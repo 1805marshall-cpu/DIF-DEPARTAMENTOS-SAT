@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIF 2026 | Área Médica</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root { 
+            --primary: #991b1b; 
+            --primary-dark: #7f1d1d;
+            --success: #059669; 
+            --warning: #f59e0b; 
+            --danger: #dc2626; 
+            --bg: #f8fafc; 
+            --border: #e2e8f0;
+        }
+        
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
+        
+        header { 
+            background: #fff; padding: 15px 40px; border-bottom: 3px solid var(--primary); 
+            display: flex; justify-content: space-between; align-items: center; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
+        .header-title h2 { margin: 0; color: var(--primary); font-size: 18px; display: flex; align-items: center; gap: 10px; }
+
+        .container { max-width: 1750px; margin: 20px auto; padding: 0 20px; }
+        
+        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); margin-bottom: 20px; }
+        h3.section-title { margin: 0 0 18px 0; font-size: 11px; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; letter-spacing: 1px; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+        input, select, textarea { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; transition: 0.2s; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(153, 27, 27, 0.1); }
+        
+        .btn-box { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 10px; color: white; display: flex; align-items: center; gap: 6px; text-transform: uppercase; transition: 0.3s; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .table-wrap { background: #fff; border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 10px; color: #475569; border-bottom: 2px solid var(--border); text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        tr:hover { background-color: #fcfcfc; }
+
+        @media print { .no-print { display: none !important; } }
+    </style>
+</head>
+<body>
+
+<header class="no-print">
+    <div class="header-title">
+        <h2><i class="fas fa-stethoscope"></i> ÁREA MÉDICA DIF</h2>
+    </div>
+    <button class="btn" style="background: var(--primary)" onclick="location.href='admin_global.html'"><i class="fa-solid fa-house"></i> DASHBOARD</button>
+</header>
+
+<div class="container">
+    <div class="card no-print">
+        <h3 class="section-title"><i class="fas fa-user-md"></i> Registro de Consulta y Apoyo Médico</h3>
+        <input type="hidden" id="f-id">
+        <div class="form-grid">
+            <div class="form-group"><label>No.</label><input type="text" id="f-no" readonly style="background:#f1f5f9; font-weight:bold; color:var(--primary);"></div>
+            <div class="form-group"><label>Fecha</label><input type="date" id="f-fecha"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Nombre del Paciente</label><input type="text" id="f-nombre" placeholder="Nombre completo"></div>
+            <div class="form-group"><label>Edad</label><input type="number" id="f-edad" placeholder="0"></div>
+            <div class="form-group"><label>Sindicalizado</label><select id="f-sindicalizado"><option value="NO">NO</option><option value="SI">SI</option></select></div>
+            <div class="form-group"><label>Colonia / Localidad</label><input type="text" id="f-col_loc" placeholder="Ej. Centro"></div>
+            <div class="form-group">
+                <label>Tipo de Apoyo / Servicio</label>
+                <select id="f-tipo_apoyo">
+                    
+                    <option value="CONSULTA GENERAL">CONSULTA GENERAL</option>
+                    <option value="CERTIFICADO MÉDICO">CERTIFICADO MÉDICO</option>
+                    <option value="ENVÍO DE ESTUDIO CRUZ ROJA">ENVÍO DE ESTUDIO CRUZ ROJAL</option>
+                    <option value="ENVÍO DE ESTUDIO LABOMEDIC">ENVÍO DE ESTUDIO LABOMEDIC</option>
+                    <option value="CONSULTA DENTAL">CONSULTA DENTAL</option>
+                    <option value="CONSULTA MEDICA">CONSULTA MEDICA</option>
+                    <option value="CONSULTA CECAM">CONSULTA CECAM</option>
+                    <option value="REFERENCIA CRISAT">REFERENCIA CRISAT</option>
+                    <option value="REFERENCIA SALUD DIGNA">REFERENCIA SALUD DIGNA</option>
+                    <option value="MEDICAMENTO">DONACIÓN DE MEDICAMENTO</option>
+                    <option value="HOSPITAL CIVIL">HOSPITAL CIVIL</option>
+                    <option value="CURACIÓN">CURACIÓN / ENFERMERÍA</option>
+                    <option value="OCULISTA">OCULISTA</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Dependencia</label><input type="text" id="f-dependencia" value="DIF MUNICIPAL"></div>
+            <div class="form-group"><label>Usuario / Registró</label><input type="text" id="f-usuario" readonly style="background:#f1f5f9;"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Observaciones / Diagnóstico</label><textarea id="f-observaciones" rows="2" placeholder="Detalles de la atención..."></textarea></div>
+        </div>
+
+        <div class="btn-box">
+            <button class="btn" id="btn-save" style="background:var(--success)" onclick="saveData()"><i class="fas fa-save"></i> GUARDAR</button>
+            <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="updateData()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
+            
+            <label class="btn" style="background:#6366f1; cursor:pointer;">
+                <i class="fas fa-upload"></i> IMPORTAR EXCEL
+                <input type="file" id="import-excel" accept=".xlsx, .xls" style="display:none" onchange="importarDesdeExcel(event)">
+            </label>
+            
+            <button class="btn" style="background:#1d6f42" onclick="exportExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
+            <button class="btn" style="background:var(--danger)" onclick="eliminarTodoBaseDatos()"><i class="fas fa-trash-alt"></i> BORRAR TODO</button>
+            <button class="btn" style="background:#94a3b8" onclick="limpiarForm()"><i class="fas fa-eraser"></i> LIMPIAR</button>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Fecha</th>
+                    <th>Paciente</th>
+                    <th>Edad</th>
+                    <th>Localidad</th>
+                    <th>Tipo de Apoyo</th>
+                    <th>Usuario</th>
+                    <th class="no-print">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, where, deleteDoc, doc, updateDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = { apiKey: "AIzaSyBELxlbkav_9vZcJhSxE1gm0XFGgInfDSU", projectId: "dif-database" };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const mainRef = collection(db, "area_medica");
+
+    let dataList = [];
+    const sesionUsuario = sessionStorage.getItem('sesion_activa') || 'MEDICO_TURNO';
+
+ // Busca esta sección en tu etiqueta <script> y reemplázala:
+
+onSnapshot(query(mainRef, where("dept", "==", "MEDICA")), (snap) => {
+    dataList = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    
+    // ORDENAR DE MENOR A MAYOR (1, 2, 3...)
+    dataList.sort((a, b) => {
+        const noA = parseInt(a.no) || 0;
+        const noB = parseInt(b.no) || 0;
+        return noA - noB;
+    });
+    
+    renderUI();
+});
+
+    function renderUI() {
+        document.getElementById('table-body').innerHTML = dataList.map(d => `
+            <tr>
+                <td><b>${d.no}</b></td>
+                <td>${d.fecha}</td>
+                <td><b>${d.nombre}</b></td>
+                <td>${d.edad} años</td>
+                <td>${d.col_loc}</td>
+                <td><span style="font-size:10px; font-weight:bold; color:var(--primary);">${d.tipo_apoyo}</span></td>
+                <td>${d.usuario}</td>
+                <td class="no-print">
+                    <button onclick="editMode('${d.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
+                    <button onclick="delDoc('${d.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    window.saveData = async () => {
+        const nombre = document.getElementById('f-nombre').value;
+        if(!nombre) return alert("Ingrese el nombre del paciente");
+        await addDoc(mainRef, {
+            dept: "MEDICA",
+            no: parseInt(document.getElementById('f-no').value),
+            fecha: document.getElementById('f-fecha').value,
+            nombre: nombre.toUpperCase(),
+            sindicalizado: document.getElementById('f-sindicalizado').value,
+            edad: document.getElementById('f-edad').value,
+            col_loc: document.getElementById('f-col_loc').value.toUpperCase(),
+            tipo_apoyo: document.getElementById('f-tipo_apoyo').value,
+            observaciones: document.getElementById('f-observaciones').value.toUpperCase(),
+            dependencia: document.getElementById('f-dependencia').value.toUpperCase(),
+            usuario: sesionUsuario,
+            t: new Date().getTime()
+        });
+        limpiarForm();
+    };
+
+    window.editMode = (id) => {
+        const d = dataList.find(i => i.id === id);
+        if(!d) return;
+        
+        document.getElementById('f-id').value = d.id;
+        document.getElementById('f-no').value = d.no;
+        document.getElementById('f-fecha').value = d.fecha;
+        document.getElementById('f-nombre').value = d.nombre;
+        document.getElementById('f-sindicalizado').value = d.sindicalizado;
+        
+        // CORRECCIÓN: Extrae solo números de la edad guardada (por si tiene la palabra "años")
+        const soloNumerosEdad = String(d.edad || "").replace(/\D/g, "");
+        document.getElementById('f-edad').value = soloNumerosEdad;
+        
+        document.getElementById('f-col_loc').value = d.col_loc;
+        document.getElementById('f-tipo_apoyo').value = d.tipo_apoyo;
+        document.getElementById('f-observaciones').value = d.observaciones;
+        document.getElementById('f-dependencia').value = d.dependencia;
+        
+        document.getElementById('btn-save').style.display = 'none';
+        document.getElementById('btn-update').style.display = 'inline-block';
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    };
+
+    window.updateData = async () => {
+        const id = document.getElementById('f-id').value;
+        await updateDoc(doc(db, "dif_sistema_integral_2026", id), {
+            fecha: document.getElementById('f-fecha').value,
+            nombre: document.getElementById('f-nombre').value.toUpperCase(),
+            sindicalizado: document.getElementById('f-sindicalizado').value,
+            edad: document.getElementById('f-edad').value,
+            col_loc: document.getElementById('f-col_loc').value.toUpperCase(),
+            tipo_apoyo: document.getElementById('f-tipo_apoyo').value,
+            observaciones: document.getElementById('f-observaciones').value.toUpperCase(),
+            dependencia: document.getElementById('f-dependencia').value.toUpperCase()
+        });
+        limpiarForm();
+    };
+
+    window.limpiarForm = () => {
+        const hoy = new Date().toISOString().split('T')[0];
+        document.getElementById('f-id').value = "";
+        document.getElementById('f-fecha').value = hoy;
+        document.getElementById('f-nombre').value = "";
+        document.getElementById('f-edad').value = "";
+        document.getElementById('f-col_loc').value = "";
+        document.getElementById('f-observaciones').value = "";
+        document.getElementById('f-usuario').value = sesionUsuario;
+        const maxNo = dataList.length > 0 ? Math.max(...dataList.map(d => d.no || 0)) : 0;
+        document.getElementById('f-no').value = maxNo + 1;
+        document.getElementById('btn-save').style.display = 'inline-block';
+        document.getElementById('btn-update').style.display = 'none';
+    };
+
+    window.delDoc = async (id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, "area_medica", id)); };
+
+    window.exportExcel = () => {
+        const reporte = dataList.map(d => ({
+            "No.": d.no,
+            "Fecha": d.fecha,
+            "Paciente": d.nombre,
+            "Edad": d.edad,
+            "Sindicalizado": d.sindicalizado,
+            "Colonia/Localidad": d.col_loc,
+            "Tipo de Apoyo": d.tipo_apoyo,
+            "Observaciones": d.observaciones,
+            "Dependencia": d.dependencia,
+            "Usuario": d.usuario
+        }));
+        const ws = XLSX.utils.json_to_sheet(reporte);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Reporte Médico");
+        XLSX.writeFile(wb, "Reporte_Area_Medica_DIF_2026.xlsx");
+    };
+
+    window.importarDesdeExcel = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            try {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const json = XLSX.utils.sheet_to_json(sheet);
+
+                let count = 0;
+                for (const fila of json) {
+                    let r = { 
+                        dept: "MEDICA", 
+                        t: new Date().getTime(),
+                        usuario: sesionUsuario,
+                        sindicalizado: "NO",
+                        dependencia: "DIF MUNICIPAL"
+                    };
+
+                    Object.keys(fila).forEach(key => {
+                        let val = fila[key];
+                        let k = key.toLowerCase().trim();
+
+                        if (k.includes("nombre") || k.includes("paciente")) r.nombre = String(val).toUpperCase();
+                        else if (k.includes("fecha")) {
+                            if (val instanceof Date) r.fecha = val.toISOString().split('T')[0];
+                            else r.fecha = String(val);
+                        }
+                        // CORRECCIÓN: Limpia la edad al importar (extrae solo números)
+                        else if (k.includes("edad")) r.edad = String(val).replace(/\D/g, ""); 
+                        else if (k.includes("localidad") || k.includes("colonia")) r.col_loc = String(val).toUpperCase();
+                        else if (k.includes("apoyo") || k.includes("servicio")) r.tipo_apoyo = String(val).toUpperCase();
+                        else if (k.includes("no") || k === "n") r.no = parseInt(val);
+                        else if (k.includes("obs") || k.includes("diag")) r.observaciones = String(val).toUpperCase();
+                        else if (k.includes("sindicalizado")) r.sindicalizado = String(val).toUpperCase();
+                        else if (k.includes("dependencia")) r.dependencia = String(val).toUpperCase();
+                        else if (k.includes("usuario")) r.usuario = String(val).toUpperCase();
+                    });
+
+                    if (!r.no) r.no = (dataList.length + count + 1);
+                    if (!r.nombre) r.nombre = "DATO IMPORTADO";
+                    if (!r.fecha) r.fecha = new Date().toISOString().split('T')[0];
+                    
+                    await addDoc(mainRef, r);
+                    count++;
+                }
+                alert(`✅ Importación exitosa: ${count} registros añadidos.`);
+                e.target.value = ""; 
+            } catch (err) {
+                console.error(err);
+                alert("❌ Error al procesar el Excel.");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
+    window.eliminarTodoBaseDatos = async () => {
+        if (confirm("⚠️ ¿BORRAR TODA LA BASE DE DATOS MÉDICA?") && prompt("Escribe ELIMINAR para confirmar") === "ELIMINAR") {
+            const q = query(mainRef, where("dept", "==", "MEDICA"));
+            const snap = await getDocs(q);
+            const batch = writeBatch(db);
+            snap.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+            alert("Base de datos limpia.");
+            limpiarForm();
+        }
+    };
+
+    window.limpiarForm();
+</script>
+</body>
+</html>

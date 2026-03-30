@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIF 2026 | Psicología</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+        :root { 
+            --primary: #991b1b; 
+            --success: #059669; --warning: #f59e0b; --danger: #dc2626; 
+            --bg: #f8fafc; --border: #e2e8f0;
+        }
+        
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
+        
+        header { 
+            background: #fff; padding: 15px 40px; border-bottom: 3px solid var(--primary); 
+            display: flex; justify-content: space-between; align-items: center; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
+
+        .container { max-width: 100%; margin: 20px auto; padding: 0 20px; }
+        
+        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); margin-bottom: 20px; }
+        h3.section-title { margin: 0 0 18px 0; font-size: 11px; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; letter-spacing: 1px; }
+
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+        input, select, textarea { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(153, 27, 27, 0.1); }
+        
+        .btn-box { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 10px; color: white; display: flex; align-items: center; gap: 6px; text-transform: uppercase; transition: 0.3s; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .table-wrap { background: #fff; border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 9px; color: #475569; border-bottom: 2px solid var(--border); text-transform: uppercase; }
+        td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
+        tr:hover { background-color: #fcfcfc; }
+
+        @media print { .no-print { display: none !important; } }
+    </style>
+</head>
+<body>
+
+<header class="no-print">
+    <div class="header-title">
+        <h2 style="margin:0; color:var(--primary)"><i class="fas fa-brain"></i> PSICOLOGÍA DIF</h2>
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <button class="btn" style="background: var(--primary)" onclick="location.href='admin_global.html'"><i class="fas fa-house"></i> DASHBOARD</button>
+        <button class="btn" style="background: var(--danger)" onclick="cerrarSesion()"><i class="fas fa-power-off"></i> SALIR</button>
+    </div>
+</header>
+
+<div class="container">
+    <div class="card no-print">
+        <h3 class="section-title"><i class="fas fa-edit"></i> Registro de Atención</h3>
+        <input type="hidden" id="f-id">
+        <div class="form-grid">
+            <div class="form-group"><label>No.</label><input type="text" id="f-no"></div>
+            <div class="form-group"><label>Horario</label><input type="time" id="f-horario"></div>
+            <div class="form-group"><label>Fecha</label><input type="date" id="f-fecha"></div>
+            <div class="form-group"><label>Paciente</label><input type="text" id="f-paciente"></div>
+            <div class="form-group"><label>Edad P</label><input type="texta" id="f-edad_p"></div>
+            <div class="form-group"><label>Edad A</label><input type="text" id="f-edad_a"></div>
+            <div class="form-group"><label>Colonia / Localidad</label><input type="text" id="f-col_loc"></div>
+            <div class="form-group"><label>Teléfono</label><input type="tel" id="f-telefono"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Tema / Motivo</label><input type="text" id="f-tema"></div>
+            <div class="form-group"><label>Usuario</label><input type="text" id="f-usuario" readonly style="background:#f1f5f9;"></div>
+        </div>
+
+        <div class="btn-box">
+            <button class="btn" id="btn-save" style="background:var(--success)" onclick="saveData()"><i class="fas fa-save"></i> GUARDAR</button>
+            <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="updateData()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
+            <button class="btn" style="background:#1d6f42" onclick="exportExcel()"><i class="fas fa-file-excel"></i> EXCEL</button>
+            
+            <label class="btn" style="background:#6366f1; cursor:pointer;">
+                <i class="fas fa-file-import"></i> IMPORTAR EXCEL
+                <input type="file" id="import-excel" style="display:none" onchange="importarDesdeExcel(event)">
+            </label>
+
+            <button class="btn" style="background:#94a3b8" onclick="limpiarForm()"><i class="fas fa-plus"></i> NUEVO</button>
+            
+            <button class="btn" style="background:var(--danger); margin-left: auto;" onclick="eliminarTodo()">
+                <i class="fas fa-trash-can"></i> ELIMINAR TODO
+            </button>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>HORARIO</th>
+                    <th>FECHA</th>
+                    <th>PACIENTE</th>
+                    <th>EDAD P</th>
+                    <th>EDAD A</th>
+                    <th>COL_LOC</th>
+                    <th>TEMA</th>
+                    <th>TELÉFONO</th>
+                    <th>USUARIO</th>
+                    <th class="no-print">ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = { apiKey: "AIzaSyBELxlbkav_9vZcJhSxE1gm0XFGgInfDSU", projectId: "dif-database" };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const mainRef = collection(db, "psicologia");
+
+    const sesion = (sessionStorage.getItem('sesion_activa') || "INVITADO").toUpperCase();
+    document.getElementById('f-usuario').value = sesion;
+
+    let dataList = [];
+
+// ORDENAMIENTO NUMÉRICO ASCENDENTE (1, 2, 3...)
+    onSnapshot(query(mainRef, orderBy("no")), (snap) => {
+        dataList = snap.docs.map(d => ({
+            id: d.id, 
+            ...d.data(),
+            no: Number(d.data().no) // Aseguramos que el "No." sea numérico para el render
+        }));
+        renderUI();
+        generarSiguienteNo();
+    });
+
+function renderUI() {
+        document.getElementById('table-body').innerHTML = dataList.map(d => `
+            <tr>
+                <td><b>${d.no || ''}</b></td>
+                <td>${d.horario || ''}</td>
+                <td>${d.fecha || ''}</td>
+                <td><b>${d.paciente || ''}</b></td>
+                <td>${d.edad_p ?? ''}</td>
+                <td>${d.edad_a ?? ''}</td>
+                <td>${d.col_loc || ''}</td>
+                <td><small>${d.tema || ''}</small></td>
+                <td>${d.telefono || ''}</td>
+                <td><span style="color:#64748b; font-size:10px">${d.usuario || ''}</span></td>
+                <td class="no-print">
+                    <button onclick="editMode('${d.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
+                    <button onclick="delDoc('${d.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function generarSiguienteNo() {
+    // Si estamos editando un registro existente, no cambiamos el número
+    if(document.getElementById('f-id').value) return; 
+
+    // Buscamos el número más grande en la lista actual
+    const maxNo = dataList.reduce((max, item) => {
+        const num = Number(item.no) || 0;
+        return num > max ? num : max;
+    }, 0);
+
+    // Asignamos el siguiente
+    document.getElementById('f-no').value = maxNo + 1;
+}
+
+window.saveData = async () => {
+    const pac = document.getElementById('f-paciente').value;
+    const numeroActual = document.getElementById('f-no').value;
+
+    if(!pac) return alert("Nombre de paciente requerido");
+
+    await addDoc(mainRef, {
+        no: Number(numeroActual), // <--- ESTO garantiza el orden 1, 2, 3...
+        horario: document.getElementById('f-horario').value,
+        fecha: document.getElementById('f-fecha').value,
+        paciente: pac.toUpperCase(),
+        edad_p: Number(document.getElementById('f-edad_p').value) || 0,
+        edad_a: Number(document.getElementById('f-edad_a').value) || 0,
+        col_loc: document.getElementById('f-col_loc').value.toUpperCase(),
+        tema: document.getElementById('f-tema').value.toUpperCase(),
+        telefono: document.getElementById('f-telefono').value,
+        usuario: sesion,
+        t: new Date().getTime()
+    });
+    limpiarForm();
+};
+
+    window.editMode = (id) => {
+        const d = dataList.find(i => i.id === id);
+        if(!d) return;
+
+        document.getElementById('f-id').value = d.id;
+        document.getElementById('f-no').value = d.no || "";
+        document.getElementById('f-fecha').value = d.fecha || "";
+        document.getElementById('f-paciente').value = d.paciente || "";
+        document.getElementById('f-col_loc').value = d.col_loc || "";
+        document.getElementById('f-tema').value = d.tema || "";
+        document.getElementById('f-telefono').value = d.telefono || "";
+        
+        // REINCORPORADO: Asignación del usuario
+        document.getElementById('f-usuario').value = d.usuario || sesion;
+
+        if(d.horario) {
+            document.getElementById('f-horario').value = d.horario.substring(0, 5);
+        }
+
+        // ASIGNACIÓN DE EDADES
+        document.getElementById('f-edad_p').value = d.edad_p ?? "";
+        document.getElementById('f-edad_a').value = d.edad_a ?? "";
+
+        document.getElementById('btn-save').style.display = 'none';
+        document.getElementById('btn-update').style.display = 'inline-block';
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    };
+
+    window.updateData = async () => {
+        const id = document.getElementById('f-id').value;
+        if(!id) return;
+        try {
+            await updateDoc(doc(db, "psicologia", id), {
+                no: document.getElementById('f-no').value,
+                horario: document.getElementById('f-horario').value,
+                fecha: document.getElementById('f-fecha').value,
+                paciente: document.getElementById('f-paciente').value.toUpperCase(),
+                edad_p: Number(document.getElementById('f-edad_p').value) || 0,
+                edad_a: Number(document.getElementById('f-edad_a').value) || 0,
+                col_loc: document.getElementById('f-col_loc').value.toUpperCase(),
+                tema: document.getElementById('f-tema').value.toUpperCase(),
+                telefono: document.getElementById('f-telefono').value
+            });
+            alert("Registro actualizado correctamente");
+            limpiarForm();
+        } catch(e) { 
+            console.error(e);
+            alert("Error al actualizar datos."); 
+        }
+    };
+
+  window.limpiarForm = () => {
+        document.getElementById('f-id').value = "";
+        // Limpia todo excepto el usuario y la fecha
+        document.getElementById('f-no').value = "";
+        document.getElementById('f-horario').value = "";
+        document.getElementById('f-paciente').value = "";
+        document.getElementById('f-tema').value = "";
+        document.getElementById('f-col_loc').value = "";
+        document.getElementById('f-telefono').value = "";
+        document.getElementById('f-edad_p').value = "";
+        document.getElementById('f-edad_a').value = "";
+        
+        document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
+        document.getElementById('f-usuario').value = sesion; // Mantiene al usuario activo
+        
+        document.getElementById('btn-save').style.display = 'inline-block';
+        document.getElementById('btn-update').style.display = 'none';
+    };
+
+    window.importarDesdeExcel = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            const data = new Uint8Array(evt.target.result);
+            const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+            const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
+            for(const [index, f] of json.entries()) {
+                const findVal = (tags) => {
+                    const key = Object.keys(f).find(k => tags.some(tag => k.toLowerCase().includes(tag.toLowerCase())));
+                    return key ? f[key] : "";
+                };
+                let f_fecha = findVal(["fecha"]);
+                if (f_fecha instanceof Date) f_fecha = f_fecha.toISOString().split('T')[0];
+                await addDoc(mainRef, {
+                    no: String(findVal(["no", "folio"])),
+                    horario: String(findVal(["horario", "hora"])),
+                    fecha: String(f_fecha),
+                    paciente: String(findVal(["paciente", "nombre"])).toUpperCase(),
+                    edad_p: Number(findVal(["edad_p", "niño"])) || 0,
+                    edad_a: Number(findVal(["edad_a", "adulto"])) || 0,
+                    col_loc: String(findVal(["col_loc", "colonia"])).toUpperCase(),
+                    tema: String(findVal(["tema", "motivo"])).toUpperCase(),
+                    telefono: String(findVal(["telefono"])),
+                    usuario: sesion,
+                    t: new Date().getTime() + index
+                });
+            }
+            alert("Importación finalizada");
+            e.target.value = ""; 
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
+    window.eliminarTodo = async () => {
+        if(confirm("¿ELIMINAR TODO?")) {
+            const snapshot = await getDocs(mainRef);
+            const batch = writeBatch(db);
+            snapshot.docs.forEach((d) => batch.delete(d.ref));
+            await batch.commit();
+        }
+    };
+
+    window.delDoc = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "psicologia", id)); };
+
+    window.exportExcel = () => {
+        const ws = XLSX.utils.json_to_sheet(dataList.map(({id, t, ...rest}) => rest));
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Psicología");
+        XLSX.writeFile(wb, "Reporte_Psicologia.xlsx");
+    };
+
+    window.cerrarSesion = () => { sessionStorage.clear(); window.location.href="login.html"; };
+    window.limpiarForm();
+</script>
+</body>
+</html>
