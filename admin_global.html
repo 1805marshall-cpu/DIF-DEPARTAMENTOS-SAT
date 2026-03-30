@@ -197,7 +197,7 @@
     const sesion = sessionStorage.getItem('sesion_activa');
     if (!sesion) window.location.href = "login.html";
 
-    window.cerrarSesion = () => { sessionStorage.clear(); window.location.href = "login.html"; };
+    window.cerrarSesion = () => { sessionStorage.clear(); window.location.href = "index.html"; };
 
     // --- RENDERIZADO GENERAL ---
     const renderMaster = (elementId, dataGroups, color) => {
