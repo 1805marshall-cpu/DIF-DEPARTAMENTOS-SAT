@@ -59,18 +59,19 @@
         <h3><i class="fas fa-folder-plus"></i> Registro de Expediente</h3>
         <input type="hidden" id="edit-id">
         <div class="form-grid">
-            <div class="form-group"><label>Folio</label><input type="text" id="no" readonly style="background:#f1f5f9; font-weight: bold;"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Nombre del Solicitante</label><input type="text" id="nombre" placeholder="Nombre completo"></div>
+            <div class="form-group"><label>No.</label><input type="text" id="no" readonly style="background:#f1f5f9; font-weight: bold;"></div>
+            <div class="form-group"><label>Fecha</label><input type="date" id="fecha"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Nombre</label><input type="text" id="nombre" placeholder="Nombre completo"></div>
             <div class="form-group" style="grid-column: span 2;"><label>Domicilio</label><input type="text" id="domicilio"></div>
-            <div class="form-group"><label>Comunidad / Colonia</label><input type="text" id="lugar"></div>
-            <div class="form-group"><label>Tipo de Asunto</label><input type="text" id="asuntos" placeholder="Ej: Pensión Alimenticia"></div>
+            <div class="form-group"><label>Lugar</label><input type="text" id="lugar" placeholder="Comunidad / Colonia"></div>
+            <div class="form-group"><label>Asuntos</label><input type="text" id="asuntos" placeholder="Ej: Pensión Alimenticia"></div>
             <div class="form-group">
-                <label>Horario Mixto</label>
+                <label>Horarios Mixtos</label>
                 <select id="horarios_mixtos"><option value="No">No</option><option value="Si">Si</option></select>
             </div>
-            <div class="form-group"><label>Especialista que Elaboró</label><input type="text" id="elaboro"></div>
-            <div class="form-group" style="grid-column: span 3;"><label>Detalles / Observaciones Clínicas</label>
-                <textarea id="detalles" rows="2" placeholder="Resumen detallado del caso..."></textarea>
+            <div class="form-group"><label>Elaboró</label><input type="text" id="elaboro"></div>
+            <div class="form-group" style="grid-column: span 4;"><label>Detalles</label>
+                <textarea id="detalles" rows="2" placeholder="Observaciones detalladas del caso..."></textarea>
             </div>
         </div>
         <div class="btn-box">
@@ -116,12 +117,14 @@
         <table>
             <thead>
                 <tr>
-                    <th>Folio</th>
+                    <th>No.</th>
+                    <th>Fecha</th>
                     <th>Nombre</th>
-                    <th>Domicilio / Lugar</th>
-                    <th>Asunto</th>
-                    <th>Observaciones</th>
-                    <th>H. Mixto</th>
+                    <th>Domicilio</th>
+                    <th>Lugar</th>
+                    <th>Asuntos</th>
+                    <th>Detalles</th>
+                    <th>H. Mixtos</th>
                     <th>Elaboró</th>
                     <th class="no-print">Acciones</th>
                 </tr>
@@ -150,7 +153,6 @@
     let filasPorPagina = 100;
     let proximoNo = 1;
 
-    // Sincronización en tiempo real
     onSnapshot(dataRef, (snapshot) => {
         todosLosDatos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         if(todosLosDatos.length > 0) {
@@ -164,7 +166,6 @@
         window.filtrar();
     });
 
-    // Sesión
     const sesion = sessionStorage.getItem('sesion_activa');
     document.getElementById('user-display').innerText = `MODO: ${sesion ? sesion.toUpperCase() : 'INVITADO'}`;
 
@@ -176,7 +177,8 @@
         reader.onload = async (evt) => {
             try {
                 const data = new Uint8Array(evt.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
+                // cellDates: true permite que SheetJS procese las fechas de Excel
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
                 const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
                 
                 let count = 0;
@@ -185,18 +187,35 @@
                 for (const f of json) {
                     const getV = (keys) => {
                         const found = Object.keys(f).find(k => keys.includes(k.trim().toUpperCase()));
-                        return found ? f[found] : "";
+                        return found ? f[found] : null;
                     };
 
+                    // Gestión de formato de Fecha
+                    let valorFecha = getV(["FECHA"]);
+                    let fechaFinal = new Date().toISOString().split('T')[0];
+
+                    if (valorFecha) {
+                        if (valorFecha instanceof Date) {
+                            fechaFinal = valorFecha.toISOString().split('T')[0];
+                        } else if (!isNaN(valorFecha) && typeof valorFecha === 'number') {
+                            // Si viene como número de serie de Excel
+                            const dateObj = new Date((valorFecha - 25569) * 86400 * 1000);
+                            fechaFinal = dateObj.toISOString().split('T')[0];
+                        } else {
+                            fechaFinal = String(valorFecha);
+                        }
+                    }
+
                     await addDoc(dataRef, {
-                        no: String(getV(["NO", "NUMERO", "FOLIO", "EXPEDIENTE", "NO."]) || currentMax++),
-                        nombre: String(getV(["NOMBRE", "BENEFICIARIO", "NOMBRE COMPLETO"]) || "SIN NOMBRE").toUpperCase(),
-                        domicilio: String(getV(["DOMICILIO", "DIRECCION", "CALLE"]) || "").toUpperCase(),
-                        lugar: String(getV(["LUGAR", "LOCALIDAD", "COLONIA", "COMUNIDAD"]) || "").toUpperCase(),
-                        asuntos: String(getV(["ASUNTOS", "ASUNTO", "MOTIVO", "TRAMITE"]) || "").toUpperCase(),
-                        detalles: String(getV(["DETALLES", "OBSERVACIONES", "NOTAS", "DESCRIPCION"]) || ""),
-                        horarios_mixtos: String(getV(["HORARIO MIXTO", "MIXTO", "H. MIXTO"]) || "No"),
-                        elaboro: String(getV(["ELABORO", "REGISTRO", "USUARIO"]) || "IMPORTADO").toUpperCase(),
+                        no: String(getV(["NO", "NUMERO", "FOLIO", "NO."]) || currentMax++),
+                        fecha: fechaFinal,
+                        nombre: String(getV(["NOMBRE"]) || "SIN NOMBRE").toUpperCase(),
+                        domicilio: String(getV(["DOMICILIO"]) || "").toUpperCase(),
+                        lugar: String(getV(["LUGAR", "LOCALIDAD", "COMUNIDAD"]) || "").toUpperCase(),
+                        asuntos: String(getV(["ASUNTOS", "ASUNTO"]) || "").toUpperCase(),
+                        detalles: String(getV(["DETALLES", "OBSERVACIONES"]) || ""),
+                        horarios_mixtos: String(getV(["HORARIOS MIXTOS", "MIXTO"]) || "No"),
+                        elaboro: String(getV(["ELABORO"]) || "IMPORTADO").toUpperCase(),
                         t: new Date().getTime()
                     });
                     count++;
@@ -204,7 +223,8 @@
                 alert(`✅ Importación exitosa: ${count} registros.`);
                 e.target.value = "";
             } catch (err) {
-                alert("Error al procesar el archivo Excel.");
+                console.error(err);
+                alert("Error al importar el archivo Excel.");
             }
         };
         reader.readAsArrayBuffer(file);
@@ -227,7 +247,7 @@
     };
 
     window.borrarTodaLaBase = async () => {
-        if (confirm("⚠️ ¿Desea eliminar TODA la información de Procuraduría? Esta acción es irreversible.")) {
+        if (confirm("⚠️ ¿Desea eliminar TODA la información? Esta acción es irreversible.")) {
             const password = prompt("Escriba 'ELIMINAR' para confirmar:");
             if (password === "ELIMINAR") {
                 const querySnapshot = await getDocs(dataRef);
@@ -250,7 +270,6 @@
         datosMostrados = todosLosDatos.filter(r => 
             Object.values(r).some(val => String(val).toLowerCase().includes(term))
         );
-        // CORRECCIÓN: Orden ascendente estricto (1, 2, 3...)
         datosMostrados.sort((a, b) => (parseInt(a.no) || 0) - (parseInt(b.no) || 0)); 
         paginaActual = 1; 
         renderTabla();
@@ -271,10 +290,12 @@
         tbody.innerHTML = segmento.map(reg => `
             <tr>
                 <td><span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-weight:bold;">${reg.no}</span></td>
+                <td>${reg.fecha || ''}</td>
                 <td><b>${reg.nombre || ''}</b></td>
-                <td><div style="font-weight:bold;">${reg.lugar || ''}</div><div style="font-size:10px; color:#64748b;">${reg.domicilio || ''}</div></td>
+                <td>${reg.domicilio || ''}</td>
+                <td>${reg.lugar || ''}</td>
                 <td style="color:var(--procu); font-weight:bold;">${reg.asuntos || ''}</td>
-                <td style="max-width:350px; font-size:11px; color:#475569;">${reg.detalles || ''}</td>
+                <td style="max-width:300px; font-size:11px; color:#475569;">${reg.detalles || ''}</td>
                 <td>${reg.horarios_mixtos || 'No'}</td>
                 <td>${reg.elaboro || ''}</td>
                 <td class="no-print">
@@ -288,6 +309,7 @@
     function obtenerValoresForm() {
         return {
             no: document.getElementById('no').value,
+            fecha: document.getElementById('fecha').value,
             nombre: document.getElementById('nombre').value.toUpperCase(),
             domicilio: document.getElementById('domicilio').value.toUpperCase(),
             lugar: document.getElementById('lugar').value.toUpperCase(),
@@ -299,10 +321,11 @@
     }
 
    window.limpiarForm = () => {
-        ['edit-id','nombre','domicilio','lugar','asuntos','detalles','elaboro'].forEach(id => {
+        ['edit-id','fecha','nombre','domicilio','lugar','asuntos','detalles','elaboro'].forEach(id => {
             document.getElementById(id).value = '';
         });
         document.getElementById('no').value = proximoNo;
+        document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
         document.getElementById('btn-save').style.display = 'inline-block';
         document.getElementById('btn-update').style.display = 'none';
     };
@@ -312,6 +335,7 @@
         if(!reg) return;
         document.getElementById('edit-id').value = id;
         document.getElementById('no').value = reg.no || '';
+        document.getElementById('fecha').value = reg.fecha || '';
         document.getElementById('nombre').value = reg.nombre || '';
         document.getElementById('domicilio').value = reg.domicilio || '';
         document.getElementById('lugar').value = reg.lugar || '';
@@ -336,46 +360,29 @@
     };
 
     window.exportarExcel = () => {
-    // 1. Creamos una copia y ordenamos numéricamente por Folio (no)
-    const datosOrdenados = [...datosMostrados].sort((a, b) => {
-        return (parseInt(a.no) || 0) - (parseInt(b.no) || 0);
-    });
+        const datosOrdenados = [...datosMostrados].sort((a, b) => (parseInt(a.no) || 0) - (parseInt(b.no) || 0));
 
-    // 2. Mapeamos a los nombres de columna que quieres en el Excel
-    const datosExportar = datosOrdenados.map(r => ({
-        "No": r.no, 
-        "Nombre": r.nombre, 
-        "Domicilio": r.domicilio, 
-        "Comunidad/Colonia": r.lugar,
-        "Asuntos": r.asuntos, 
-        "Observaciones": r.detalles, 
-        "Horario Mixto": r.horarios_mixtos, 
-        "Elaboró": r.elaboro
-    }));
+        const datosExportar = datosOrdenados.map(r => ({
+            "No.": r.no, 
+            "Fecha": r.fecha,
+            "Nombre": r.nombre, 
+            "Domicilio": r.domicilio, 
+            "Lugar": r.lugar,
+            "Asuntos": r.asuntos, 
+            "Detalles": r.detalles, 
+            "Horarios Mixtos": r.horarios_mixtos, 
+            "Elaboró": r.elaboro
+        }));
 
-    // 3. Generación del archivo
-    const ws = XLSX.utils.json_to_sheet(datosExportar);
-    
-    // Opcional: Ajustar ancho de columnas para que se vea profesional
-    const wscols = [
-        {wch: 8},  // No.
-        {wch: 30}, // Nombre
-        {wch: 30}, // Domicilio
-        {wch: 25}, // Comunidad
-        {wch: 25}, // Asuntos
-        {wch: 40}, // Observaciones
-        {wch: 12}, // Horario Mixto
-        {wch: 20}  // Elaboró
-    ];
-    ws['!cols'] = wscols;
+        const ws = XLSX.utils.json_to_sheet(datosExportar);
+        const wscols = [{wch: 6}, {wch: 12}, {wch: 35}, {wch: 30}, {wch: 25}, {wch: 25}, {wch: 45}, {wch: 15}, {wch: 20}];
+        ws['!cols'] = wscols;
 
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Padron_Procuraduria");
-    
-    // Nombre del archivo con la fecha actual para mejor control
-    const fecha = new Date().toISOString().split('T')[0];
-    XLSX.writeFile(wb, `Reporte_Procuraduria_DIF_${fecha}.xlsx`);
-};
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Padron_Procuraduria");
+        const fHoy = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(wb, `Reporte_Procuraduria_${fHoy}.xlsx`);
+    };
 
     window.limpiarForm();
 </script>
