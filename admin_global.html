@@ -115,12 +115,18 @@
         }
     };
 
+    // --- ACTUALIZADO: AHORA FILTRA TAMBIÉN POR ASUNTO ---
     const cumpleFiltros = (d, s, m) => {
         const term = s.toLowerCase().trim();
+        // Identidad completa + Campo ASUNTO
         const nom = `${d.nombre||''} ${d.apellido_paterno||''} ${d.paciente||''} ${d.denunciado||''}`.toLowerCase();
         const cod = `${d.codigo||''} ${d.folio_expediente||''} ${d.no||''} ${d.expediente||''}`.toLowerCase();
-        const matchBusqueda = nom.includes(term) || cod.includes(term);
+        const asu = `${d.asunto||''} ${d.asuntos||''} ${d.tema||''}`.toLowerCase(); // Incluye variaciones de nombre del campo asunto
+        
+        const matchBusqueda = nom.includes(term) || cod.includes(term) || asu.includes(term);
+
         if (m === "all") return matchBusqueda;
+
         const fRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_atencion || "";
         if (fRaw && fRaw.includes("-")) {
             const mesRegistro = fRaw.split("-")[1];
@@ -182,7 +188,6 @@
         }
     };
 
-    // --- MODIFICADO: Solo Trabajo Social muestra Nombre y Asunto en Negrita ---
     window.procSoc = (s, m) => {
         let fin = 0, prg = {}, rec = [];
         let fil = DB_S.filter(d => cumpleFiltros(d,s,m));
@@ -190,10 +195,9 @@
             if(['entregado','realizado'].includes(d.estatus?.toLowerCase())) fin++;
             const p = (d.programa||"OTROS").toUpperCase();
             const n = (d.nombre||'S/N').toUpperCase();
-            const asu = (d.asunto||"S/A").toUpperCase(); // Captura el asunto
+            const asu = (d.asunto||"S/A").toUpperCase();
 
             if(!prg[p]) prg[p]=[]; 
-            // Se concatena el asunto en negrita al lado del nombre
             prg[p].push({n: `${n} <b style="color:#1e293b; margin-left:5px;">${asu}</b>`, x: d.folio_expediente||'S/F'});
             rec.push({n: n, x: p});
         });
@@ -267,7 +271,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         const filterHTML = `
-            <div class="filter-group"><label>🔍 Búsqueda Global</label><input type="text" class="global-search" placeholder="Buscar..." onkeyup="reprocesarTodo()"></div>
+            <div class="filter-group"><label>🔍 Búsqueda Global (Nombre, Folio o Asunto)</label><input type="text" class="global-search" placeholder="Escribe para buscar..." onkeyup="reprocesarTodo()"></div>
             <div class="filter-group" style="flex:0.4;"><label>📅 Corte Mensual</label>
                 <select class="month-filter" onchange="reprocesarTodo()">
                     <option value="all">Todo el Año</option>
