@@ -106,7 +106,7 @@
     const db = getFirestore(app);
 
     const sesion = sessionStorage.getItem('sesion_activa');
-    if (!sesion) window.location.href = "login.html";
+    if (!sesion) window.location.href = "index.html";
 
     window.cerrarSesion = () => {
         if(confirm("¿Deseas cerrar la sesión actual?")) {
