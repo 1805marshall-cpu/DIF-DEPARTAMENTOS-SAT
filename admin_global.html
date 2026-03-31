@@ -33,9 +33,9 @@
         .btn-open { background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; border: 1px solid white; }
         
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        .stat-box { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
-        .stat-box small { color: #64748b; font-weight: bold; text-transform: uppercase; font-size: 9px; }
-        .stat-box div { font-size: 20px; font-weight: bold; margin-top: 4px; color: #1e293b; }
+        .stat-box { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; min-width: 100px; }
+        .stat-box small { color: #64748b; font-weight: bold; text-transform: uppercase; font-size: 9px; display: block; line-height: 1.1; margin-bottom: 4px; }
+        .stat-box div { font-size: 20px; font-weight: bold; color: #1e293b; }
 
         .panel { background: white; border-radius: 12px; padding: 18px; border: 1px solid #e2e8f0; height: 450px; overflow-y: auto; }
         .panel b { display: block; margin-bottom: 12px; font-size: 10px; text-transform: uppercase; color: var(--primary); border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }
@@ -43,6 +43,9 @@
         .group-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 10px; margin-bottom: 6px; }
         .member-line { font-size: 10px; padding: 6px 8px; background: white; margin-bottom: 3px; border-radius: 4px; display: flex; justify-content: space-between; border: 1px solid #f1f5f9; align-items: center; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        table td { padding: 5px 0; border-bottom: 1px solid #f1f5f9; }
     </style>
 </head>
 <body>
@@ -65,20 +68,17 @@
         <div id="view-vulnerable" class="view-container">
             <div class="access-card" style="background: var(--vulnerable-color);"><div><b>Población Vulnerable</b></div><a href="vulnerable.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
-            
             <div class="stats-grid">
                 <div class="stat-box"><small>Registros</small><div id="v-total">0</div></div>
                 <div class="stat-box"><small>Entregas</small><div id="v-ent" style="color:var(--success)">0</div></div>
                 <div class="stat-box"><small>Pendientes</small><div id="v-pen" style="color:var(--danger)">0</div></div>
             </div>
-
             <div class="stats-grid">
                 <div class="stat-box" style="border-top: 3px solid #854d0e;"><small>Grupos Carpintería</small><div id="v-g-carp">0</div></div>
                 <div class="stat-box" style="border-top: 3px solid #9a3412;"><small>Grupos Panadería</small><div id="v-g-pana">0</div></div>
                 <div class="stat-box" style="border-top: 3px solid #164e63;"><small>Grupos Cocina</small><div id="v-g-coci">0</div></div>
                 <div class="stat-box" style="border-top: 3px solid #5b21b6;"><small>Otros Grupos</small><div id="v-g-otros">0</div></div>
             </div>
-
             <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
                 <div class="panel"><b>TALLERES (POR CÓDIGO)</b><div id="v-list-talleres"></div></div>
                 <div class="panel"><b>Apoyos</b><div id="v-list-apoyos"></div></div>
@@ -89,8 +89,20 @@
         <div id="view-social" class="view-container">
             <div class="access-card" style="background: var(--social-color);"><div><b>Trabajo Social</b></div><a href="social.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
-            <div class="stats-grid"><div class="stat-box"><small>Casos</small><div id="s-total">0</div></div><div class="stat-box"><small>Finalizados</small><div id="s-ent" style="color:var(--success)">0</div></div></div>
-            <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;"><div class="panel"><b>Programas</b><div id="s-list-programas"></div></div><div class="panel"><b>Historial</b><div id="s-list-recientes"></div></div></div>
+            
+            <div class="stats-grid">
+                <div class="stat-box"><small>Total Casos</small><div id="s-total">0</div></div>
+                <div class="stat-box"><small>Finalizados</small><div id="s-ent" style="color:var(--success)">0</div></div>
+            </div>
+
+            <div id="s-dynamic-programs" class="stats-grid">
+                </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
+                <div class="panel"><b>RESUMEN DE ASUNTOS</b><div id="s-list-asuntos-count"></div></div>
+                <div class="panel"><b>LISTADO POR PROGRAMA</b><div id="s-list-programas"></div></div>
+                <div class="panel"><b>HISTORIAL RECIENTE</b><div id="s-list-recientes"></div></div>
+            </div>
         </div>
 
         <div id="view-procuraduria" class="view-container">
@@ -124,15 +136,13 @@
     const db = getFirestore(app);
 
     const sesion = sessionStorage.getItem('sesion_activa');
-    if (!sesion) window.location.href = "login.index";
+    if (!sesion) window.location.href = "index.html";
 
-    window.cerrarSesion = () => {
-        if(confirm("¿Cerrar sesión?")) { sessionStorage.clear(); window.location.href = "login.index"; }
-    };
+    window.cerrarSesion = () => { if(confirm("¿Cerrar sesión?")) { sessionStorage.clear(); window.location.href = "index.html"; } };
 
     const cumpleFiltros = (d, s, m) => {
         const term = s.toLowerCase().trim();
-        const searchable = `${d.nombre||''} ${d.apellido_paterno||''} ${d.paciente||''} ${d.denunciado||''} ${d.codigo||''} ${d.no||''}`.toLowerCase();
+        const searchable = `${d.nombre||''} ${d.apellido_paterno||''} ${d.paciente||''} ${d.denunciado||''} ${d.codigo||''} ${d.no||''} ${d.asunto||''} ${d.programa||''}`.toLowerCase();
         const matchBusqueda = searchable.includes(term);
         if (m === "all") return matchBusqueda;
         const fRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_ingreso || "";
@@ -143,15 +153,8 @@
         let h = "";
         Object.keys(gs).sort().forEach(k => {
             h += `<div class="group-container" style="border-left-color:${c}">
-                <div class="group-header"><span>${k}</span><b>${gs[k].length} Pers.</b></div>
-                ${gs[k].map(i => `
-                    <div class="member-line">
-                        <div>
-                            <span>${i.n}</span>
-                            <small style="color:#64748b; margin-left:8px; font-style:italic;">(${i.l})</small>
-                        </div>
-                        <span style="font-weight:bold; color:${c}">${i.x}</span>
-                    </div>`).join('')}
+                <div class="group-header"><span>${k}</span><b>${gs[k].length}</b></div>
+                ${gs[k].map(i => `<div class="member-line"><div><span>${i.n}</span><small style="color:#64748b; margin-left:8px; font-style:italic;">(${i.l})</small></div><span style="font-weight:bold; color:${c}">${i.x}</span></div>`).join('')}
             </div>`;
         });
         const el = document.getElementById(id); if(el) el.innerHTML = h || "Sin registros.";
@@ -180,7 +183,6 @@
         fil.forEach(d => {
             if(d.estatus?.toLowerCase() === 'entregado') ent++;
             const n = `${d.nombre||''} ${d.apellido_paterno||''}`.toUpperCase(), c = (d.codigo||'S/C').toUpperCase(), t = (d.tipo_apoyo||"").toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
-            
             if (c.startsWith('CARP') || c.startsWith('PANAD') || c.startsWith('COC') || c.startsWith('COST') || t.includes("TALLER")) {
                 if (!tal[c]) tal[c] = []; tal[c].push({ n, x: c, l });
                 if(c.startsWith('CARP')) sCarp.add(c); else if(c.startsWith('PANAD')) sPana.add(c); else if(c.startsWith('COC')) sCoci.add(c); else sOtr.add(c);
@@ -191,32 +193,50 @@
         });
         if(document.getElementById('v-total')){
             document.getElementById('v-total').innerText = fil.length;
-            document.getElementById('v-ent').innerText = ent;
-            document.getElementById('v-pen').innerText = fil.length - ent;
-            document.getElementById('v-g-carp').innerText = sCarp.size;
-            document.getElementById('v-g-pana').innerText = sPana.size;
-            document.getElementById('v-g-coci').innerText = sCoci.size;
-            document.getElementById('v-g-otros').innerText = sOtr.size;
-            renderM('v-list-talleres', tal, 'var(--vulnerable-color)');
-            renderM('v-list-apoyos', apo, 'var(--primary)');
-            renderM('v-list-geo', geo, '#64748b');
+            document.getElementById('v-ent').innerText = ent; document.getElementById('v-pen').innerText = fil.length - ent;
+            document.getElementById('v-g-carp').innerText = sCarp.size; document.getElementById('v-g-pana').innerText = sPana.size;
+            document.getElementById('v-g-coci').innerText = sCoci.size; document.getElementById('v-g-otros').innerText = sOtr.size;
+            renderM('v-list-talleres', tal, 'var(--vulnerable-color)'); renderM('v-list-apoyos', apo, 'var(--primary)'); renderM('v-list-geo', geo, '#64748b');
         }
     };
 
     window.procSoc = (s, m) => {
-        let fin = 0, prg = {}, rec = [];
+        let fin = 0, prg = {}, rec = [], asuCounts = {}, progCounts = {};
+        
         let fil = DB_S.filter(d => cumpleFiltros(d,s,m));
         fil.forEach(d => {
             if(['entregado','realizado'].includes(d.estatus?.toLowerCase())) fin++;
-            const p = (d.programa||"OTROS").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
-            if(!prg[p]) prg[p]=[]; prg[p].push({n, x: d.folio_expediente||'S/F', l});
-            rec.push({n, x: p, l});
+            const p = (d.programa||"S/P").toUpperCase();
+            const asu = (d.asunto||"S/A").toUpperCase();
+            const n = (d.nombre||'S/N').toUpperCase();
+
+            // Lógica de conteo para tarjetas dinámicas de programas
+            progCounts[p] = (progCounts[p] || 0) + 1;
+
+            asuCounts[asu] = (asuCounts[asu] || 0) + 1;
+            if(!prg[p]) prg[p]=[]; prg[p].push({n, x: d.folio_expediente||'S/F', l: asu});
+            rec.push({n, x: p, l: asu});
         });
+
         if(document.getElementById('s-total')){
             document.getElementById('s-total').innerText = fil.length;
             document.getElementById('s-ent').innerText = fin;
+
+            // GENERACIÓN DE TARJETAS DINÁMICAS
+            const container = document.getElementById('s-dynamic-programs');
+            container.innerHTML = ""; // Limpiar
+            Object.keys(progCounts).sort().forEach(progName => {
+                const card = document.createElement('div');
+                card.className = "stat-box";
+                card.style.borderTop = "3px solid var(--social-color)";
+                card.innerHTML = `<small>${progName}</small><div>${progCounts[progName]}</div>`;
+                container.appendChild(card);
+            });
+
             renderM('s-list-programas', prg, 'var(--social-color)');
             renderM('s-list-recientes', {"Recientes": rec.reverse().slice(0,10)}, "#64748b");
+            let t = `<table>`; Object.keys(asuCounts).sort().forEach(k => { t += `<tr><td>${k}</td><td align="right"><b>${asuCounts[k]}</b></td></tr>`; });
+            document.getElementById('s-list-asuntos-count').innerHTML = t + "</table>";
         }
     };
 
@@ -230,11 +250,9 @@
             if(!lD[asu]) lD[asu]=[]; lD[asu].push({n, x: d.no||'S/E', l});
         });
         if(document.getElementById('pr-total')){
-            document.getElementById('pr-total').innerText = fil.length;
-            document.getElementById('pr-mixtos').innerText = mix;
+            document.getElementById('pr-total').innerText = fil.length; document.getElementById('pr-mixtos').innerText = mix;
             renderM('pr-list-casos', lD, 'var(--procu-color)');
-            let t = `<table style="width:100%; font-size:10px;">`;
-            Object.keys(cA).forEach(k => t += `<tr><td>${k}</td><td align="right"><b>${cA[k]}</b></td></tr>`);
+            let t = `<table>`; Object.keys(cA).forEach(k => t += `<tr><td>${k}</td><td align="right"><b>${cA[k]}</b></td></tr>`);
             document.getElementById('pr-conteo-tabla').innerHTML = t + "</table>";
         }
     };
@@ -249,10 +267,8 @@
             dia.push({n, x: d.fecha||'S/F', l});
         });
         if(document.getElementById('m-total')){
-            document.getElementById('m-total').innerText = fil.length;
-            document.getElementById('m-med').innerText = med;
-            renderM('m-list-servicios', ser, 'var(--med-color)');
-            renderM('m-list-diagnosticos', {"Historial": dia.reverse().slice(0,10)}, "#64748b");
+            document.getElementById('m-total').innerText = fil.length; document.getElementById('m-med').innerText = med;
+            renderM('m-list-servicios', ser, 'var(--med-color)'); renderM('m-list-diagnosticos', {"Historial": dia.reverse().slice(0,10)}, "#64748b");
         }
     };
 
@@ -266,10 +282,8 @@
             seg.push({n, x: l, l});
         });
         if(document.getElementById('p-total')){
-            document.getElementById('p-total').innerText = pSet.size;
-            document.getElementById('p-ses').innerText = ses;
-            renderM('p-list-motivos', mot, 'var(--psico-color)');
-            renderM('p-list-seguimiento', {"Zonas": seg.reverse().slice(0,10)}, "#64748b");
+            document.getElementById('p-total').innerText = pSet.size; document.getElementById('p-ses').innerText = ses;
+            renderM('p-list-motivos', mot, 'var(--psico-color)'); renderM('p-list-seguimiento', {"Zonas": seg.reverse().slice(0,10)}, "#64748b");
         }
     };
 
@@ -281,15 +295,11 @@
     };
 
     document.addEventListener("DOMContentLoaded", () => {
-        const fHTML = `<div class="filter-group"><label>🔍 Buscar...</label><input type="text" class="global-search" onkeyup="reprocesarTodo()"></div>
-        <div class="filter-group" style="flex:0.4;"><label>📅 Mes</label><select class="month-filter" onchange="reprocesarTodo()">
-        <option value="all">Todo el Año</option><option value="01">Ene</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option></select></div>`;
+        const fHTML = `<div class="filter-group"><label>🔍 Buscar...</label><input type="text" class="global-search" onkeyup="reprocesarTodo()"></div><div class="filter-group" style="flex:0.4;"><label>📅 Mes</label><select class="month-filter" onchange="reprocesarTodo()"><option value="all">Todo el Año</option><option value="01">Ene</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option></select></div>`;
         document.querySelectorAll('.filter-bar').forEach(b => b.innerHTML = fHTML);
         document.getElementById('role-tag').innerText = (sesion||"").toUpperCase();
         if (sesion !== 'admin') {
-            ['vulnerable','social','procuraduria','medica','psicologia'].forEach(d => {
-                if (d !== sesion) { const n = document.getElementById('nav-'+d); if(n) n.style.display='none'; }
-            });
+            ['vulnerable','social','procuraduria','medica','psicologia'].forEach(d => { if (d !== sesion) { const n = document.getElementById('nav-'+d); if(n) n.style.display='none'; } });
             showView(sesion, document.getElementById('nav-'+sesion));
         } else { showView('vulnerable', document.getElementById('nav-vulnerable')); }
     });
