@@ -12,178 +12,83 @@
             --vulnerable-color: #ea580c; --psico-color: #be185d; --procu-color: #1e3a8a; --med-color: #4c1d95;
             --social-color: #af1e92;
         }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
-
-        /* Sidebar */
-        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; flex-shrink: 0; transition: 0.3s; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
         .sidebar-header { padding: 25px; text-align: center; border-bottom: 1px solid #1e293b; }
         .nav-menu { flex-grow: 1; padding: 15px 0; overflow-y: auto; }
         .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 12px; color: #94a3b8; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; font-size: 13px; }
         .nav-item:hover, .nav-item.active { background: #1e293b; color: white; border-left-color: var(--primary); }
-        .nav-logout { color: #f87171 !important; margin-top: auto; border-top: 1px solid #1e293b; }
-
-        /* Main Content */
         .main-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
         .top-bar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        
         .view-container { padding: 25px; display: none; }
         .view-container.active { display: block; animation: fadeIn 0.3s ease; }
-
-        /* UI Elements */
-        .filter-bar { background: white; padding: 12px; border-radius: 10px; margin-bottom: 15px; display: flex; gap: 12px; border: 1px solid #e2e8f0; align-items: flex-end; }
+        .filter-bar { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; gap: 15px; border: 1px solid #e2e8f0; align-items: flex-end; }
         .filter-group { display: flex; flex-direction: column; flex: 1; }
-        .filter-group label { font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
-        .filter-group input { padding: 6px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 11px; }
-
-        .access-card { padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .btn-open { background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; border: 1px solid white; transition: 0.3s; }
-        .btn-open:hover { background: white; color: #334155; }
-
+        .filter-group label { font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 6px; }
+        .filter-group input, .filter-group select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; }
+        .access-card { padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white; }
+        .btn-open { background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; border: 1px solid white; }
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-box { background: white; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; }
         .stat-box div { font-size: 22px; font-weight: bold; margin-top: 5px; }
-
-        /* Layouts */
-        .double-layout { display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; }
-        .triple-layout { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-        .panel { background: white; border-radius: 12px; padding: 18px; border: 1px solid #e2e8f0; height: 480px; overflow-y: auto; }
+        .panel { background: white; border-radius: 12px; padding: 18px; border: 1px solid #e2e8f0; height: 450px; overflow-y: auto; }
         .panel b { display: block; margin-bottom: 12px; font-size: 10px; text-transform: uppercase; color: var(--primary); border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }
-
-        .group-container { background: #f8fafc; border-radius: 8px; margin-bottom: 12px; padding: 10px; border: 1px solid #edf2f7; border-left: 4px solid var(--primary); }
-        .group-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 10px; margin-bottom: 6px; text-transform: uppercase; }
+        .group-container { background: #f8fafc; border-radius: 8px; margin-bottom: 12px; padding: 10px; border-left: 4px solid var(--primary); }
+        .group-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 10px; margin-bottom: 6px; }
         .member-line { font-size: 10px; padding: 6px 8px; background: white; margin-bottom: 3px; border-radius: 4px; display: flex; justify-content: space-between; border: 1px solid #f1f5f9; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div class="sidebar-header">
-            <h3>DIF GLOBAL</h3>
-            <small id="role-tag" style="color:var(--warning); font-weight:bold;"></small>
-        </div>
-        <nav class="nav-menu" id="side-nav">
+        <div class="sidebar-header"><h3>DIF GLOBAL</h3><small id="role-tag" style="color:var(--warning); font-weight: bold;"></small></div>
+        <nav class="nav-menu">
             <div id="nav-vulnerable" class="nav-item" onclick="showView('vulnerable', this)"><i class="fas fa-hand-holding-heart"></i> Pob. Vulnerable</div>
             <div id="nav-social" class="nav-item" onclick="showView('social', this)"><i class="fa-solid fa-users"></i> Trabajo Social</div>
             <div id="nav-procuraduria" class="nav-item" onclick="showView('procuraduria', this)"><i class="fas fa-balance-scale"></i> Procuraduría</div>
             <div id="nav-medica" class="nav-item" onclick="showView('medica', this)"><i class="fas fa-notes-medical"></i> Área Médica</div>
             <div id="nav-psicologia" class="nav-item" onclick="showView('psicologia', this)"><i class="fas fa-brain"></i> Psicología</div>
-            <div class="nav-item nav-logout" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</div>
         </nav>
     </div>
 
     <div class="main-content">
-        <div class="top-bar">
-            <h2 id="view-title" style="margin:0; font-size: 17px;">Cargando...</h2>
-            <div id="reloj" style="font-size: 11px; font-weight: bold; color: #323335;">2026</div>
-        </div>
+        <div class="top-bar"><h2 id="view-title">Panel</h2><div id="reloj"></div></div>
 
         <div id="view-vulnerable" class="view-container">
-            <div class="access-card" style="background: linear-gradient(135deg, #ea580c 0%, #fb923c 100%);">
-                <div><b>Población Vulnerable</b><p style="margin:0; font-size:11px; opacity:0.9;">Control de padrón nominal y geográfico.</p></div>
-                <a href="vulnerable.html" class="btn-open">Ir al Módulo <i class="fas fa-external-link-alt"></i></a>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box"><small>Total Registrados</small><div id="v-total">0</div></div>
-                <div class="stat-box"><small>Entregados</small><div id="v-ent" style="color:var(--success)">0</div></div>
-                <div class="stat-box"><small>Pendientes</small><div id="v-pen" style="color:var(--danger)">0</div></div>
-                <div class="stat-box"><small>Zonas</small><div id="v-zonas">0</div></div>
-            </div>
-            <div class="triple-layout">
-                <div class="panel"><b>Talleres</b><div id="v-list-talleres"></div></div>
-                <div class="panel"><b>Apoyos Específicos</b><div id="v-list-apoyos"></div></div>
-                <div class="panel"><b>Distribución Geográfica</b><div id="v-list-geo"></div></div>
-            </div>
+            <div class="access-card" style="background: var(--vulnerable-color);"><div><b>Población Vulnerable</b></div><a href="vulnerable.html" target="_blank" class="btn-open">Módulo</a></div>
+            <div class="filter-bar"></div>
+            <div class="stats-grid"><div class="stat-box"><small>Registros</small><div id="v-total">0</div></div><div class="stat-box"><small>Entregas</small><div id="v-ent" style="color:var(--success)">0</div></div><div class="stat-box"><small>Pendientes</small><div id="v-pen" style="color:var(--danger)">0</div></div></div>
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;"><div class="panel"><b>Talleres</b><div id="v-list-talleres"></div></div><div class="panel"><b>Apoyos</b><div id="v-list-apoyos"></div></div><div class="panel"><b>Zonas</b><div id="v-list-geo"></div></div></div>
         </div>
 
         <div id="view-social" class="view-container">
-            <div class="access-card" style="background: linear-gradient(135deg, #af1e92 0%, #d946ef 100%);">
-                <div><b>Trabajo Social</b><p style="margin:0; font-size:11px; opacity:0.9;">Gestión de estudios y programas.</p></div>
-                <a href="social.html" class="btn-open">Ir al Módulo <i class="fas fa-external-link-alt"></i></a>
-            </div>
-            <div class="filter-bar">
-                <div class="filter-group"><label>🔍 Buscar...</label><input type="text" id="ts-filtro-busqueda" placeholder="Nombre o Programa" onkeyup="procesarDatosTrabajoSocial()"></div>
-                <div class="filter-group" style="flex:0.5;"><label>Desde</label><input type="date" id="ts-fecha-inicio" onchange="procesarDatosTrabajoSocial()"></div>
-                <div class="filter-group" style="flex:0.5;"><label>Hasta</label><input type="date" id="ts-fecha-fin" onchange="procesarDatosTrabajoSocial()"></div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box"><small>Filtrados</small><div id="s-total">0</div></div>
-                <div class="stat-box"><small>Finalizados</small><div id="s-ent" style="color:var(--success)">0</div></div>
-                <div class="stat-box"><small>Pendientes</small><div id="s-pen" style="color:var(--danger)">0</div></div>
-            </div>
-            <div class="double-layout">
-                <div class="panel"><b>Programas</b><div id="s-list-programas"></div></div>
-                <div class="panel"><b>Historial Reciente</b><div id="s-list-recientes"></div></div>
-            </div>
+            <div class="access-card" style="background: var(--social-color);"><div><b>Trabajo Social</b></div><a href="social.html" target="_blank" class="btn-open">Módulo</a></div>
+            <div class="filter-bar"></div>
+            <div class="stats-grid"><div class="stat-box"><small>Casos</small><div id="s-total">0</div></div><div class="stat-box"><small>Finalizados</small><div id="s-ent" style="color:var(--success)">0</div></div></div>
+            <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;"><div class="panel"><b>Programas</b><div id="s-list-programas"></div></div><div class="panel"><b>Historial</b><div id="s-list-recientes"></div></div></div>
         </div>
 
         <div id="view-procuraduria" class="view-container">
-            <div class="access-card" style="background: var(--procu-color);">
-                <div><b>Procuraduría</b><p style="margin:0; font-size:11px; opacity:0.9;">Expedientes Jurídicos y Asesorías.</p></div>
-                <a href="procuraduria.html" class="btn-open">Ir al Módulo <i class="fas fa-external-link-alt"></i></a>
-            </div>
-            <div class="filter-bar">
-                <div class="filter-group"><label>📍 Localidad</label><input type="text" id="pr-filtro-loc" onkeyup="procesarDatosProcuraduria()"></div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box"><small>Total Casos</small><div id="pr-total">0</div></div>
-                <div class="stat-box"><small>H. Mixtos</small><div id="pr-mixtos" style="color:var(--warning)">0</div></div>
-            </div>
-            <div class="double-layout">
-                <div class="panel"><b>Conteo por Apoyo</b><div id="pr-conteo-tabla"></div></div>
-                <div class="panel"><b>Listado de Casos</b><div id="pr-list-casos"></div></div>
-            </div>
+            <div class="access-card" style="background: var(--procu-color);"><div><b>Procuraduría</b></div><a href="procuraduria.html" target="_blank" class="btn-open">Módulo</a></div>
+            <div class="filter-bar"></div>
+            <div class="stats-grid"><div class="stat-box"><small>Expedientes</small><div id="pr-total">0</div></div><div class="stat-box"><small>H. Mixtos</small><div id="pr-mixtos">0</div></div></div>
+            <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;"><div class="panel"><b>Asuntos</b><div id="pr-conteo-tabla"></div></div><div class="panel"><b>Listado</b><div id="pr-list-casos"></div></div></div>
         </div>
 
-     <div id="view-medica" class="view-container">
-    <div class="access-card" style="background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%);">
-        <div><b>Área Médica</b><p style="margin:0; font-size:11px; opacity:0.9;">Consultas y Medicamentos.</p></div>
-        <div style="display:flex; gap:10px;">
-                <a href="medica.html" class="btn-open">Ir al Módulo <i class="fas fa-external-link-alt"></i></a>
+        <div id="view-medica" class="view-container">
+            <div class="access-card" style="background: var(--med-color);"><div><b>Área Médica</b></div><a href="medica.html" target="_blank" class="btn-open">Módulo</a></div>
+            <div class="filter-bar"></div>
+            <div class="stats-grid"><div class="stat-box"><small>Atenciones</small><div id="m-total">0</div></div><div class="stat-box"><small>Medicamentos</small><div id="m-med">0</div></div></div>
+            <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;"><div class="panel"><b>Servicios</b><div id="m-list-servicios"></div></div><div class="panel"><b>Diagnósticos</b><div id="m-list-diagnosticos"></div></div></div>
         </div>
-    </div>
-
-    <div class="filter-bar">
-        <div class="filter-group">
-            <label>🔍 Buscar Paciente</label>
-            <input type="text" id="m-filtro-nombre" placeholder="Nombre del paciente..." onkeyup="procesarDatosMedica()">
-        </div>
-        <div class="filter-group" style="flex:0.5;"><label>Desde</label><input type="date" id="m-fecha-inicio" onchange="procesarDatosMedica()"></div>
-        <div class="filter-group" style="flex:0.5;"><label>Hasta</label><input type="date" id="m-fecha-fin" onchange="procesarDatosMedica()"></div>
-    </div>
-
-    <div class="stats-grid">
-        <div class="stat-box"><small>Registros Filtrados</small><div id="m-total">0</div></div>
-        <div class="stat-box"><small>Con Medicamento</small><div id="m-med" style="color:var(--success)">0</div></div>
-    </div>
-    
-    <div class="double-layout">
-        <div class="panel"><b>Resumen por Servicio</b><div id="m-list-servicios"></div></div>
-        <div class="panel"><b>Historial de Atención</b><div id="m-list-diagnosticos"></div></div>
-    </div>
-</div>
 
         <div id="view-psicologia" class="view-container">
-            <div class="access-card" style="background: linear-gradient(135deg, #be185d 0%, #db2777 100%);">
-                <div><b>Psicología</b><p style="margin:0; font-size:11px; opacity:0.9;">Terapia y Valoraciones.</p></div>
-                <a href="psicologia.html" class="btn-open">Ir al Módulo <i class="fas fa-external-link-alt"></i></a>
-            </div>
-            <div class="filter-bar">
-                <div class="filter-group"><label>🔍 Buscar Tema/Motivo</label><input type="text" id="p-filtro-tema" placeholder="Ansiedad, Pareja..." onkeyup="procesarDatosPsicologia()"></div>
-                <div class="filter-group" style="flex:0.5;"><label>Desde</label><input type="date" id="p-fecha-inicio" onchange="procesarDatosPsicologia()"></div>
-                <div class="filter-group" style="flex:0.5;"><label>Hasta</label><input type="date" id="p-fecha-fin" onchange="procesarDatosPsicologia()"></div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box"><small>Pacientes Únicos</small><div id="p-total">0</div></div>
-                <div class="stat-box"><small>Atenciones Totales</small><div id="p-ses" style="color:var(--psico-color)">0</div></div>
-            </div>
-            <div class="double-layout">
-                <div class="panel"><b>Motivos de Consulta</b><div id="p-list-motivos"></div></div>
-                <div class="panel"><b>Seguimiento por Zona</b><div id="p-list-seguimiento"></div></div>
-            </div>
+            <div class="access-card" style="background: var(--psico-color);"><div><b>Psicología</b></div><a href="psicologia.html" target="_blank" class="btn-open">Módulo</a></div>
+            <div class="filter-bar"></div>
+            <div class="stats-grid"><div class="stat-box"><small>Pacientes</small><div id="p-total">0</div></div><div class="stat-box"><small>Sesiones</small><div id="p-ses">0</div></div></div>
+            <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;"><div class="panel"><b>Motivos</b><div id="p-list-motivos"></div></div><div class="panel"><b>Zonas</b><div id="p-list-seguimiento"></div></div></div>
         </div>
-
     </div>
 
 <script type="module">
@@ -197,179 +102,148 @@
     const sesion = sessionStorage.getItem('sesion_activa');
     if (!sesion) window.location.href = "login.html";
 
-    window.cerrarSesion = () => { sessionStorage.clear(); window.location.href = "index.html"; };
+    // --- MOTOR DE FILTRADO MAESTRO ---
+    const cumpleFiltros = (d, s, m) => {
+        const term = s.toLowerCase().trim();
+        // Identidad (Nombre, Apellidos, Paciente, Códigos, Expediente)
+        const nom = `${d.nombre||''} ${d.apellido_paterno||''} ${d.paciente||''} ${d.denunciado||''}`.toLowerCase();
+        const cod = `${d.codigo||''} ${d.folio_expediente||''} ${d.no||''} ${d.expediente||''}`.toLowerCase();
+        const matchBusqueda = nom.includes(term) || cod.includes(term);
 
-    // --- RENDERIZADO GENERAL ---
-    const renderMaster = (elementId, dataGroups, color) => {
-        let html = "";
-        Object.keys(dataGroups).sort().forEach(key => {
-            html += `<div class="group-container" style="border-left-color:${color}">
-                <div class="group-header"><span>${key}</span><b>${dataGroups[key].length}</b></div>
-                ${dataGroups[key].map(i => `<div class="member-line"><span>${i.n}</span><span style="font-weight:bold; color:${color}">${i.x}</span></div>`).join('')}
-            </div>`;
-        });
-        const el = document.getElementById(elementId);
-        if(el) el.innerHTML = html || "Sin datos.";
+        if (m === "all") return matchBusqueda;
+
+        // Búsqueda de Fecha en cualquier campo posible
+        const fRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_atencion || "";
+        if (fRaw && fRaw.includes("-")) {
+            const mesRegistro = fRaw.split("-")[1]; // Extrae el MM de YYYY-MM-DD
+            return matchBusqueda && (mesRegistro === m);
+        }
+        return false;
     };
 
-    let DB_TS = [], DB_PR = [], DB_MED = [], DB_PSI = [];
+    window.reprocesarTodo = () => {
+        const act = document.querySelector('.view-container.active');
+        if(!act) return;
+        const s = act.querySelector('.global-search')?.value || "";
+        const m = act.querySelector('.month-filter')?.value || "all";
+        
+        window.procVul(s,m); window.procSoc(s,m); window.procPro(s,m); 
+        window.procMed(s,m); window.procPsi(s,m);
+    };
 
-    // 1. POBLACION VULNERABLE
-    onSnapshot(collection(db, "apoyos"), (snap) => {
-        let ent = 0, talleres = {}, apoyos = {}, geo = {};
-        snap.forEach(doc => {
-            const d = doc.data(); if(d.estatus === 'Entregado') ent++;
-            const nom = `${d.nombre || ''} ${d.apellido_paterno || ''}`.toUpperCase().trim();
-            const loc = (d.col_loc || "S/L").toUpperCase();
-            const cod = d.codigo || 'S/C';
-            if (cod.startsWith('CARP') || cod.startsWith('PANAD') || cod.startsWith('COC')) {
-                const t = cod.substring(0,4); if(!talleres[t]) talleres[t] = []; talleres[t].push({n:nom,x:cod});
+    const renderM = (id, gs, c) => {
+        let h = "";
+        Object.keys(gs).sort().forEach(k => {
+            h += `<div class="group-container" style="border-left-color:${c}">
+                <div class="group-header"><span>${k}</span><b>${gs[k].length}</b></div>
+                ${gs[k].map(i => `<div class="member-line"><span>${i.n}</span><span style="font-weight:bold; color:${c}">${i.x}</span></div>`).join('')}
+            </div>`;
+        });
+        const el = document.getElementById(id); if(el) el.innerHTML = h || "Sin registros.";
+    };
+
+    let DB_V = [], DB_S = [], DB_P = [], DB_M = [], DB_PS = [];
+
+    // --- SNAPSHOTS FIREBASE ---
+    onSnapshot(collection(db, "apoyos"), s => { DB_V = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
+    onSnapshot(collection(db, "trabajo_social"), s => { DB_S = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
+    onSnapshot(collection(db, "procuraduria"), s => { DB_P = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
+    onSnapshot(collection(db, "area_medica"), s => { DB_M = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
+    onSnapshot(collection(db, "psicologia"), s => { DB_PS = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
+
+    // --- PROCESADORES (TODOS CORREGIDOS PARA FILTRAR POR MES) ---
+    window.procVul = (s, m) => {
+        let ent = 0, tal = {}, apo = {}, geo = {};
+        let fil = DB_V.filter(d => cumpleFiltros(d,s,m));
+        fil.forEach(d => {
+            if(d.estatus?.toLowerCase() === 'entregado') ent++;
+            const n = `${d.nombre||''} ${d.apellido_paterno||''}`.toUpperCase();
+            const l = (d.col_loc||"SIN LOCALIDAD").toUpperCase();
+            const c = d.codigo||'S/C';
+            if(c.startsWith('CARP')||c.startsWith('PANAD')||c.startsWith('COC')){
+                const t=c.substring(0,4); if(!tal[t]) tal[t]=[]; tal[t].push({n,x:c});
             } else {
-                const a = (d.tipo_apoyo || "OTROS").toUpperCase(); if(!apoyos[a]) apoyos[a] = []; apoyos[a].push({n:nom,x:cod});
+                const a=(d.tipo_apoyo||"OTROS").toUpperCase(); if(!apo[a]) apo[a]=[]; apo[a].push({n,x:c});
             }
-            if(!geo[loc]) geo[loc] = []; geo[loc].push({n:nom,x:cod});
+            if(!geo[l]) geo[l]=[]; geo[l].push({n,x:c});
         });
-        document.getElementById('v-total').innerText = snap.size;
-        document.getElementById('v-ent').innerText = ent;
-        document.getElementById('v-pen').innerText = snap.size - ent;
-        document.getElementById('v-zonas').innerText = Object.keys(geo).length;
-        renderMaster('v-list-talleres', talleres, 'var(--vulnerable-color)');
-        renderMaster('v-list-apoyos', apoyos, 'var(--primary)');
-        renderMaster('v-list-geo', geo, '#64748b');
-    });
-
-    // 2. TRABAJO SOCIAL
-    onSnapshot(collection(db, "trabajo_social"), (snap) => {
-        DB_TS = snap.docs.map(d => d.data());
-        window.procesarDatosTrabajoSocial();
-    });
-    window.procesarDatosTrabajoSocial = () => {
-        const bus = document.getElementById('ts-filtro-busqueda')?.value.toLowerCase() || "";
-        const fI = document.getElementById('ts-fecha-inicio')?.value || "";
-        const fF = document.getElementById('ts-fecha-fin')?.value || "";
-        let fin = 0, prog = {}, rec = [];
-        let filtrados = DB_TS.filter(d => {
-            const mB = `${d.nombre} ${d.programa}`.toLowerCase().includes(bus);
-            const fD = d.fecha || "";
-            let mF = true;
-            if(fI && fD < fI) mF = false; if(fF && fD > fF) mF = false;
-            return mB && mF;
-        });
-        filtrados.forEach(d => {
-            if(['entregado','realizado'].includes(d.estatus?.toLowerCase())) fin++;
-            const pg = (d.programa || "OTROS").toUpperCase();
-            if(!prog[pg]) prog[pg] = [];
-            prog[pg].push({n: (d.nombre || 'S/N').toUpperCase(), x: d.folio_expediente || 'S/F'});
-            rec.push({n: (d.nombre || 'S/N').toUpperCase(), x: pg});
-        });
-        if(document.getElementById('s-total')){
-            document.getElementById('s-total').innerText = filtrados.length;
-            document.getElementById('s-ent').innerText = fin;
-            document.getElementById('s-pen').innerText = filtrados.length - fin;
-            renderMaster('s-list-programas', prog, 'var(--social-color)');
-            renderMaster('s-list-recientes', {"Recientes": rec.reverse().slice(0,10)}, "#64748b");
+        if(document.getElementById('v-total')){
+            document.getElementById('v-total').innerText = fil.length;
+            document.getElementById('v-ent').innerText = ent;
+            document.getElementById('v-pen').innerText = fil.length - ent;
+            renderM('v-list-talleres', tal, 'var(--vulnerable-color)');
+            renderM('v-list-apoyos', apo, 'var(--primary)');
+            renderM('v-list-geo', geo, '#64748b');
         }
     };
 
-    // 3. PROCURADURIA
-    onSnapshot(collection(db, "procuraduria"), (snap) => {
-        DB_PR = snap.docs.map(d => d.data());
-        window.procesarDatosProcuraduria();
-    });
-    window.procesarDatosProcuraduria = () => {
-        const locF = document.getElementById('pr-filtro-loc')?.value.toLowerCase() || "";
-        let mixtos = 0, countA = {}, listD = {};
-        let filtrados = DB_PR.filter(d => (d.lugar || "").toLowerCase().includes(locF));
-        filtrados.forEach(d => {
-            if(d.horarios_mixtos === 'Si') mixtos++;
-            const asu = (d.asuntos || "GENERAL").toUpperCase();
-            countA[asu] = (countA[asu] || 0) + 1;
-            if(!listD[asu]) listD[asu] = []; listD[asu].push({n: (d.nombre || 'S/N').toUpperCase(), x: d.no || 'S/E'});
+    window.procSoc = (s, m) => {
+        let fin = 0, prg = {}, rec = [];
+        let fil = DB_S.filter(d => cumpleFiltros(d,s,m));
+        fil.forEach(d => {
+            if(['entregado','realizado'].includes(d.estatus?.toLowerCase())) fin++;
+            const p = (d.programa||"OTROS").toUpperCase();
+            if(!prg[p]) prg[p]=[]; prg[p].push({n: (d.nombre||'S/N').toUpperCase(), x: d.folio_expediente||'S/F'});
+            rec.push({n: (d.nombre||'S/N').toUpperCase(), x: p});
+        });
+        if(document.getElementById('s-total')){
+            document.getElementById('s-total').innerText = fil.length;
+            document.getElementById('s-ent').innerText = fin;
+            renderM('s-list-programas', prg, 'var(--social-color)');
+            renderM('s-list-recientes', {"Recientes": rec.reverse().slice(0,10)}, "#64748b");
+        }
+    };
+
+    window.procPro = (s, m) => {
+        let mix = 0, cA = {}, lD = {};
+        let fil = DB_P.filter(d => cumpleFiltros(d,s,m));
+        fil.forEach(d => {
+            if(d.horarios_mixtos === 'Si') mix++;
+            const asu = (d.asuntos||"GENERAL").toUpperCase();
+            cA[asu] = (cA[asu]||0)+1;
+            if(!lD[asu]) lD[asu]=[]; lD[asu].push({n:(d.nombre||'S/N').toUpperCase(), x:d.no||'S/E'});
         });
         if(document.getElementById('pr-total')){
-            document.getElementById('pr-total').innerText = filtrados.length;
-            document.getElementById('pr-mixtos').innerText = mixtos;
-            renderMaster('pr-list-casos', listD, 'var(--procu-color)');
+            document.getElementById('pr-total').innerText = fil.length;
+            document.getElementById('pr-mixtos').innerText = mix;
+            renderM('pr-list-casos', lD, 'var(--procu-color)');
             let t = `<table style="width:100%; font-size:10px;">`;
-            Object.keys(countA).forEach(k => t += `<tr><td>${k}</td><td><b>${countA[k]}</b></td></tr>`);
+            Object.keys(cA).forEach(k => t += `<tr><td>${k}</td><td align="right"><b>${cA[k]}</b></td></tr>`);
             document.getElementById('pr-conteo-tabla').innerHTML = t + "</table>";
         }
     };
 
-// 4. MEDICA (Sincronizado con filtros)
-    onSnapshot(collection(db, "area_medica"), (snap) => {
-        DB_MED = snap.docs.map(d => d.data());
-        window.procesarDatosMedica();
-    });
-
-    window.procesarDatosMedica = () => {
-        const busNombre = document.getElementById('m-filtro-nombre')?.value.toLowerCase() || "";
-        const selServicio = document.getElementById('m-filtro-servicio')?.value || "TODOS";
-        const fI = document.getElementById('m-fecha-inicio')?.value || "";
-        const fF = document.getElementById('m-fecha-fin')?.value || "";
-
-        let meds = 0, servs = {}, diags = [];
-
-        // Aplicar filtros
-        let filtrados = DB_MED.filter(d => {
-            const matchNombre = (d.nombre || "").toLowerCase().includes(busNombre);
-            const matchServicio = (selServicio === "TODOS" || d.tipo_apoyo === selServicio);
-            const fD = d.fecha || "";
-            let matchFecha = true;
-            if(fI && fD < fI) matchFecha = false;
-            if(fF && fD > fF) matchFecha = false;
-
-            return matchNombre && matchServicio && matchFecha;
+    window.procMed = (s, m) => {
+        let med = 0, ser = {}, dia = [];
+        let fil = DB_M.filter(d => cumpleFiltros(d,s,m));
+        fil.forEach(d => {
+            if(d.tipo_apoyo==='MEDICAMENTO'||(d.observaciones && d.observaciones.includes('MEDICAM'))) med++;
+            const sr = (d.tipo_apoyo||"GENERAL").toUpperCase();
+            if(!ser[sr]) ser[sr]=[]; ser[sr].push({n:(d.nombre||'S/N').toUpperCase(), x:d.no||'-'});
+            dia.push({n:(d.nombre||'S/N').toUpperCase(), x:d.fecha||'S/F'});
         });
-
-        // Procesar datos filtrados para la UI
-        filtrados.forEach(d => {
-            if(d.tipo_apoyo === 'MEDICAMENTO' || (d.observaciones && d.observaciones.includes('MEDICAM'))) meds++;
-            
-            const s = (d.tipo_apoyo || "GENERAL").toUpperCase();
-            if(!servs[s]) servs[s] = [];
-            servs[s].push({n: (d.nombre || 'S/N').toUpperCase(), x: `Folio: ${d.no || '-'}`});
-            
-            diags.push({n: (d.nombre || 'S/N').toUpperCase(), x: `${d.fecha} - ${(d.observaciones || 'S/D').toUpperCase()}`});
-        });
-
-        // Actualizar UI
         if(document.getElementById('m-total')){
-            document.getElementById('m-total').innerText = filtrados.length;
-            document.getElementById('m-med').innerText = meds;
-            renderMaster('m-list-servicios', servs, 'var(--med-color)');
-            renderMaster('m-list-diagnosticos', {"Resultados Filtrados": diags.reverse()}, "#64748b");
+            document.getElementById('m-total').innerText = fil.length;
+            document.getElementById('m-med').innerText = med;
+            renderM('m-list-servicios', ser, 'var(--med-color)');
+            renderM('m-list-diagnosticos', {"Historial": dia.reverse().slice(0,10)}, "#64748b");
         }
     };
 
-    // 5. PSICOLOGIA
-    onSnapshot(collection(db, "psicologia"), (snap) => {
-        DB_PSI = snap.docs.map(d => d.data());
-        window.procesarDatosPsicologia();
-    });
-    window.procesarDatosPsicologia = () => {
-        const temaF = document.getElementById('p-filtro-tema')?.value.toLowerCase() || "";
-        const fI = document.getElementById('p-fecha-inicio')?.value || "";
-        const fF = document.getElementById('p-fecha-fin')?.value || "";
-        let ses = 0, pacSet = new Set(), mots = {}, segs = [];
-        let filtrados = DB_PSI.filter(d => {
-            const mT = (d.tema || "").toLowerCase().includes(temaF);
-            const fD = d.fecha || "";
-            let mF = true;
-            if(fI && fD < fI) mF = false; if(fF && fD > fF) mF = false;
-            return mT && mF;
-        });
-        filtrados.forEach(d => {
-            ses++; if(d.paciente) pacSet.add(d.paciente.toUpperCase().trim());
-            const m = (d.tema || "GENERAL").toUpperCase();
-            if(!mots[m]) mots[m] = []; mots[m].push({n: (d.paciente || 'S/N').toUpperCase(), x: d.no || 'S/F'});
-            segs.push({n: (d.paciente || 'S/N').toUpperCase(), x: (d.col_loc || 'S/L').toUpperCase()});
+    window.procPsi = (s, m) => {
+        let ses = 0, pSet = new Set(), mot = {}, seg = [];
+        let fil = DB_PS.filter(d => cumpleFiltros(d,s,m));
+        fil.forEach(d => {
+            ses++; if(d.paciente) pSet.add(d.paciente.toUpperCase().trim());
+            const mo = (d.tema||"GENERAL").toUpperCase();
+            if(!mot[mo]) mot[mo]=[]; mot[mo].push({n:(d.paciente||'S/N').toUpperCase(), x:d.no||'S/F'});
+            seg.push({n:(d.paciente||'S/N').toUpperCase(), x:(d.col_loc||'S/L').toUpperCase()});
         });
         if(document.getElementById('p-total')){
-            document.getElementById('p-total').innerText = pacSet.size;
+            document.getElementById('p-total').innerText = pSet.size;
             document.getElementById('p-ses').innerText = ses;
-            renderMaster('p-list-motivos', mots, 'var(--psico-color)');
-            renderMaster('p-list-seguimiento', {"Historial": segs.reverse().slice(0,10)}, "#64748b");
+            renderM('p-list-motivos', mot, 'var(--psico-color)');
+            renderM('p-list-seguimiento', {"Zonas": seg.reverse().slice(0,10)}, "#64748b");
         }
     };
 
@@ -377,30 +251,35 @@
     window.showView = (v, e) => {
         document.querySelectorAll('.view-container').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        const target = document.getElementById('view-' + v);
-        if(target) {
-            target.classList.add('active');
-            e.classList.add('active');
-            document.getElementById('view-title').innerText = e.innerText;
-        }
+        const t = document.getElementById('view-' + v);
+        if(t) { t.classList.add('active'); e.classList.add('active'); document.getElementById('view-title').innerText = e.innerText; window.reprocesarTodo(); }
     };
 
     document.addEventListener("DOMContentLoaded", () => {
+        const filterHTML = `
+            <div class="filter-group"><label>🔍 Búsqueda Global</label><input type="text" class="global-search" placeholder="Buscar..." onkeyup="reprocesarTodo()"></div>
+            <div class="filter-group" style="flex:0.4;"><label>📅 Corte Mensual</label>
+                <select class="month-filter" onchange="reprocesarTodo()">
+                    <option value="all">Todo el Año</option>
+                    <option value="01">Enero</option><option value="02">Febrero</option><option value="03">Marzo</option>
+                    <option value="04">Abril</option><option value="05">Mayo</option><option value="06">Junio</option>
+                    <option value="07">Julio</option><option value="08">Agosto</option><option value="09">Septiembre</option>
+                    <option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option>
+                </select>
+            </div>`;
+        
+        document.querySelectorAll('.filter-bar').forEach(bar => bar.innerHTML = filterHTML);
         document.getElementById('role-tag').innerText = sesion.toUpperCase();
+        
         if (sesion !== 'admin') {
-            const depts = ['vulnerable', 'social', 'procuraduria', 'medica', 'psicologia'];
-            depts.forEach(d => {
+            ['vulnerable','social','procuraduria','medica','psicologia'].forEach(d => {
                 if (d !== sesion) {
-                    const nav = document.getElementById('nav-' + d);
-                    const view = document.getElementById('view-' + d);
-                    if(nav) nav.style.display = 'none';
-                    if(view) view.remove();
+                    const n = document.getElementById('nav-'+d); if(n) n.style.display='none';
+                    const vw = document.getElementById('view-'+d); if(vw) vw.remove();
                 }
             });
-            showView(sesion, document.getElementById('nav-' + sesion));
-        } else {
-            showView('vulnerable', document.getElementById('nav-vulnerable'));
-        }
+            showView(sesion, document.querySelector('.nav-item:not([style*="display:none"])'));
+        } else { showView('vulnerable', document.getElementById('nav-vulnerable')); }
     });
 
     setInterval(() => { document.getElementById('reloj').innerText = new Date().toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' }).toUpperCase(); }, 1000);
