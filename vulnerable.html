@@ -8,81 +8,45 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* PALETA DE COLORES TRABAJO SOCIAL */
         :root { 
-            --primary: #0d9488; /* Teal */
-            --primary-dark: #0f766e;
-            --success: #059669; 
-            --warning: #f59e0b; 
-            --danger: #dc2626; 
-            --bg: #f8fafc; 
-            --border: #e2e8f0;
+            --primary: #0d9488; --primary-dark: #0f766e; --success: #059669; 
+            --warning: #f59e0b; --danger: #dc2626; --bg: #f8fafc; --border: #e2e8f0;
         }
-        
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
-        
-        /* CABECERA ESTILO LIMPIO */
-        header { 
-            background: #fff; padding: 15px 40px; border-bottom: 3px solid var(--primary); 
-            display: flex; justify-content: space-between; align-items: center; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-        }
+        header { background: #fff; padding: 15px 40px; border-bottom: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .header-title h2 { margin: 0; color: var(--primary); font-size: 18px; display: flex; align-items: center; gap: 10px; }
-
         .container { max-width: 1850px; margin: 20px auto; padding: 0 20px; }
-        
-        /* TARJETAS */
         .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); margin-bottom: 20px; }
         h3 { margin: 0 0 18px 0; font-size: 11px; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; letter-spacing: 1px; }
-
-        /* FORMULARIO GRID */
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
         .form-group { display: flex; flex-direction: column; }
         label { font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
         input, select { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; transition: 0.2s; }
         input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1); }
-        
         .foto-field { grid-column: 1 / -1; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px dashed #cbd5e1; display: flex; align-items: center; gap: 15px; }
         .img-preview { width: 60px; height: 40px; background: #fff; border-radius: 4px; overflow: hidden; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; }
         .img-preview img { width: 100%; height: 100%; object-fit: cover; }
-
-        /* BOTONES */
         .btn-box { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
         .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 10px; color: white; display: flex; align-items: center; gap: 6px; text-transform: uppercase; transition: 0.3s; }
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-
-        /* BUSCADOR */
         .search-box { background: #f1f5f9; padding: 15px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 15px; display: flex; gap: 15px; align-items: flex-end; }
-        
-        /* TABLA */
         .table-wrap { background: #fff; border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 1700px; }
         th { background: #f8fafc; padding: 12px; text-align: left; font-size: 10px; color: #475569; border-bottom: 2px solid var(--border); text-transform: uppercase; }
         td { padding: 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-        tr:hover { background-color: #fcfcfc; }
-
         .sub-text { font-size: 10px; color: #64748b; display: block; margin-top: 2px; }
         .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-
-        /* PAGINACIÓN */
         .paginacion-bar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 20px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--border); }
         .btn-pag { padding: 6px 12px; border: 1px solid #cbd5e1; background: white; border-radius: 4px; cursor: pointer; font-size: 11px; }
-        .btn-pag.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        /* VISOR */
         #modal-visor { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 20px; border-radius: 10px; text-align: center; max-width: 80%; position: relative;}
         .close-x { position: absolute; top: 10px; right: 20px; font-size: 25px; cursor: pointer; color: #64748b; }
-
         @media print { .no-print { display: none !important; } }
     </style>
 </head>
 <body>
 
 <header class="no-print">
-    <div class="header-title">
-        <h2><i class="fas fa-hand-holding-heart"></i> Pob. Vulnerable</h2>
-    </div>
+    <div class="header-title"><h2><i class="fas fa-hand-holding-heart"></i> Pob. Vulnerable</h2></div>
     <button class="btn" style="background: var(--primary)" onclick="location.href='admin_global.html'"><i class="fa-solid fa-house"></i> DASHBOARD</button>
 </header>
 
@@ -91,7 +55,8 @@
         <h3><i class="fas fa-folder-plus"></i> Registro de Expediente</h3>
         <input type="hidden" id="edit-id">
         <div class="form-grid" id="main-form">
-            <div class="form-group"><label>Expediente</label><input type="text" id="codigo" placeholder="ID-2026"></div>
+            <div class="form-group"><label>Código</label><input type="text" id="codigo" placeholder="ID-2026"></div>
+            <div class="form-group"><label>Fecha Ingreso</label><input type="date" id="fecha_ingreso"></div>
             <div class="form-group"><label>Paterno</label><input type="text" id="apellido_paterno"></div>
             <div class="form-group"><label>Materno</label><input type="text" id="apellido_materno"></div>
             <div class="form-group"><label>Nombre(s)</label><input type="text" id="nombre"></div>
@@ -105,14 +70,16 @@
                     <option value="Entregado">ENTREGADO</option>
                 </select>
             </div>
+            <div class="form-group"><label>Clave Entidad</label><input type="text" id="clave_entidad"></div>
+            <div class="form-group"><label>Entidad</label><input type="text" id="entidad"></div>
+            <div class="form-group"><label>Cve Mpio</label><input type="text" id="cve_mpio"></div>
             <div class="form-group"><label>Municipio</label><input type="text" id="municipio"></div>
-            <div class="form-group"><label>Localidad</label><input type="text" id="col_loc"></div>
+            <div class="form-group"><label>Clave Col/Loc</label><input type="text" id="clave_col_loc"></div>
+            <div class="form-group"><label>Colonia/Loc</label><input type="text" id="col_loc"></div>
             <div class="form-group" style="grid-column: span 2;"><label>Dirección</label><input type="text" id="direccion"></div>
             <div class="form-group"><label>Teléfono</label><input type="text" id="telefono"></div>
             <div class="form-group" style="grid-column: span 2;"><label>Observaciones</label><input type="text" id="observaciones"></div>
             
-            <input type="hidden" id="entidad"><input type="hidden" id="clave_entidad"><input type="hidden" id="clave_mpio"><input type="hidden" id="clave_loc_col">
-
             <div class="foto-field">
                 <div style="flex-grow: 1;">
                     <label><i class="fas fa-camera"></i> Adjuntar INE / Evidencia</label>
@@ -129,14 +96,12 @@
             <button class="btn" style="background:#1d6f42" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
             <label class="btn" style="background:#6366f1; cursor:pointer;"><i class="fas fa-upload"></i> IMPORTAR EXCEL <input type="file" onchange="importarSincronizado(event)" hidden></label>
             <button class="btn" style="background:#94a3b8" onclick="location.reload()"><i class="fas fa-eraser"></i> LIMPIAR</button>
+            <button class="btn" style="background:var(--danger); margin-left: auto;" onclick="vaciarBaseDeDatos()"><i class="fas fa-trash-alt"></i> VACIAR BASE DE DATOS</button>
         </div>
     </div>
 
     <div class="search-box no-print">
-        <div class="form-group" style="flex:2;">
-            <label>🔍 Buscador de Beneficiarios</label>
-            <input type="text" id="input-busqueda" placeholder="Buscar por nombre, CURP, dirección..." onkeyup="filtrarYRender()">
-        </div>
+        <div class="form-group" style="flex:2;"><label>🔍 Buscador</label><input type="text" id="input-busqueda" onkeyup="filtrarYRender()"></div>
         <div class="form-group" style="flex:1;">
             <label>Filtrar Estatus</label>
             <select id="filtro-estatus" onchange="filtrarYRender()">
@@ -156,14 +121,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>NO.</th>
-                    <th>FOTO</th>
-                    <th>EXPEDIENTE</th>
-                    <th>BENEFICIARIO</th>
-                    <th>LOCALIDAD / DIRECCIÓN</th>
-                    <th>APOYO</th>
-                    <th>ESTATUS</th>
-                    <th class="no-print">ACCIONES</th>
+                    <th>NO.</th><th>FOTO</th><th>CÓDIGO</th><th>BENEFICIARIO</th><th>LOCALIDAD / DIRECCIÓN</th><th>APOYO</th><th>ESTATUS</th><th class="no-print">ACCIONES</th>
                 </tr>
             </thead>
             <tbody id="tabla-beneficiarios"></tbody>
@@ -177,15 +135,14 @@
         <h4 id="visor-titulo" style="margin:0 0 10px 0; color:var(--primary);"></h4>
         <img id="img-grande" style="max-width:100%; max-height:70vh; border-radius:5px;">
         <div class="btn-box" style="justify-content:center;">
-            <button class="btn" style="background:var(--primary)" id="btn-descargar">📥 DESCARGAR</button>
+            <a id="link-descarga" download="evidencia.jpg" href="#"><button class="btn" style="background:var(--primary)">📥 DESCARGAR</button></a>
         </div>
     </div>
 </div>
 
 <script type="module">
-    // --- TU LÓGICA DE FIREBASE Y FUNCIONES SE MANTIENE AQUÍ ---
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, orderBy, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
     const app = initializeApp(firebaseConfig);
@@ -206,7 +163,7 @@
         const val = document.getElementById('input-busqueda').value.toLowerCase();
         const est = document.getElementById('filtro-estatus').value;
         DATA_FILTRADA = DATA_ACTUAL.filter(r => {
-            const campos = [r.nombre, r.apellido_paterno, r.curp, r.codigo, r.col_loc].join(" ").toLowerCase();
+            const campos = Object.values(r).join(" ").toLowerCase();
             return campos.includes(val) && (est === "Todos" || r.estatus === est);
         });
         PAGINA_ACTUAL = 1;
@@ -222,8 +179,8 @@
             <tr>
                 <td><b>${inicio + i + 1}</b></td>
                 <td>${r.ine_img ? `<img src="${r.ine_img}" onclick="abrirVisor('${r.ine_img}', '${r.nombre}')" style="width:35px;height:35px;object-fit:cover;cursor:pointer;border-radius:4px;">` : '-'}</td>
-                <td style="color:var(--primary); font-weight:bold;">${r.codigo}</td>
-                <td><b>${r.nombre} ${r.apellido_paterno}</b><span class="sub-text">${r.curp || ''}</span></td>
+                <td style="color:var(--primary); font-weight:bold;">${r.codigo || ''}</td>
+                <td><b>${r.apellido_paterno || ''} ${r.apellido_materno || ''} ${r.nombre || ''}</b><span class="sub-text">${r.curp || ''}</span></td>
                 <td><b>${r.col_loc || ''}</b><span class="sub-text">${r.direccion || ''}</span></td>
                 <td>${r.tipo_apoyo || ''}</td>
                 <td><span class="badge-status" style="background:${r.estatus==='Entregado'?'#dcfce7':'#fef3c7'}; color:${r.estatus==='Entregado'?'#15803d':'#b45309'}">${r.estatus}</span></td>
@@ -234,7 +191,6 @@
             </tr>
         `).join('');
 
-        // Paginación simple
         const tPag = Math.ceil(DATA_FILTRADA.length / FILAS_POR_PAGINA);
         let pagHTML = `<button class="btn-pag" onclick="irPagina(${PAGINA_ACTUAL - 1})" ${PAGINA_ACTUAL === 1 ? 'disabled' : ''}>Anterior</button>`;
         pagHTML += `<span style="margin:0 15px">Página ${PAGINA_ACTUAL} de ${tPag || 1}</span>`;
@@ -243,13 +199,6 @@
     }
 
     window.irPagina = (p) => { PAGINA_ACTUAL = p; render(); };
-    window.abrirVisor = (src, n) => {
-        document.getElementById('modal-visor').style.display='flex'; 
-        document.getElementById('img-grande').src = src; 
-        document.getElementById('visor-titulo').innerText = n;
-        document.getElementById('btn-descargar').onclick = () => { const a=document.createElement('a'); a.href=src; a.download=`${n}.png`; a.click(); };
-    };
-    window.cerrarVisor = () => document.getElementById('modal-visor').style.display='none';
 
     window.handleFoto = (e) => {
         const fr = new FileReader();
@@ -260,15 +209,51 @@
         fr.readAsDataURL(e.target.files[0]);
     };
 
-    window.guardar = async () => {
-        const d = {}; document.querySelectorAll('#main-form input, #main-form select').forEach(i => { if(i.id) d[i.id] = i.value; });
-        if(!d.codigo) return alert("Código requerido");
-        await addDoc(apoyosRef, d); location.reload();
+    const obtenerDatosForm = () => {
+        const d = {};
+        document.querySelectorAll('#main-form input, #main-form select').forEach(i => {
+            if(i.id) d[i.id] = i.value;
+        });
+        return d;
     };
 
+    window.guardar = async () => {
+        const data = obtenerDatosForm();
+        if(!data.codigo) return alert("Código requerido");
+        await addDoc(apoyosRef, data);
+        alert("Guardado correctamente");
+        location.reload();
+    };
+
+    // FUNCIÓN EDITAR CON SOPORTE MULTI-CAMPO (Corregido: Teléfono y Clave Mpio)
     window.editar = (id) => {
         const r = DATA_ACTUAL.find(x => x.id === id);
-        Object.keys(r).forEach(k => { if(document.getElementById(k)) document.getElementById(k).value = r[k]; });
+        if(!r) return;
+
+        // Limpieza de formulario
+        document.querySelectorAll('#main-form input').forEach(i => i.value = "");
+
+        // Mapeo genérico
+        Object.keys(r).forEach(k => {
+            const input = document.getElementById(k);
+            if(input) input.value = r[k];
+        });
+
+        // REGLAS DE NORMALIZACIÓN PARA CARGA (Atiende variaciones de base de datos)
+        const valorMpio = r.cve_mpio || r.clave_municipio || r.clave_mpio || r.cve_municipio || "";
+        document.getElementById('cve_mpio').value = valorMpio;
+
+        const valorTel = r.telefono || r.teléfono || r.tel || "";
+        document.getElementById('telefono').value = valorTel;
+
+        // Carga de imagen
+        if(r.ine_img) {
+            document.getElementById('box-preview').innerHTML = `<img src="${r.ine_img}" style="width:100%">`;
+            document.getElementById('ine_img').value = r.ine_img;
+        } else {
+            document.getElementById('box-preview').innerHTML = `<i class="fas fa-image" style="color:#cbd5e1; font-size: 20px;"></i>`;
+        }
+
         document.getElementById('edit-id').value = id;
         document.getElementById('btn-save').style.display = 'none'; 
         document.getElementById('btn-upd').style.display = 'inline-block';
@@ -277,29 +262,44 @@
 
     window.actualizar = async () => {
         const id = document.getElementById('edit-id').value;
-        const d = {}; document.querySelectorAll('#main-form input, #main-form select').forEach(i => { if(i.id) d[i.id] = i.value; });
-        await updateDoc(doc(db, "apoyos", id), d); location.reload();
+        const data = obtenerDatosForm();
+        await updateDoc(doc(db, "apoyos", id), data);
+        alert("Actualizado correctamente");
+        location.reload();
     };
 
     window.eliminar = async (id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, "apoyos", id)); };
 
-    // --- IMPORTAR / EXPORTAR ---
+    // IMPORTACIÓN ROBUSTA (Normaliza acentos y espacios del Excel)
     window.importarSincronizado = async (e) => {
         const f = e.target.files[0];
         const reader = new FileReader();
         reader.onload = async (ev) => {
             const data = new Uint8Array(ev.target.result);
-            const wb = XLSX.read(data, { type: 'array' });
+            const wb = XLSX.read(data, { type: 'array', cellDates: true });
             const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
             const batch = writeBatch(db);
+            
             json.forEach(row => {
-                const cod = String(row["CÓDIGO"] || row["codigo"] || "");
-                if(cod) {
-                    const ref = doc(apoyosRef);
-                    batch.set(ref, { codigo: cod, nombre: row["NOMBRE"] || "", estatus: "Pendiente" });
-                }
+                const nuevoDoc = doc(apoyosRef);
+                const dataRow = {};
+                Object.keys(row).forEach(key => {
+                    // Normalización extrema: quita acentos, espacios y pone minúsculas
+                    let idLimpio = key.toLowerCase().trim()
+                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
+                        .replace(/ /g, "_");
+                    
+                    // Asegurar que variaciones de nombres apunten al ID correcto del HTML
+                    if(idLimpio.includes("clave_mpio") || idLimpio.includes("cve_mpio") || idLimpio.includes("clave_municipio")) idLimpio = "cve_mpio";
+                    if(idLimpio === "telefono" || idLimpio === "tel") idLimpio = "telefono";
+
+                    let valor = row[key];
+                    if(valor instanceof Date) valor = valor.toISOString().split('T')[0];
+                    dataRow[idLimpio] = valor;
+                });
+                if(dataRow.codigo) batch.set(nuevoDoc, dataRow);
             });
-            await batch.commit(); alert("Importado."); location.reload();
+            await batch.commit(); alert("Importación terminada con éxito."); location.reload();
         };
         reader.readAsArrayBuffer(f);
     };
@@ -308,7 +308,24 @@
         const ws = XLSX.utils.json_to_sheet(DATA_FILTRADA);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Datos");
-        XLSX.writeFile(wb, "Trabajo_Social_2026.xlsx");
+        XLSX.writeFile(wb, "Poblacion_Vulnerable_2026.xlsx");
+    };
+
+    window.abrirVisor = (src, n) => {
+        document.getElementById('modal-visor').style.display='flex'; 
+        document.getElementById('img-grande').src = src; 
+        document.getElementById('visor-titulo').innerText = n;
+        document.getElementById('link-descarga').href = src;
+    };
+    window.cerrarVisor = () => document.getElementById('modal-visor').style.display='none';
+    
+    window.vaciarBaseDeDatos = async () => {
+        if(!confirm("¿BORRAR TODO? Esta acción es definitiva.")) return;
+        if(prompt("Escribe ELIMINAR") !== "ELIMINAR") return;
+        const snap = await getDocs(apoyosRef);
+        const batch = writeBatch(db);
+        snap.forEach(d => batch.delete(d.ref));
+        await batch.commit(); location.reload();
     };
 </script>
 </body>
