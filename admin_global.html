@@ -18,6 +18,9 @@
         .nav-menu { flex-grow: 1; padding: 15px 0; overflow-y: auto; }
         .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 12px; color: #94a3b8; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; font-size: 13px; }
         .nav-item:hover, .nav-item.active { background: #1e293b; color: white; border-left-color: var(--primary); }
+        .nav-exit { padding: 15px 25px; display: flex; align-items: center; gap: 12px; color: #f87171; cursor: pointer; border-top: 1px solid #1e293b; font-size: 13px; transition: 0.2s; font-weight: bold; }
+        .nav-exit:hover { background: #450a0a; color: #fca5a5; }
+
         .main-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
         .top-bar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
         .view-container { padding: 25px; display: none; }
@@ -50,6 +53,9 @@
             <div id="nav-medica" class="nav-item" onclick="showView('medica', this)"><i class="fas fa-notes-medical"></i> Área Médica</div>
             <div id="nav-psicologia" class="nav-item" onclick="showView('psicologia', this)"><i class="fas fa-brain"></i> Psicología</div>
         </nav>
+        <div class="nav-exit" onclick="cerrarSesion()">
+            <i class="fas fa-sign-out-alt"></i> CERRAR SESIÓN
+        </div>
     </div>
 
     <div class="main-content">
@@ -84,7 +90,7 @@
         </div>
 
         <div id="view-psicologia" class="view-container">
-            <div class="access-card" style="background: var(--psico-color);"><div><b>Psicología</b></div><a href="psicologia.html" class="btn-open">Módulo</a></div>
+            <div class="access-card" style="background: var(--psico-color);"><div><b>Psicología</b></div><a href="psicologia.html"  class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
             <div class="stats-grid"><div class="stat-box"><small>Pacientes</small><div id="p-total">0</div></div><div class="stat-box"><small>Sesiones</small><div id="p-ses">0</div></div></div>
             <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;"><div class="panel"><b>Motivos</b><div id="p-list-motivos"></div></div><div class="panel"><b>Zonas</b><div id="p-list-seguimiento"></div></div></div>
@@ -102,20 +108,22 @@
     const sesion = sessionStorage.getItem('sesion_activa');
     if (!sesion) window.location.href = "login.html";
 
-    // --- MOTOR DE FILTRADO MAESTRO ---
+    window.cerrarSesion = () => {
+        if(confirm("¿Deseas cerrar la sesión actual?")) {
+            sessionStorage.clear();
+            window.location.href = "login.html";
+        }
+    };
+
     const cumpleFiltros = (d, s, m) => {
         const term = s.toLowerCase().trim();
-        // Identidad (Nombre, Apellidos, Paciente, Códigos, Expediente)
         const nom = `${d.nombre||''} ${d.apellido_paterno||''} ${d.paciente||''} ${d.denunciado||''}`.toLowerCase();
         const cod = `${d.codigo||''} ${d.folio_expediente||''} ${d.no||''} ${d.expediente||''}`.toLowerCase();
         const matchBusqueda = nom.includes(term) || cod.includes(term);
-
         if (m === "all") return matchBusqueda;
-
-        // Búsqueda de Fecha en cualquier campo posible
         const fRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_atencion || "";
         if (fRaw && fRaw.includes("-")) {
-            const mesRegistro = fRaw.split("-")[1]; // Extrae el MM de YYYY-MM-DD
+            const mesRegistro = fRaw.split("-")[1];
             return matchBusqueda && (mesRegistro === m);
         }
         return false;
@@ -126,7 +134,6 @@
         if(!act) return;
         const s = act.querySelector('.global-search')?.value || "";
         const m = act.querySelector('.month-filter')?.value || "all";
-        
         window.procVul(s,m); window.procSoc(s,m); window.procPro(s,m); 
         window.procMed(s,m); window.procPsi(s,m);
     };
@@ -144,14 +151,12 @@
 
     let DB_V = [], DB_S = [], DB_P = [], DB_M = [], DB_PS = [];
 
-    // --- SNAPSHOTS FIREBASE ---
     onSnapshot(collection(db, "apoyos"), s => { DB_V = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "trabajo_social"), s => { DB_S = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "procuraduria"), s => { DB_P = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "area_medica"), s => { DB_M = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "psicologia"), s => { DB_PS = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
 
-    // --- PROCESADORES (TODOS CORREGIDOS PARA FILTRAR POR MES) ---
     window.procVul = (s, m) => {
         let ent = 0, tal = {}, apo = {}, geo = {};
         let fil = DB_V.filter(d => cumpleFiltros(d,s,m));
@@ -177,14 +182,20 @@
         }
     };
 
+    // --- MODIFICADO: Solo Trabajo Social muestra Nombre y Asunto en Negrita ---
     window.procSoc = (s, m) => {
         let fin = 0, prg = {}, rec = [];
         let fil = DB_S.filter(d => cumpleFiltros(d,s,m));
         fil.forEach(d => {
             if(['entregado','realizado'].includes(d.estatus?.toLowerCase())) fin++;
             const p = (d.programa||"OTROS").toUpperCase();
-            if(!prg[p]) prg[p]=[]; prg[p].push({n: (d.nombre||'S/N').toUpperCase(), x: d.folio_expediente||'S/F'});
-            rec.push({n: (d.nombre||'S/N').toUpperCase(), x: p});
+            const n = (d.nombre||'S/N').toUpperCase();
+            const asu = (d.asunto||"S/A").toUpperCase(); // Captura el asunto
+
+            if(!prg[p]) prg[p]=[]; 
+            // Se concatena el asunto en negrita al lado del nombre
+            prg[p].push({n: `${n} <b style="color:#1e293b; margin-left:5px;">${asu}</b>`, x: d.folio_expediente||'S/F'});
+            rec.push({n: n, x: p});
         });
         if(document.getElementById('s-total')){
             document.getElementById('s-total').innerText = fil.length;
@@ -247,7 +258,6 @@
         }
     };
 
-    // --- MANEJO DE VISTAS ---
     window.showView = (v, e) => {
         document.querySelectorAll('.view-container').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
