@@ -106,28 +106,25 @@
     const db = getFirestore(app);
 
     const sesion = sessionStorage.getItem('sesion_activa');
-    if (!sesion) window.location.href = "index.html";
+    if (!sesion) window.location.href = "login.html";
 
     window.cerrarSesion = () => {
         if(confirm("¿Deseas cerrar la sesión actual?")) {
             sessionStorage.clear();
-            window.location.href = "index.html";
+            window.location.href = "login.html";
         }
     };
 
-    // --- ACTUALIZADO: AHORA FILTRA TAMBIÉN POR ASUNTO ---
     const cumpleFiltros = (d, s, m) => {
         const term = s.toLowerCase().trim();
-        // Identidad completa + Campo ASUNTO
         const nom = `${d.nombre||''} ${d.apellido_paterno||''} ${d.paciente||''} ${d.denunciado||''}`.toLowerCase();
         const cod = `${d.codigo||''} ${d.folio_expediente||''} ${d.no||''} ${d.expediente||''}`.toLowerCase();
-        const asu = `${d.asunto||''} ${d.asuntos||''} ${d.tema||''}`.toLowerCase(); // Incluye variaciones de nombre del campo asunto
+        const asu = `${d.asunto||''} ${d.asuntos||''} ${d.tema||''}`.toLowerCase();
         
         const matchBusqueda = nom.includes(term) || cod.includes(term) || asu.includes(term);
-
         if (m === "all") return matchBusqueda;
 
-        const fRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_atencion || "";
+        const fRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_atencion || d.fecha_ingreso || "";
         if (fRaw && fRaw.includes("-")) {
             const mesRegistro = fRaw.split("-")[1];
             return matchBusqueda && (mesRegistro === m);
@@ -163,15 +160,28 @@
     onSnapshot(collection(db, "area_medica"), s => { DB_M = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "psicologia"), s => { DB_PS = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
 
+    // INTEGRACIÓN DE CORTE MENSUAL ESPECÍFICO PARA VULNERABLE
     window.procVul = (s, m) => {
         let ent = 0, tal = {}, apo = {}, geo = {};
-        let fil = DB_V.filter(d => cumpleFiltros(d,s,m));
+        let fil = DB_V.filter(d => {
+            const term = s.toLowerCase().trim();
+            const searchableText = `${d.nombre||''} ${d.apellido_paterno||''} ${d.apellido_materno||''} ${d.curp||''} ${d.codigo||''} ${d.col_loc||''}`.toLowerCase();
+            const matchBusqueda = searchableText.includes(term);
+            if (m === "all") return matchBusqueda;
+            const fRaw = d.fecha_ingreso || d.fecha_apoyo || d.fecha || "";
+            if (fRaw && fRaw.includes("-")) {
+                const mesRegistro = fRaw.split("-")[1];
+                return matchBusqueda && (mesRegistro === m);
+            }
+            return false;
+        });
+
         fil.forEach(d => {
             if(d.estatus?.toLowerCase() === 'entregado') ent++;
             const n = `${d.nombre||''} ${d.apellido_paterno||''}`.toUpperCase();
             const l = (d.col_loc||"SIN LOCALIDAD").toUpperCase();
             const c = d.codigo||'S/C';
-            if(c.startsWith('CARP')||c.startsWith('PANAD')||c.startsWith('COC')){
+            if(c.startsWith('CARP')||c.startsWith('PANAD')||c.startsWith('COC')||c.startsWith('COST')){
                 const t=c.substring(0,4); if(!tal[t]) tal[t]=[]; tal[t].push({n,x:c});
             } else {
                 const a=(d.tipo_apoyo||"OTROS").toUpperCase(); if(!apo[a]) apo[a]=[]; apo[a].push({n,x:c});
@@ -196,7 +206,6 @@
             const p = (d.programa||"OTROS").toUpperCase();
             const n = (d.nombre||'S/N').toUpperCase();
             const asu = (d.asunto||"S/A").toUpperCase();
-
             if(!prg[p]) prg[p]=[]; 
             prg[p].push({n: `${n} <b style="color:#1e293b; margin-left:5px;">${asu}</b>`, x: d.folio_expediente||'S/F'});
             rec.push({n: n, x: p});
