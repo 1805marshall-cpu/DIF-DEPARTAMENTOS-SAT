@@ -13,22 +13,34 @@
             --social-color: #af1e92;
         }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-        .sidebar-header { padding: 25px; text-align: center; border-bottom: 1px solid #1e293b; }
-        .nav-menu { flex-grow: 1; padding: 15px 0; overflow-y: auto; }
-        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 12px; color: #94a3b8; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; font-size: 13px; }
+        
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
+        .sidebar.collapsed { width: 70px; }
+        .sidebar-header { padding: 25px; text-align: center; border-bottom: 1px solid #1e293b; white-space: nowrap; }
+        .sidebar.collapsed .sidebar-header h3, .sidebar.collapsed .sidebar-header small { display: none; }
+
+        .nav-menu { flex-grow: 1; padding: 15px 0; overflow-y: auto; overflow-x: hidden; }
+        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 12px; color: #94a3b8; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; font-size: 13px; white-space: nowrap; }
         .nav-item:hover, .nav-item.active { background: #1e293b; color: white; border-left-color: var(--primary); }
-        .nav-exit { padding: 15px 25px; display: flex; align-items: center; gap: 12px; color: #f87171; cursor: pointer; border-top: 1px solid #1e293b; font-size: 13px; transition: 0.2s; font-weight: bold; }
+        .sidebar.collapsed .nav-item { padding: 12px 0; justify-content: center; }
+        .sidebar.collapsed .nav-item span { display: none; }
+        .sidebar.collapsed .nav-item i { margin: 0; font-size: 18px; }
+
+        .nav-exit { padding: 15px 25px; display: flex; align-items: center; gap: 12px; color: #f87171; cursor: pointer; border-top: 1px solid #1e293b; font-size: 13px; transition: 0.2s; font-weight: bold; white-space: nowrap; }
         .nav-exit:hover { background: #450a0a; color: #fca5a5; }
+        .sidebar.collapsed .nav-exit span { display: none; }
 
         .main-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
         .top-bar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        #btn-toggle { cursor: pointer; font-size: 18px; color: var(--sidebar-bg); }
+
         .view-container { padding: 25px; display: none; }
         .view-container.active { display: block; animation: fadeIn 0.3s ease; }
         .filter-bar { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; gap: 15px; border: 1px solid #e2e8f0; align-items: flex-end; }
         .filter-group { display: flex; flex-direction: column; flex: 1; }
         .filter-group label { font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 6px; }
         .filter-group input, .filter-group select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; }
+        
         .access-card { padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white; }
         .btn-open { background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; border: 1px solid white; }
         
@@ -42,8 +54,8 @@
         .group-container { background: #f8fafc; border-radius: 8px; margin-bottom: 12px; padding: 10px; border-left: 4px solid var(--primary); }
         .group-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 10px; margin-bottom: 6px; }
         .member-line { font-size: 10px; padding: 6px 8px; background: white; margin-bottom: 3px; border-radius: 4px; display: flex; justify-content: space-between; border: 1px solid #f1f5f9; align-items: center; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         table { width: 100%; border-collapse: collapse; font-size: 11px; }
         table td { padding: 5px 0; border-bottom: 1px solid #f1f5f9; }
     </style>
@@ -53,17 +65,20 @@
     <div class="sidebar">
         <div class="sidebar-header"><h3>DIF GLOBAL</h3><small id="role-tag" style="color:var(--warning); font-weight: bold;"></small></div>
         <nav class="nav-menu">
-            <div id="nav-vulnerable" class="nav-item" onclick="showView('vulnerable', this)"><i class="fas fa-hand-holding-heart"></i> Pob. Vulnerable</div>
-            <div id="nav-social" class="nav-item" onclick="showView('social', this)"><i class="fa-solid fa-users"></i> Trabajo Social</div>
-            <div id="nav-procuraduria" class="nav-item" onclick="showView('procuraduria', this)"><i class="fas fa-balance-scale"></i> Procuraduría</div>
-            <div id="nav-medica" class="nav-item" onclick="showView('medica', this)"><i class="fas fa-notes-medical"></i> Área Médica</div>
-            <div id="nav-psicologia" class="nav-item" onclick="showView('psicologia', this)"><i class="fas fa-brain"></i> Psicología</div>
+            <div id="nav-vulnerable" class="nav-item" onclick="showView('vulnerable', this)"><i class="fas fa-hand-holding-heart"></i> <span>Pob. Vulnerable</span></div>
+            <div id="nav-social" class="nav-item" onclick="showView('social', this)"><i class="fa-solid fa-users"></i> <span>Trabajo Social</span></div>
+            <div id="nav-procuraduria" class="nav-item" onclick="showView('procuraduria', this)"><i class="fas fa-balance-scale"></i> <span>Procuraduría</span></div>
+            <div id="nav-medica" class="nav-item" onclick="showView('medica', this)"><i class="fas fa-notes-medical"></i> <span>Área Médica</span></div>
+            <div id="nav-psicologia" class="nav-item" onclick="showView('psicologia', this)"><i class="fas fa-brain"></i> <span>Psicología</span></div>
         </nav>
-        <div class="nav-exit" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> CERRAR SESIÓN</div>
+        <div class="nav-exit" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> <span>CERRAR SESIÓN</span></div>
     </div>
 
     <div class="main-content">
-        <div class="top-bar"><h2 id="view-title">Panel</h2><div id="reloj"></div></div>
+        <div class="top-bar">
+            <div style="display:flex; align-items:center; gap:20px;"><i class="fas fa-bars" id="btn-toggle"></i><h2 id="view-title" style="margin:0;">Panel</h2></div>
+            <div id="reloj"></div>
+        </div>
 
         <div id="view-vulnerable" class="view-container">
             <div class="access-card" style="background: var(--vulnerable-color);"><div><b>Población Vulnerable</b></div><a href="vulnerable.html" class="btn-open">Módulo</a></div>
@@ -74,13 +89,13 @@
                 <div class="stat-box"><small>Pendientes</small><div id="v-pen" style="color:var(--danger)">0</div></div>
             </div>
             <div class="stats-grid">
-                <div class="stat-box" style="border-top: 3px solid #854d0e;"><small>Grupos Carpintería</small><div id="v-g-carp">0</div></div>
-                <div class="stat-box" style="border-top: 3px solid #9a3412;"><small>Grupos Panadería</small><div id="v-g-pana">0</div></div>
-                <div class="stat-box" style="border-top: 3px solid #164e63;"><small>Grupos Cocina</small><div id="v-g-coci">0</div></div>
-                <div class="stat-box" style="border-top: 3px solid #5b21b6;"><small>Otros Grupos</small><div id="v-g-otros">0</div></div>
+                <div class="stat-box" style="border-top:3px solid #854d0e;"><small>Carpintería</small><div id="v-g-carp">0</div><div style="font-size:15px; margin-top:5px; display:flex; justify-content:space-around;"><span style="color:var(--success)">E: <b id="v-g-carp-e">0</b></span><span style="color:var(--danger)">P: <b id="v-g-carp-p">0</b></span></div></div>
+                <div class="stat-box" style="border-top:3px solid #9a3412;"><small>Panadería</small><div id="v-g-pana">0</div><div style="font-size:15px; margin-top:5px; display:flex; justify-content:space-around;"><span style="color:var(--success)">E: <b id="v-g-pana-e">0</b></span><span style="color:var(--danger)">P: <b id="v-g-pana-p">0</b></span></div></div>
+                <div class="stat-box" style="border-top:3px solid #164e63;"><small>Cocina</small><div id="v-g-coci">0</div><div style="font-size:15px; margin-top:5px; display:flex; justify-content:space-around;"><span style="color:var(--success)">E: <b id="v-g-coci-e">0</b></span><span style="color:var(--danger)">P: <b id="v-g-coci-p">0</b></span></div></div>
+                <div class="stat-box" style="border-top:3px solid #5b21b6;"><small>Otros Grupos</small><div id="v-g-otros">0</div><div style="font-size:15px; margin-top:5px; display:flex; justify-content:space-around;"><span style="color:var(--success)">E: <b id="v-g-otr-e">0</b></span><span style="color:var(--danger)">P: <b id="v-g-otr-p">0</b></span></div></div>
             </div>
             <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
-                <div class="panel"><b>TALLERES (POR CÓDIGO)</b><div id="v-list-talleres"></div></div>
+                <div class="panel"><b>TALLERES / Grupos de Trabajo</b><div id="v-list-talleres"></div></div>
                 <div class="panel"><b>Apoyos</b><div id="v-list-apoyos"></div></div>
                 <div class="panel"><b>Zonas</b><div id="v-list-geo"></div></div>
             </div>
@@ -89,15 +104,8 @@
         <div id="view-social" class="view-container">
             <div class="access-card" style="background: var(--social-color);"><div><b>Trabajo Social</b></div><a href="social.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
-            
-            <div class="stats-grid">
-                <div class="stat-box"><small>Total Casos</small><div id="s-total">0</div></div>
-                <div class="stat-box"><small>Finalizados</small><div id="s-ent" style="color:var(--success)">0</div></div>
-            </div>
-
-            <div id="s-dynamic-programs" class="stats-grid">
-                </div>
-
+            <div class="stats-grid"><div class="stat-box"><small>Total Casos</small><div id="s-total">0</div></div><div class="stat-box"><small>Finalizados</small><div id="s-ent" style="color:var(--success)">0</div></div></div>
+            <div id="s-dynamic-programs" class="stats-grid"></div>
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
                 <div class="panel"><b>RESUMEN DE ASUNTOS</b><div id="s-list-asuntos-count"></div></div>
                 <div class="panel"><b>LISTADO POR PROGRAMA</b><div id="s-list-programas"></div></div>
@@ -120,7 +128,7 @@
         </div>
 
         <div id="view-psicologia" class="view-container">
-            <div class="access-card" style="background: var(--psico-color);"><div><b>Psicología</b></div><a href="psicologia.html"  class="btn-open">Módulo</a></div>
+            <div class="access-card" style="background: var(--psico-color);"><div><b>Psicología</b></div><a href="psicologia.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
             <div class="stats-grid"><div class="stat-box"><small>Pacientes</small><div id="p-total">0</div></div><div class="stat-box"><small>Sesiones</small><div id="p-ses">0</div></div></div>
             <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;"><div class="panel"><b>Motivos</b><div id="p-list-motivos"></div></div><div class="panel"><b>Zonas</b><div id="p-list-seguimiento"></div></div></div>
@@ -139,6 +147,7 @@
     if (!sesion) window.location.href = "index.html";
 
     window.cerrarSesion = () => { if(confirm("¿Cerrar sesión?")) { sessionStorage.clear(); window.location.href = "index.html"; } };
+    document.getElementById('btn-toggle').addEventListener('click', () => { document.querySelector('.sidebar').classList.toggle('collapsed'); });
 
     const cumpleFiltros = (d, s, m) => {
         const term = s.toLowerCase().trim();
@@ -151,10 +160,25 @@
 
     const renderM = (id, gs, c) => {
         let h = "";
+        const esMóduloEstatus = (id.startsWith('v-') || id.startsWith('s-'));
+
         Object.keys(gs).sort().forEach(k => {
             h += `<div class="group-container" style="border-left-color:${c}">
                 <div class="group-header"><span>${k}</span><b>${gs[k].length}</b></div>
-                ${gs[k].map(i => `<div class="member-line"><div><span>${i.n}</span><small style="color:#64748b; margin-left:8px; font-style:italic;">(${i.l})</small></div><span style="font-weight:bold; color:${c}">${i.x}</span></div>`).join('')}
+                ${gs[k].map(i => {
+                    let badge = "";
+                    if(esMóduloEstatus && i.s) {
+                        const isE = i.s.toLowerCase() === 'entregado' || i.s.toLowerCase() === 'realizado';
+                        badge = `<span style="margin-left:6px; padding:2px 5px; border-radius:4px; font-size:7px; text-transform:uppercase; background:${isE ? 'var(--success)':'var(--danger)'}; color:white; font-weight:bold;">${isE ? 'ENTREGADO':'PENDIENTE'}</span>`;
+                    }
+                    return `<div class="member-line">
+                        <div style="display:flex; align-items:center;"><span>${i.n}</span>${badge}</div>
+                        <div style="text-align:right;">
+                            <small style="color:#64748b; display:block; font-style:italic; font-size:8px;">(${i.l})</small>
+                            <span style="font-weight:bold; color:${c}">${i.x}</span>
+                        </div>
+                    </div>`;
+                }).join('')}
             </div>`;
         });
         const el = document.getElementById(id); if(el) el.innerHTML = h || "Sin registros.";
@@ -179,62 +203,54 @@
     window.procVul = (s, m) => {
         let ent = 0, tal = {}, apo = {}, geo = {};
         let sCarp = new Set(), sPana = new Set(), sCoci = new Set(), sOtr = new Set();
+        let grpStatus = {};
         let fil = DB_V.filter(d => cumpleFiltros(d,s,m));
         fil.forEach(d => {
-            if(d.estatus?.toLowerCase() === 'entregado') ent++;
+            const est = (d.estatus||"").toLowerCase();
+            if(est === 'entregado') ent++;
             const n = `${d.nombre||''} ${d.apellido_paterno||''}`.toUpperCase(), c = (d.codigo||'S/C').toUpperCase(), t = (d.tipo_apoyo||"").toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
             if (c.startsWith('CARP') || c.startsWith('PANAD') || c.startsWith('COC') || c.startsWith('COST') || t.includes("TALLER")) {
-                if (!tal[c]) tal[c] = []; tal[c].push({ n, x: c, l });
+                if (!tal[c]) tal[c] = []; tal[c].push({ n, x: c, l, s: est });
+                if (!grpStatus[c]) grpStatus[c] = { pendientes: 0 };
+                if (est !== 'entregado') grpStatus[c].pendientes++;
                 if(c.startsWith('CARP')) sCarp.add(c); else if(c.startsWith('PANAD')) sPana.add(c); else if(c.startsWith('COC')) sCoci.add(c); else sOtr.add(c);
-            } else {
-                const a = t || "OTROS"; if (!apo[a]) apo[a] = []; apo[a].push({ n, x: c, l });
-            }
-            if(!geo[l]) geo[l]=[]; geo[l].push({n, x: c, l});
+            } else { if (!apo[t||"OTROS"]) apo[t||"OTROS"] = []; apo[t||"OTROS"].push({ n, x: c, l, s: est }); }
+            if(!geo[l]) geo[l]=[]; geo[l].push({n, x: c, l, s: est });
         });
+        const countEP = (set) => {
+            let e = 0, p = 0;
+            set.forEach(id => { if (grpStatus[id] && grpStatus[id].pendientes > 0) p++; else e++; });
+            return { e, p };
+        };
         if(document.getElementById('v-total')){
-            document.getElementById('v-total').innerText = fil.length;
-            document.getElementById('v-ent').innerText = ent; document.getElementById('v-pen').innerText = fil.length - ent;
-            document.getElementById('v-g-carp').innerText = sCarp.size; document.getElementById('v-g-pana').innerText = sPana.size;
-            document.getElementById('v-g-coci').innerText = sCoci.size; document.getElementById('v-g-otros').innerText = sOtr.size;
+            document.getElementById('v-total').innerText = fil.length; document.getElementById('v-ent').innerText = ent; document.getElementById('v-pen').innerText = fil.length - ent;
+            const cC = countEP(sCarp); document.getElementById('v-g-carp').innerText = sCarp.size; document.getElementById('v-g-carp-e').innerText = cC.e; document.getElementById('v-g-carp-p').innerText = cC.p;
+            const cP = countEP(sPana); document.getElementById('v-g-pana').innerText = sPana.size; document.getElementById('v-g-pana-e').innerText = cP.e; document.getElementById('v-g-pana-p').innerText = cP.p;
+            const cCo = countEP(sCoci); document.getElementById('v-g-coci').innerText = sCoci.size; document.getElementById('v-g-coci-e').innerText = cCo.e; document.getElementById('v-g-coci-p').innerText = cCo.p;
+            const cO = countEP(sOtr); document.getElementById('v-g-otros').innerText = sOtr.size; document.getElementById('v-g-otr-e').innerText = cO.e; document.getElementById('v-g-otr-p').innerText = cO.p;
             renderM('v-list-talleres', tal, 'var(--vulnerable-color)'); renderM('v-list-apoyos', apo, 'var(--primary)'); renderM('v-list-geo', geo, '#64748b');
         }
     };
 
     window.procSoc = (s, m) => {
         let fin = 0, prg = {}, rec = [], asuCounts = {}, progCounts = {};
-        
         let fil = DB_S.filter(d => cumpleFiltros(d,s,m));
         fil.forEach(d => {
-            if(['entregado','realizado'].includes(d.estatus?.toLowerCase())) fin++;
-            const p = (d.programa||"S/P").toUpperCase();
-            const asu = (d.asunto||"S/A").toUpperCase();
-            const n = (d.nombre||'S/N').toUpperCase();
-
-            // Lógica de conteo para tarjetas dinámicas de programas
-            progCounts[p] = (progCounts[p] || 0) + 1;
-
-            asuCounts[asu] = (asuCounts[asu] || 0) + 1;
-            if(!prg[p]) prg[p]=[]; prg[p].push({n, x: d.folio_expediente||'S/F', l: asu});
-            rec.push({n, x: p, l: asu});
+            const est = (d.estatus||"").toLowerCase();
+            if(['entregado','realizado'].includes(est)) fin++;
+            const p = (d.programa||"S/P").toUpperCase(), asu = (d.asunto||"S/A").toUpperCase(), n = (d.nombre||'S/N').toUpperCase();
+            progCounts[p] = (progCounts[p] || 0) + 1; asuCounts[asu] = (asuCounts[asu] || 0) + 1;
+            if(!prg[p]) prg[p]=[]; prg[p].push({n, x: d.folio_expediente||'S/F', l: asu, s: est});
+            rec.push({n, x: p, l: asu, s: est});
         });
-
         if(document.getElementById('s-total')){
-            document.getElementById('s-total').innerText = fil.length;
-            document.getElementById('s-ent').innerText = fin;
-
-            // GENERACIÓN DE TARJETAS DINÁMICAS
+            document.getElementById('s-total').innerText = fil.length; document.getElementById('s-ent').innerText = fin;
             const container = document.getElementById('s-dynamic-programs');
-            container.innerHTML = ""; // Limpiar
-            Object.keys(progCounts).sort().forEach(progName => {
-                const card = document.createElement('div');
-                card.className = "stat-box";
-                card.style.borderTop = "3px solid var(--social-color)";
-                card.innerHTML = `<small>${progName}</small><div>${progCounts[progName]}</div>`;
-                container.appendChild(card);
-            });
-
-            renderM('s-list-programas', prg, 'var(--social-color)');
-            renderM('s-list-recientes', {"Recientes": rec.reverse().slice(0,10)}, "#64748b");
+            if(container) { container.innerHTML = ""; Object.keys(progCounts).sort().forEach(pr => {
+                const card = document.createElement('div'); card.className="stat-box"; card.style.borderTop="3px solid var(--social-color)";
+                card.innerHTML = `<small>${pr}</small><div>${progCounts[pr]}</div>`; container.appendChild(card);
+            }); }
+            renderM('s-list-programas', prg, 'var(--social-color)'); renderM('s-list-recientes', {"Recientes": rec.reverse().slice(0,10)}, "#64748b");
             let t = `<table>`; Object.keys(asuCounts).sort().forEach(k => { t += `<tr><td>${k}</td><td align="right"><b>${asuCounts[k]}</b></td></tr>`; });
             document.getElementById('s-list-asuntos-count').innerHTML = t + "</table>";
         }
@@ -246,8 +262,7 @@
         fil.forEach(d => {
             if(d.horarios_mixtos === 'Si') mix++;
             const asu = (d.asuntos||"GENERAL").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
-            cA[asu] = (cA[asu]||0)+1;
-            if(!lD[asu]) lD[asu]=[]; lD[asu].push({n, x: d.no||'S/E', l});
+            cA[asu] = (cA[asu]||0)+1; if(!lD[asu]) lD[asu]=[]; lD[asu].push({n, x: d.no||'S/E', l});
         });
         if(document.getElementById('pr-total')){
             document.getElementById('pr-total').innerText = fil.length; document.getElementById('pr-mixtos').innerText = mix;
@@ -291,16 +306,26 @@
         document.querySelectorAll('.view-container').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         const t = document.getElementById('view-' + v);
-        if(t) { t.classList.add('active'); e.classList.add('active'); document.getElementById('view-title').innerText = e.innerText; window.reprocesarTodo(); }
+        if(t) { t.classList.add('active'); e.classList.add('active'); document.getElementById('view-title').innerText = e.querySelector('span').innerText; window.reprocesarTodo(); }
     };
 
     document.addEventListener("DOMContentLoaded", () => {
         const fHTML = `<div class="filter-group"><label>🔍 Buscar...</label><input type="text" class="global-search" onkeyup="reprocesarTodo()"></div><div class="filter-group" style="flex:0.4;"><label>📅 Mes</label><select class="month-filter" onchange="reprocesarTodo()"><option value="all">Todo el Año</option><option value="01">Ene</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option></select></div>`;
         document.querySelectorAll('.filter-bar').forEach(b => b.innerHTML = fHTML);
         document.getElementById('role-tag').innerText = (sesion||"").toUpperCase();
-        if (sesion !== 'admin') {
-            ['vulnerable','social','procuraduria','medica','psicologia'].forEach(d => { if (d !== sesion) { const n = document.getElementById('nav-'+d); if(n) n.style.display='none'; } });
-            showView(sesion, document.getElementById('nav-'+sesion));
+
+        const admins = ['admin', 'lorena.gonzalez'];
+        const permisos = { 'vulnerable': ['vulnerable','ramon.guapillo','usuario.v2'], 'social': ['social','juanita.campechano','monse.plata'], 'procuraduria': ['procuraduria','edmundo.pechi','lic.perez'], 'medica': ['medica','doctor.simi','enfermeria.gral'], 'psicologia': ['psicologia','psico.ayuda','terapeuta1'] };
+
+        if (!admins.includes(sesion)) {
+            let vAsignada = "";
+            ['vulnerable','social','procuraduria','medica','psicologia'].forEach(dep => {
+                if (!permisos[dep].includes(sesion)) {
+                    const nav = document.getElementById('nav-'+dep); if(nav) nav.style.display = 'none';
+                } else { vAsignada = dep; }
+            });
+            if (vAsignada) showView(vAsignada, document.getElementById('nav-'+vAsignada));
+            else { alert("Sin permisos."); cerrarSesion(); }
         } else { showView('vulnerable', document.getElementById('nav-vulnerable')); }
     });
     setInterval(() => { document.getElementById('reloj').innerText = new Date().toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' }).toUpperCase(); }, 1000);
