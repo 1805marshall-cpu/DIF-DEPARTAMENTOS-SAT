@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DIF 2026 | Población Vulnerable</title>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
@@ -93,10 +92,7 @@
         <div class="btn-box">
             <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
             <button class="btn" id="btn-upd" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
-            <button class="btn" style="background:#1d6f42" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
-            <label class="btn" style="background:#6366f1; cursor:pointer;"><i class="fas fa-upload"></i> IMPORTAR EXCEL <input type="file" onchange="importarSincronizado(event)" hidden></label>
             <button class="btn" style="background:#94a3b8" onclick="location.reload()"><i class="fas fa-eraser"></i> LIMPIAR</button>
-            <button class="btn" style="background:var(--danger); margin-left: auto;" onclick="vaciarBaseDeDatos()"><i class="fas fa-trash-alt"></i> VACIAR BASE DE DATOS</button>
         </div>
     </div>
 
@@ -142,7 +138,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, orderBy, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
     const app = initializeApp(firebaseConfig);
@@ -225,35 +221,24 @@
         location.reload();
     };
 
-    // FUNCIÓN EDITAR CON SOPORTE MULTI-CAMPO (Corregido: Teléfono y Clave Mpio)
     window.editar = (id) => {
         const r = DATA_ACTUAL.find(x => x.id === id);
         if(!r) return;
-
-        // Limpieza de formulario
         document.querySelectorAll('#main-form input').forEach(i => i.value = "");
-
-        // Mapeo genérico
         Object.keys(r).forEach(k => {
             const input = document.getElementById(k);
             if(input) input.value = r[k];
         });
-
-        // REGLAS DE NORMALIZACIÓN PARA CARGA (Atiende variaciones de base de datos)
         const valorMpio = r.cve_mpio || r.clave_municipio || r.clave_mpio || r.cve_municipio || "";
         document.getElementById('cve_mpio').value = valorMpio;
-
         const valorTel = r.telefono || r.teléfono || r.tel || "";
         document.getElementById('telefono').value = valorTel;
-
-        // Carga de imagen
         if(r.ine_img) {
             document.getElementById('box-preview').innerHTML = `<img src="${r.ine_img}" style="width:100%">`;
             document.getElementById('ine_img').value = r.ine_img;
         } else {
             document.getElementById('box-preview').innerHTML = `<i class="fas fa-image" style="color:#cbd5e1; font-size: 20px;"></i>`;
         }
-
         document.getElementById('edit-id').value = id;
         document.getElementById('btn-save').style.display = 'none'; 
         document.getElementById('btn-upd').style.display = 'inline-block';
@@ -270,47 +255,6 @@
 
     window.eliminar = async (id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, "apoyos", id)); };
 
-    // IMPORTACIÓN ROBUSTA (Normaliza acentos y espacios del Excel)
-    window.importarSincronizado = async (e) => {
-        const f = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-            const data = new Uint8Array(ev.target.result);
-            const wb = XLSX.read(data, { type: 'array', cellDates: true });
-            const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            const batch = writeBatch(db);
-            
-            json.forEach(row => {
-                const nuevoDoc = doc(apoyosRef);
-                const dataRow = {};
-                Object.keys(row).forEach(key => {
-                    // Normalización extrema: quita acentos, espacios y pone minúsculas
-                    let idLimpio = key.toLowerCase().trim()
-                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
-                        .replace(/ /g, "_");
-                    
-                    // Asegurar que variaciones de nombres apunten al ID correcto del HTML
-                    if(idLimpio.includes("clave_mpio") || idLimpio.includes("cve_mpio") || idLimpio.includes("clave_municipio")) idLimpio = "cve_mpio";
-                    if(idLimpio === "telefono" || idLimpio === "tel") idLimpio = "telefono";
-
-                    let valor = row[key];
-                    if(valor instanceof Date) valor = valor.toISOString().split('T')[0];
-                    dataRow[idLimpio] = valor;
-                });
-                if(dataRow.codigo) batch.set(nuevoDoc, dataRow);
-            });
-            await batch.commit(); alert("Importación terminada con éxito."); location.reload();
-        };
-        reader.readAsArrayBuffer(f);
-    };
-
-    window.exportarExcel = () => {
-        const ws = XLSX.utils.json_to_sheet(DATA_FILTRADA);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Datos");
-        XLSX.writeFile(wb, "Poblacion_Vulnerable_2026.xlsx");
-    };
-
     window.abrirVisor = (src, n) => {
         document.getElementById('modal-visor').style.display='flex'; 
         document.getElementById('img-grande').src = src; 
@@ -318,15 +262,6 @@
         document.getElementById('link-descarga').href = src;
     };
     window.cerrarVisor = () => document.getElementById('modal-visor').style.display='none';
-    
-    window.vaciarBaseDeDatos = async () => {
-        if(!confirm("¿BORRAR TODO? Esta acción es definitiva.")) return;
-        if(prompt("Escribe ELIMINAR") !== "ELIMINAR") return;
-        const snap = await getDocs(apoyosRef);
-        const batch = writeBatch(db);
-        snap.forEach(d => batch.delete(d.ref));
-        await batch.commit(); location.reload();
-    };
 </script>
 </body>
 </html>
