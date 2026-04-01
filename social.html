@@ -9,7 +9,7 @@
     <style>
         :root { 
             --primary: #1e40af; --success: #059669; --warning: #f59e0b; 
-            --danger: #dc2626; --bg: #f8fafc; --social: #1e40af; --excel: #1d6f42;
+            --danger: #dc2626; --bg: #f8fafc; --social: #1e40af;
         }
         
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
@@ -19,7 +19,7 @@
         .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; margin-bottom: 20px; }
         h3 { margin: 0 0 15px 0; font-size: 11px; color: var(--social); text-transform: uppercase; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; letter-spacing: 1px; }
         
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
         .form-group { display: flex; flex-direction: column; }
         label { font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 3px; }
         input, select, textarea { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; transition: 0.2s; }
@@ -32,7 +32,7 @@
         .search-box { background: #f1f5f9; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 15px; display: flex; gap: 15px; align-items: flex-end; }
         
         .table-wrap { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1500px; }
+        table { width: 100%; border-collapse: collapse; min-width: 1700px; }
         th { background: #f8fafc; padding: 12px; text-align: left; font-size: 10px; color: #475569; border-bottom: 2px solid #e2e8f0; text-transform: uppercase; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
         tr:hover { background-color: #fcfcfc; }
@@ -41,9 +41,6 @@
         .bg-entregado { background: #dcfce7; color: #15803d; }
         .bg-pendiente { background: #fef3c7; color: #b45309; }
         .bg-realizado { background: #e0f2fe; color: #0369a1; }
-
-        .modal-foto { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
-        .modal-content { max-width: 85%; max-height: 85%; border: 4px solid white; border-radius: 10px; }
 
         .paginacion-bar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 20px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
         .btn-pag { padding: 6px 12px; border: 1px solid #cbd5e1; background: white; border-radius: 4px; cursor: pointer; font-size: 11px; }
@@ -64,13 +61,14 @@
     <div class="card no-print">
         <h3><i class="fas fa-folder-plus"></i> Registro de Casos y Apoyos</h3>
         <input type="hidden" id="edit-id">
+        
         <div class="form-grid">
-            <div class="form-group"><label>Folio</label><input type="text" id="numero_consecutivo" readonly style="background:#f1f5f9; font-weight:bold;"></div>
+            <div class="form-group"><label>No.</label><input type="text" id="numero_consecutivo" readonly style="background:#f1f5f9; font-weight:bold;"></div>
             <div class="form-group"><label>Fecha</label><input type="date" id="fecha_registro"></div>
             <div class="form-group" style="grid-column: span 2;"><label>Nombre del Beneficiario</label><input type="text" id="nombre"></div>
             <div class="form-group"><label>Teléfono</label><input type="tel" id="telefono"></div>
-            <div class="form-group"><label>Localidad</label><input type="text" id="col_loc"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Dirección Específica</label><input type="text" id="direccion"></div>
+            <div class="form-group"><label>Colonia/Localidad</label><input type="text" id="col_loc"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Dirección</label><input type="text" id="direccion"></div>
             <div class="form-group">
                 <label>Programa</label>
                 <select id="programa">
@@ -88,44 +86,49 @@
                 </select>
             </div>
             <div class="form-group"><label>Asunto</label><input type="text" id="asunto"></div>
-            <div class="form-group"><label>H. Mixto</label><select id="horarios_mixtos"><option value="NO">NO</option><option value="SI">SI</option></select></div>
-            <div class="form-group"><label>Folio Exp.</label><input type="text" id="folio_expediente"></div>
+            <div class="form-group"><label>H. Mixtos</label><select id="horarios_mixtos"><option value="NO">NO</option><option value="SI">SI</option></select></div>
+            <div class="form-group"><label>Folio Expediente</label><input type="text" id="folio_expediente"></div>
             <div class="form-group">
                 <label>Estatus</label>
                 <select id="estatus">
                     <option value="PENDIENTE">PENDIENTE</option>
                     <option value="ENTREGADO">ENTREGADO</option>
                     <option value="REALIZADO">REALIZADO</option>
+                    <option value="CANCELADO">CANCELADO</option>
+                    <option value="EN PROCESO">EN PROCESO</option>
+                    <option value="VALIDADO">VALIDADO</option>
                 </select>
             </div>
-            <div class="form-group"><label>Registró</label><input type="text" id="usuario"></div>
+            <div class="form-group">
+                <label>Usuario</label>
+                <select id="usuario">
+                    <option value="">-- SELECCIONAR --</option>
+                    <option value="JUANITA C. CAMPECHANO QUEZADA">JUANITA C. CAMPECHANO QUEZADA</option>
+                    <option value="MONSERRAT PLATA FLORES">MONSERRAT PLATA FLORES</option>
+                </select>
+            </div>
+            <div class="form-group" style="grid-column: span 2;"><label>Detalles</label><input type="text" id="detalles"></div>
             <div class="form-group" style="grid-column: span 2;"><label>Observaciones</label><input type="text" id="observaciones"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Adjuntos (INE/Receta)</label><input type="file" id="ine_file" accept="image/*" multiple></div>
         </div>
 
         <div class="btn-box">
             <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
             <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
-            <button class="btn" style="background:var(--excel)" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
-            <label class="btn" style="background:#6366f1; cursor:pointer;">
-                <i class="fas fa-upload"></i> IMPORTAR EXCEL
-                <input type="file" id="import-excel" accept=".xlsx, .xls" style="display:none" onchange="importarDesdeExcel(event)">
-            </label>
-            <button class="btn" style="background:var(--danger)" onclick="eliminarTodoBaseDatos()"><i class="fas fa-trash-alt"></i> BORRAR TODO</button>
             <button class="btn" style="background:#94a3b8" onclick="limpiarForm()"><i class="fas fa-eraser"></i> LIMPIAR</button>
         </div>
     </div>
 
     <div class="search-box no-print">
         <div class="form-group" style="flex:2;">
-            <label>🔍 Buscador de Beneficiarios</label>
-            <input type="text" id="buscador" placeholder="Buscar por nombre, localidad, programa..." onkeyup="filtrar()">
+            <label>🔍 Buscador Global</label>
+            <input type="text" id="buscador" placeholder="Buscar por nombre, localidad, asunto..." onkeyup="filtrar()">
         </div>
         <div class="form-group" style="flex:1;">
-            <label>Mostrar</label>
+            <label>Filas</label>
             <select id="rows-per-page" onchange="actualizarFilasPorPagina()">
                 <option value="10" selected>10 filas</option>
                 <option value="50">50 filas</option>
+                <option value="100">100 filas</option>
             </select>
         </div>
     </div>
@@ -143,16 +146,15 @@
         <table>
             <thead>
                 <tr>
-                    <th>Doc</th>
-                    <th>Folio</th>
+                    <th>No.</th>
                     <th>Fecha</th>
-                    <th>Beneficiario</th>
-                    <th>Localidad</th>
+                    <th>Nombre del Beneficiario</th>
+                    <th>Col_Loc</th>
                     <th>Programa</th>
                     <th>Asunto</th>
-                    <th>Exp.</th>
+                    <th>Folio_Exp</th>
                     <th>Estatus</th>
-                    <th>Registró</th>
+                    <th>Usuario</th>
                     <th class="no-print">Acciones</th>
                 </tr>
             </thead>
@@ -161,12 +163,9 @@
     </div>
 </div>
 
-<div id="modalFoto" class="modal-foto" onclick="cerrarModal()"><img id="imgGrande" class="modal-content"></div>
-
 <script type="module">
-    // MANTIENE TODA TU LÓGICA ORIGINAL DE FIREBASE
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E",
@@ -183,6 +182,13 @@
     let filasPorPagina = 10;
     let proximoNo = 1;
 
+    const listaCampos = [
+        'numero_consecutivo', 'fecha_registro', 'nombre', 'telefono', 
+        'col_loc', 'direccion', 'programa', 'asunto', 
+        'horarios_mixtos', 'folio_expediente', 'estatus', 
+        'detalles', 'usuario', 'observaciones'
+    ];
+
     onSnapshot(apoyosRef, (snapshot) => {
         todosLosDatos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const numeros = todosLosDatos.map(d => parseInt(d.numero_consecutivo) || 0);
@@ -194,7 +200,6 @@
     window.guardar = async () => {
         const data = obtenerValoresForm();
         if(!data.nombre) return alert("Nombre requerido");
-        data.imagenes = await procesarImagenes(document.getElementById('ine_file').files);
         await addDoc(apoyosRef, data);
         limpiarForm();
     };
@@ -202,18 +207,17 @@
     window.actualizar = async () => {
         const id = document.getElementById('edit-id').value;
         const data = obtenerValoresForm();
-        const files = document.getElementById('ine_file').files;
-        if(files.length > 0) data.imagenes = await procesarImagenes(files);
         await updateDoc(doc(db, "trabajo_social", id), data);
         limpiarForm();
-        alert("✅ Registro actualizado.");
+        alert("✅ Registro actualizado correctamente.");
     };
 
     window.filtrar = () => {
         const term = document.getElementById('buscador').value.toLowerCase();
+        // ORDEN ASCENDENTE (MENOR A MAYOR)
         datosFiltrados = todosLosDatos.filter(r => 
             Object.values(r).some(v => String(v).toLowerCase().includes(term))
-        ).sort((a,b) => a.numero_consecutivo - b.numero_consecutivo);
+        ).sort((a,b) => parseInt(a.numero_consecutivo) - parseInt(b.numero_consecutivo));
         renderTabla();
     };
 
@@ -222,23 +226,22 @@
         const segmento = datosFiltrados.slice(inicio, inicio + filasPorPagina);
         const tbody = document.getElementById('cuerpoTabla');
         
-        document.getElementById('info-total').innerText = `REGISTROS ENCONTRADOS: ${datosFiltrados.length}`;
+        document.getElementById('info-total').innerText = `TOTAL: ${datosFiltrados.length} REGISTROS`;
         
         tbody.innerHTML = segmento.map(reg => `
             <tr>
-                <td>${reg.imagenes?.length ? `<i class="fas fa-image" style="color:var(--social); cursor:pointer" onclick="verImagen('${reg.imagenes[0]}')"></i>` : '-'}</td>
                 <td><b>${reg.numero_consecutivo}</b></td>
-                <td>${reg.fecha_registro}</td>
+                <td>${reg.fecha_registro || ''}</td>
                 <td><b>${reg.nombre}</b></td>
-                <td>${reg.col_loc}</td>
-                <td><span style="font-size:10px; font-weight:bold; color:#64748b;">${reg.programa}</span></td>
+                <td>${reg.col_loc || ''}</td>
+                <td><span style="font-size:10px; font-weight:bold; color:#64748b;">${reg.programa || ''}</span></td>
                 <td>${reg.asunto || ''}</td>
                 <td>${reg.folio_expediente || ''}</td>
                 <td><span class="status-badge ${getEstatusClass(reg.estatus)}">${reg.estatus || 'PENDIENTE'}</span></td>
                 <td>${reg.usuario || ''}</td>
                 <td class="no-print">
-                    <button onclick="editarLocal('${reg.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
-                    <button onclick="eliminarDoc('${reg.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
+                    <button onclick="editarLocal('${reg.id}')" style="border:none; background:none; cursor:pointer; font-size:16px;">✏️</button>
+                    <button onclick="eliminarDoc('${reg.id}')" style="border:none; background:none; cursor:pointer; font-size:16px;">🗑️</button>
                 </td>
             </tr>
         `).join('');
@@ -253,90 +256,19 @@
         return 'bg-pendiente';
     }
 
-    // Funciones de apoyo (Importar, Exportar, Procesar Imágenes) se mantienen igual a tu código original...
-    window.importarDesdeExcel = async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async (evt) => {
-            const data = new Uint8Array(evt.target.result);
-            const workbook = XLSX.read(data, { type: 'array', cellDates: true });
-            const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-            let count = 0;
-            for (const f of json) {
-                // ... (tu lógica de mapeo de Excel se mantiene intacta)
-            }
-            alert(`✅ ${count} Registros importados.`);
-        };
-        reader.readAsArrayBuffer(file);
-    };
-
-window.exportarExcel = () => {
-    // 1. Ordenamos numéricamente por Folio para que el Excel sea profesional
-    const datosOrdenados = [...datosFiltrados].sort((a, b) => {
-        return (parseInt(a.numero_consecutivo) || 0) - (parseInt(b.numero_consecutivo) || 0);
-    });
-
-    // 2. Mapeo con los nombres de columna EXACTOS de social.html
-    const datosMapeados = datosOrdenados.map(r => ({
-        "No": r.numero_consecutivo || "",
-        "Fecha": r.fecha_registro || "",
-        "Nombre del Beneficiario": r.nombre || "",
-        "Localidad / Colonia": r.col_loc || "",
-        "Dirección": r.direccion || "",
-        "Teléfono": r.telefono || "",
-        "Programa": r.programa || "",
-        "Asunto / Solicitud": r.asunto || "",
-        "Folio Exp.": r.folio_expediente || "",
-        "Estatus": r.estatus || "PENDIENTE",
-        "Observaciones": r.observaciones || "",
-        "Registró": r.usuario || ""
-    }));
-
-    // 3. Crear la hoja de cálculo
-    const ws = XLSX.utils.json_to_sheet(datosMapeados);
-
-    // 4. Configurar anchos de columna para una lectura clara
-    const wscols = [
-        { wch: 6 },  // No
-        { wch: 12 }, // Fecha
-        { wch: 35 }, // Nombre
-        { wch: 25 }, // Localidad
-        { wch: 30 }, // Dirección
-        { wch: 15 }, // Teléfono
-        { wch: 20 }, // Programa
-        { wch: 25 }, // Asunto
-        { wch: 10 }, // Folio Exp
-        { wch: 15 }, // Estatus
-        { wch: 45 }, // Observaciones
-        { wch: 20 }  // Registró
-    ];
-    ws['!cols'] = wscols;
-
-    // 5. Generar el libro y descargar
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Padron_Trabajo_Social");
-    
-    // Nombre del archivo con la fecha del sistema 2026
-    const hoy = new Date().toISOString().split('T')[0];
-    XLSX.writeFile(wb, `Reporte_Trabajo_Social_DIF_${hoy}.xlsx`);
-};
-
-    window.eliminarTodoBaseDatos = async () => {
-        if(confirm("¿BORRAR TODO?") && prompt("Escribe ELIMINAR") === "ELIMINAR") {
-            const snap = await getDocs(apoyosRef);
-            const batch = writeBatch(db);
-            snap.forEach(d => batch.delete(d.ref));
-            await batch.commit();
-        }
-    };
-
-    window.eliminarDoc = async (id) => { if(confirm("¿Borrar?")) await deleteDoc(doc(db, "trabajo_social", id)); };
-
     window.editarLocal = (id) => {
         const reg = todosLosDatos.find(r => r.id === id);
+        if(!reg) return;
+
         document.getElementById('edit-id').value = id;
-        Object.keys(reg).forEach(key => { if(document.getElementById(key)) document.getElementById(key).value = reg[key]; });
+        
+        listaCampos.forEach(campo => {
+            const input = document.getElementById(campo);
+            if(input) {
+                input.value = reg[campo] || "";
+            }
+        });
+
         document.getElementById('btn-save').style.display = 'none';
         document.getElementById('btn-update').style.display = 'inline-block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -344,20 +276,28 @@ window.exportarExcel = () => {
 
     function obtenerValoresForm() {
         const res = {};
-        ['numero_consecutivo','fecha_registro','nombre','telefono','col_loc','direccion','programa','asunto','horarios_mixtos','folio_expediente','estatus','usuario','observaciones'].forEach(id => {
+        listaCampos.forEach(id => {
             const el = document.getElementById(id);
-            if(el) res[id] = el.value.toUpperCase();
+            if(el) {
+                if(id === 'numero_consecutivo' || id === 'fecha_registro' || id === 'usuario') res[id] = el.value;
+                else res[id] = el.value.toUpperCase();
+            }
         });
         return res;
     }
 
     window.limpiarForm = () => {
-        document.querySelectorAll('input, select').forEach(el => el.value = "");
+        listaCampos.forEach(id => {
+            const el = document.getElementById(id);
+            if(el && id !== "numero_consecutivo") el.value = "";
+        });
         document.getElementById('numero_consecutivo').value = proximoNo;
         document.getElementById('edit-id').value = "";
         document.getElementById('btn-save').style.display = 'inline-block';
         document.getElementById('btn-update').style.display = 'none';
     };
+
+    window.eliminarDoc = async (id) => { if(confirm("¿Eliminar registro permanentemente?")) await deleteDoc(doc(db, "trabajo_social", id)); };
 
     window.cambiarPagina = (dir) => {
         const max = Math.ceil(datosFiltrados.length / filasPorPagina);
@@ -369,17 +309,6 @@ window.exportarExcel = () => {
         paginaActual = 1;
         renderTabla();
     };
-
-    async function procesarImagenes(files) {
-        return await Promise.all(Array.from(files).map(f => new Promise(r => {
-            const reader = new FileReader();
-            reader.onload = e => r(e.target.result);
-            reader.readAsDataURL(f);
-        })));
-    }
-
-    window.verImagen = (s) => { document.getElementById('imgGrande').src = s; document.getElementById('modalFoto').style.display = 'flex'; };
-    window.cerrarModal = () => document.getElementById('modalFoto').style.display = 'none';
 </script>
 </body>
 </html>
