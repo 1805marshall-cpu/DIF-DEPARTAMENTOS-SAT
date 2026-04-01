@@ -3,332 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA DIF 2026 | Admin Global</title>
+    <title>DIF 2026 | Población Vulnerable</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
         :root { 
-            --sidebar-bg: #0f172a; --primary: #1e40af; --success: #059669; 
-            --warning: #f59e0b; --danger: #dc2626; --bg: #f1f5f9; 
-            --vulnerable-color: #ea580c; --psico-color: #be185d; --procu-color: #1e3a8a; --med-color: #4c1d95;
-            --social-color: #af1e92;
+            --primary: #0d9488; --primary-dark: #0f766e; --success: #059669; 
+            --warning: #f59e0b; --danger: #dc2626; --bg: #f8fafc; --border: #e2e8f0;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
-        .sidebar.collapsed { width: 70px; }
-        .sidebar-header { padding: 25px; text-align: center; border-bottom: 1px solid #1e293b; white-space: nowrap; }
-        .sidebar.collapsed .sidebar-header h3, .sidebar.collapsed .sidebar-header small { display: none; }
-
-        .nav-menu { flex-grow: 1; padding: 15px 0; overflow-y: auto; overflow-x: hidden; }
-        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 12px; color: #94a3b8; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; font-size: 13px; white-space: nowrap; }
-        .nav-item:hover, .nav-item.active { background: #1e293b; color: white; border-left-color: var(--primary); }
-        .sidebar.collapsed .nav-item { padding: 12px 0; justify-content: center; }
-        .sidebar.collapsed .nav-item span { display: none; }
-        .sidebar.collapsed .nav-item i { margin: 0; font-size: 18px; }
-
-        .nav-exit { padding: 15px 25px; display: flex; align-items: center; gap: 12px; color: #f87171; cursor: pointer; border-top: 1px solid #1e293b; font-size: 13px; transition: 0.2s; font-weight: bold; white-space: nowrap; }
-        .nav-exit:hover { background: #450a0a; color: #fca5a5; }
-        .sidebar.collapsed .nav-exit span { display: none; }
-
-        .main-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
-        .top-bar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        #btn-toggle { cursor: pointer; font-size: 18px; color: var(--sidebar-bg); }
-
-        .view-container { padding: 25px; display: none; }
-        .view-container.active { display: block; animation: fadeIn 0.3s ease; }
-        .filter-bar { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; gap: 15px; border: 1px solid #e2e8f0; align-items: flex-end; }
-        .filter-group { display: flex; flex-direction: column; flex: 1; }
-        .filter-group label { font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 6px; }
-        .filter-group input, .filter-group select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; }
-        
-        .access-card { padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white; }
-        .btn-open { background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; border: 1px solid white; }
-        
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        .stat-box { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; min-width: 100px; }
-        .stat-box small { color: #64748b; font-weight: bold; text-transform: uppercase; font-size: 9px; display: block; line-height: 1.1; margin-bottom: 4px; }
-        .stat-box div { font-size: 20px; font-weight: bold; color: #1e293b; }
-
-        .panel { background: white; border-radius: 12px; padding: 18px; border: 1px solid #e2e8f0; height: 450px; overflow-y: auto; }
-        .panel b { display: block; margin-bottom: 12px; font-size: 10px; text-transform: uppercase; color: var(--primary); border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }
-        .group-container { background: #f8fafc; border-radius: 8px; margin-bottom: 12px; padding: 10px; border-left: 4px solid var(--primary); }
-        .group-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 10px; margin-bottom: 6px; }
-        .member-line { font-size: 10px; padding: 6px 8px; background: white; margin-bottom: 3px; border-radius: 4px; display: flex; justify-content: space-between; border: 1px solid #f1f5f9; align-items: center; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        table td { padding: 5px 0; border-bottom: 1px solid #f1f5f9; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
+        header { background: #fff; padding: 15px 40px; border-bottom: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .header-title h2 { margin: 0; color: var(--primary); font-size: 18px; display: flex; align-items: center; gap: 10px; }
+        .container { max-width: 1850px; margin: 20px auto; padding: 0 20px; }
+        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); margin-bottom: 20px; }
+        h3 { margin: 0 0 18px 0; font-size: 11px; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; letter-spacing: 1px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+        input, select { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1); }
+        .foto-field { grid-column: 1 / -1; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px dashed #cbd5e1; display: flex; align-items: center; gap: 15px; }
+        .img-preview { width: 60px; height: 40px; background: #fff; border-radius: 4px; overflow: hidden; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; }
+        .img-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-box { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 10px; color: white; display: flex; align-items: center; gap: 6px; text-transform: uppercase; transition: 0.3s; }
+        .search-box { background: #f1f5f9; padding: 15px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 15px; display: flex; gap: 15px; align-items: flex-end; }
+        .table-wrap { background: #fff; border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1700px; }
+        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 10px; color: #475569; border-bottom: 2px solid var(--border); text-transform: uppercase; }
+        td { padding: 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .sub-text { font-size: 10px; color: #64748b; display: block; margin-top: 2px; }
+        .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .paginacion-bar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 20px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .btn-pag { padding: 6px 12px; border: 1px solid #cbd5e1; background: white; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        #modal-visor { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 10px; text-align: center; max-width: 80%; position: relative;}
+        .close-x { position: absolute; top: 10px; right: 20px; font-size: 25px; cursor: pointer; color: #64748b; }
+        @media print { .no-print { display: none !important; } }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="sidebar-header"><h3>DIF GLOBAL</h3><small id="role-tag" style="color:var(--warning); font-weight: bold;"></small></div>
-        <nav class="nav-menu">
-            <div id="nav-vulnerable" class="nav-item" onclick="showView('vulnerable', this)"><i class="fas fa-hand-holding-heart"></i> <span>Pob. Vulnerable</span></div>
-            <div id="nav-social" class="nav-item" onclick="showView('social', this)"><i class="fa-solid fa-users"></i> <span>Trabajo Social</span></div>
-            <div id="nav-procuraduria" class="nav-item" onclick="showView('procuraduria', this)"><i class="fas fa-balance-scale"></i> <span>Procuraduría</span></div>
-            <div id="nav-medica" class="nav-item" onclick="showView('medica', this)"><i class="fas fa-notes-medical"></i> <span>Área Médica</span></div>
-            <div id="nav-psicologia" class="nav-item" onclick="showView('psicologia', this)"><i class="fas fa-brain"></i> <span>Psicología</span></div>
-        </nav>
-        <div class="nav-exit" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> <span>CERRAR SESIÓN</span></div>
+<header class="no-print">
+    <div class="header-title"><h2><i class="fas fa-hand-holding-heart"></i> Pob. Vulnerable</h2></div>
+    <button class="btn" style="background: var(--primary)" onclick="location.href='admin_global.html'"><i class="fa-solid fa-house"></i> DASHBOARD</button>
+</header>
+
+<div class="container">
+    <div class="card no-print">
+        <h3><i class="fas fa-folder-plus"></i> Registro de Expediente</h3>
+        <input type="hidden" id="edit-id">
+        <div class="form-grid" id="main-form">
+            <div class="form-group"><label>Código</label><input type="text" id="codigo" placeholder="ID-2026"></div>
+            <div class="form-group"><label>Fecha Ingreso</label><input type="date" id="fecha_ingreso"></div>
+            <div class="form-group"><label>Paterno</label><input type="text" id="apellido_paterno"></div>
+            <div class="form-group"><label>Materno</label><input type="text" id="apellido_materno"></div>
+            <div class="form-group"><label>Nombre(s)</label><input type="text" id="nombre"></div>
+            <div class="form-group"><label>F. Nacimiento</label><input type="text" id="fecha_nac" placeholder="DD/MM/AAAA"></div>
+            <div class="form-group"><label>CURP</label><input type="text" id="curp" maxlength="18"></div>
+            <div class="form-group"><label>Tipo de Apoyo</label><input type="text" id="tipo_apoyo"></div>
+            <div class="form-group">
+                <label>Estatus</label>
+                <select id="estatus">
+                    <option value="Pendiente">PENDIENTE</option>
+                    <option value="Entregado">ENTREGADO</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Clave Entidad</label><input type="text" id="clave_entidad"></div>
+            <div class="form-group"><label>Entidad</label><input type="text" id="entidad"></div>
+            <div class="form-group"><label>Cve Mpio</label><input type="text" id="cve_mpio"></div>
+            <div class="form-group"><label>Municipio</label><input type="text" id="municipio"></div>
+            <div class="form-group"><label>Clave Col/Loc</label><input type="text" id="clave_col_loc"></div>
+            <div class="form-group"><label>Colonia/Loc</label><input type="text" id="col_loc"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Dirección</label><input type="text" id="direccion"></div>
+            <div class="form-group"><label>Teléfono</label><input type="text" id="telefono"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Observaciones</label><input type="text" id="observaciones"></div>
+            
+            <div class="foto-field">
+                <div style="flex-grow: 1;">
+                    <label><i class="fas fa-camera"></i> Adjuntar INE / Evidencia</label>
+                    <input type="file" accept="image/*" onchange="handleFoto(event)" style="width: 100%; margin-top: 5px;">
+                </div>
+                <div class="img-preview" id="box-preview"><i class="fas fa-image" style="color:#cbd5e1; font-size: 20px;"></i></div>
+                <input type="hidden" id="ine_img">
+            </div>
+        </div>
+
+        <div class="btn-box">
+            <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
+            <button class="btn" id="btn-upd" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
+            <button class="btn" style="background:#94a3b8" onclick="location.reload()"><i class="fas fa-eraser"></i> LIMPIAR</button>
+        </div>
     </div>
 
-    <div class="main-content">
-        <div class="top-bar">
-            <div style="display:flex; align-items:center; gap:20px;"><i class="fas fa-bars" id="btn-toggle"></i><h2 id="view-title" style="margin:0;">Panel</h2></div>
-            <div id="reloj"></div>
-        </div>
-
-        <div id="view-vulnerable" class="view-container">
-            <div class="access-card" style="background: var(--vulnerable-color);"><div><b>Población Vulnerable</b></div><a href="vulnerable.html" class="btn-open">Módulo</a></div>
-            <div class="filter-bar"></div>
-            <div class="stats-grid">
-                <div class="stat-box"><small>Registros</small><div id="v-total">0</div></div>
-                <div class="stat-box"><small>Entregas</small><div id="v-ent" style="color:var(--success)">0</div></div>
-                <div class="stat-box"><small>Pendientes</small><div id="v-pen" style="color:var(--danger)">0</div></div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-box" style="border-top:3px solid #854d0e;"><small>Carpintería</small><div id="v-g-carp">0</div><div style="font-size:15px; margin-top:5px; display:flex; justify-content:space-around;"><span style="color:var(--success)">E: <b id="v-g-carp-e">0</b></span><span style="color:var(--danger)">P: <b id="v-g-carp-p">0</b></span></div></div>
-                <div class="stat-box" style="border-top:3px solid #9a3412;"><small>Panadería</small><div id="v-g-pana">0</div><div style="font-size:15px; margin-top:5px; display:flex; justify-content:space-around;"><span style="color:var(--success)">E: <b id="v-g-pana-e">0</b></span><span style="color:var(--danger)">P: <b id="v-g-pana-p">0</b></span></div></div>
-                <div class="stat-box" style="border-top:3px solid #164e63;"><small>Cocina</small><div id="v-g-coci">0</div><div style="font-size:15px; margin-top:5px; display:flex; justify-content:space-around;"><span style="color:var(--success)">E: <b id="v-g-coci-e">0</b></span><span style="color:var(--danger)">P: <b id="v-g-coci-p">0</b></span></div></div>
-                <div class="stat-box" style="border-top:3px solid #5b21b6;"><small>Otros Grupos</small><div id="v-g-otros">0</div><div style="font-size:15px; margin-top:5px; display:flex; justify-content:space-around;"><span style="color:var(--success)">E: <b id="v-g-otr-e">0</b></span><span style="color:var(--danger)">P: <b id="v-g-otr-p">0</b></span></div></div>
-            </div>
-            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
-                <div class="panel"><b>TALLERES / Grupos de Trabajo</b><div id="v-list-talleres"></div></div>
-                <div class="panel"><b>Apoyos</b><div id="v-list-apoyos"></div></div>
-                <div class="panel"><b>Zonas</b><div id="v-list-geo"></div></div>
-            </div>
-        </div>
-
-        <div id="view-social" class="view-container">
-            <div class="access-card" style="background: var(--social-color);"><div><b>Trabajo Social</b></div><a href="social.html" class="btn-open">Módulo</a></div>
-            <div class="filter-bar"></div>
-            <div class="stats-grid"><div class="stat-box"><small>Total Casos</small><div id="s-total">0</div></div><div class="stat-box"><small>Finalizados</small><div id="s-ent" style="color:var(--success)">0</div></div></div>
-            <div id="s-dynamic-programs" class="stats-grid"></div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
-                <div class="panel"><b>RESUMEN DE ASUNTOS</b><div id="s-list-asuntos-count"></div></div>
-                <div class="panel"><b>LISTADO POR PROGRAMA</b><div id="s-list-programas"></div></div>
-                <div class="panel"><b>HISTORIAL RECIENTE</b><div id="s-list-recientes"></div></div>
-            </div>
-        </div>
-
-        <div id="view-procuraduria" class="view-container">
-            <div class="access-card" style="background: var(--procu-color);"><div><b>Procuraduría</b></div><a href="procuraduria.html" class="btn-open">Módulo</a></div>
-            <div class="filter-bar"></div>
-            <div class="stats-grid"><div class="stat-box"><small>Expedientes</small><div id="pr-total">0</div></div><div class="stat-box"><small>H. Mixtos</small><div id="pr-mixtos">0</div></div></div>
-            <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;"><div class="panel"><b>Asuntos</b><div id="pr-conteo-tabla"></div></div><div class="panel"><b>Listado</b><div id="pr-list-casos"></div></div></div>
-        </div>
-
-        <div id="view-medica" class="view-container">
-            <div class="access-card" style="background: var(--med-color);"><div><b>Área Médica</b></div><a href="medica.html" class="btn-open">Módulo</a></div>
-            <div class="filter-bar"></div>
-            <div class="stats-grid"><div class="stat-box"><small>Atenciones</small><div id="m-total">0</div></div><div class="stat-box"><small>Medicamentos</small><div id="m-med">0</div></div></div>
-            <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;"><div class="panel"><b>Servicios</b><div id="m-list-servicios"></div></div><div class="panel"><b>Diagnósticos</b><div id="m-list-diagnosticos"></div></div></div>
-        </div>
-
-        <div id="view-psicologia" class="view-container">
-            <div class="access-card" style="background: var(--psico-color);"><div><b>Psicología</b></div><a href="psicologia.html" class="btn-open">Módulo</a></div>
-            <div class="filter-bar"></div>
-            <div class="stats-grid"><div class="stat-box"><small>Pacientes</small><div id="p-total">0</div></div><div class="stat-box"><small>Sesiones</small><div id="p-ses">0</div></div></div>
-            <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;"><div class="panel"><b>Motivos</b><div id="p-list-motivos"></div></div><div class="panel"><b>Zonas</b><div id="p-list-seguimiento"></div></div></div>
+    <div class="search-box no-print">
+        <div class="form-group" style="flex:2;"><label>🔍 Buscador</label><input type="text" id="input-busqueda" onkeyup="filtrarYRender()"></div>
+        <div class="form-group" style="flex:1;">
+            <label>Filtrar Estatus</label>
+            <select id="filtro-estatus" onchange="filtrarYRender()">
+                <option value="Todos">TODOS</option>
+                <option value="Pendiente">PENDIENTE</option>
+                <option value="Entregado">ENTREGADO</option>
+            </select>
         </div>
     </div>
+
+    <div class="paginacion-bar no-print">
+        <div id="info-total" style="font-size: 11px; font-weight: bold; color: var(--primary);"></div>
+        <div id="pag-container"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>NO.</th><th>FOTO</th><th>CÓDIGO</th><th>BENEFICIARIO</th><th>LOCALIDAD / DIRECCIÓN</th><th>APOYO</th><th>ESTATUS</th><th class="no-print">ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-beneficiarios"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="modal-visor" onclick="cerrarVisor()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-x" onclick="cerrarVisor()">&times;</span>
+        <h4 id="visor-titulo" style="margin:0 0 10px 0; color:var(--primary);"></h4>
+        <img id="img-grande" style="max-width:100%; max-height:70vh; border-radius:5px;">
+        <div class="btn-box" style="justify-content:center;">
+            <a id="link-descarga" download="evidencia.jpg" href="#"><button class="btn" style="background:var(--primary)">📥 DESCARGAR</button></a>
+        </div>
+    </div>
+</div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, orderBy, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const apoyosRef = collection(db, "apoyos");
 
-    const sesion = sessionStorage.getItem('sesion_activa');
-    if (!sesion) window.location.href = "index.html";
+    let DATA_ACTUAL = [];
+    let DATA_FILTRADA = [];
+    let PAGINA_ACTUAL = 1;
+    let FILAS_POR_PAGINA = 50;
 
-    window.cerrarSesion = () => { if(confirm("¿Cerrar sesión?")) { sessionStorage.clear(); window.location.href = "index.html"; } };
-    document.getElementById('btn-toggle').addEventListener('click', () => { document.querySelector('.sidebar').classList.toggle('collapsed'); });
-
-    const cumpleFiltros = (d, s, m) => {
-        const term = s.toLowerCase().trim();
-        const searchable = `${d.nombre||''} ${d.apellido_paterno||''} ${d.paciente||''} ${d.denunciado||''} ${d.codigo||''} ${d.no||''} ${d.asunto||''} ${d.programa||''}`.toLowerCase();
-        const matchBusqueda = searchable.includes(term);
-        if (m === "all") return matchBusqueda;
-        const fRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_ingreso || "";
-        return matchBusqueda && fRaw.includes("-") && fRaw.split("-")[1] === m;
-    };
-
-    const renderM = (id, gs, c) => {
-        let h = "";
-        const esMóduloEstatus = (id.startsWith('v-') || id.startsWith('s-'));
-
-        Object.keys(gs).sort().forEach(k => {
-            h += `<div class="group-container" style="border-left-color:${c}">
-                <div class="group-header"><span>${k}</span><b>${gs[k].length}</b></div>
-                ${gs[k].map(i => {
-                    let badge = "";
-                    if(esMóduloEstatus && i.s) {
-                        const isE = i.s.toLowerCase() === 'entregado' || i.s.toLowerCase() === 'realizado';
-                        badge = `<span style="margin-left:6px; padding:2px 5px; border-radius:4px; font-size:7px; text-transform:uppercase; background:${isE ? 'var(--success)':'var(--danger)'}; color:white; font-weight:bold;">${isE ? 'ENTREGADO':'PENDIENTE'}</span>`;
-                    }
-                    return `<div class="member-line">
-                        <div style="display:flex; align-items:center;"><span>${i.n}</span>${badge}</div>
-                        <div style="text-align:right;">
-                            <small style="color:#64748b; display:block; font-style:italic; font-size:8px;">(${i.l})</small>
-                            <span style="font-weight:bold; color:${c}">${i.x}</span>
-                        </div>
-                    </div>`;
-                }).join('')}
-            </div>`;
-        });
-        const el = document.getElementById(id); if(el) el.innerHTML = h || "Sin registros.";
-    };
-
-    let DB_V = [], DB_S = [], DB_P = [], DB_M = [], DB_PS = [];
-
-    onSnapshot(collection(db, "apoyos"), s => { DB_V = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
-    onSnapshot(collection(db, "trabajo_social"), s => { DB_S = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
-    onSnapshot(collection(db, "procuraduria"), s => { DB_P = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
-    onSnapshot(collection(db, "area_medica"), s => { DB_M = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
-    onSnapshot(collection(db, "psicologia"), s => { DB_PS = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
-
-    window.reprocesarTodo = () => {
-        const act = document.querySelector('.view-container.active');
-        if(!act) return;
-        const s = act.querySelector('.global-search')?.value || "";
-        const m = act.querySelector('.month-filter')?.value || "all";
-        window.procVul(s,m); window.procSoc(s,m); window.procPro(s,m); window.procMed(s,m); window.procPsi(s,m);
-    };
-
-    window.procVul = (s, m) => {
-        let ent = 0, tal = {}, apo = {}, geo = {};
-        let sCarp = new Set(), sPana = new Set(), sCoci = new Set(), sOtr = new Set();
-        let grpStatus = {};
-        let fil = DB_V.filter(d => cumpleFiltros(d,s,m));
-        fil.forEach(d => {
-            const est = (d.estatus||"").toLowerCase();
-            if(est === 'entregado') ent++;
-            const n = `${d.nombre||''} ${d.apellido_paterno||''}`.toUpperCase(), c = (d.codigo||'S/C').toUpperCase(), t = (d.tipo_apoyo||"").toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
-            if (c.startsWith('CARP') || c.startsWith('PANAD') || c.startsWith('COC') || c.startsWith('COST') || t.includes("TALLER")) {
-                if (!tal[c]) tal[c] = []; tal[c].push({ n, x: c, l, s: est });
-                if (!grpStatus[c]) grpStatus[c] = { pendientes: 0 };
-                if (est !== 'entregado') grpStatus[c].pendientes++;
-                if(c.startsWith('CARP')) sCarp.add(c); else if(c.startsWith('PANAD')) sPana.add(c); else if(c.startsWith('COC')) sCoci.add(c); else sOtr.add(c);
-            } else { if (!apo[t||"OTROS"]) apo[t||"OTROS"] = []; apo[t||"OTROS"].push({ n, x: c, l, s: est }); }
-            if(!geo[l]) geo[l]=[]; geo[l].push({n, x: c, l, s: est });
-        });
-        const countEP = (set) => {
-            let e = 0, p = 0;
-            set.forEach(id => { if (grpStatus[id] && grpStatus[id].pendientes > 0) p++; else e++; });
-            return { e, p };
-        };
-        if(document.getElementById('v-total')){
-            document.getElementById('v-total').innerText = fil.length; document.getElementById('v-ent').innerText = ent; document.getElementById('v-pen').innerText = fil.length - ent;
-            const cC = countEP(sCarp); document.getElementById('v-g-carp').innerText = sCarp.size; document.getElementById('v-g-carp-e').innerText = cC.e; document.getElementById('v-g-carp-p').innerText = cC.p;
-            const cP = countEP(sPana); document.getElementById('v-g-pana').innerText = sPana.size; document.getElementById('v-g-pana-e').innerText = cP.e; document.getElementById('v-g-pana-p').innerText = cP.p;
-            const cCo = countEP(sCoci); document.getElementById('v-g-coci').innerText = sCoci.size; document.getElementById('v-g-coci-e').innerText = cCo.e; document.getElementById('v-g-coci-p').innerText = cCo.p;
-            const cO = countEP(sOtr); document.getElementById('v-g-otros').innerText = sOtr.size; document.getElementById('v-g-otr-e').innerText = cO.e; document.getElementById('v-g-otr-p').innerText = cO.p;
-            renderM('v-list-talleres', tal, 'var(--vulnerable-color)'); renderM('v-list-apoyos', apo, 'var(--primary)'); renderM('v-list-geo', geo, '#64748b');
-        }
-    };
-
-    window.procSoc = (s, m) => {
-        let fin = 0, prg = {}, rec = [], asuCounts = {}, progCounts = {};
-        let fil = DB_S.filter(d => cumpleFiltros(d,s,m));
-        fil.forEach(d => {
-            const est = (d.estatus||"").toLowerCase();
-            if(['entregado','realizado'].includes(est)) fin++;
-            const p = (d.programa||"S/P").toUpperCase(), asu = (d.asunto||"S/A").toUpperCase(), n = (d.nombre||'S/N').toUpperCase();
-            progCounts[p] = (progCounts[p] || 0) + 1; asuCounts[asu] = (asuCounts[asu] || 0) + 1;
-            if(!prg[p]) prg[p]=[]; prg[p].push({n, x: d.folio_expediente||'S/F', l: asu, s: est});
-            rec.push({n, x: p, l: asu, s: est});
-        });
-        if(document.getElementById('s-total')){
-            document.getElementById('s-total').innerText = fil.length; document.getElementById('s-ent').innerText = fin;
-            const container = document.getElementById('s-dynamic-programs');
-            if(container) { container.innerHTML = ""; Object.keys(progCounts).sort().forEach(pr => {
-                const card = document.createElement('div'); card.className="stat-box"; card.style.borderTop="3px solid var(--social-color)";
-                card.innerHTML = `<small>${pr}</small><div>${progCounts[pr]}</div>`; container.appendChild(card);
-            }); }
-            renderM('s-list-programas', prg, 'var(--social-color)'); renderM('s-list-recientes', {"Recientes": rec.reverse().slice(0,10)}, "#64748b");
-            let t = `<table>`; Object.keys(asuCounts).sort().forEach(k => { t += `<tr><td>${k}</td><td align="right"><b>${asuCounts[k]}</b></td></tr>`; });
-            document.getElementById('s-list-asuntos-count').innerHTML = t + "</table>";
-        }
-    };
-
-    window.procPro = (s, m) => {
-        let mix = 0, cA = {}, lD = {};
-        let fil = DB_P.filter(d => cumpleFiltros(d,s,m));
-        fil.forEach(d => {
-            if(d.horarios_mixtos === 'Si') mix++;
-            const asu = (d.asuntos||"GENERAL").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
-            cA[asu] = (cA[asu]||0)+1; if(!lD[asu]) lD[asu]=[]; lD[asu].push({n, x: d.no||'S/E', l});
-        });
-        if(document.getElementById('pr-total')){
-            document.getElementById('pr-total').innerText = fil.length; document.getElementById('pr-mixtos').innerText = mix;
-            renderM('pr-list-casos', lD, 'var(--procu-color)');
-            let t = `<table>`; Object.keys(cA).forEach(k => t += `<tr><td>${k}</td><td align="right"><b>${cA[k]}</b></td></tr>`);
-            document.getElementById('pr-conteo-tabla').innerHTML = t + "</table>";
-        }
-    };
-
-    window.procMed = (s, m) => {
-        let med = 0, ser = {}, dia = [];
-        let fil = DB_M.filter(d => cumpleFiltros(d,s,m));
-        fil.forEach(d => {
-            if(d.tipo_apoyo==='MEDICAMENTO') med++;
-            const sr = (d.tipo_apoyo||"GENERAL").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
-            if(!ser[sr]) ser[sr]=[]; ser[sr].push({n, x: d.no||'-', l});
-            dia.push({n, x: d.fecha||'S/F', l});
-        });
-        if(document.getElementById('m-total')){
-            document.getElementById('m-total').innerText = fil.length; document.getElementById('m-med').innerText = med;
-            renderM('m-list-servicios', ser, 'var(--med-color)'); renderM('m-list-diagnosticos', {"Historial": dia.reverse().slice(0,10)}, "#64748b");
-        }
-    };
-
-    window.procPsi = (s, m) => {
-        let ses = 0, pSet = new Set(), mot = {}, seg = [];
-        let fil = DB_PS.filter(d => cumpleFiltros(d,s,m));
-        fil.forEach(d => {
-            ses++; if(d.paciente) pSet.add(d.paciente.toUpperCase());
-            const mo = (d.tema||"GENERAL").toUpperCase(), n = (d.paciente||'S/N').toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
-            if(!mot[mo]) mot[mo]=[]; mot[mo].push({n, x: d.no||'S/F', l});
-            seg.push({n, x: l, l});
-        });
-        if(document.getElementById('p-total')){
-            document.getElementById('p-total').innerText = pSet.size; document.getElementById('p-ses').innerText = ses;
-            renderM('p-list-motivos', mot, 'var(--psico-color)'); renderM('p-list-seguimiento', {"Zonas": seg.reverse().slice(0,10)}, "#64748b");
-        }
-    };
-
-    window.showView = (v, e) => {
-        document.querySelectorAll('.view-container').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        const t = document.getElementById('view-' + v);
-        if(t) { t.classList.add('active'); e.classList.add('active'); document.getElementById('view-title').innerText = e.querySelector('span').innerText; window.reprocesarTodo(); }
-    };
-
-    document.addEventListener("DOMContentLoaded", () => {
-        const fHTML = `<div class="filter-group"><label>🔍 Buscar...</label><input type="text" class="global-search" onkeyup="reprocesarTodo()"></div><div class="filter-group" style="flex:0.4;"><label>📅 Mes</label><select class="month-filter" onchange="reprocesarTodo()"><option value="all">Todo el Año</option><option value="01">Ene</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option></select></div>`;
-        document.querySelectorAll('.filter-bar').forEach(b => b.innerHTML = fHTML);
-        document.getElementById('role-tag').innerText = (sesion||"").toUpperCase();
-
-        const admins = ['admin', 'lorena.gonzalez'];
-        const permisos = { 'vulnerable': ['vulnerable','ramon.guapillo','usuario.v2'], 'social': ['social','juanita.campechano','monse.plata'], 'procuraduria': ['procuraduria','edmundo.pechi','lic.perez'], 'medica': ['medica','doctor.simi','enfermeria.gral'], 'psicologia': ['psicologia','psico.ayuda','terapeuta1'] };
-
-        if (!admins.includes(sesion)) {
-            let vAsignada = "";
-            ['vulnerable','social','procuraduria','medica','psicologia'].forEach(dep => {
-                if (!permisos[dep].includes(sesion)) {
-                    const nav = document.getElementById('nav-'+dep); if(nav) nav.style.display = 'none';
-                } else { vAsignada = dep; }
-            });
-            if (vAsignada) showView(vAsignada, document.getElementById('nav-'+vAsignada));
-            else { alert("Sin permisos."); cerrarSesion(); }
-        } else { showView('vulnerable', document.getElementById('nav-vulnerable')); }
+    onSnapshot(query(apoyosRef, orderBy("codigo", "asc")), (snap) => {
+        DATA_ACTUAL = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        filtrarYRender();
     });
-    setInterval(() => { document.getElementById('reloj').innerText = new Date().toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' }).toUpperCase(); }, 1000);
+
+    window.filtrarYRender = () => {
+        const val = document.getElementById('input-busqueda').value.toLowerCase();
+        const est = document.getElementById('filtro-estatus').value;
+        DATA_FILTRADA = DATA_ACTUAL.filter(r => {
+            const campos = Object.values(r).join(" ").toLowerCase();
+            return campos.includes(val) && (est === "Todos" || r.estatus === est);
+        });
+        PAGINA_ACTUAL = 1;
+        render();
+    };
+
+    function render() {
+        const inicio = (PAGINA_ACTUAL - 1) * FILAS_POR_PAGINA;
+        const lista = DATA_FILTRADA.slice(inicio, inicio + FILAS_POR_PAGINA);
+        document.getElementById('info-total').innerText = `REGISTROS: ${DATA_FILTRADA.length}`;
+        
+        document.getElementById('tabla-beneficiarios').innerHTML = lista.map((r, i) => `
+            <tr>
+                <td><b>${inicio + i + 1}</b></td>
+                <td>${r.ine_img ? `<img src="${r.ine_img}" onclick="abrirVisor('${r.ine_img}', '${r.nombre}')" style="width:35px;height:35px;object-fit:cover;cursor:pointer;border-radius:4px;">` : '-'}</td>
+                <td style="color:var(--primary); font-weight:bold;">${r.codigo || ''}</td>
+                <td><b>${r.apellido_paterno || ''} ${r.apellido_materno || ''} ${r.nombre || ''}</b><span class="sub-text">${r.curp || ''}</span></td>
+                <td><b>${r.col_loc || ''}</b><span class="sub-text">${r.direccion || ''}</span></td>
+                <td>${r.tipo_apoyo || ''}</td>
+                <td><span class="badge-status" style="background:${r.estatus==='Entregado'?'#dcfce7':'#fef3c7'}; color:${r.estatus==='Entregado'?'#15803d':'#b45309'}">${r.estatus}</span></td>
+                <td class="no-print">
+                    <button onclick="editar('${r.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
+                    <button onclick="eliminar('${r.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+
+        const tPag = Math.ceil(DATA_FILTRADA.length / FILAS_POR_PAGINA);
+        let pagHTML = `<button class="btn-pag" onclick="irPagina(${PAGINA_ACTUAL - 1})" ${PAGINA_ACTUAL === 1 ? 'disabled' : ''}>Anterior</button>`;
+        pagHTML += `<span style="margin:0 15px">Página ${PAGINA_ACTUAL} de ${tPag || 1}</span>`;
+        pagHTML += `<button class="btn-pag" onclick="irPagina(${PAGINA_ACTUAL + 1})" ${PAGINA_ACTUAL >= tPag ? 'disabled' : ''}>Siguiente</button>`;
+        document.getElementById('pag-container').innerHTML = pagHTML;
+    }
+
+    window.irPagina = (p) => { PAGINA_ACTUAL = p; render(); };
+
+    window.handleFoto = (e) => {
+        const fr = new FileReader();
+        fr.onload = (ev) => { 
+            document.getElementById('ine_img').value = ev.target.result; 
+            document.getElementById('box-preview').innerHTML = `<img src="${ev.target.result}" style="width:100%">`; 
+        };
+        fr.readAsDataURL(e.target.files[0]);
+    };
+
+    const obtenerDatosForm = () => {
+        const d = {};
+        document.querySelectorAll('#main-form input, #main-form select').forEach(i => {
+            if(i.id) d[i.id] = i.value;
+        });
+        return d;
+    };
+
+    window.guardar = async () => {
+        const data = obtenerDatosForm();
+        if(!data.codigo) return alert("Código requerido");
+        await addDoc(apoyosRef, data);
+        alert("Guardado correctamente");
+        location.reload();
+    };
+
+    // FUNCIÓN EDITAR CON SOPORTE MULTI-CAMPO (Corregido: Teléfono y Clave Mpio)
+    window.editar = (id) => {
+        const r = DATA_ACTUAL.find(x => x.id === id);
+        if(!r) return;
+
+        // Limpieza de formulario
+        document.querySelectorAll('#main-form input').forEach(i => i.value = "");
+
+        // Mapeo genérico
+        Object.keys(r).forEach(k => {
+            const input = document.getElementById(k);
+            if(input) input.value = r[k];
+        });
+
+        // REGLAS DE NORMALIZACIÓN PARA CARGA (Atiende variaciones de base de datos)
+        const valorMpio = r.cve_mpio || r.clave_municipio || r.clave_mpio || r.cve_municipio || "";
+        document.getElementById('cve_mpio').value = valorMpio;
+
+        const valorTel = r.telefono || r.teléfono || r.tel || "";
+        document.getElementById('telefono').value = valorTel;
+
+        // Carga de imagen
+        if(r.ine_img) {
+            document.getElementById('box-preview').innerHTML = `<img src="${r.ine_img}" style="width:100%">`;
+            document.getElementById('ine_img').value = r.ine_img;
+        } else {
+            document.getElementById('box-preview').innerHTML = `<i class="fas fa-image" style="color:#cbd5e1; font-size: 20px;"></i>`;
+        }
+
+        document.getElementById('edit-id').value = id;
+        document.getElementById('btn-save').style.display = 'none'; 
+        document.getElementById('btn-upd').style.display = 'inline-block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.actualizar = async () => {
+        const id = document.getElementById('edit-id').value;
+        const data = obtenerDatosForm();
+        await updateDoc(doc(db, "apoyos", id), data);
+        alert("Actualizado correctamente");
+        location.reload();
+    };
+
+    window.abrirVisor = (src, n) => {
+        document.getElementById('modal-visor').style.display='flex'; 
+        document.getElementById('img-grande').src = src; 
+        document.getElementById('visor-titulo').innerText = n;
+        document.getElementById('link-descarga').href = src;
+    };
+    window.cerrarVisor = () => document.getElementById('modal-visor').style.display='none';
+    
 </script>
 </body>
 </html>
