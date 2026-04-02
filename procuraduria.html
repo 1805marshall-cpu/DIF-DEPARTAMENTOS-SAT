@@ -185,12 +185,14 @@
         }
     };
 
-   window.filtrar = () => {
+  window.filtrar = () => {
         const term = document.getElementById('buscador').value.toLowerCase().trim();
         datosMostrados = todosLosDatos.filter(r => 
             Object.values(r).some(val => String(val).toLowerCase().includes(term))
         );
-        datosMostrados.sort((a, b) => (parseInt(b.no) || 0) - (parseInt(a.no) || 0)); 
+        // CAMBIO AQUÍ: (a - b) para orden ascendente (menor a mayor)
+        datosMostrados.sort((a, b) => (parseInt(a.no) || 0) - (parseInt(b.no) || 0)); 
+        
         paginaActual = 1; 
         renderTabla();
     };
