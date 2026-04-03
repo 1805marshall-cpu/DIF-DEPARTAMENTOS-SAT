@@ -111,10 +111,24 @@
         </div>
     </div>
 
-    <div class="paginacion-bar no-print">
-        <div id="info-total" style="font-size: 11px; font-weight: bold; color: var(--primary);"></div>
-        <div id="pag-container"></div>
+   <div class="paginacion-bar no-print">
+    <div style="display: flex; align-items: center; gap: 8px;">
+        <label style="font-size: 10px; color: #64748b;">MOSTRAR:</label>
+        <select id="selector-filas" onchange="cambiarFilas(this.value)" style="padding: 2px 5px; font-size: 11px;">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="30">30</option>
+            <option value="40">40</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+            <option value="200">200</option>
+            <option value="500">500</option>
+        </select>
     </div>
+    
+    <div id="info-total" style="font-size: 11px; font-weight: bold; color: var(--primary);"></div>
+    <div id="pag-container"></div>
+</div>
 
     <div class="table-wrap">
         <table>
@@ -216,12 +230,34 @@
         return d;
     };
 
-    window.guardar = async () => {
+window.guardar = async () => {
         const data = obtenerDatosForm();
         if(!data.codigo) return alert("Código requerido");
-        await addDoc(apoyosRef, data);
-        alert("Guardado correctamente");
-        location.reload();
+        if(!data.nombre || !data.curp) return alert("Nombre y CURP son obligatorios para validar duplicados");
+
+        // VALIDACIÓN DE DUPLICADOS
+        const duplicado = DATA_ACTUAL.find(r => 
+            r.curp?.trim().toUpperCase() === data.curp.trim().toUpperCase() && 
+            r.nombre?.trim().toLowerCase() === data.nombre.trim().toLowerCase()
+        );
+
+        if (duplicado) {
+            const mensaje = `¡ATENCIÓN! El beneficiario ${duplicado.nombre} con CURP ${duplicado.curp} ya existe en el sistema.\n\n` +
+                            `Apoyo previo: ${duplicado.tipo_apoyo || 'No especificado'}\n` +
+                            `Estatus actual: ${duplicado.estatus}\n\n` +
+                            `¿Deseas registrarlo de todos modos?`;
+            
+            if (!confirm(mensaje)) return; // Detiene la ejecución si el usuario cancela
+        }
+
+        try {
+            await addDoc(apoyosRef, data);
+            alert("Guardado correctamente");
+            location.reload();
+        } catch (error) {
+            console.error("Error al guardar:", error);
+            alert("Error al intentar guardar el registro.");
+        }
     };
 
     // FUNCIÓN EDITAR CON SOPORTE MULTI-CAMPO (Corregido: Teléfono y Clave Mpio)
@@ -333,6 +369,13 @@
         document.getElementById('link-descarga').href = src;
     };
     window.cerrarVisor = () => document.getElementById('modal-visor').style.display='none';
+
+        // Función para cambiar la cantidad de registros visibles
+    window.cambiarFilas = (valor) => {
+        FILAS_POR_PAGINA = parseInt(valor);
+        PAGINA_ACTUAL = 1; // Reiniciar a la primera página para evitar errores de índice
+        render();
+    };
 </script>
 </body>
 </html>
