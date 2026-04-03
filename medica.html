@@ -109,7 +109,24 @@
             <button class="btn" style="background:#94a3b8" onclick="limpiarForm()"><i class="fas fa-eraser"></i> LIMPIAR</button>
         </div>
     </div>
-
+    <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 20px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--border);">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <label style="font-size: 10px; color: #64748b; font-weight: bold;">MOSTRAR:</label>
+            <select id="selector-filas" onchange="window.cambiarFilas(this.value)" style="padding: 4px 8px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 11px;">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+                <option value="40">40</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="300">300</option>
+                <option value="500">500</option>
+            </select>
+            <span id="info-total" style="font-size: 11px; font-weight: bold; color: var(--primary); margin-left: 10px;"></span>
+        </div>
+        <div id="pag-container" style="display: flex; align-items: center; gap: 5px;"></div>
+    </div>
     <div class="table-wrap">
         <table>
             <thead>
@@ -139,6 +156,8 @@
     const mainRef = collection(db, "area_medica");
 
     let dataList = [];
+    let PAGINA_ACTUAL = 1;
+    let FILAS_POR_PAGINA = 50;
     const sesionUsuario = sessionStorage.getItem('sesion_activa') || 'MEDICO_TURNO';
 
  // Busca esta sección en tu etiqueta <script> y reemplázala:
@@ -156,8 +175,15 @@ onSnapshot(query(mainRef, where("dept", "==", "MEDICA")), (snap) => {
     renderUI();
 });
 
+// REEMPLAZAR TU FUNCIÓN renderUI POR ESTA
     function renderUI() {
-        document.getElementById('table-body').innerHTML = dataList.map(d => `
+        const inicio = (PAGINA_ACTUAL - 1) * FILAS_POR_PAGINA;
+        const fin = inicio + FILAS_POR_PAGINA;
+        const listaSegmentada = dataList.slice(inicio, fin);
+
+        document.getElementById('info-total').innerText = `TOTAL: ${dataList.length} REGISTROS`;
+
+        document.getElementById('table-body').innerHTML = listaSegmentada.map(d => `
             <tr>
                 <td><b>${d.no}</b></td>
                 <td>${d.fecha}</td>
@@ -172,7 +198,32 @@ onSnapshot(query(mainRef, where("dept", "==", "MEDICA")), (snap) => {
                 </td>
             </tr>
         `).join('');
+
+        renderPaginacion();
     }
+
+    // AÑADIR ESTAS FUNCIONES AL FINAL DEL SCRIPT
+    function renderPaginacion() {
+        const totalPaginas = Math.ceil(dataList.length / FILAS_POR_PAGINA);
+        let html = `
+            <button class="btn" style="background:#f1f5f9; color:#475569; padding:5px 10px;" onclick="window.irPagina(${PAGINA_ACTUAL - 1})" ${PAGINA_ACTUAL === 1 ? 'disabled' : ''}>Anterior</button>
+            <span style="font-size:11px; font-weight:bold;">Pág. ${PAGINA_ACTUAL} de ${totalPaginas || 1}</span>
+            <button class="btn" style="background:#f1f5f9; color:#475569; padding:5px 10px;" onclick="window.irPagina(${PAGINA_ACTUAL + 1})" ${PAGINA_ACTUAL >= totalPaginas ? 'disabled' : ''}>Siguiente</button>
+        `;
+        document.getElementById('pag-container').innerHTML = html;
+    }
+
+    window.cambiarFilas = (v) => {
+        FILAS_POR_PAGINA = parseInt(v);
+        PAGINA_ACTUAL = 1;
+        renderUI();
+    };
+
+    window.irPagina = (p) => {
+        PAGINA_ACTUAL = p;
+        renderUI();
+        window.scrollTo({top: document.querySelector('.table-wrap').offsetTop - 50, behavior: 'smooth'});
+    };
 
     window.saveData = async () => {
         const nombre = document.getElementById('f-nombre').value;
