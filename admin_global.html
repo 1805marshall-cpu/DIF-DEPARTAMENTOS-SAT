@@ -208,7 +208,7 @@
         fil.forEach(d => {
             const est = (d.estatus||"").toLowerCase();
             if(est === 'entregado') ent++;
-            const n = `${d.nombre||''} ${d.apellido_paterno||''}`.toUpperCase(), c = (d.codigo||'S/C').toUpperCase(), t = (d.tipo_apoyo||"").toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
+            const n = `${d.nombre||''} ${d.apellido_paterno||''} ${d.apellido_materno||''}`.toUpperCase(), c = (d.codigo||'S/C').toUpperCase(), t = (d.tipo_apoyo||"").toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
             if (c.startsWith('CARP') || c.startsWith('PANAD') || c.startsWith('COC') || c.startsWith('COST') || t.includes("TALLER")) {
                 if (!tal[c]) tal[c] = []; tal[c].push({ n, x: c, l, s: est });
                 if (!grpStatus[c]) grpStatus[c] = { pendientes: 0 };
