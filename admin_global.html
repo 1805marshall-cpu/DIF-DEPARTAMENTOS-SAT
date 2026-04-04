@@ -254,7 +254,7 @@
         const est = (d.estatus || "").toUpperCase();
         if (est === 'ENTREGADO' || est === 'REALIZADO') ent++;
 
-        const n = `${d.nombre || ''} ${d.apellido_paterno || ''}`.toUpperCase();
+        const n = `${d.nombre || ''} ${d.apellido_paterno || ''} ${d.apellido_materno || ''}`.toUpperCase();
         const c = (d.codigo || 'S/C').toUpperCase();
         const t = (d.tipo_apoyo || "").toUpperCase();
         const l = (d.col_loc || "S/L").toUpperCase();
