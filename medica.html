@@ -165,11 +165,11 @@
 onSnapshot(query(mainRef, where("dept", "==", "MEDICA")), (snap) => {
     dataList = snap.docs.map(d => ({id: d.id, ...d.data()}));
     
-    // ORDENAR DE MENOR A MAYOR (1, 2, 3...)
+    // ORDENAR DE MAYOR A MENOR (Ej: 100, 99, 98...)
     dataList.sort((a, b) => {
         const noA = parseInt(a.no) || 0;
         const noB = parseInt(b.no) || 0;
-        return noA - noB;
+        return noB - noA; // Cambiado de (noA - noB) a (noB - noA)
     });
     
     renderUI();
