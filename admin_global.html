@@ -149,7 +149,19 @@
         <div id="view-psicologia" class="view-container">
             <div class="access-card" style="background: var(--psico-color);"><div><b>Psicología</b></div><a href="psicologia.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
-            <div class="stats-grid"><div class="stat-box"><small>Pacientes</small><div id="p-total">0</div></div><div class="stat-box"><small>Sesiones</small><div id="p-ses">0</div></div></div>
+         <div class="stats-grid">
+    <div class="stat-box" style="border-top:3px solid var(--psico-color)"><small>Total Pacientes</small><div id="p-total">0</div></div>
+    <div class="stat-box"><small>Pacientes H</small><div id="p-hombres" style="color:var(--primary)">0</div></div>
+    <div class="stat-box"><small>Pacientes M</small><div id="p-mujeres" style="color:var(--psico-color)">0</div></div>
+    <div class="stat-box"><small>Pacientes Menores</small><div id="p-menores" style="color:var(--warning)">0</div></div>
+
+    <div class="stat-box" style="border-top:3px solid #64748b"><small>Total Acompañantes</small><div id="p-total-a">0</div></div>
+    <div class="stat-box"><small>Acompañantes H</small><div id="p-hombres-a" style="color:var(--primary)">0</div></div>
+    <div class="stat-box"><small>Acompañantes M</small><div id="p-mujeres-a" style="color:var(--psico-color)">0</div></div>
+    <div class="stat-box"><small>Acompañantes Menores</small><div id="p-menores-a" style="color:var(--warning)">0</div></div>
+    
+    <div class="stat-box" style="border-top:3px solid var(--success)"><small>Total Sesiones</small><div id="p-ses">0</div></div>
+</div>
             <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;">
                 <div class="panel"><b>Motivos</b><div id="p-list-motivos"></div></div>
                 <div class="panel"><b>Zonas</b><div id="p-list-seguimiento"></div></div>
@@ -176,7 +188,7 @@
         const zonaBusqueda = document.getElementById('global-zone-search').value.toLowerCase().trim();
         const fRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_ingreso || d.fecha_atencion || "";
         const matchMes = (m === "all") || (fRaw.includes("-") && fRaw.split("-")[1] === m);
-        const localidad = (d.col_loc || d.localidad || d.colonia || "").toLowerCase();
+        const localidad = (d.col_loc || d.localidad || d.colonia || d.lugar || "").toLowerCase();
         const matchZona = localidad.includes(zonaBusqueda);
         const searchable = `${d.nombre||''} ${d.apellido_paterno||''} ${d.paciente||''} ${d.denunciado||''} ${d.codigo||''} ${d.no||''} ${d.asunto||''} ${d.programa||''}`.toLowerCase();
         return matchMes && matchZona && searchable.includes(term);
@@ -216,44 +228,101 @@
     onSnapshot(collection(db, "psicologia"), s => { DB_PS = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
 
     window.reprocesarTodo = () => {
-        const act = document.querySelector('.view-container.active');
-        if(!act) return;
-        const s = act.querySelector('.global-search')?.value || "";
-        const m = act.querySelector('.month-filter')?.value || "all";
-        window.procVul(s, m); window.procSoc(s, m); window.procPro(s, m); window.procMed(s, m); window.procPsi(s, m);
+    // Buscamos los filtros de la vista que esté activa actualmente
+    const act = document.querySelector('.view-container.active');
+    const s = act ? (act.querySelector('.global-search')?.value || "") : "";
+    const m = act ? (act.querySelector('.month-filter')?.value || "all") : "all";
+    
+    // Ejecutamos todos los procesos
+    window.procVul(s, m); 
+    window.procSoc(s, m); 
+    window.procPro(s, m); 
+    window.procMed(s, m); 
+    window.procPsi(s, m);
+};
+
+   window.procVul = (s, m) => {
+    let ent = 0, tal = {}, apo = {}, geo = {};
+    let sCarp = new Set(), sPana = new Set(), sCoci = new Set(), sOtr = new Set();
+    let grpStatus = {};
+
+    // Filtrar base de datos
+    let fil = DB_V.filter(d => cumpleFiltros(d, s, m));
+
+    fil.forEach(d => {
+        // Estandarizar estatus para conteo
+        const est = (d.estatus || "").toUpperCase();
+        if (est === 'ENTREGADO' || est === 'REALIZADO') ent++;
+
+        const n = `${d.nombre || ''} ${d.apellido_paterno || ''}`.toUpperCase();
+        const c = (d.codigo || 'S/C').toUpperCase();
+        const t = (d.tipo_apoyo || "").toUpperCase();
+        const l = (d.col_loc || "S/L").toUpperCase();
+
+        // Lógica de Talleres y Grupos
+        if (c.startsWith('CARP') || c.startsWith('PANAD') || c.startsWith('COC') || c.startsWith('COST') || t.includes("TALLER")) {
+            if (!tal[c]) tal[c] = []; 
+            tal[c].push({ n, x: c, l, s: est });
+
+            if (!grpStatus[c]) grpStatus[c] = { pendientes: 0 };
+            if (est !== 'ENTREGADO' && est !== 'REALIZADO') grpStatus[c].pendientes++;
+
+            if (c.startsWith('CARP')) sCarp.add(c); 
+            else if (c.startsWith('PANAD')) sPana.add(c); 
+            else if (c.startsWith('COC')) sCoci.add(c); 
+            else sOtr.add(c);
+        } else { 
+            // Otros apoyos
+            if (!apo[t || "OTROS"]) apo[t || "OTROS"] = []; 
+            apo[t || "OTROS"].push({ n, x: c, l, s: est }); 
+        }
+
+        // Agrupación por zona
+        if (!geo[l]) geo[l] = []; 
+        geo[l].push({ n, x: c, l, s: est });
+    });
+
+    // Función interna para contar grupos finalizados vs pendientes
+    const countEP = (set) => {
+        let e = 0, p = 0;
+        set.forEach(id => { 
+            if (grpStatus[id] && grpStatus[id].pendientes > 0) p++; 
+            else e++; 
+        });
+        return { e, p };
     };
 
-    window.procVul = (s, m) => {
-        let ent = 0, tal = {}, apo = {}, geo = {};
-        let sCarp = new Set(), sPana = new Set(), sCoci = new Set(), sOtr = new Set();
-        let grpStatus = {};
-        let fil = DB_V.filter(d => cumpleFiltros(d,s,m));
-        fil.forEach(d => {
-            const est = (d.estatus||"").toLowerCase();
-            if(est === 'entregado') ent++;
-            const n = `${d.nombre||''} ${d.apellido_paterno||''}`.toUpperCase(), c = (d.codigo||'S/C').toUpperCase(), t = (d.tipo_apoyo||"").toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
-            if (c.startsWith('CARP') || c.startsWith('PANAD') || c.startsWith('COC') || c.startsWith('COST') || t.includes("TALLER")) {
-                if (!tal[c]) tal[c] = []; tal[c].push({ n, x: c, l, s: est });
-                if (!grpStatus[c]) grpStatus[c] = { pendientes: 0 };
-                if (est !== 'entregado') grpStatus[c].pendientes++;
-                if(c.startsWith('CARP')) sCarp.add(c); else if(c.startsWith('PANAD')) sPana.add(c); else if(c.startsWith('COC')) sCoci.add(c); else sOtr.add(c);
-            } else { if (!apo[t||"OTROS"]) apo[t||"OTROS"] = []; apo[t||"OTROS"].push({ n, x: c, l, s: est }); }
-            if(!geo[l]) geo[l]=[]; geo[l].push({n, x: c, l, s: est });
-        });
-        const countEP = (set) => {
-            let e = 0, p = 0;
-            set.forEach(id => { if (grpStatus[id] && grpStatus[id].pendientes > 0) p++; else e++; });
-            return { e, p };
-        };
-        if(document.getElementById('v-total')){
-            document.getElementById('v-total').innerText = fil.length; document.getElementById('v-ent').innerText = ent; document.getElementById('v-pen').innerText = fil.length - ent;
-            const cC = countEP(sCarp); document.getElementById('v-g-carp-e').innerText = cC.e; document.getElementById('v-g-carp-p').innerText = cC.p;
-            const cP = countEP(sPana); document.getElementById('v-g-pana-e').innerText = cP.e; document.getElementById('v-g-pana-p').innerText = cP.p;
-            const cCo = countEP(sCoci); document.getElementById('v-g-coci-e').innerText = cCo.e; document.getElementById('v-g-coci-p').innerText = cCo.p;
-            const cO = countEP(sOtr); document.getElementById('v-g-otr-e').innerText = cO.e; document.getElementById('v-g-otr-p').innerText = cO.p;
-            renderM('v-list-talleres', tal, 'var(--vulnerable-color)'); renderM('v-list-apoyos', apo, 'var(--primary)'); renderM('v-list-geo', geo, '#64748b');
-        }
-    };
+    // RENDERIZADO EN PANTALLA (Verificación de existencia de IDs)
+    if (document.getElementById('v-total')) {
+        document.getElementById('v-total').innerText = fil.length;
+        document.getElementById('v-ent').innerText = ent;
+        document.getElementById('v-pen').innerText = fil.length - ent;
+
+        const cC = countEP(sCarp); 
+        document.getElementById('v-g-carp-e').innerText = cC.e; 
+        document.getElementById('v-g-carp-p').innerText = cC.p;
+        document.getElementById('v-g-carp').innerText = sCarp.size; // Total de grupos
+
+        const cP = countEP(sPana); 
+        document.getElementById('v-g-pana-e').innerText = cP.e; 
+        document.getElementById('v-g-pana-p').innerText = cP.p;
+        document.getElementById('v-g-pana').innerText = sPana.size;
+
+        const cCo = countEP(sCoci); 
+        document.getElementById('v-g-coci-e').innerText = cCo.e; 
+        document.getElementById('v-g-coci-p').innerText = cCo.p;
+        document.getElementById('v-g-coci').innerText = sCoci.size;
+
+        const cO = countEP(sOtr); 
+        document.getElementById('v-g-otr-e').innerText = cO.e; 
+        document.getElementById('v-g-otr-p').innerText = cO.p;
+        document.getElementById('v-g-otros').innerText = sOtr.size;
+
+        renderM('v-list-talleres', tal, 'var(--vulnerable-color)');
+        renderM('v-list-apoyos', apo, 'var(--primary)');
+        renderM('v-list-geo', geo, '#64748b');
+    }
+};
 
     window.procSoc = (s, m) => {
         let fin = 0, prg = {}, geo = {}, asuCounts = {}, progCounts = {};
@@ -284,7 +353,7 @@
         let fil = DB_P.filter(d => cumpleFiltros(d,s,m));
         fil.forEach(d => {
             if(d.horarios_mixtos === 'Si') mix++;
-            const asu = (d.asuntos||"GENERAL").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.lugar||"S/L").toUpperCase();
+            const asu = (d.asuntos||"GENERAL").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.col_loc || d.localidad || d.colonia || d.lugar || "S/L").toUpperCase();
             cA[asu] = (cA[asu]||0)+1; 
             if(!lD[asu]) lD[asu]=[]; lD[asu].push({n, x: d.no||'S/E', l});
             if(!geo[l]) geo[l]=[]; geo[l].push({n, x: asu, l});
@@ -309,24 +378,88 @@
         });
         if(document.getElementById('m-total')){
             document.getElementById('m-total').innerText = fil.length; document.getElementById('m-med').innerText = med;
-            renderM('m-list-servicios', ser, 'var(--med-color)'); renderM('m-list-diagnosticos', dia, 'var(--primary)'); renderM('m-list-geo', geo, '#64748b');
+            renderM('m-list-servicios', ser, 'var(--med-color)'); renderM('m-list-diagnosticos', dia, '#64748b'); renderM('m-list-geo', geo, '#64748b');
         }
     };
 
-    window.procPsi = (s, m) => {
-        let ses = 0, pSet = new Set(), mot = {}, seg = {};
-        let fil = DB_PS.filter(d => cumpleFiltros(d,s,m));
-        fil.forEach(d => {
-            ses++; if(d.paciente) pSet.add(d.paciente.toUpperCase());
-            const mo = (d.tema||"GENERAL").toUpperCase(), n = (d.paciente||'S/N').toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
-            if(!mot[mo]) mot[mo]=[]; mot[mo].push({n, x: d.no||'S/F', l});
-            if(!seg["ZONAS"]) seg["ZONAS"]=[]; seg["ZONAS"].push({n, x: l, l});
-        });
-        if(document.getElementById('p-total')){
-            document.getElementById('p-total').innerText = pSet.size; document.getElementById('p-ses').innerText = ses;
-            renderM('p-list-motivos', mot, 'var(--psico-color)'); renderM('p-list-seguimiento', seg, '#64748b');
+window.procPsi = (s, m) => {
+    let ses = 0;
+    let pSet = new Set(), aSet = new Set();
+    let mot = {}, seg = {};
+    
+    // Contadores Pacientes
+    let pH = 0, pM = 0, pMen = 0;
+    // Contadores Acompañantes
+    let aH = 0, aM = 0, aMen = 0;
+
+    let pacientesUnicos = new Set();
+    let acompañantesUnicos = new Set();
+
+    let fil = DB_PS.filter(d => cumpleFiltros(d, s, m));
+
+    fil.forEach(d => {
+        ses++;
+        const pNom = (d.paciente || '').toUpperCase();
+        const aNom = (d.nombre_a || '').toUpperCase();
+
+        // --- LÓGICA PACIENTES ---
+        if(pNom) {
+            pSet.add(pNom);
+            if(!pacientesUnicos.has(pNom)) {
+                const genP = (d.genero_p || "").toUpperCase();
+                const edadP = parseInt(d.edad_p) || 0;
+                if(genP === 'MASCULINO') pH++;
+                if(genP === 'FEMENINO') pM++;
+                if(edadP > 0 && edadP < 18) pMen++;
+                pacientesUnicos.add(pNom);
+            }
         }
-    };
+
+        // --- LÓGICA ACOMPAÑANTES ---
+        if(aNom && aNom !== "S/N" && aNom !== "NINGUNO") {
+            aSet.add(aNom);
+            if(!acompañantesUnicos.has(aNom)) {
+                const genA = (d.genero_a || "").toUpperCase();
+                const edadA = parseInt(d.edad_a) || 0;
+                if(genA === 'MASCULINO') aH++;
+                if(genA === 'FEMENINO') aM++;
+                if(edadA > 0 && edadA < 18) aMen++;
+                acompañantesUnicos.add(aNom);
+            }
+        }
+
+        // --- PANELES ---
+        const mo = (d.tema || "GENERAL").toUpperCase();
+        const l = (d.col_loc || "S/L").toUpperCase();
+        if(!mot[mo]) mot[mo] = [];
+        mot[mo].push({ n: pNom, x: `FOLIO: ${d.no}`, l: `Acompaña: ${aNom || 'Solo'}` });
+        
+        if(!seg[l]) seg[l] = [];
+        seg[l].push({ n: pNom, x: d.fecha || '', l: mo });
+    });
+
+    // --- RENDERIZADO ---
+    if(document.getElementById('p-total')){
+        // Totales generales
+        document.getElementById('p-total').innerText = pSet.size;
+        document.getElementById('p-total-a').innerText = aSet.size;
+        document.getElementById('p-ses').innerText = ses;
+
+        // Detalle Pacientes
+        document.getElementById('p-hombres').innerText = pH;
+        document.getElementById('p-mujeres').innerText = pM;
+        document.getElementById('p-menores').innerText = pMen;
+
+        // Detalle Acompañantes
+        document.getElementById('p-hombres-a').innerText = aH;
+        document.getElementById('p-mujeres-a').innerText = aM;
+        document.getElementById('p-menores-a').innerText = aMen;
+
+        renderM('p-list-motivos', mot, 'var(--psico-color)');
+        renderM('p-list-seguimiento', seg, '#64748b');
+    }
+};
+
 
     window.showView = (v, e) => {
         document.querySelectorAll('.view-container').forEach(c => c.classList.remove('active'));
