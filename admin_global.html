@@ -75,21 +75,21 @@
     </div>
 
     <div class="main-content">
-   <div class="top-bar">
-    <div style="display:flex; align-items:center; gap:20px;">
-        <i class="fas fa-bars" id="btn-toggle"></i>
-        <h2 id="view-title" style="margin:0;">Panel</h2>
-    </div>
-    
-    <div style="flex-grow: 1; max-width: 400px; margin: 0 20px; position: relative;">
-        <i class="fas fa-map-marker-alt" style="position: absolute; left: 12px; top: 10px; color: #64748b;"></i>
-        <input type="text" id="global-zone-search" placeholder="BUSCAR POR ZONA / LOCALIDAD..." 
-               onkeyup="window.reprocesarTodo()" 
-               style="width: 100%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
-    </div>
+        <div class="top-bar">
+            <div style="display:flex; align-items:center; gap:20px;">
+                <i class="fas fa-bars" id="btn-toggle"></i>
+                <h2 id="view-title" style="margin:0;">Panel</h2>
+            </div>
+            
+            <div style="flex-grow: 1; max-width: 400px; margin: 0 20px; position: relative;">
+                <i class="fas fa-map-marker-alt" style="position: absolute; left: 12px; top: 10px; color: #64748b;"></i>
+                <input type="text" id="global-zone-search" placeholder="BUSCAR POR ZONA / LOCALIDAD..." 
+                    onkeyup="window.reprocesarTodo()" 
+                    style="width: 100%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
+            </div>
 
-    <div id="reloj"></div>
-</div>
+            <div id="reloj"></div>
+        </div>        
 
         <div id="view-vulnerable" class="view-container">
             <div class="access-card" style="background: var(--vulnerable-color);"><div><b>Población Vulnerable</b></div><a href="vulnerable.html" class="btn-open">Módulo</a></div>
@@ -120,7 +120,7 @@
             <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
                 <div class="panel"><b>RESUMEN DE ASUNTOS</b><div id="s-list-asuntos-count"></div></div>
                 <div class="panel"><b>LISTADO POR PROGRAMA</b><div id="s-list-programas"></div></div>
-                <div class="panel"><b>HISTORIAL RECIENTE</b><div id="s-list-recientes"></div></div>
+                <div class="panel"><b>ZONAS</b><div id="s-list-geo"></div></div>
             </div>
         </div>
 
@@ -128,21 +128,32 @@
             <div class="access-card" style="background: var(--procu-color);"><div><b>Procuraduría</b></div><a href="procuraduria.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
             <div class="stats-grid"><div class="stat-box"><small>Expedientes</small><div id="pr-total">0</div></div><div class="stat-box"><small>H. Mixtos</small><div id="pr-mixtos">0</div></div></div>
-            <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;"><div class="panel"><b>Asuntos</b><div id="pr-conteo-tabla"></div></div><div class="panel"><b>Listado</b><div id="pr-list-casos"></div></div></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
+                <div class="panel"><b>Asuntos</b><div id="pr-conteo-tabla"></div></div>
+                <div class="panel"><b>Listado</b><div id="pr-list-casos"></div></div>
+                <div class="panel"><b>Zonas</b><div id="pr-list-geo"></div></div>
+            </div>
         </div>
 
         <div id="view-medica" class="view-container">
             <div class="access-card" style="background: var(--med-color);"><div><b>Área Médica</b></div><a href="medica.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
             <div class="stats-grid"><div class="stat-box"><small>Atenciones</small><div id="m-total">0</div></div><div class="stat-box"><small>Medicamentos</small><div id="m-med">0</div></div></div>
-            <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;"><div class="panel"><b>Servicios</b><div id="m-list-servicios"></div></div><div class="panel"><b>Diagnósticos</b><div id="m-list-diagnosticos"></div></div></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
+                <div class="panel"><b>Servicios</b><div id="m-list-servicios"></div></div>
+                <div class="panel"><b>Diagnósticos</b><div id="m-list-diagnosticos"></div></div>
+                <div class="panel"><b>Zonas</b><div id="m-list-geo"></div></div>
+            </div>
         </div>
 
         <div id="view-psicologia" class="view-container">
             <div class="access-card" style="background: var(--psico-color);"><div><b>Psicología</b></div><a href="psicologia.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
             <div class="stats-grid"><div class="stat-box"><small>Pacientes</small><div id="p-total">0</div></div><div class="stat-box"><small>Sesiones</small><div id="p-ses">0</div></div></div>
-            <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;"><div class="panel"><b>Motivos</b><div id="p-list-motivos"></div></div><div class="panel"><b>Zonas</b><div id="p-list-seguimiento"></div></div></div>
+            <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;">
+                <div class="panel"><b>Motivos</b><div id="p-list-motivos"></div></div>
+                <div class="panel"><b>Zonas</b><div id="p-list-seguimiento"></div></div>
+            </div>
         </div>
     </div>
 
@@ -160,31 +171,20 @@
     window.cerrarSesion = () => { if(confirm("¿Cerrar sesión?")) { sessionStorage.clear(); window.location.href = "index.html"; } };
     document.getElementById('btn-toggle').addEventListener('click', () => { document.querySelector('.sidebar').classList.toggle('collapsed'); });
 
-const cumpleFiltros = (d, s, m) => {
-    const term = s.toLowerCase().trim();
-    
-    // Capturamos el valor del nuevo buscador de zona
-    const zonaBusqueda = document.getElementById('global-zone-search').value.toLowerCase().trim();
-    
-    // 1. Filtro por Mes (m)
-    const fRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_ingreso || d.fecha_atencion || "";
-    const matchMes = (m === "all") || (fRaw.includes("-") && fRaw.split("-")[1] === m);
-
-    // 2. Filtro por Zona (Nueva lógica)
-    const localidad = (d.col_loc || d.localidad || d.colonia || "").toLowerCase();
-    const matchZona = localidad.includes(zonaBusqueda);
-
-    // 3. Filtro de Búsqueda General (Nombre, Folio, etc.)
-    const searchable = `${d.nombre||''} ${d.apellido_paterno||''} ${d.paciente||''} ${d.denunciado||''} ${d.codigo||''} ${d.no||''} ${d.asunto||''} ${d.programa||''}`.toLowerCase();
-    const matchGeneral = searchable.includes(term);
-
-    return matchMes && matchZona && matchGeneral;
-};
+    const cumpleFiltros = (d, s, m) => {
+        const term = s.toLowerCase().trim();
+        const zonaBusqueda = document.getElementById('global-zone-search').value.toLowerCase().trim();
+        const fRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_ingreso || d.fecha_atencion || "";
+        const matchMes = (m === "all") || (fRaw.includes("-") && fRaw.split("-")[1] === m);
+        const localidad = (d.col_loc || d.localidad || d.colonia || "").toLowerCase();
+        const matchZona = localidad.includes(zonaBusqueda);
+        const searchable = `${d.nombre||''} ${d.apellido_paterno||''} ${d.paciente||''} ${d.denunciado||''} ${d.codigo||''} ${d.no||''} ${d.asunto||''} ${d.programa||''}`.toLowerCase();
+        return matchMes && matchZona && searchable.includes(term);
+    };
 
     const renderM = (id, gs, c) => {
         let h = "";
         const esMóduloEstatus = (id.startsWith('v-') || id.startsWith('s-'));
-
         Object.keys(gs).sort().forEach(k => {
             h += `<div class="group-container" style="border-left-color:${c}">
                 <div class="group-header"><span>${k}</span><b>${gs[k].length}</b></div>
@@ -215,21 +215,13 @@ const cumpleFiltros = (d, s, m) => {
     onSnapshot(collection(db, "area_medica"), s => { DB_M = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "psicologia"), s => { DB_PS = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
 
-window.reprocesarTodo = () => {
-    const act = document.querySelector('.view-container.active');
-    if(!act) return;
-    
-    // Filtros locales de la vista (si aún quedan inputs ahí)
-    const s = act.querySelector('.global-search')?.value || "";
-    const m = act.querySelector('.month-filter')?.value || "all";
-    
-    // Ejecutar procesamiento de todos los departamentos
-    window.procVul(s, m); 
-    window.procSoc(s, m); 
-    window.procPro(s, m); 
-    window.procMed(s, m); 
-    window.procPsi(s, m);
-};
+    window.reprocesarTodo = () => {
+        const act = document.querySelector('.view-container.active');
+        if(!act) return;
+        const s = act.querySelector('.global-search')?.value || "";
+        const m = act.querySelector('.month-filter')?.value || "all";
+        window.procVul(s, m); window.procSoc(s, m); window.procPro(s, m); window.procMed(s, m); window.procPsi(s, m);
+    };
 
     window.procVul = (s, m) => {
         let ent = 0, tal = {}, apo = {}, geo = {};
@@ -239,7 +231,7 @@ window.reprocesarTodo = () => {
         fil.forEach(d => {
             const est = (d.estatus||"").toLowerCase();
             if(est === 'entregado') ent++;
-            const n = `${d.nombre||''} ${d.apellido_paterno||''} ${d.apellido_materno||''}`.toUpperCase(), c = (d.codigo||'S/C').toUpperCase(), t = (d.tipo_apoyo||"").toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
+            const n = `${d.nombre||''} ${d.apellido_paterno||''}`.toUpperCase(), c = (d.codigo||'S/C').toUpperCase(), t = (d.tipo_apoyo||"").toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
             if (c.startsWith('CARP') || c.startsWith('PANAD') || c.startsWith('COC') || c.startsWith('COST') || t.includes("TALLER")) {
                 if (!tal[c]) tal[c] = []; tal[c].push({ n, x: c, l, s: est });
                 if (!grpStatus[c]) grpStatus[c] = { pendientes: 0 };
@@ -255,24 +247,24 @@ window.reprocesarTodo = () => {
         };
         if(document.getElementById('v-total')){
             document.getElementById('v-total').innerText = fil.length; document.getElementById('v-ent').innerText = ent; document.getElementById('v-pen').innerText = fil.length - ent;
-            const cC = countEP(sCarp); document.getElementById('v-g-carp').innerText = sCarp.size; document.getElementById('v-g-carp-e').innerText = cC.e; document.getElementById('v-g-carp-p').innerText = cC.p;
-            const cP = countEP(sPana); document.getElementById('v-g-pana').innerText = sPana.size; document.getElementById('v-g-pana-e').innerText = cP.e; document.getElementById('v-g-pana-p').innerText = cP.p;
-            const cCo = countEP(sCoci); document.getElementById('v-g-coci').innerText = sCoci.size; document.getElementById('v-g-coci-e').innerText = cCo.e; document.getElementById('v-g-coci-p').innerText = cCo.p;
-            const cO = countEP(sOtr); document.getElementById('v-g-otros').innerText = sOtr.size; document.getElementById('v-g-otr-e').innerText = cO.e; document.getElementById('v-g-otr-p').innerText = cO.p;
+            const cC = countEP(sCarp); document.getElementById('v-g-carp-e').innerText = cC.e; document.getElementById('v-g-carp-p').innerText = cC.p;
+            const cP = countEP(sPana); document.getElementById('v-g-pana-e').innerText = cP.e; document.getElementById('v-g-pana-p').innerText = cP.p;
+            const cCo = countEP(sCoci); document.getElementById('v-g-coci-e').innerText = cCo.e; document.getElementById('v-g-coci-p').innerText = cCo.p;
+            const cO = countEP(sOtr); document.getElementById('v-g-otr-e').innerText = cO.e; document.getElementById('v-g-otr-p').innerText = cO.p;
             renderM('v-list-talleres', tal, 'var(--vulnerable-color)'); renderM('v-list-apoyos', apo, 'var(--primary)'); renderM('v-list-geo', geo, '#64748b');
         }
     };
 
     window.procSoc = (s, m) => {
-        let fin = 0, prg = {}, rec = [], asuCounts = {}, progCounts = {};
+        let fin = 0, prg = {}, geo = {}, asuCounts = {}, progCounts = {};
         let fil = DB_S.filter(d => cumpleFiltros(d,s,m));
         fil.forEach(d => {
             const est = (d.estatus||"").toLowerCase();
             if(['entregado','realizado'].includes(est)) fin++;
-            const p = (d.programa||"S/P").toUpperCase(), asu = (d.asunto||"S/A").toUpperCase(), n = (d.nombre||'S/N').toUpperCase();
+            const p = (d.programa||"S/P").toUpperCase(), asu = (d.asunto||"S/A").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
             progCounts[p] = (progCounts[p] || 0) + 1; asuCounts[asu] = (asuCounts[asu] || 0) + 1;
             if(!prg[p]) prg[p]=[]; prg[p].push({n, x: d.folio_expediente||'S/F', l: asu, s: est});
-            rec.push({n, x: p, l: asu, s: est});
+            if(!geo[l]) geo[l]=[]; geo[l].push({n, x: p, l: asu, s: est});
         });
         if(document.getElementById('s-total')){
             document.getElementById('s-total').innerText = fil.length; document.getElementById('s-ent').innerText = fin;
@@ -281,55 +273,58 @@ window.reprocesarTodo = () => {
                 const card = document.createElement('div'); card.className="stat-box"; card.style.borderTop="3px solid var(--social-color)";
                 card.innerHTML = `<small>${pr}</small><div>${progCounts[pr]}</div>`; container.appendChild(card);
             }); }
-            renderM('s-list-programas', prg, 'var(--social-color)'); renderM('s-list-recientes', {"Recientes": rec.reverse().slice(0,10)}, "#64748b");
+            renderM('s-list-programas', prg, 'var(--social-color)'); renderM('s-list-geo', geo, '#64748b');
             let t = `<table>`; Object.keys(asuCounts).sort().forEach(k => { t += `<tr><td>${k}</td><td align="right"><b>${asuCounts[k]}</b></td></tr>`; });
             document.getElementById('s-list-asuntos-count').innerHTML = t + "</table>";
         }
     };
 
     window.procPro = (s, m) => {
-        let mix = 0, cA = {}, lD = {};
+        let mix = 0, cA = {}, lD = {}, geo = {};
         let fil = DB_P.filter(d => cumpleFiltros(d,s,m));
         fil.forEach(d => {
             if(d.horarios_mixtos === 'Si') mix++;
-            const asu = (d.asuntos||"GENERAL").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
-            cA[asu] = (cA[asu]||0)+1; if(!lD[asu]) lD[asu]=[]; lD[asu].push({n, x: d.no||'S/E', l});
+            const asu = (d.asuntos||"GENERAL").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.lugar||"S/L").toUpperCase();
+            cA[asu] = (cA[asu]||0)+1; 
+            if(!lD[asu]) lD[asu]=[]; lD[asu].push({n, x: d.no||'S/E', l});
+            if(!geo[l]) geo[l]=[]; geo[l].push({n, x: asu, l});
         });
         if(document.getElementById('pr-total')){
             document.getElementById('pr-total').innerText = fil.length; document.getElementById('pr-mixtos').innerText = mix;
-            renderM('pr-list-casos', lD, 'var(--procu-color)');
+            renderM('pr-list-casos', lD, 'var(--procu-color)'); renderM('pr-list-geo', geo, '#64748b');
             let t = `<table>`; Object.keys(cA).forEach(k => t += `<tr><td>${k}</td><td align="right"><b>${cA[k]}</b></td></tr>`);
             document.getElementById('pr-conteo-tabla').innerHTML = t + "</table>";
         }
     };
 
     window.procMed = (s, m) => {
-        let med = 0, ser = {}, dia = [];
+        let med = 0, ser = {}, dia = {}, geo = {};
         let fil = DB_M.filter(d => cumpleFiltros(d,s,m));
         fil.forEach(d => {
             if(d.tipo_apoyo==='MEDICAMENTO') med++;
             const sr = (d.tipo_apoyo||"GENERAL").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
             if(!ser[sr]) ser[sr]=[]; ser[sr].push({n, x: d.no||'-', l});
-            dia.push({n, x: d.fecha||'S/F', l});
+            if(!dia["HISTORIAL"]) dia["HISTORIAL"]=[]; dia["HISTORIAL"].push({n, x: d.fecha||'S/F', l});
+            if(!geo[l]) geo[l]=[]; geo[l].push({n, x: sr, l});
         });
         if(document.getElementById('m-total')){
             document.getElementById('m-total').innerText = fil.length; document.getElementById('m-med').innerText = med;
-            renderM('m-list-servicios', ser, 'var(--med-color)'); renderM('m-list-diagnosticos', {"Historial": dia.reverse().slice(0,10)}, "#64748b");
+            renderM('m-list-servicios', ser, 'var(--med-color)'); renderM('m-list-diagnosticos', dia, 'var(--primary)'); renderM('m-list-geo', geo, '#64748b');
         }
     };
 
     window.procPsi = (s, m) => {
-        let ses = 0, pSet = new Set(), mot = {}, seg = [];
+        let ses = 0, pSet = new Set(), mot = {}, seg = {};
         let fil = DB_PS.filter(d => cumpleFiltros(d,s,m));
         fil.forEach(d => {
             ses++; if(d.paciente) pSet.add(d.paciente.toUpperCase());
             const mo = (d.tema||"GENERAL").toUpperCase(), n = (d.paciente||'S/N').toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
             if(!mot[mo]) mot[mo]=[]; mot[mo].push({n, x: d.no||'S/F', l});
-            seg.push({n, x: l, l});
+            if(!seg["ZONAS"]) seg["ZONAS"]=[]; seg["ZONAS"].push({n, x: l, l});
         });
         if(document.getElementById('p-total')){
             document.getElementById('p-total').innerText = pSet.size; document.getElementById('p-ses').innerText = ses;
-            renderM('p-list-motivos', mot, 'var(--psico-color)'); renderM('p-list-seguimiento', {"Zonas": seg.reverse().slice(0,10)}, "#64748b");
+            renderM('p-list-motivos', mot, 'var(--psico-color)'); renderM('p-list-seguimiento', seg, '#64748b');
         }
     };
 
@@ -344,10 +339,8 @@ window.reprocesarTodo = () => {
         const fHTML = `<div class="filter-group"><label>🔍 Buscar...</label><input type="text" class="global-search" onkeyup="reprocesarTodo()"></div><div class="filter-group" style="flex:0.4;"><label>📅 Mes</label><select class="month-filter" onchange="reprocesarTodo()"><option value="all">Todo el Año</option><option value="01">Ene</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option></select></div>`;
         document.querySelectorAll('.filter-bar').forEach(b => b.innerHTML = fHTML);
         document.getElementById('role-tag').innerText = (sesion||"").toUpperCase();
-
         const admins = ['admin', 'lorena.gonzalez'];
         const permisos = { 'vulnerable': ['vulnerable','ramon.guapillo','usuario.v2'], 'social': ['social','juanita.campechano','monse.plata'], 'procuraduria': ['procuraduria','edmundo.pechi','lic.perez'], 'medica': ['medica','doctor.simi','enfermeria.gral'], 'psicologia': ['psicologia','psico.ayuda','terapeuta1'] };
-
         if (!admins.includes(sesion)) {
             let vAsignada = "";
             ['vulnerable','social','procuraduria','medica','psicologia'].forEach(dep => {
