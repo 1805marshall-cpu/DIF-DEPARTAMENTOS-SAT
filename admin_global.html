@@ -75,10 +75,21 @@
     </div>
 
     <div class="main-content">
-        <div class="top-bar">
-            <div style="display:flex; align-items:center; gap:20px;"><i class="fas fa-bars" id="btn-toggle"></i><h2 id="view-title" style="margin:0;">Panel</h2></div>
-            <div id="reloj"></div>
-        </div>
+   <div class="top-bar">
+    <div style="display:flex; align-items:center; gap:20px;">
+        <i class="fas fa-bars" id="btn-toggle"></i>
+        <h2 id="view-title" style="margin:0;">Panel</h2>
+    </div>
+    
+    <div style="flex-grow: 1; max-width: 400px; margin: 0 20px; position: relative;">
+        <i class="fas fa-map-marker-alt" style="position: absolute; left: 12px; top: 10px; color: #64748b;"></i>
+        <input type="text" id="global-zone-search" placeholder="BUSCAR POR ZONA / LOCALIDAD..." 
+               onkeyup="window.reprocesarTodo()" 
+               style="width: 100%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
+    </div>
+
+    <div id="reloj"></div>
+</div>
 
         <div id="view-vulnerable" class="view-container">
             <div class="access-card" style="background: var(--vulnerable-color);"><div><b>Población Vulnerable</b></div><a href="vulnerable.html" class="btn-open">Módulo</a></div>
@@ -149,14 +160,26 @@
     window.cerrarSesion = () => { if(confirm("¿Cerrar sesión?")) { sessionStorage.clear(); window.location.href = "index.html"; } };
     document.getElementById('btn-toggle').addEventListener('click', () => { document.querySelector('.sidebar').classList.toggle('collapsed'); });
 
-    const cumpleFiltros = (d, s, m) => {
-        const term = s.toLowerCase().trim();
-        const searchable = `${d.nombre||''} ${d.apellido_paterno||''} ${d.paciente||''} ${d.denunciado||''} ${d.codigo||''} ${d.no||''} ${d.asunto||''} ${d.programa||''}`.toLowerCase();
-        const matchBusqueda = searchable.includes(term);
-        if (m === "all") return matchBusqueda;
-        const fRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_ingreso || "";
-        return matchBusqueda && fRaw.includes("-") && fRaw.split("-")[1] === m;
-    };
+const cumpleFiltros = (d, s, m) => {
+    const term = s.toLowerCase().trim();
+    
+    // Capturamos el valor del nuevo buscador de zona
+    const zonaBusqueda = document.getElementById('global-zone-search').value.toLowerCase().trim();
+    
+    // 1. Filtro por Mes (m)
+    const fRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_ingreso || d.fecha_atencion || "";
+    const matchMes = (m === "all") || (fRaw.includes("-") && fRaw.split("-")[1] === m);
+
+    // 2. Filtro por Zona (Nueva lógica)
+    const localidad = (d.col_loc || d.localidad || d.colonia || "").toLowerCase();
+    const matchZona = localidad.includes(zonaBusqueda);
+
+    // 3. Filtro de Búsqueda General (Nombre, Folio, etc.)
+    const searchable = `${d.nombre||''} ${d.apellido_paterno||''} ${d.paciente||''} ${d.denunciado||''} ${d.codigo||''} ${d.no||''} ${d.asunto||''} ${d.programa||''}`.toLowerCase();
+    const matchGeneral = searchable.includes(term);
+
+    return matchMes && matchZona && matchGeneral;
+};
 
     const renderM = (id, gs, c) => {
         let h = "";
@@ -192,13 +215,21 @@
     onSnapshot(collection(db, "area_medica"), s => { DB_M = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "psicologia"), s => { DB_PS = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
 
-    window.reprocesarTodo = () => {
-        const act = document.querySelector('.view-container.active');
-        if(!act) return;
-        const s = act.querySelector('.global-search')?.value || "";
-        const m = act.querySelector('.month-filter')?.value || "all";
-        window.procVul(s,m); window.procSoc(s,m); window.procPro(s,m); window.procMed(s,m); window.procPsi(s,m);
-    };
+window.reprocesarTodo = () => {
+    const act = document.querySelector('.view-container.active');
+    if(!act) return;
+    
+    // Filtros locales de la vista (si aún quedan inputs ahí)
+    const s = act.querySelector('.global-search')?.value || "";
+    const m = act.querySelector('.month-filter')?.value || "all";
+    
+    // Ejecutar procesamiento de todos los departamentos
+    window.procVul(s, m); 
+    window.procSoc(s, m); 
+    window.procPro(s, m); 
+    window.procMed(s, m); 
+    window.procPsi(s, m);
+};
 
     window.procVul = (s, m) => {
         let ent = 0, tal = {}, apo = {}, geo = {};
