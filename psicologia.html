@@ -3,111 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIF 2026 | Psicología - Registro</title>
+    <title>DIF 2026 | Psicología - Registro Estructurado</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
     <style>
         :root { 
             --primary: #991b1b; --success: #059669; --warning: #f59e0b; --danger: #dc2626; 
-            --bg: #f8fafc; --border: #e2e8f0;
+            --bg: #f1f5f9; --border: #cbd5e1;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
-        header { background: #fff; padding: 15px 40px; border-bottom: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .container { max-width: 100%; margin: 20px auto; padding: 0 20px; }
-        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); margin-bottom: 20px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
+        
+        header { 
+            background: #fff; padding: 12px 40px; border-bottom: 3px solid var(--primary); 
+            display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+
+        .container { max-width: 98%; margin: 15px auto; }
+
+        /* Estilo de los bloques divididos */
+        fieldset {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #ffffff;
+            margin-bottom: 15px;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        legend {
+            font-weight: 800;
+            color: var(--primary);
+            padding: 0 10px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .form-group { display: flex; flex-direction: column; }
-        label { font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
-        input, select, textarea { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; transition: 0.2s; }
-        input:focus, textarea:focus { border-color: var(--primary); }
-        .btn-box { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; align-items: center; }
-        .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 10px; color: white; display: flex; align-items: center; gap: 6px; text-transform: uppercase; }
-        .table-wrap { background: #fff; border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; min-width: 1600px; }
-        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 9px; color: #475569; border-bottom: 2px solid var(--border); }
-        td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; font-size: 11px; }
-        .filter-input { width: 100%; padding: 4px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 11px; box-sizing: border-box; }
-        .pagination-container { display: flex; justify-content: center; align-items: center; gap: 15px; padding: 15px; background: #fff; }
-        .btn-page { background: #fff; border: 1px solid #cbd5e1; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
-        .btn-page:disabled { opacity: 0.5; cursor: not-allowed; }
+        label { font-size: 10px; font-weight: 700; color: #475569; margin-bottom: 4px; text-transform: uppercase; }
+        
+        input, select { 
+            padding: 8px 10px; border: 1px solid var(--border); border-radius: 5px; 
+            font-size: 12px; transition: all 0.2s; background: #fff;
+        }
+        input:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(153, 27, 27, 0.1); }
+
+        .btn-box { 
+            background: #fff; padding: 15px; border-radius: 8px; border: 1px solid var(--border);
+            display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px;
+        }
+        .btn { 
+            padding: 9px 15px; border: none; border-radius: 5px; font-weight: 700; 
+            cursor: pointer; font-size: 10px; color: white; display: flex; align-items: center; gap: 6px; 
+        }
+
+        /* Tabla */
+        .table-wrap { background: #fff; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; min-width: 1700px; }
+        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 10px; color: #1e293b; border-bottom: 2px solid var(--border); }
+        td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 11px; }
+        tr:hover { background-color: #f8fafc; }
+
+        .action-btns button { border: none; background: none; cursor: pointer; font-size: 14px; padding: 2px 5px; }
     </style>
 </head>
 <body>
 
 <header>
-    <h2 style="margin:0; color:var(--primary)"><i class="fas fa-brain"></i> PSICOLOGÍA DIF</h2>
-    <button class="btn" style="background: var(--primary)" onclick="location.href='admin_global.html'"><i class="fas fa-house"></i> DASHBOARD</button>
+    <h2 style="margin:0; color:var(--primary); font-size: 1.2rem;"><i class="fas fa-hand-holding-heart"></i> PSICOLOGÍA DIF | SISTEMA 2026</h2>
+    <button class="btn" style="background: var(--primary)" onclick="location.href='admin_global.html'"><i class="fas fa-home"></i> INICIO</button>
 </header>
 
 <div class="container">
-    <div class="card">
-        <input type="hidden" id="f-id">
-        <div class="form-grid">
-            <div class="form-group"><label>No.</label><input type="number" id="f-no"></div>
-            <div class="form-group"><label>Hora</label><input type="time" id="f-horario"></div>
-            <div class="form-group"><label>Fecha</label><input type="date" id="f-fecha"></div>
-            <div class="form-group"><label>Paciente</label><input type="text" id="f-paciente"></div>
-            <div class="form-group"><label>Edad Paciente</label><input type="text" id="f-edad_p"></div>
-            <div class="form-group"><label>Nombre Acompañante</label><input type="text" id="f-nombre_a"></div>
-            <div class="form-group"><label>Edad Acompañante</label><input type="text" id="f-edad_a"></div>
-            <div class="form-group"><label>Colonia / Localidad</label><input type="text" id="f-col_loc"></div>
-            <div class="form-group"><label>Teléfono</label><input type="tel" id="f-telefono"></div>
-            <div class="form-group"><label>Tema / Motivo</label><input type="text" id="f-tema"></div>
-            <div class="form-group"><label>Usuario</label><input type="text" id="f-usuario"></div>
-            <div class="form-group" style="grid-column: span 1;"><label>Observaciones</label><input type="text" id="f-observaciones"></div>
-        </div>
+    <input type="hidden" id="f-id">
+    
+    <fieldset>
+        <legend><i class="fas fa-clipboard-list"></i> Datos de la Cita</legend>
+        <div class="form-group"><label>Folio No.</label><input type="number" id="f-no"></div>
+        <div class="form-group"><label>Fecha</label><input type="date" id="f-fecha"></div>
+        <div class="form-group"><label>Hora</label><input type="time" id="f-horario"></div>
+        <div class="form-group"><label>Atendido por:</label><input type="text" id="f-usuario" placeholder="Psicólogo en turno"></div>
+    </fieldset>
 
-        <div class="btn-box">
-            <button class="btn" id="btn-save" style="background:var(--success)" onclick="saveData()"><i class="fas fa-save"></i> GUARDAR</button>
-            <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="updateData()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
-            <button class="btn" style="background:#4b5563" onclick="limpiarForm()"><i class="fas fa-broom"></i> LIMPIAR</button>
-            
-            <div style="margin-left:10px; display:flex; align-items:center; gap:5px; background:#f1f5f9; padding:5px 10px; border-radius:6px;">
-                <label style="margin:0">MOSTRAR:</label>
-                <select id="row-selector" onchange="resetPageAndRender()">
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                    <option value="all">TODO</option>
-                </select>
-            </div>
+    <fieldset>
+        <legend><i class="fas fa-user"></i> Información del Paciente</legend>
+        <div class="form-group" style="grid-column: span 2;"><label>Nombre Completo</label><input type="text" id="f-paciente"></div>
+        <div class="form-group"><label>Edad</label><input type="text" id="f-edad_p"></div>
+        <div class="form-group"><label>Género</label>
+            <select id="f-genero_p">
+                <option value="">-- SELECCIONAR --</option>
+                <option value="FEMENINO">FEMENINO</option>
+                <option value="MASCULINO">MASCULINO</option>
+                <option value="OTRO">OTRO</option>
+            </select>
         </div>
+        <div class="form-group"><label>Teléfono Contacto</label><input type="tel" id="f-telefono"></div>
+    </fieldset>
+
+    <fieldset>
+        <legend><i class="fas fa-users"></i> Información del Acompañante (Si aplica)</legend>
+        <div class="form-group" style="grid-column: span 2;"><label>Nombre del Acompañante</label><input type="text" id="f-nombre_a"></div>
+        <div class="form-group"><label>Edad</label><input type="text" id="f-edad_a"></div>
+        <div class="form-group"><label>Género</label>
+            <select id="f-genero_a">
+                <option value="">-- SELECCIONAR --</option>
+                <option value="FEMENINO">FEMENINO</option>
+                <option value="MASCULINO">MASCULINO</option>
+                <option value="OTRO">OTRO</option>
+            </select>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend><i class="fas fa-map-marker-alt"></i> Localización y Motivo</legend>
+        <div class="form-group"><label>Colonia / Localidad</label><input type="text" id="f-col_loc"></div>
+        <div class="form-group"><label>Motivo de Consulta / Tema</label><input type="text" id="f-tema"></div>
+        <div class="form-group" style="grid-column: span 2;"><label>Observaciones / Diagnóstico Preliminar</label><input type="text" id="f-observaciones"></div>
+    </fieldset>
+
+    <div class="btn-box">
+        <button class="btn" id="btn-save" style="background:var(--success)" onclick="saveData()"><i class="fas fa-save"></i> GUARDAR REGISTRO</button>
+        <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="updateData()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
+        <button class="btn" style="background:#64748b" onclick="limpiarForm()"><i class="fas fa-eraser"></i> LIMPIAR</button>
     </div>
-
-    <div id="pagination-top" class="pagination-container"></div>
-
+    <div style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 15px; border: 1px solid var(--border); border-bottom: none; border-radius: 8px 8px 0 0;">
+        <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
+            <label style="margin:0">Mostrar:</label>
+            <select id="pagi-limit" onchange="changePageLimit()" style="padding: 4px 8px;">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="30">30</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="300">300</option>
+                <option value="500">500</option>
+            </select>
+            <span id="pagi-info" style="font-size: 11px; color: #64748b; font-weight: bold;"></span>
+        </div>
+        
+        <div style="display: flex; gap: 5px;" id="pagi-buttons">
+            </div>
+    </div>
     <div class="table-wrap">
         <table>
             <thead>
                 <tr>
-                    <th>No.</th><th>HORA</th><th>FECHA</th><th>PACIENTE</th><th>EDAD P</th><th>NOMBRE A</th><th>EDAD A</th><th>COLONIA</th><th>TELÉFONO</th><th>TEMA</th><th>USUARIO</th><th>OBSERVACIONES</th><th>ACCIONES</th>
-                </tr>
-                <tr class="filter-row">
-                    <th><input type="text" class="filter-input" data-col="no" onkeyup="renderUI()"></th>
-                    <th><input type="text" class="filter-input" data-col="horario" onkeyup="renderUI()"></th>
-                    <th><input type="text" class="filter-input" data-col="fecha" onkeyup="renderUI()"></th>
-                    <th><input type="text" class="filter-input" data-col="paciente" onkeyup="renderUI()"></th>
-                    <th><input type="text" class="filter-input" data-col="edad_p" onkeyup="renderUI()"></th>
-                    <th><input type="text" class="filter-input" data-col="nombre_a" onkeyup="renderUI()"></th>
-                    <th><input type="text" class="filter-input" data-col="edad_a" onkeyup="renderUI()"></th>
-                    <th><input type="text" class="filter-input" data-col="col_loc" onkeyup="renderUI()"></th>
-                    <th><input type="text" class="filter-input" data-col="telefono" onkeyup="renderUI()"></th>
-                    <th><input type="text" class="filter-input" data-col="tema" onkeyup="renderUI()"></th>
-                    <th><input type="text" class="filter-input" data-col="usuario" onkeyup="renderUI()"></th>
-                    <th><input type="text" class="filter-input" data-col="observaciones" onkeyup="renderUI()"></th>
-                    <th></th>
+                    <th>FOLIO</th>
+                    <th>FECHA</th>
+                    <th>PACIENTE</th>
+                    <th>EDAD</th>
+                    <th>GÉNERO</th>
+                    <th>ACOMPAÑANTE</th>
+                    <th>COLONIA</th>
+                    <th>TELÉFONO</th>
+                    <th>TEMA / MOTIVO</th>
+                    <th>ATENDIÓ</th>
+                    <th>ACCIONES</th>
                 </tr>
             </thead>
             <tbody id="table-body"></tbody>
         </table>
     </div>
-
-    <div id="pagination-bottom" class="pagination-container"></div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
     const app = initializeApp(firebaseConfig);
@@ -115,66 +179,102 @@
     const mainRef = collection(db, "psicologia");
 
     const sesion = (sessionStorage.getItem('sesion_activa') || "INVITADO").toUpperCase();
+    
+    // VARIABLES DE PAGINACIÓN
     let dataList = [];
     let currentPage = 1;
+    let rowsPerPage = 10;
 
-    onSnapshot(query(mainRef, orderBy("no", "asc")), (snap) => {
+    onSnapshot(query(mainRef, orderBy("no", "desc")), (snap) => {
         dataList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderUI();
-        generarSiguienteNo();
     });
 
+    window.changePageLimit = () => {
+        rowsPerPage = parseInt(document.getElementById('pagi-limit').value);
+        currentPage = 1;
+        renderUI();
+    };
+
+    window.goToPage = (p) => {
+        currentPage = p;
+        renderUI();
+    };
+
     window.renderUI = () => {
-        const filters = Array.from(document.querySelectorAll('.filter-input'));
-        let filteredData = [...dataList];
-        
-        filters.forEach(input => {
-            const val = input.value.toUpperCase();
-            const col = input.dataset.col;
-            if (val) filteredData = filteredData.filter(d => String(d[col] || '').toUpperCase().includes(val));
-        });
-
-        const selector = document.getElementById('row-selector');
-        const rowsPerPage = selector.value === "all" ? (filteredData.length || 1) : parseInt(selector.value);
-        const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
-        
-        if (currentPage > totalPages) currentPage = totalPages;
+        // 1. Calcular rango de datos para la página actual
         const start = (currentPage - 1) * rowsPerPage;
-        const dataToShow = filteredData.slice(start, start + rowsPerPage);
+        const end = start + rowsPerPage;
+        const paginatedData = dataList.slice(start, end);
 
-        document.getElementById('table-body').innerHTML = dataToShow.map(d => `
+        // 2. Renderizar filas de la tabla
+        document.getElementById('table-body').innerHTML = paginatedData.map(d => `
             <tr>
-                <td><b>${d.no || ''}</b></td>
-                <td>${d.horario || ''}</td>
-                <td>${d.fecha || ''}</td>
+                <td><b>#${d.no || ''}</b></td>
+                <td>${d.fecha || ''} ${d.horario || ''}</td>
                 <td><b>${d.paciente || ''}</b></td>
                 <td>${d.edad_p || ''}</td>
+                <td>${d.genero_p || ''}</td>
                 <td>${d.nombre_a || ''}</td>
-                <td>${d.edad_a || ''}</td>
                 <td>${d.col_loc || ''}</td>
                 <td>${d.telefono || ''}</td>
                 <td><small>${d.tema || ''}</small></td>
                 <td><small>${d.usuario || ''}</small></td>
-                <td><small>${d.observaciones || ''}</small></td>
-                <td>
-                    <button onclick="editMode('${d.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
-                    <button onclick="delDoc('${d.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
+                <td class="action-btns">
+                    <button onclick="editMode('${d.id}')" title="Editar">✏️</button>
+                    <button onclick="delDoc('${d.id}')" title="Eliminar">🗑️</button>
                 </td>
             </tr>
         `).join('');
 
-        const navHTML = `
-            <button class="btn-page" onclick="changePage(-1)" ${currentPage === 1 ? 'disabled' : ''}>Anterior</button>
-            <span style="font-weight:bold">Página ${currentPage} de ${totalPages} (Total: ${filteredData.length})</span>
-            <button class="btn-page" onclick="changePage(1)" ${currentPage === totalPages ? 'disabled' : ''}>Siguiente</button>
-        `;
-        document.getElementById('pagination-top').innerHTML = navHTML;
-        document.getElementById('pagination-bottom').innerHTML = navHTML;
+        // 3. Renderizar Controles de Paginación
+        const totalPages = Math.ceil(dataList.length / rowsPerPage);
+        document.getElementById('pagi-info').innerText = `Total: ${dataList.length} registros | Pág. ${currentPage} de ${totalPages}`;
+        
+        let btns = '';
+        if(totalPages > 1) {
+            // Botón Anterior
+            btns += `<button class="btn" style="background:#64748b; padding:4px 8px" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
+            
+            // Números de página (limitado a mostrar 5 páginas cerca de la actual para no saturar)
+            for (let i = 1; i <= totalPages; i++) {
+                if(i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    btns += `<button class="btn" style="background:${i === currentPage ? 'var(--primary)' : '#cbd5e1'}; color:${i === currentPage ? 'white' : '#1e293b'}; padding:4px 10px" onclick="goToPage(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    btns += `<span style="padding:4px">...</span>`;
+                }
+            }
+
+            // Botón Siguiente
+            btns += `<button class="btn" style="background:#64748b; padding:4px 8px" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
+        }
+        document.getElementById('pagi-buttons').innerHTML = btns;
+    };
+
+    // --- EL RESTO DE TUS FUNCIONES SE MANTIENEN IGUAL ---
+    window.getFormData = () => {
+        return {
+            no: Number(document.getElementById('f-no').value),
+            fecha: document.getElementById('f-fecha').value,
+            horario: document.getElementById('f-horario').value,
+            paciente: document.getElementById('f-paciente').value.toUpperCase(),
+            edad_p: document.getElementById('f-edad_p').value,
+            genero_p: document.getElementById('f-genero_p').value,
+            nombre_a: document.getElementById('f-nombre_a').value.toUpperCase(),
+            edad_a: document.getElementById('f-edad_a').value,
+            genero_a: document.getElementById('f-genero_a').value,
+            col_loc: document.getElementById('f-col_loc').value.toUpperCase(),
+            telefono: document.getElementById('f-telefono').value,
+            tema: document.getElementById('f-tema').value.toUpperCase(),
+            usuario: document.getElementById('f-usuario').value.toUpperCase(),
+            observaciones: document.getElementById('f-observaciones').value.toUpperCase(),
+            t: new Date().getTime()
+        };
     };
 
     window.saveData = async () => {
         const data = getFormData();
-        if(!data.paciente) return alert("Nombre de paciente requerido");
+        if(!data.paciente) return alert("El nombre del paciente es obligatorio");
         await addDoc(mainRef, data);
         limpiarForm();
     };
@@ -183,18 +283,20 @@
         const d = dataList.find(i => i.id === id);
         if(!d) return;
         document.getElementById('f-id').value = d.id;
-        document.getElementById('f-no').value = d.no || "";
-        document.getElementById('f-horario').value = d.horario || "";
-        document.getElementById('f-fecha').value = d.fecha || "";
-        document.getElementById('f-paciente').value = d.paciente || "";
-        document.getElementById('f-edad_p').value = d.edad_p || "";
-        document.getElementById('f-nombre_a').value = d.nombre_a || "";
-        document.getElementById('f-edad_a').value = d.edad_a || "";
-        document.getElementById('f-col_loc').value = d.col_loc || "";
-        document.getElementById('f-telefono').value = d.telefono || "";
-        document.getElementById('f-tema').value = d.tema || "";
-        document.getElementById('f-usuario').value = d.usuario || sesion;
-        document.getElementById('f-observaciones').value = d.observaciones || "";
+        document.getElementById('f-no').value = d.no;
+        document.getElementById('f-fecha').value = d.fecha;
+        document.getElementById('f-horario').value = d.horario;
+        document.getElementById('f-paciente').value = d.paciente;
+        document.getElementById('f-edad_p').value = d.edad_p;
+        document.getElementById('f-genero_p').value = d.genero_p;
+        document.getElementById('f-nombre_a').value = d.nombre_a;
+        document.getElementById('f-edad_a').value = d.edad_a;
+        document.getElementById('f-genero_a').value = d.genero_a;
+        document.getElementById('f-col_loc').value = d.col_loc;
+        document.getElementById('f-telefono').value = d.telefono;
+        document.getElementById('f-tema').value = d.tema;
+        document.getElementById('f-usuario').value = d.usuario;
+        document.getElementById('f-observaciones').value = d.observaciones;
         
         document.getElementById('btn-save').style.display = 'none';
         document.getElementById('btn-update').style.display = 'inline-block';
@@ -204,46 +306,26 @@
     window.updateData = async () => {
         const id = document.getElementById('f-id').value;
         await updateDoc(doc(db, "psicologia", id), getFormData());
-        alert("Registro actualizado");
+        alert("Registro actualizado correctamente");
         limpiarForm();
     };
-
-    function getFormData() {
-        return {
-            no: Number(document.getElementById('f-no').value),
-            horario: document.getElementById('f-horario').value,
-            fecha: document.getElementById('f-fecha').value,
-            paciente: document.getElementById('f-paciente').value.toUpperCase(),
-            edad_p: document.getElementById('f-edad_p').value,
-            nombre_a: document.getElementById('f-nombre_a').value.toUpperCase(),
-            edad_a: document.getElementById('f-edad_a').value,
-            col_loc: document.getElementById('f-col_loc').value.toUpperCase(),
-            tema: document.getElementById('f-tema').value.toUpperCase(),
-            telefono: document.getElementById('f-telefono').value,
-            usuario: document.getElementById('f-usuario').value.toUpperCase(),
-            observaciones: document.getElementById('f-observaciones').value.toUpperCase(),
-            t: new Date().getTime()
-        };
-    }
 
     window.limpiarForm = () => {
         document.getElementById('f-id').value = "";
         document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
         document.getElementById('f-usuario').value = sesion;
-        ['f-horario','f-paciente','f-edad_p','f-nombre_a','f-edad_a','f-col_loc','f-telefono','f-tema', 'f-observaciones'].forEach(id => document.getElementById(id).value = "");
+        ['f-horario','f-paciente','f-edad_p','f-genero_p','f-nombre_a','f-edad_a','f-genero_a','f-col_loc','f-telefono','f-tema','f-observaciones'].forEach(id => {
+            document.getElementById(id).value = "";
+        });
         document.getElementById('btn-save').style.display = 'inline-block';
         document.getElementById('btn-update').style.display = 'none';
-        generarSiguienteNo();
+        
+        const max = dataList.reduce((m, i) => Math.max(m, Number(i.no) || 0), 0);
+        document.getElementById('f-no').value = max + 1;
     };
 
-    function generarSiguienteNo() {
-        const max = dataList.reduce((m, i) => Math.max(m, Number(i.no) || 0), 0);
-        if(!document.getElementById('f-id').value) document.getElementById('f-no').value = max + 1;
-    }
+    window.delDoc = async (id) => { if(confirm("¿Seguro que desea eliminar este registro?")) await deleteDoc(doc(db, "psicologia", id)); };
 
-    window.changePage = (d) => { currentPage += d; renderUI(); };
-    window.resetPageAndRender = () => { currentPage = 1; renderUI(); };
-    window.delDoc = async (id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, "psicologia", id)); };
 
     window.limpiarForm();
 </script>
