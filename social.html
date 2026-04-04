@@ -213,15 +213,18 @@
         alert("✅ Registro actualizado correctamente.");
     };
 
-    window.filtrar = () => {
+   window.filtrar = () => {
         const term = document.getElementById('buscador').value.toLowerCase();
-        // ORDEN ASCENDENTE (MENOR A MAYOR)
         datosFiltrados = todosLosDatos.filter(r => 
             Object.values(r).some(v => String(v).toLowerCase().includes(term))
-        ).sort((a,b) => parseInt(a.numero_consecutivo) - parseInt(b.numero_consecutivo));
+        ).sort((a, b) => {
+            // Convertimos a número para asegurar el orden matemático correcto
+            const numA = parseInt(a.numero_consecutivo) || 0;
+            const numB = parseInt(b.numero_consecutivo) || 0;
+            return numB - numA; // <--- Cambio aquí: B menos A para orden descendente
+        });
         renderTabla();
     };
-
     function renderTabla() {
         const inicio = (paginaActual - 1) * filasPorPagina;
         const segmento = datosFiltrados.slice(inicio, inicio + filasPorPagina);
