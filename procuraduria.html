@@ -185,17 +185,24 @@
         }
     };
 
-  window.filtrar = () => {
-        const term = document.getElementById('buscador').value.toLowerCase().trim();
-        datosMostrados = todosLosDatos.filter(r => 
-            Object.values(r).some(val => String(val).toLowerCase().includes(term))
-        );
-        // CAMBIO AQUÍ: (a - b) para orden ascendente (menor a mayor)
-        datosMostrados.sort((a, b) => (parseInt(a.no) || 0) - (parseInt(b.no) || 0)); 
-        
-        paginaActual = 1; 
-        renderTabla();
-    };
+ window.filtrar = () => {
+    const term = document.getElementById('buscador').value.toLowerCase().trim();
+    
+    // 1. Filtramos los datos según el término de búsqueda
+    datosMostrados = todosLosDatos.filter(r => 
+        Object.values(r).some(val => String(val).toLowerCase().includes(term))
+    );
+
+    // 2. ORDENAR DE MAYOR A MENOR (Descendente)
+    datosMostrados.sort((a, b) => {
+        const numA = parseInt(a.no) || 0;
+        const numB = parseInt(b.no) || 0;
+        return numB - numA; // B menos A para que el mayor vaya primero
+    });
+    
+    paginaActual = 1; 
+    renderTabla();
+};
 
     function renderTabla() {
         const totalRegistros = datosMostrados.length;
