@@ -93,9 +93,10 @@
         <div class="btn-box">
             <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
             <button class="btn" id="btn-upd" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
-            <button class="btn" style="background:#94a3b8" onclick="location.reload()"><i class="fas fa-eraser"></i> LIMPIAR</button>
             <button class="btn" style="background:#1d6f42" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
-
+            <label class="btn" style="background:#6366f1; cursor:pointer;"><i class="fas fa-upload"></i> IMPORTAR EXCEL <input type="file" onchange="importarSincronizado(event)" hidden></label>
+            <button class="btn" style="background:#94a3b8" onclick="location.reload()"><i class="fas fa-eraser"></i> LIMPIAR</button>
+            <button class="btn" style="background:var(--danger); margin-left: auto;" onclick="vaciarBaseDeDatos()"><i class="fas fa-trash-alt"></i> VACIAR BASE DE DATOS</button>
         </div>
     </div>
 
@@ -172,37 +173,47 @@
         filtrarYRender();
     });
 
-    window.filtrarYRender = () => {
-        const val = document.getElementById('input-busqueda').value.toLowerCase();
-        const est = document.getElementById('filtro-estatus').value;
-        DATA_FILTRADA = DATA_ACTUAL.filter(r => {
-            const campos = Object.values(r).join(" ").toLowerCase();
-            return campos.includes(val) && (est === "Todos" || r.estatus === est);
-        });
-        PAGINA_ACTUAL = 1;
-        render();
-    };
+window.filtrarYRender = () => {
+    const val = document.getElementById('input-busqueda').value.toLowerCase();
+    const est = document.getElementById('filtro-estatus').value;
+    
+    DATA_FILTRADA = DATA_ACTUAL.filter(r => {
+        const campos = Object.values(r).join(" ").toLowerCase();
+        return campos.includes(val) && (est === "Todos" || r.estatus === est);
+    });
 
-    function render() {
-        const inicio = (PAGINA_ACTUAL - 1) * FILAS_POR_PAGINA;
-        const lista = DATA_FILTRADA.slice(inicio, inicio + FILAS_POR_PAGINA);
-        document.getElementById('info-total').innerText = `REGISTROS: ${DATA_FILTRADA.length}`;
-        
-        document.getElementById('tabla-beneficiarios').innerHTML = lista.map((r, i) => `
-            <tr>
-                <td><b>${inicio + i + 1}</b></td>
-                <td>${r.ine_img ? `<img src="${r.ine_img}" onclick="abrirVisor('${r.ine_img}', '${r.nombre}')" style="width:35px;height:35px;object-fit:cover;cursor:pointer;border-radius:4px;">` : '-'}</td>
-                <td style="color:var(--primary); font-weight:bold;">${r.codigo || ''}</td>
-                <td><b>${r.apellido_paterno || ''} ${r.apellido_materno || ''} ${r.nombre || ''}</b><span class="sub-text">${r.curp || ''}</span></td>
-                <td><b>${r.col_loc || ''}</b><span class="sub-text">${r.direccion || ''}</span></td>
-                <td>${r.tipo_apoyo || ''}</td>
-                <td><span class="badge-status" style="background:${r.estatus==='Entregado'?'#dcfce7':'#fef3c7'}; color:${r.estatus==='Entregado'?'#15803d':'#b45309'}">${r.estatus}</span></td>
-                <td class="no-print">
-                    <button onclick="editar('${r.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
-                    <button onclick="eliminar('${r.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
-                </td>
-            </tr>
-        `).join('');
+    // ORDENAR POR CÓDIGO (De mayor a menor)
+    DATA_FILTRADA.sort((a, b) => {
+        return (b.codigo || "").localeCompare(a.codigo || "", undefined, {numeric: true});
+    });
+
+    PAGINA_ACTUAL = 1;
+    render();
+};
+
+function render() {
+    const inicio = (PAGINA_ACTUAL - 1) * FILAS_POR_PAGINA;
+    const lista = DATA_FILTRADA.slice(inicio, inicio + FILAS_POR_PAGINA);
+    document.getElementById('info-total').innerText = `REGISTROS: ${DATA_FILTRADA.length}`;
+    
+    // Calculamos el número inicial basado en el total para conteo regresivo
+    const totalRegistros = DATA_FILTRADA.length;
+
+    document.getElementById('tabla-beneficiarios').innerHTML = lista.map((r, i) => `
+        <tr>
+            <td><b>${totalRegistros - (inicio + i)}</b></td>
+            <td>${r.ine_img ? `<img src="${r.ine_img}" onclick="abrirVisor('${r.ine_img}', '${r.nombre}')" style="width:35px;height:35px;object-fit:cover;cursor:pointer;border-radius:4px;">` : '-'}</td>
+            <td style="color:var(--primary); font-weight:bold;">${r.codigo || ''}</td>
+            <td><b>${r.apellido_paterno || ''} ${r.apellido_materno || ''} ${r.nombre || ''}</b><span class="sub-text">${r.curp || ''}</span></td>
+            <td><b>${r.col_loc || ''}</b><span class="sub-text">${r.direccion || ''}</span></td>
+            <td>${r.tipo_apoyo || ''}</td>
+            <td><span class="badge-status" style="background:${r.estatus==='Entregado'?'#dcfce7':'#fef3c7'}; color:${r.estatus==='Entregado'?'#15803d':'#b45309'}">${r.estatus}</span></td>
+            <td class="no-print">
+                <button onclick="editar('${r.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
+                <button onclick="eliminar('${r.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
+            </td>
+        </tr>
+    `).join('');
 
         const tPag = Math.ceil(DATA_FILTRADA.length / FILAS_POR_PAGINA);
         let pagHTML = `<button class="btn-pag" onclick="irPagina(${PAGINA_ACTUAL - 1})" ${PAGINA_ACTUAL === 1 ? 'disabled' : ''}>Anterior</button>`;
@@ -303,6 +314,65 @@ window.guardar = async () => {
         location.reload();
     };
 
+    window.eliminar = async (id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, "apoyos", id)); };
+
+// IMPORTACIÓN ROBUSTA CON NORMALIZACIÓN DE ESTATUS
+    window.importarSincronizado = async (e) => {
+        const f = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+            const data = new Uint8Array(ev.target.result);
+            const wb = XLSX.read(data, { type: 'array', cellDates: true });
+            const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+            const batch = writeBatch(db);
+            
+            json.forEach(row => {
+                const nuevoDoc = doc(apoyosRef);
+                const dataRow = {};
+                
+                Object.keys(row).forEach(key => {
+                    // 1. Limpieza de nombres de columnas (IDs)
+                    let idLimpio = key.toLowerCase().trim()
+                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
+                        .replace(/ /g, "_");
+                    
+                    // Mapeos de nombres de columnas alternativos
+                    if(idLimpio.includes("clave_mpio") || idLimpio.includes("cve_mpio") || idLimpio.includes("clave_municipio")) idLimpio = "cve_mpio";
+                    if(idLimpio === "telefono" || idLimpio === "tel") idLimpio = "telefono";
+
+                    let valor = row[key];
+
+                    // 2. NORMALIZACIÓN CRÍTICA DEL ESTATUS (Para que coincida con el Select/Checklist)
+                    if (idLimpio === "estatus") {
+                        let vStr = String(valor).trim().toLowerCase();
+                        if (vStr.includes("entregado")) {
+                            valor = "Entregado";
+                        } else {
+                            valor = "Pendiente"; // Por defecto si no dice entregado
+                        }
+                    }
+
+                    if(valor instanceof Date) valor = valor.toISOString().split('T')[0];
+                    dataRow[idLimpio] = valor;
+                });
+
+                // Si el Excel no traía columna de estatus, lo ponemos como Pendiente por defecto
+                if (!dataRow.estatus) dataRow.estatus = "Pendiente";
+
+                if(dataRow.codigo) batch.set(nuevoDoc, dataRow);
+            });
+
+            try {
+                await batch.commit(); 
+                alert("Importación terminada con éxito. Los estados han sido normalizados."); 
+                location.reload();
+            } catch (error) {
+                console.error("Error al importar:", error);
+                alert("Error al guardar los datos en la base de datos.");
+            }
+        };
+        reader.readAsArrayBuffer(f);
+    };
  window.exportarExcel = () => {
     // 1. Definimos el orden y los nombres de las columnas (Headers)
     const encabezados = {
@@ -369,8 +439,17 @@ window.guardar = async () => {
         document.getElementById('link-descarga').href = src;
     };
     window.cerrarVisor = () => document.getElementById('modal-visor').style.display='none';
+    
+    window.vaciarBaseDeDatos = async () => {
+        if(!confirm("¿BORRAR TODO? Esta acción es definitiva.")) return;
+        if(prompt("Escribe ELIMINAR") !== "ELIMINAR") return;
+        const snap = await getDocs(apoyosRef);
+        const batch = writeBatch(db);
+        snap.forEach(d => batch.delete(d.ref));
+        await batch.commit(); location.reload();
+    };
 
-        // Función para cambiar la cantidad de registros visibles
+    // Función para cambiar la cantidad de registros visibles
     window.cambiarFilas = (valor) => {
         FILAS_POR_PAGINA = parseInt(valor);
         PAGINA_ACTUAL = 1; // Reiniciar a la primera página para evitar errores de índice
