@@ -93,11 +93,7 @@
         <div class="btn-box">
             <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
             <button class="btn" id="btn-upd" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
-            <button class="btn" style="background:#1d6f42" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
-            <label class="btn" style="background:#6366f1; cursor:pointer;"><i class="fas fa-upload"></i> IMPORTAR EXCEL <input type="file" onchange="importarSincronizado(event)" hidden></label>
             <button class="btn" style="background:#94a3b8" onclick="location.reload()"><i class="fas fa-eraser"></i> LIMPIAR</button>
-            <button class="btn" style="background:var(--danger); margin-left: auto;" onclick="vaciarBaseDeDatos()"><i class="fas fa-trash-alt"></i> VACIAR BASE DE DATOS</button>
-        </div>
     </div>
 
     <div class="search-box no-print">
@@ -440,14 +436,6 @@ window.guardar = async () => {
     };
     window.cerrarVisor = () => document.getElementById('modal-visor').style.display='none';
     
-    window.vaciarBaseDeDatos = async () => {
-        if(!confirm("¿BORRAR TODO? Esta acción es definitiva.")) return;
-        if(prompt("Escribe ELIMINAR") !== "ELIMINAR") return;
-        const snap = await getDocs(apoyosRef);
-        const batch = writeBatch(db);
-        snap.forEach(d => batch.delete(d.ref));
-        await batch.commit(); location.reload();
-    };
 
     // Función para cambiar la cantidad de registros visibles
     window.cambiarFilas = (valor) => {
