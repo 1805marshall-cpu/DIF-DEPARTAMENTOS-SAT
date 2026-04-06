@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA DIF 2026 | Admin Global</title>
+    <title>SISTEMA DIF 2026 - 2029 | Admin Global</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { 
@@ -70,6 +70,7 @@
             <div id="nav-procuraduria" class="nav-item" onclick="showView('procuraduria', this)"><i class="fas fa-balance-scale"></i> <span>Procuraduría</span></div>
             <div id="nav-medica" class="nav-item" onclick="showView('medica', this)"><i class="fas fa-notes-medical"></i> <span>Área Médica</span></div>
             <div id="nav-psicologia" class="nav-item" onclick="showView('psicologia', this)"><i class="fas fa-brain"></i> <span>Psicología</span></div>
+            <div id="nav-jefatura-psicologia" class="nav-item" onclick="showView('jefatura-psicologia', this)"><i class="fas fa-balance-scale"></i> <span>Jefatura Psicología</span></div>
         </nav>
         <div class="nav-exit" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> <span>CERRAR SESIÓN</span></div>
     </div>
@@ -149,24 +150,41 @@
         <div id="view-psicologia" class="view-container">
             <div class="access-card" style="background: var(--psico-color);"><div><b>Psicología</b></div><a href="psicologia.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
-         <div class="stats-grid">
-    <div class="stat-box" style="border-top:3px solid var(--psico-color)"><small>Total Pacientes</small><div id="p-total">0</div></div>
-    <div class="stat-box"><small>Pacientes H</small><div id="p-hombres" style="color:var(--primary)">0</div></div>
-    <div class="stat-box"><small>Pacientes M</small><div id="p-mujeres" style="color:var(--psico-color)">0</div></div>
-    <div class="stat-box"><small>Pacientes Menores</small><div id="p-menores" style="color:var(--warning)">0</div></div>
+            <div class="stats-grid">
+                <div class="stat-box" style="border-top:3px solid var(--psico-color)"><small>Total Pacientes</small><div id="p-total">0</div></div>
+                <div class="stat-box"><small>Pacientes H</small><div id="p-hombres" style="color:var(--primary)">0</div></div>
+                <div class="stat-box"><small>Pacientes M</small><div id="p-mujeres" style="color:var(--psico-color)">0</div></div>
+                <div class="stat-box"><small>Pacientes Menores</small><div id="p-menores" style="color:var(--warning)">0</div></div>
 
-    <div class="stat-box" style="border-top:3px solid #64748b"><small>Total Acompañantes</small><div id="p-total-a">0</div></div>
-    <div class="stat-box"><small>Acompañantes H</small><div id="p-hombres-a" style="color:var(--primary)">0</div></div>
-    <div class="stat-box"><small>Acompañantes M</small><div id="p-mujeres-a" style="color:var(--psico-color)">0</div></div>
-    <div class="stat-box"><small>Acompañantes Menores</small><div id="p-menores-a" style="color:var(--warning)">0</div></div>
-    
-    <div class="stat-box" style="border-top:3px solid var(--success)"><small>Total Sesiones</small><div id="p-ses">0</div></div>
-</div>
+                <div class="stat-box" style="border-top:3px solid #64748b"><small>Total Acompañantes</small><div id="p-total-a">0</div></div>
+                <div class="stat-box"><small>Acompañantes H</small><div id="p-hombres-a" style="color:var(--primary)">0</div></div>
+                <div class="stat-box"><small>Acompañantes M</small><div id="p-mujeres-a" style="color:var(--psico-color)">0</div></div>
+                <div class="stat-box"><small>Acompañantes Menores</small><div id="p-menores-a" style="color:var(--warning)">0</div></div>
+                
+                <div class="stat-box" style="border-top:3px solid var(--success)"><small>Total Sesiones</small><div id="p-ses">0</div></div>
+            </div>
             <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;">
-                <div class="panel"><b>Motivos</b><div id="p-list-motivos"></div></div>
+                <div class="panel"><b>Motivos / Sesiones</b><div id="p-list-motivos"></div></div>
                 <div class="panel"><b>Zonas</b><div id="p-list-seguimiento"></div></div>
             </div>
         </div>
+
+        <div id="view-jefatura-psicologia" class="view-container">
+    <div class="access-card" style="background: #701a27;">
+        <div><b>Jefatura de Psicología</b></div>
+        <a href="jefatura_psicologia.html" class="btn-open">Módulo Registro</a>
+    </div>
+    <div class="filter-bar"></div>
+    <div class="stats-grid">
+        <div class="stat-box" style="border-top:3px solid #701a27"><small>Total Actividades</small><div id="jp-total">0</div></div>
+        <div class="stat-box"><small>Valoraciones</small><div id="jp-val" style="color:var(--primary)">0</div></div>
+        <div class="stat-box"><small>Entrevistas</small><div id="jp-ent" style="color:var(--success)">0</div></div>
+    </div>
+    <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px;">
+        <div class="panel"><b>Resumen por Dependencia / Actividad</b><div id="jp-list-actividades"></div></div>
+        <div class="panel"><b>Zonas de Intervención</b><div id="jp-list-geo"></div></div>
+    </div>
+</div>
     </div>
 
 <script type="module">
@@ -183,6 +201,7 @@
     window.cerrarSesion = () => { if(confirm("¿Cerrar sesión?")) { sessionStorage.clear(); window.location.href = "index.html"; } };
     document.getElementById('btn-toggle').addEventListener('click', () => { document.querySelector('.sidebar').classList.toggle('collapsed'); });
 
+    // --- FUNCIONES DE UTILIDAD ---
     const cumpleFiltros = (d, s, m) => {
         const term = s.toLowerCase().trim();
         const zonaBusqueda = document.getElementById('global-zone-search').value.toLowerCase().trim();
@@ -219,111 +238,75 @@
         const el = document.getElementById(id); if(el) el.innerHTML = h || "Sin registros.";
     };
 
-    let DB_V = [], DB_S = [], DB_P = [], DB_M = [], DB_PS = [];
+    // --- BASES DE DATOS EN MEMORIA ---
+   // --- BASES DE DATOS EN MEMORIA ---
+    let DB_V = [], DB_S = [], DB_P = [], DB_M = [], DB_PS = [], DB_JP = [];
 
     onSnapshot(collection(db, "apoyos"), s => { DB_V = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "trabajo_social"), s => { DB_S = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "procuraduria"), s => { DB_P = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "area_medica"), s => { DB_M = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "psicologia"), s => { DB_PS = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
+    onSnapshot(collection(db, "jefatura_psicologia"), s => { DB_JP = s.docs.map(d => d.data()); window.reprocesarTodo(); });
 
     window.reprocesarTodo = () => {
-    // Buscamos los filtros de la vista que esté activa actualmente
-    const act = document.querySelector('.view-container.active');
-    const s = act ? (act.querySelector('.global-search')?.value || "") : "";
-    const m = act ? (act.querySelector('.month-filter')?.value || "all") : "all";
-    
-    // Ejecutamos todos los procesos
-    window.procVul(s, m); 
-    window.procSoc(s, m); 
-    window.procPro(s, m); 
-    window.procMed(s, m); 
-    window.procPsi(s, m);
-};
-
-   window.procVul = (s, m) => {
-    let ent = 0, tal = {}, apo = {}, geo = {};
-    let sCarp = new Set(), sPana = new Set(), sCoci = new Set(), sOtr = new Set();
-    let grpStatus = {};
-
-    // Filtrar base de datos
-    let fil = DB_V.filter(d => cumpleFiltros(d, s, m));
-
-    fil.forEach(d => {
-        // Estandarizar estatus para conteo
-        const est = (d.estatus || "").toUpperCase();
-        if (est === 'ENTREGADO' || est === 'REALIZADO') ent++;
-
-        const n = `${d.nombre || ''} ${d.apellido_paterno || ''} ${d.apellido_materno || ''}`.toUpperCase();
-        const c = (d.codigo || 'S/C').toUpperCase();
-        const t = (d.tipo_apoyo || "").toUpperCase();
-        const l = (d.col_loc || "S/L").toUpperCase();
-
-        // Lógica de Talleres y Grupos
-        if (c.startsWith('CARP') || c.startsWith('PANAD') || c.startsWith('COC') || c.startsWith('COST') || t.includes("TALLER")) {
-            if (!tal[c]) tal[c] = []; 
-            tal[c].push({ n, x: c, l, s: est });
-
-            if (!grpStatus[c]) grpStatus[c] = { pendientes: 0 };
-            if (est !== 'ENTREGADO' && est !== 'REALIZADO') grpStatus[c].pendientes++;
-
-            if (c.startsWith('CARP')) sCarp.add(c); 
-            else if (c.startsWith('PANAD')) sPana.add(c); 
-            else if (c.startsWith('COC')) sCoci.add(c); 
-            else sOtr.add(c);
-        } else { 
-            // Otros apoyos
-            if (!apo[t || "OTROS"]) apo[t || "OTROS"] = []; 
-            apo[t || "OTROS"].push({ n, x: c, l, s: est }); 
-        }
-
-        // Agrupación por zona
-        if (!geo[l]) geo[l] = []; 
-        geo[l].push({ n, x: c, l, s: est });
-    });
-
-    // Función interna para contar grupos finalizados vs pendientes
-    const countEP = (set) => {
-        let e = 0, p = 0;
-        set.forEach(id => { 
-            if (grpStatus[id] && grpStatus[id].pendientes > 0) p++; 
-            else e++; 
-        });
-        return { e, p };
+        const act = document.querySelector('.view-container.active');
+        const s = act ? (act.querySelector('.global-search')?.value || "") : "";
+        const m = act ? (act.querySelector('.month-filter')?.value || "all") : "all";
+        
+        window.procVul(s, m); 
+        window.procSoc(s, m); 
+        window.procPro(s, m); 
+        window.procMed(s, m); 
+        window.procPsi(s, m);
+        window.procJefPsic(s, m);
     };
 
-    // RENDERIZADO EN PANTALLA (Verificación de existencia de IDs)
-    if (document.getElementById('v-total')) {
-        document.getElementById('v-total').innerText = fil.length;
-        document.getElementById('v-ent').innerText = ent;
-        document.getElementById('v-pen').innerText = fil.length - ent;
+    // --- MÓDULO: VULNERABLE ---
+    window.procVul = (s, m) => {
+        let ent = 0, tal = {}, apo = {}, geo = {};
+        let sCarp = new Set(), sPana = new Set(), sCoci = new Set(), sOtr = new Set();
+        let grpStatus = {};
+        let fil = DB_V.filter(d => cumpleFiltros(d, s, m));
 
-        const cC = countEP(sCarp); 
-        document.getElementById('v-g-carp-e').innerText = cC.e; 
-        document.getElementById('v-g-carp-p').innerText = cC.p;
-        document.getElementById('v-g-carp').innerText = sCarp.size; // Total de grupos
+        fil.forEach(d => {
+            const est = (d.estatus || "").toUpperCase();
+            if (est === 'ENTREGADO' || est === 'REALIZADO') ent++;
+            const n = `${d.nombre || ''} ${d.apellido_paterno || ''} ${d.apellido_materno || ''}`.toUpperCase();
+            const c = (d.codigo || 'S/C').toUpperCase();
+            const t = (d.tipo_apoyo || "").toUpperCase();
+            const l = (d.col_loc || "S/L").toUpperCase();
 
-        const cP = countEP(sPana); 
-        document.getElementById('v-g-pana-e').innerText = cP.e; 
-        document.getElementById('v-g-pana-p').innerText = cP.p;
-        document.getElementById('v-g-pana').innerText = sPana.size;
+            if (c.startsWith('CARP') || c.startsWith('PANAD') || c.startsWith('COC') || c.startsWith('COST') || t.includes("TALLER")) {
+                if (!tal[c]) tal[c] = []; tal[c].push({ n, x: c, l, s: est });
+                if (!grpStatus[c]) grpStatus[c] = { pendientes: 0 };
+                if (est !== 'ENTREGADO' && est !== 'REALIZADO') grpStatus[c].pendientes++;
+                if (c.startsWith('CARP')) sCarp.add(c); else if (c.startsWith('PANAD')) sPana.add(c); else if (c.startsWith('COC')) sCoci.add(c); else sOtr.add(c);
+            } else {
+                if (!apo[t || "OTROS"]) apo[t || "OTROS"] = []; apo[t || "OTROS"].push({ n, x: c, l, s: est }); 
+            }
+            if (!geo[l]) geo[l] = []; geo[l].push({ n, x: c, l, s: est });
+        });
 
-        const cCo = countEP(sCoci); 
-        document.getElementById('v-g-coci-e').innerText = cCo.e; 
-        document.getElementById('v-g-coci-p').innerText = cCo.p;
-        document.getElementById('v-g-coci').innerText = sCoci.size;
+        const countEP = (set) => {
+            let e = 0, p = 0;
+            set.forEach(id => { if (grpStatus[id] && grpStatus[id].pendientes > 0) p++; else e++; });
+            return { e, p };
+        };
 
-        const cO = countEP(sOtr); 
-        document.getElementById('v-g-otr-e').innerText = cO.e; 
-        document.getElementById('v-g-otr-p').innerText = cO.p;
-        document.getElementById('v-g-otros').innerText = sOtr.size;
+        if (document.getElementById('v-total')) {
+            document.getElementById('v-total').innerText = fil.length;
+            document.getElementById('v-ent').innerText = ent;
+            document.getElementById('v-pen').innerText = fil.length - ent;
+            const cC = countEP(sCarp); document.getElementById('v-g-carp-e').innerText = cC.e; document.getElementById('v-g-carp-p').innerText = cC.p; document.getElementById('v-g-carp').innerText = sCarp.size;
+            const cP = countEP(sPana); document.getElementById('v-g-pana-e').innerText = cP.e; document.getElementById('v-g-pana-p').innerText = cP.p; document.getElementById('v-g-pana').innerText = sPana.size;
+            const cCo = countEP(sCoci); document.getElementById('v-g-coci-e').innerText = cCo.e; document.getElementById('v-g-coci-p').innerText = cCo.p; document.getElementById('v-g-coci').innerText = sCoci.size;
+            const cO = countEP(sOtr); document.getElementById('v-g-otr-e').innerText = cO.e; document.getElementById('v-g-otr-p').innerText = cO.p; document.getElementById('v-g-otros').innerText = sOtr.size;
+            renderM('v-list-talleres', tal, 'var(--vulnerable-color)'); renderM('v-list-apoyos', apo, 'var(--primary)'); renderM('v-list-geo', geo, '#64748b');
+        }
+    };
 
-        renderM('v-list-talleres', tal, 'var(--vulnerable-color)');
-        renderM('v-list-apoyos', apo, 'var(--primary)');
-        renderM('v-list-geo', geo, '#64748b');
-    }
-};
-
+    // --- MÓDULO: TRABAJO SOCIAL ---
     window.procSoc = (s, m) => {
         let fin = 0, prg = {}, geo = {}, asuCounts = {}, progCounts = {};
         let fil = DB_S.filter(d => cumpleFiltros(d,s,m));
@@ -348,6 +331,7 @@
         }
     };
 
+    // --- MÓDULO: PROCURADURÍA ---
     window.procPro = (s, m) => {
         let mix = 0, cA = {}, lD = {}, geo = {};
         let fil = DB_P.filter(d => cumpleFiltros(d,s,m));
@@ -366,6 +350,7 @@
         }
     };
 
+    // --- MÓDULO: ÁREA MÉDICA ---
     window.procMed = (s, m) => {
         let med = 0, ser = {}, dia = {}, geo = {};
         let fil = DB_M.filter(d => cumpleFiltros(d,s,m));
@@ -382,110 +367,157 @@
         }
     };
 
-window.procPsi = (s, m) => {
-    let ses = 0;
-    let pSet = new Set(), aSet = new Set();
-    let mot = {}, seg = {};
-    
-    // Contadores Pacientes
-    let pH = 0, pM = 0, pMen = 0;
-    // Contadores Acompañantes
-    let aH = 0, aM = 0, aMen = 0;
+    // --- MÓDULO: PSICOLOGÍA (Lógica Separada) ---
+    window.procPsi = (s, m) => {
+        let ses = 0;
+        let pSet = new Set(), aSet = new Set();
+        let mot = {}, seg = {};
+        let pH = 0, pM = 0, pMen = 0;
+        let aH = 0, aM = 0, aMen = 0;
+        let pacUnicos = new Set(), acoUnicos = new Set();
 
-    let pacientesUnicos = new Set();
-    let acompañantesUnicos = new Set();
+        let fil = DB_PS.filter(d => cumpleFiltros(d, s, m));
 
-    let fil = DB_PS.filter(d => cumpleFiltros(d, s, m));
+        fil.forEach(d => {
+            ses++;
+            const pNom = (d.paciente || '').toUpperCase();
+            const aNom = (d.nombre_a || '').toUpperCase();
+
+            // Pacientes
+            if(pNom) {
+                pSet.add(pNom);
+                if(!pacUnicos.has(pNom)) {
+                    const g = (d.genero_p || "").toUpperCase();
+                    const e = parseInt(d.edad_p) || 0;
+                    if(g === 'MASCULINO') pH++; if(g === 'FEMENINO') pM++; if(e > 0 && e < 18) pMen++;
+                    pacUnicos.add(pNom);
+                }
+            }
+            // Acompañantes
+            if(aNom && aNom !== "S/N" && aNom !== "NINGUNO") {
+                aSet.add(aNom);
+                if(!acoUnicos.has(aNom)) {
+                    const g = (d.genero_a || "").toUpperCase();
+                    const e = parseInt(d.edad_a) || 0;
+                    if(g === 'MASCULINO') aH++; if(g === 'FEMENINO') aM++; if(e > 0 && e < 18) aMen++;
+                    acoUnicos.add(aNom);
+                }
+            }
+
+            const mo = (d.tema || "GENERAL").toUpperCase();
+            const l = (d.col_loc || "S/L").toUpperCase();
+            if(!mot[mo]) mot[mo] = []; mot[mo].push({ n: pNom, x: `FOLIO: ${d.no}`, l: `Acompaña: ${aNom || 'Solo'}` });
+            if(!seg[l]) seg[l] = []; seg[l].push({ n: pNom, x: d.fecha || '', l: mo });
+        });
+
+        if(document.getElementById('p-total')){
+            document.getElementById('p-total').innerText = pSet.size;
+            document.getElementById('p-total-a').innerText = aSet.size;
+            document.getElementById('p-ses').innerText = ses;
+            document.getElementById('p-hombres').innerText = pH; document.getElementById('p-mujeres').innerText = pM; document.getElementById('p-menores').innerText = pMen;
+            document.getElementById('p-hombres-a').innerText = aH; document.getElementById('p-mujeres-a').innerText = aM; document.getElementById('p-menores-a').innerText = aMen;
+            renderM('p-list-motivos', mot, 'var(--psico-color)'); renderM('p-list-seguimiento', seg, '#64748b');
+        }
+    };
+// --- MÓDULO: JEFATURA DE PSICOLOGÍA (Lógica Separada) ---
+    window.procJefPsic = (s, m) => {
+    let val = 0, ent = 0, acts = {}, geo = {};
+    let fil = DB_JP.filter(d => cumpleFiltros(d, s, m));
 
     fil.forEach(d => {
-        ses++;
-        const pNom = (d.paciente || '').toUpperCase();
-        const aNom = (d.nombre_a || '').toUpperCase();
+        const act = (d.actividad || "").toUpperCase();
+        if(act.includes("VALORACION")) val++;
+        if(act.includes("ENTREVISTA")) ent++;
 
-        // --- LÓGICA PACIENTES ---
-        if(pNom) {
-            pSet.add(pNom);
-            if(!pacientesUnicos.has(pNom)) {
-                const genP = (d.genero_p || "").toUpperCase();
-                const edadP = parseInt(d.edad_p) || 0;
-                if(genP === 'MASCULINO') pH++;
-                if(genP === 'FEMENINO') pM++;
-                if(edadP > 0 && edadP < 18) pMen++;
-                pacientesUnicos.add(pNom);
-            }
-        }
+        const dep = (d.dependencia || "S/D").toUpperCase();
+        const n = (d.paciente || "S/N").toUpperCase();
+        const l = (d.colonia || d.localidad || "S/L").toUpperCase();
 
-        // --- LÓGICA ACOMPAÑANTES ---
-        if(aNom && aNom !== "S/N" && aNom !== "NINGUNO") {
-            aSet.add(aNom);
-            if(!acompañantesUnicos.has(aNom)) {
-                const genA = (d.genero_a || "").toUpperCase();
-                const edadA = parseInt(d.edad_a) || 0;
-                if(genA === 'MASCULINO') aH++;
-                if(genA === 'FEMENINO') aM++;
-                if(edadA > 0 && edadA < 18) aMen++;
-                acompañantesUnicos.add(aNom);
-            }
-        }
+        if(!acts[dep]) acts[dep] = [];
+        acts[dep].push({ n, x: act, l });
 
-        // --- PANELES ---
-        const mo = (d.tema || "GENERAL").toUpperCase();
-        const l = (d.col_loc || "S/L").toUpperCase();
-        if(!mot[mo]) mot[mo] = [];
-        mot[mo].push({ n: pNom, x: `FOLIO: ${d.no}`, l: `Acompaña: ${aNom || 'Solo'}` });
-        
-        if(!seg[l]) seg[l] = [];
-        seg[l].push({ n: pNom, x: d.fecha || '', l: mo });
+        if(!geo[l]) geo[l] = [];
+        geo[l].push({ n, x: dep, l });
     });
 
-    // --- RENDERIZADO ---
-    if(document.getElementById('p-total')){
-        // Totales generales
-        document.getElementById('p-total').innerText = pSet.size;
-        document.getElementById('p-total-a').innerText = aSet.size;
-        document.getElementById('p-ses').innerText = ses;
-
-        // Detalle Pacientes
-        document.getElementById('p-hombres').innerText = pH;
-        document.getElementById('p-mujeres').innerText = pM;
-        document.getElementById('p-menores').innerText = pMen;
-
-        // Detalle Acompañantes
-        document.getElementById('p-hombres-a').innerText = aH;
-        document.getElementById('p-mujeres-a').innerText = aM;
-        document.getElementById('p-menores-a').innerText = aMen;
-
-        renderM('p-list-motivos', mot, 'var(--psico-color)');
-        renderM('p-list-seguimiento', seg, '#64748b');
+    if(document.getElementById('jp-total')){
+        document.getElementById('jp-total').innerText = fil.length;
+        document.getElementById('jp-val').innerText = val;
+        document.getElementById('jp-ent').innerText = ent;
+        renderM('jp-list-actividades', acts, '#701a27');
+        renderM('jp-list-geo', geo, '#64748b');
     }
 };
 
-
-    window.showView = (v, e) => {
+   window.showView = (v, e) => {
         document.querySelectorAll('.view-container').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
         const t = document.getElementById('view-' + v);
-        if(t) { t.classList.add('active'); e.classList.add('active'); document.getElementById('view-title').innerText = e.querySelector('span').innerText; window.reprocesarTodo(); }
+        if(t) { 
+            t.classList.add('active'); 
+            e.classList.add('active'); 
+            document.getElementById('view-title').innerText = e.querySelector('span').innerText; 
+            window.reprocesarTodo(); 
+        }
     };
 
     document.addEventListener("DOMContentLoaded", () => {
-        const fHTML = `<div class="filter-group"><label>🔍 Buscar...</label><input type="text" class="global-search" onkeyup="reprocesarTodo()"></div><div class="filter-group" style="flex:0.4;"><label>📅 Mes</label><select class="month-filter" onchange="reprocesarTodo()"><option value="all">Todo el Año</option><option value="01">Ene</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Abr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Ago</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option></select></div>`;
+        const fHTML = `
+            <div class="filter-group">
+                <label>🔍 Buscar...</label>
+                <input type="text" class="global-search" onkeyup="reprocesarTodo()">
+            </div>
+            <div class="filter-group" style="flex:0.4;">
+                <label>📅 Mes</label>
+                <select class="month-filter" onchange="reprocesarTodo()">
+                    <option value="all">Todo el Año</option>
+                    <option value="01">Ene</option><option value="02">Feb</option>
+                    <option value="03">Mar</option><option value="04">Abr</option>
+                    <option value="05">May</option><option value="06">Jun</option>
+                    <option value="07">Jul</option><option value="08">Ago</option>
+                    <option value="09">Sep</option><option value="10">Oct</option>
+                    <option value="11">Nov</option><option value="12">Dic</option>
+                </select>
+            </div>`;
+
         document.querySelectorAll('.filter-bar').forEach(b => b.innerHTML = fHTML);
-        document.getElementById('role-tag').innerText = (sesion||"").toUpperCase();
+        document.getElementById('role-tag').innerText = (sesion || "").toUpperCase();
+        
         const admins = ['admin', 'lorena.gonzalez'];
-        const permisos = { 'vulnerable': ['vulnerable','ramon.guapillo','usuario.v2'], 'social': ['social','juanita.campechano','monse.plata'], 'procuraduria': ['procuraduria','edmundo.pechi','lic.perez'], 'medica': ['medica','doctor.simi','enfermeria.gral'], 'psicologia': ['psicologia','psico.ayuda','terapeuta1'] };
+        const permisos = { 
+            'vulnerable': ['vulnerable','ramon.guapillo'], 
+            'social': ['social','juanita.campechano','monse.plata'], 
+            'procuraduria': ['procuraduria','edmundo.pechi'], 
+            'medica': ['medica','enfermeria.gral'], 
+            'psicologia': ['psicologia','psico.ayuda'],
+            'jefatura-psicologia': ['admin', 'lorena.gonzalez'] 
+        };
+        
         if (!admins.includes(sesion)) {
             let vAsignada = "";
-            ['vulnerable','social','procuraduria','medica','psicologia'].forEach(dep => {
-                if (!permisos[dep].includes(sesion)) {
-                    const nav = document.getElementById('nav-'+dep); if(nav) nav.style.display = 'none';
-                } else { vAsignada = dep; }
+            ['vulnerable','social','procuraduria','medica','psicologia', 'jefatura-psicologia'].forEach(dep => {
+                if (!permisos[dep]?.includes(sesion)) {
+                    const nav = document.getElementById('nav-' + dep); 
+                    if(nav) nav.style.display = 'none';
+                } else { 
+                    if(!vAsignada) vAsignada = dep; 
+                }
             });
-            if (vAsignada) showView(vAsignada, document.getElementById('nav-'+vAsignada));
-            else { alert("Sin permisos."); cerrarSesion(); }
-        } else { showView('vulnerable', document.getElementById('nav-vulnerable')); }
+            if (vAsignada) {
+                showView(vAsignada, document.getElementById('nav-' + vAsignada));
+            } else { 
+                alert("Sin permisos de acceso."); 
+                cerrarSesion(); 
+            }
+        } else { 
+            showView('vulnerable', document.getElementById('nav-vulnerable')); 
+        }
     });
-    setInterval(() => { document.getElementById('reloj').innerText = new Date().toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' }).toUpperCase(); }, 1000);
+
+    setInterval(() => { 
+        const r = document.getElementById('reloj');
+        if(r) r.innerText = new Date().toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' }).toUpperCase(); 
+    }, 1000);
 </script>
 </body>
 </html>
