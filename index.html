@@ -136,14 +136,27 @@
         const error = document.getElementById('error-msg');
 
         // Configuración de cuentas (Usuario: { p: contraseña, url: destino })
-        const cuentas = {
-            "admin": { p: "master2026", url: "admin_global.html" },
-            "vulnerable": { p: "vuln123", url: "vulnerable.html" },
-            "social": { p: "soc123", url: "social.html" },
-            "procuraduria": { p: "pro123", url: "procuraduria.html" },
-            "medica": { p: "med123", url: "medica.html" },
-            "psicologia": { p: "psi123", url: "psicologia.html" }
-        };
+  const cuentas = {
+    "lorena.gonzalez": { p: "logoke.15", url: "admin_global.html" }, 
+    "admin": { p: "master2026", url: "admin_global.html" },
+
+    "vulnerable": { p: "vul123", url: "vulnerable.html" }, 
+    "ramon.guapillo": { p: "Fatima20", url: "vulnerable.html" },
+
+    "social": { p: "soc123", url: "social.html" },
+    "juanita.campechano": { p: "Juanita123..", url: "social.html" }, 
+    "monse.plata": { p: "Monse123..", url: "social.html" },
+
+    "procuraduria": { p: "pro123", url: "procuraduria.html" },
+    "edmundo.pechi": { p: "Edmundo123..", url: "procuraduria.html" },
+
+    "medica": { p: "med123", url: "medica.html" },
+
+    "psicologia": { p: "psi123", url: "psicologia.html" },
+    
+    // NUEVA CUENTA JEFATURA
+    "jefatura.psico": { p: "jefe.psi.2026", url: "admin_global.html" } 
+};
 
         if (cuentas[user] && cuentas[user].p === pass) {
             // Guardar datos de sesión simple
