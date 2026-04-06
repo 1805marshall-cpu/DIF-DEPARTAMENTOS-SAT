@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIF 2026 | Jefatura de Psicología</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+
+    <style>
+        :root { 
+            --primary: #701a27; --success: #15803d; --warning: #b45309; --danger: #be123b; 
+            --bg: #f8fafc; --border: #e2e8f0; --accent: #b38e5d;
+        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
+        
+        header { 
+            background: #fff; padding: 15px 40px; border-bottom: 4px solid var(--primary); 
+            display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+
+        .container { max-width: 98%; margin: 20px auto; }
+
+        fieldset {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #ffffff;
+            margin-bottom: 20px;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        legend {
+            font-weight: 800;
+            color: var(--primary);
+            padding: 0 15px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .form-group { display: flex; flex-direction: column; }
+        label { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 5px; text-transform: uppercase; }
+        
+        input, select, textarea { 
+            padding: 10px; border: 1px solid var(--border); border-radius: 6px; 
+            font-size: 13px; transition: all 0.2s; background: #fdfdfd;
+        }
+        input:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(179, 142, 93, 0.2); }
+
+        .btn-box { 
+            background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border);
+            display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 25px;
+        }
+        .btn { 
+            padding: 10px 20px; border: none; border-radius: 6px; font-weight: 700; 
+            cursor: pointer; font-size: 11px; color: white; display: flex; align-items: center; gap: 8px; 
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+
+        .table-wrap { background: #fff; border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; min-width: 1400px; }
+        th { background: #f1f5f9; padding: 15px; text-align: left; font-size: 11px; color: #475569; border-bottom: 2px solid var(--border); text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 12px; }
+        tr:hover { background-color: #f8fafc; }
+
+        .badge-dep { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; background: #e2e8f0; color: #475569; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h2 style="margin:0; color:var(--primary); font-size: 1.4rem;"><i class="fas fa-balance-scale"></i> JEFATURA DE PSICOLOGÍA</h2>
+        <span style="color:var(--accent); font-weight: bold; font-size: 11px;">REGISTRO DE ACTIVIDADES INSTITUCIONALES 2026</span>
+    </div>
+    <button class="btn" style="background: var(--primary)" onclick="location.href='admin_global.html'"><i class="fas fa-arrow-left"></i> DASHBOARD</button>
+</header>
+
+<div class="container">
+    <input type="hidden" id="f-id">
+    
+    <fieldset>
+        <legend><i class="fas fa-folder-open"></i> Clasificación Institucional</legend>
+        <div class="form-group">
+            <label>Dependencia Solicitante</label>
+            <select id="f-dependencia" onchange="updateActividades()">
+                <option value="">-- SELECCIONAR --</option>
+                <option value="FISCALIA">FISCALÍA</option>
+                <option value="JUZGADO">JUZGADO</option>
+                <option value="PROCURADURIA">PROCURADURÍA</option>
+                <option value="DIRECCION DIF">DIRECCIÓN DIF</option>
+                <option value="AREA MEDICA">ÁREA MÉDICA</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Actividad / Servicio</label>
+            <select id="f-actividad">
+                <option value="">-- SELECCIONE DEPENDENCIA PRIMERO --</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Fecha de Registro</label><input type="date" id="f-fecha"></div>
+        <div class="form-group"><label>Folio Interno</label><input type="number" id="f-no"></div>
+    </fieldset>
+
+    <fieldset>
+        <legend><i class="fas fa-user-friends"></i> Datos del Beneficiario / Expediente</legend>
+        <div class="form-group" style="grid-column: span 2;"><label>Nombre del Paciente o Interesado</label><input type="text" id="f-paciente" placeholder="Nombre completo"></div>
+        <div class="form-group"><label>Número de Expediente / Oficio</label><input type="text" id="f-oficio" placeholder="Ejem: EXP-123/2026"></div>
+        <div class="form-group"><label>Localidad / Colonia</label><input type="text" id="f-colonia"></div>
+    </fieldset>
+
+    <fieldset>
+        <legend><i class="fas fa-align-left"></i> Detalles Técnicos</legend>
+        <div class="form-group" style="grid-column: span 2;"><label>Observaciones y Resultados</label><textarea id="f-observaciones" rows="2" placeholder="Breve resumen de la intervención..."></textarea></div>
+        <div class="form-group"><label>Psicólogo Responsable</label><input type="text" id="f-usuario"></div>
+    </fieldset>
+
+    <div class="btn-box">
+        <button class="btn" id="btn-save" style="background:var(--success)" onclick="saveData()"><i class="fas fa-save"></i> GUARDAR ACTIVIDAD</button>
+        <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="updateData()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
+        <button class="btn" style="background:#64748b" onclick="limpiarForm()"><i class="fas fa-eraser"></i> NUEVO REGISTRO</button>
+        
+        <div style="flex-grow: 1;"></div> 
+        <button class="btn" style="background:#1d6f42" onclick="exportExcel()"><i class="fas fa-file-excel"></i> DESCARGAR REPORTE</button>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px 20px; border: 1px solid var(--border); border-bottom: none; border-radius: 12px 12px 0 0;">
+        <span id="pagi-info" style="font-size: 12px; color: #64748b; font-weight: bold;"></span>
+        <div id="pagi-buttons" style="display: flex; gap: 5px;"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>FOLIO</th>
+                    <th>FECHA</th>
+                    <th>DEPENDENCIA</th>
+                    <th>ACTIVIDAD</th>
+                    <th>PACIENTE / BENEFICIARIO</th>
+                    <th>OFICIO/EXP</th>
+                    <th>LOCALIDAD</th>
+                    <th>RESPONSABLE</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Mismo proyecto de Firebase según tu ejemplo
+    const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const mainRef = collection(db, "jefatura_psicologia");
+
+    let dataList = [];
+    let currentPage = 1;
+    let rowsPerPage = 10;
+
+    // Lógica de campos dinámicos
+    const catalogo = {
+        "FISCALIA": ["ENTREVISTAS", "VALORACIONES", "VISITAS DOMICILIADAS"],
+        "JUZGADO": ["AUDIENCIAS", "VALORACIONES PSICOLOGICAS", "SOLICITUDES"],
+        "PROCURADURIA": ["VALORACIONES", "VISITAS DOMICILIADAS", "PERFILES PSICOLOGICOS"],
+        "DIRECCION DIF": ["VISITAS DOMICILIADAS", "VALORACIONES PSICOLOGICAS", "ENTREVISTAS CLINICAS", "PLATICAS A ESCUELAS", "ASISTENCIA A JORNADA ITINERANTE", "INVESTIGACIONES"],
+        "AREA MEDICA": ["ATENCION PSICOLOGICA", "VALORACIONES"]
+    };
+
+    window.updateActividades = () => {
+        const dep = document.getElementById('f-dependencia').value;
+        const actSelect = document.getElementById('f-actividad');
+        actSelect.innerHTML = '<option value="">-- SELECCIONAR ACTIVIDAD --</option>';
+        
+        if(catalogo[dep]) {
+            catalogo[dep].forEach(a => {
+                actSelect.innerHTML += `<option value="${a}">${a}</option>`;
+            });
+        }
+    };
+
+    onSnapshot(query(mainRef, orderBy("no", "desc")), (snap) => {
+        dataList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderUI();
+    });
+
+    window.renderUI = () => {
+        const start = (currentPage - 1) * rowsPerPage;
+        const paginatedData = dataList.slice(start, start + rowsPerPage);
+
+        document.getElementById('table-body').innerHTML = paginatedData.map(d => `
+            <tr>
+                <td><b>#${d.no || ''}</b></td>
+                <td>${d.fecha || ''}</td>
+                <td><span class="badge-dep">${d.dependencia || ''}</span></td>
+                <td><b>${d.actividad || ''}</b></td>
+                <td>${d.paciente || ''}</td>
+                <td><small>${d.oficio || ''}</small></td>
+                <td>${d.colonia || ''}</td>
+                <td><small>${d.usuario || ''}</small></td>
+                <td class="action-btns" style="display:flex; gap:8px;">
+                    <button onclick="editMode('${d.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
+                    <button onclick="delDoc('${d.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+
+        const totalPages = Math.ceil(dataList.length / rowsPerPage);
+        document.getElementById('pagi-info').innerText = `Mostrando ${paginatedData.length} de ${dataList.length} registros`;
+        
+        let btns = '';
+        for (let i = 1; i <= totalPages; i++) {
+            if(i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                btns += `<button class="btn" style="background:${i === currentPage ? 'var(--primary)' : '#cbd5e1'}; padding:5px 10px" onclick="goToPage(${i})">${i}</button>`;
+            }
+        }
+        document.getElementById('pagi-buttons').innerHTML = btns;
+    };
+
+    window.goToPage = (p) => { currentPage = p; renderUI(); };
+
+    window.getFormData = () => ({
+        no: Number(document.getElementById('f-no').value),
+        dependencia: document.getElementById('f-dependencia').value,
+        actividad: document.getElementById('f-actividad').value,
+        fecha: document.getElementById('f-fecha').value,
+        paciente: document.getElementById('f-paciente').value.toUpperCase(),
+        oficio: document.getElementById('f-oficio').value.toUpperCase(),
+        colonia: document.getElementById('f-colonia').value.toUpperCase(),
+        usuario: document.getElementById('f-usuario').value.toUpperCase(),
+        observaciones: document.getElementById('f-observaciones').value.toUpperCase(),
+        t: new Date().getTime()
+    });
+
+    window.saveData = async () => {
+        const data = getFormData();
+        if(!data.dependencia || !data.paciente) return alert("Por favor complete Dependencia y Paciente");
+        await addDoc(mainRef, data);
+        limpiarForm();
+    };
+
+    window.editMode = (id) => {
+        const d = dataList.find(i => i.id === id);
+        document.getElementById('f-id').value = d.id;
+        document.getElementById('f-no').value = d.no;
+        document.getElementById('f-dependencia').value = d.dependencia;
+        updateActividades();
+        document.getElementById('f-actividad').value = d.actividad;
+        document.getElementById('f-fecha').value = d.fecha;
+        document.getElementById('f-paciente').value = d.paciente;
+        document.getElementById('f-oficio').value = d.oficio;
+        document.getElementById('f-colonia').value = d.colonia;
+        document.getElementById('f-usuario').value = d.usuario;
+        document.getElementById('f-observaciones').value = d.observaciones;
+        
+        document.getElementById('btn-save').style.display = 'none';
+        document.getElementById('btn-update').style.display = 'inline-block';
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    };
+
+    window.updateData = async () => {
+        const id = document.getElementById('f-id').value;
+        await updateDoc(doc(db, "jefatura_psicologia", id), getFormData());
+        alert("Registro actualizado");
+        limpiarForm();
+    };
+
+    window.limpiarForm = () => {
+        document.getElementById('f-id').value = "";
+        document.getElementById('f-fecha').value = new Date().toISOString().split('T')[0];
+        ['f-no','f-dependencia','f-actividad','f-paciente','f-oficio','f-colonia','f-usuario','f-observaciones'].forEach(id => document.getElementById(id).value = "");
+        document.getElementById('btn-save').style.display = 'inline-block';
+        document.getElementById('btn-update').style.display = 'none';
+        const max = dataList.reduce((m, i) => Math.max(m, Number(i.no) || 0), 0);
+        document.getElementById('f-no').value = max + 1;
+    };
+
+    window.delDoc = async (id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, "jefatura_psicologia", id)); };
+    
+    window.exportExcel = () => { 
+        const ws = XLSX.utils.json_to_sheet(dataList.map(({id, t, ...rest}) => rest)); 
+        const wb = XLSX.utils.book_new(); 
+        XLSX.utils.book_append_sheet(wb, ws, "JefaturaPsicologia"); 
+        XLSX.writeFile(wb, "Reporte_Jefatura_Psicologia_2026.xlsx"); 
+    };
+
+    window.limpiarForm();
+</script>
+</body>
+</html>
