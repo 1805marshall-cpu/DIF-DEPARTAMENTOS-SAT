@@ -93,7 +93,9 @@
         <div class="btn-box">
             <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
             <button class="btn" id="btn-upd" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
+            <button class="btn" style="background:#1d6f42" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
             <button class="btn" style="background:#94a3b8" onclick="location.reload()"><i class="fas fa-eraser"></i> LIMPIAR</button>
+        </div>
     </div>
 
     <div class="search-box no-print">
@@ -178,7 +180,7 @@ window.filtrarYRender = () => {
         return campos.includes(val) && (est === "Todos" || r.estatus === est);
     });
 
-    // ORDENAR POR CÓDIGO (De mayor a menor)
+    // ORDENAR POR CÓDIGO (De mayor a menor por No.)
     DATA_FILTRADA.sort((a, b) => {
         return (b.codigo || "").localeCompare(a.codigo || "", undefined, {numeric: true});
     });
@@ -192,7 +194,6 @@ function render() {
     const lista = DATA_FILTRADA.slice(inicio, inicio + FILAS_POR_PAGINA);
     document.getElementById('info-total').innerText = `REGISTROS: ${DATA_FILTRADA.length}`;
     
-    // Calculamos el número inicial basado en el total para conteo regresivo
     const totalRegistros = DATA_FILTRADA.length;
 
     document.getElementById('tabla-beneficiarios').innerHTML = lista.map((r, i) => `
@@ -242,7 +243,6 @@ window.guardar = async () => {
         if(!data.codigo) return alert("Código requerido");
         if(!data.nombre || !data.curp) return alert("Nombre y CURP son obligatorios para validar duplicados");
 
-        // VALIDACIÓN DE DUPLICADOS
         const duplicado = DATA_ACTUAL.find(r => 
             r.curp?.trim().toUpperCase() === data.curp.trim().toUpperCase() && 
             r.nombre?.trim().toLowerCase() === data.nombre.trim().toLowerCase()
@@ -254,7 +254,7 @@ window.guardar = async () => {
                             `Estatus actual: ${duplicado.estatus}\n\n` +
                             `¿Deseas registrarlo de todos modos?`;
             
-            if (!confirm(mensaje)) return; // Detiene la ejecución si el usuario cancela
+            if (!confirm(mensaje)) return;
         }
 
         try {
@@ -267,28 +267,23 @@ window.guardar = async () => {
         }
     };
 
-    // FUNCIÓN EDITAR CON SOPORTE MULTI-CAMPO (Corregido: Teléfono y Clave Mpio)
     window.editar = (id) => {
         const r = DATA_ACTUAL.find(x => x.id === id);
         if(!r) return;
 
-        // Limpieza de formulario
         document.querySelectorAll('#main-form input').forEach(i => i.value = "");
 
-        // Mapeo genérico
         Object.keys(r).forEach(k => {
             const input = document.getElementById(k);
             if(input) input.value = r[k];
         });
 
-        // REGLAS DE NORMALIZACIÓN PARA CARGA (Atiende variaciones de base de datos)
         const valorMpio = r.cve_mpio || r.clave_municipio || r.clave_mpio || r.cve_municipio || "";
         document.getElementById('cve_mpio').value = valorMpio;
 
         const valorTel = r.telefono || r.teléfono || r.tel || "";
         document.getElementById('telefono').value = valorTel;
 
-        // Carga de imagen
         if(r.ine_img) {
             document.getElementById('box-preview').innerHTML = `<img src="${r.ine_img}" style="width:100%">`;
             document.getElementById('ine_img').value = r.ine_img;
@@ -312,65 +307,7 @@ window.guardar = async () => {
 
     window.eliminar = async (id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, "apoyos", id)); };
 
-// IMPORTACIÓN ROBUSTA CON NORMALIZACIÓN DE ESTATUS
-    window.importarSincronizado = async (e) => {
-        const f = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = async (ev) => {
-            const data = new Uint8Array(ev.target.result);
-            const wb = XLSX.read(data, { type: 'array', cellDates: true });
-            const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-            const batch = writeBatch(db);
-            
-            json.forEach(row => {
-                const nuevoDoc = doc(apoyosRef);
-                const dataRow = {};
-                
-                Object.keys(row).forEach(key => {
-                    // 1. Limpieza de nombres de columnas (IDs)
-                    let idLimpio = key.toLowerCase().trim()
-                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
-                        .replace(/ /g, "_");
-                    
-                    // Mapeos de nombres de columnas alternativos
-                    if(idLimpio.includes("clave_mpio") || idLimpio.includes("cve_mpio") || idLimpio.includes("clave_municipio")) idLimpio = "cve_mpio";
-                    if(idLimpio === "telefono" || idLimpio === "tel") idLimpio = "telefono";
-
-                    let valor = row[key];
-
-                    // 2. NORMALIZACIÓN CRÍTICA DEL ESTATUS (Para que coincida con el Select/Checklist)
-                    if (idLimpio === "estatus") {
-                        let vStr = String(valor).trim().toLowerCase();
-                        if (vStr.includes("entregado")) {
-                            valor = "Entregado";
-                        } else {
-                            valor = "Pendiente"; // Por defecto si no dice entregado
-                        }
-                    }
-
-                    if(valor instanceof Date) valor = valor.toISOString().split('T')[0];
-                    dataRow[idLimpio] = valor;
-                });
-
-                // Si el Excel no traía columna de estatus, lo ponemos como Pendiente por defecto
-                if (!dataRow.estatus) dataRow.estatus = "Pendiente";
-
-                if(dataRow.codigo) batch.set(nuevoDoc, dataRow);
-            });
-
-            try {
-                await batch.commit(); 
-                alert("Importación terminada con éxito. Los estados han sido normalizados."); 
-                location.reload();
-            } catch (error) {
-                console.error("Error al importar:", error);
-                alert("Error al guardar los datos en la base de datos.");
-            }
-        };
-        reader.readAsArrayBuffer(f);
-    };
  window.exportarExcel = () => {
-    // 1. Definimos el orden y los nombres de las columnas (Headers)
     const encabezados = {
         n: "NO.",
         codigo: "CÓDIGO",
@@ -385,10 +322,9 @@ window.guardar = async () => {
         fecha_ingreso: "FECHA INGRESO"
     };
 
-    // 2. Mapeamos la data filtrada al formato de los encabezados
     const dataParaExportar = DATA_FILTRADA.map((r, index) => {
         return {
-            [encabezados.n]: index + 1,
+            [encabezados.n]: DATA_FILTRADA.length - index,
             [encabezados.codigo]: r.codigo || '',
             [encabezados.apellido_paterno]: `${r.apellido_paterno || ''}`.trim(),
             [encabezados.apellido_materno]: `${r.apellido_materno || ''}`.trim(),
@@ -402,29 +338,15 @@ window.guardar = async () => {
         };
     });
 
-    // 3. Creamos el libro de Excel
     const ws = XLSX.utils.json_to_sheet(dataParaExportar);
-    
-    // Ajuste opcional: Definir anchos de columna para que se vea profesional
     const wscols = [
-        {wch: 5},  // NO.
-        {wch: 15}, // CÓDIGO
-        {wch: 20}, // PATERNO
-        {wch: 20}, // MATERNO
-        {wch: 20}, // NOMBRE
-        {wch: 20}, // CURP
-        {wch: 45}, // LOCALIDAD / DIRECCIÓN
-        {wch: 20}, // APOYO
-        {wch: 15}, // ESTATUS
-        {wch: 30}, // OBSERVACIONES
-        {wch: 15}  // FECHA
+        {wch: 5}, {wch: 15}, {wch: 20}, {wch: 20}, {wch: 20}, {wch: 20},
+        {wch: 45}, {wch: 20}, {wch: 15}, {wch: 30}, {wch: 15}
     ];
     ws['!cols'] = wscols;
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Beneficiarios 2026");
-    
-    // 4. Descargar
     XLSX.writeFile(wb, `Reporte_Poblacion_Vulnerable_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
 
@@ -435,12 +357,10 @@ window.guardar = async () => {
         document.getElementById('link-descarga').href = src;
     };
     window.cerrarVisor = () => document.getElementById('modal-visor').style.display='none';
-    
 
-    // Función para cambiar la cantidad de registros visibles
     window.cambiarFilas = (valor) => {
         FILAS_POR_PAGINA = parseInt(valor);
-        PAGINA_ACTUAL = 1; // Reiniciar a la primera página para evitar errores de índice
+        PAGINA_ACTUAL = 1; 
         render();
     };
 </script>
