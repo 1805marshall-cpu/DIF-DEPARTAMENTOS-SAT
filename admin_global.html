@@ -482,17 +482,16 @@
 
         document.querySelectorAll('.filter-bar').forEach(b => b.innerHTML = fHTML);
         document.getElementById('role-tag').innerText = (sesion || "").toUpperCase();
-        
-       const admins = ['admin', 'lorena.gonzalez'];
+     
+        const admins = ['admin', 'lorena.gonzalez'];
         const permisos = { 
             'vulnerable': ['vulnerable','ramon.guapillo'], 
             'social': ['social','juanita.campechano','monse.plata'], 
             'procuraduria': ['procuraduria','edmundo.pechi'], 
             'medica': ['medica','enfermeria.gral'], 
             'psicologia': ['psicologia','psico.ayuda','samuel.pucheta'],
-            'jefatura-psicologia': ['admin', 'lorena.gonzalez'] 
+            'jefatura-psicologia': ['admin', 'lorena.gonzalez', 'jefatura.psico', 'veronica.velasco'] 
         };
-        
         
         if (!admins.includes(sesion)) {
             let vAsignada = "";
