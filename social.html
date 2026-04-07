@@ -198,12 +198,35 @@
         window.filtrar();
     });
 
-    window.guardar = async () => {
-        const data = obtenerValoresForm();
-        if(!data.nombre) return alert("Nombre requerido");
+window.guardar = async () => {
+    const data = obtenerValoresForm();
+    if(!data.nombre) return alert("El nombre del beneficiario es obligatorio.");
+
+    // VALIDACIÓN DE DUPLICADOS
+    // Buscamos si el nombre ya existe en los registros actuales
+    const registroPrevio = todosLosDatos.find(r => 
+        r.nombre.trim().toUpperCase() === data.nombre.trim().toUpperCase()
+    );
+
+    if (registroPrevio) {
+        const mensaje = `⚠️ ATENCIÓN: El beneficiario "${registroPrevio.nombre}" ya se encuentra registrado.\n\n` +
+                        `• Programa previo: ${registroPrevio.programa || 'No especificado'}\n` +
+                        `• Asunto registrado: ${registroPrevio.asunto || 'Sin asunto'}\n` +
+                        `• Fecha: ${registroPrevio.fecha_registro || 'Sin fecha'}\n\n` +
+                        `¿Deseas registrar este nuevo caso de todos modos?`;
+        
+        if (!confirm(mensaje)) return; // Si el usuario cancela, no se guarda nada
+    }
+
+    try {
         await addDoc(apoyosRef, data);
+        alert("✅ Registro guardado con éxito.");
         limpiarForm();
-    };
+    } catch (error) {
+        console.error("Error al guardar:", error);
+        alert("Hubo un error al intentar guardar el registro.");
+    }
+};
 
     window.actualizar = async () => {
         const id = document.getElementById('edit-id').value;
