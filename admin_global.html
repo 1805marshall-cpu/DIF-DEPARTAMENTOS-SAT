@@ -6,91 +6,179 @@
     <title>SISTEMA DIF 2026 - 2029 | Admin Global</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+    
         :root { 
-            --sidebar-bg: #0f172a; --primary: #1e40af; --success: #059669; 
-            --warning: #f59e0b; --danger: #dc2626; --bg: #f1f5f9; 
-            --vulnerable-color: #ea580c; --psico-color: #be185d; --procu-color: #1e3a8a; --med-color: #4c1d95;
-            --social-color: #af1e92;
+            --sidebar-bg: #0f172a; --primary: #2563eb; --success: #10b981; 
+            --warning: #f59e0b; --danger: #ef4444; --bg: #f8fafc; 
+            --vulnerable-color: #f97316; --psico-color: #db2777; --procu-color: #1e40af; --med-color: #7c3aed;
+            --social-color: #9333ea; --genloc-color: #0891b2; --escolar-color: #1e3a8a;
+            --jefatura-color: #be123c;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; flex-shrink: 0; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; }
-        .sidebar.collapsed { width: 70px; }
-        .sidebar-header { padding: 25px; text-align: center; border-bottom: 1px solid #1e293b; white-space: nowrap; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; color: #1e293b; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; flex-shrink: 0; transition: all 0.3s; z-index: 1000; }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar-header { padding: 25px 15px; text-align: center; border-bottom: 1px solid #1e293b; }
+        .sidebar-header h3 { font-size: 1.1rem; margin: 0; letter-spacing: 1px; font-weight: 800; }
         .sidebar.collapsed .sidebar-header h3, .sidebar.collapsed .sidebar-header small { display: none; }
 
-        .nav-menu { flex-grow: 1; padding: 15px 0; overflow-y: auto; overflow-x: hidden; }
-        .nav-item { padding: 12px 25px; display: flex; align-items: center; gap: 12px; color: #94a3b8; cursor: pointer; border-left: 4px solid transparent; transition: 0.2s; font-size: 13px; white-space: nowrap; }
+        .nav-menu { flex-grow: 1; padding: 10px 0; overflow-y: auto; }
+        .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 15px; color: #94a3b8; cursor: pointer; transition: 0.3s; font-size: 13px; border-left: 4px solid transparent; }
         .nav-item:hover, .nav-item.active { background: #1e293b; color: white; border-left-color: var(--primary); }
-        .sidebar.collapsed .nav-item { padding: 12px 0; justify-content: center; }
+        .sidebar.collapsed .nav-item { justify-content: center; padding: 15px 0; }
         .sidebar.collapsed .nav-item span { display: none; }
-        .sidebar.collapsed .nav-item i { margin: 0; font-size: 18px; }
 
-        .nav-exit { padding: 15px 25px; display: flex; align-items: center; gap: 12px; color: #f87171; cursor: pointer; border-top: 1px solid #1e293b; font-size: 13px; transition: 0.2s; font-weight: bold; white-space: nowrap; }
-        .nav-exit:hover { background: #450a0a; color: #fca5a5; }
-        .sidebar.collapsed .nav-exit span { display: none; }
-
+        /* Main Content */
         .main-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
-        .top-bar { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
-        #btn-toggle { cursor: pointer; font-size: 18px; color: var(--sidebar-bg); }
+        .top-bar { background: white; padding: 0 30px; height: 70px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 2px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        
+        /* Search Bars Uniformes */
+        .search-container { display: flex; gap: 15px; flex-grow: 1; max-width: 900px; margin: 0 30px; }
+        .search-wrapper { position: relative; flex: 1; }
+        .search-wrapper i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px; }
+        .search-wrapper input { width: 100%; padding: 10px 15px 10px 40px; border-radius: 10px; border: 1px solid #e2e8f0; outline: none; font-size: 12px; font-weight: 600; transition: 0.2s; background: #f8fafc; }
+        .search-wrapper input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
+        /* View Components */
         .view-container { padding: 25px; display: none; }
-        .view-container.active { display: block; animation: fadeIn 0.3s ease; }
-        .filter-bar { background: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; gap: 15px; border: 1px solid #e2e8f0; align-items: flex-end; }
-        .filter-group { display: flex; flex-direction: column; flex: 1; }
-        .filter-group label { font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 6px; }
-        .filter-group input, .filter-group select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; }
+        .view-container.active { display: block; animation: fadeIn 0.4s ease; }
         
-        .access-card { padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; color: white; }
-        .btn-open { background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: bold; border: 1px solid white; }
+        .access-card { padding: 18px 25px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .access-card b { font-size: 16px; letter-spacing: 0.5px; }
+        .btn-open { background: rgba(255,255,255,0.2); color: white; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-size: 11px; font-weight: 800; border: 1px solid rgba(255,255,255,0.4); transition: 0.3s; text-transform: uppercase; }
+        .btn-open:hover { background: white; color: #0f172a; }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        .stat-box { background: white; padding: 12px; border-radius: 10px; border: 1px solid #e2e8f0; text-align: center; min-width: 100px; }
-        .stat-box small { color: #64748b; font-weight: bold; text-transform: uppercase; font-size: 9px; display: block; line-height: 1.1; margin-bottom: 4px; }
-        .stat-box div { font-size: 20px; font-weight: bold; color: #1e293b; }
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
+        .stat-box small { color: #64748b; font-weight: 800; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+        .stat-box div { font-size: 22px; font-weight: 800; color: #0f172a; }
+        .stat-box div { transition: color 0.3s ease;} 
+        /* Opcional: una animación de pulso suave cuando el filtro está activo */
+.filter-active-indicator {   animation: pulse-blue 2s infinite; }
 
-        .panel { background: white; border-radius: 12px; padding: 18px; border: 1px solid #e2e8f0; height: 450px; overflow-y: auto; }
-        .panel b { display: block; margin-bottom: 12px; font-size: 10px; text-transform: uppercase; color: var(--primary); border-bottom: 1px solid #f1f5f9; padding-bottom: 6px; }
-        .group-container { background: #f8fafc; border-radius: 8px; margin-bottom: 12px; padding: 10px; border-left: 4px solid var(--primary); }
-        .group-header { display: flex; justify-content: space-between; font-weight: bold; font-size: 10px; margin-bottom: 6px; }
-        .member-line { font-size: 10px; padding: 6px 8px; background: white; margin-bottom: 3px; border-radius: 4px; display: flex; justify-content: space-between; border: 1px solid #f1f5f9; align-items: center; }
+@keyframes pulse-blue {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+        /* Panels */
+        .panel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .panel { background: white; border-radius: 15px; padding: 20px; border: 1px solid #e2e8f0; height: 480px; overflow-y: auto; }
+        .panel b { display: block; margin-bottom: 15px; font-size: 10px; text-transform: uppercase; color: #94a3b8; border-bottom: 2px solid #f8fafc; padding-bottom: 10px; letter-spacing: 1px; }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        table td { padding: 5px 0; border-bottom: 1px solid #f1f5f9; }
+        .group-container { background: #f8fafc; border-radius: 12px; margin-bottom: 15px; padding: 12px; border-left: 5px solid var(--primary); }
+        .group-header { display: flex; justify-content: space-between; font-weight: 800; font-size: 11px; margin-bottom: 10px; color: #334155; }
+        .member-line { font-size: 11px; padding: 10px; background: white; margin-bottom: 5px; border-radius: 8px; display: flex; justify-content: space-between; border: 1px solid #f1f5f9; align-items: center; font-weight: 500; }
+        
+        #reloj { font-weight: 800; color: #64748b; font-size: 14px; font-variant-numeric: tabular-nums; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Contenedor de Salida en la Sidebar */
+        .nav-exit { margin-top: auto; /* Empuja el botón al final del menú */ 
+        padding: 18px 25px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        color: #f87171; /* Rojo suave inicial */
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-top: 1px solid #1e293b;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+}
+
+        .nav-exit i {
+        font-size: 16px;
+}
+
+.nav-exit:hover {
+    background: #ef4444; /* Rojo intenso al pasar el mouse */
+    color: white;
+}
+
+/* Ajuste para cuando la Sidebar está colapsada */
+.sidebar.collapsed .nav-exit {
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.sidebar.collapsed .nav-exit span {
+    display: none;
+}
+
+.sidebar.collapsed .nav-exit i {
+    font-size: 18px;
+}
     </style>
 </head>
 <body>
 
     <div class="sidebar">
-        <div class="sidebar-header"><h3>DIF GLOBAL</h3><small id="role-tag" style="color:var(--warning); font-weight: bold;"></small></div>
+        <div class="sidebar-header">
+            <h3>DIF GLOBAL</h3>
+            <small id="role-tag" style="color:var(--warning); font-size: 10px;"></small>
+        </div>
         <nav class="nav-menu">
             <div id="nav-vulnerable" class="nav-item" onclick="showView('vulnerable', this)"><i class="fas fa-hand-holding-heart"></i> <span>Pob. Vulnerable</span></div>
             <div id="nav-social" class="nav-item" onclick="showView('social', this)"><i class="fa-solid fa-users"></i> <span>Trabajo Social</span></div>
             <div id="nav-procuraduria" class="nav-item" onclick="showView('procuraduria', this)"><i class="fas fa-balance-scale"></i> <span>Procuraduría</span></div>
             <div id="nav-medica" class="nav-item" onclick="showView('medica', this)"><i class="fas fa-notes-medical"></i> <span>Área Médica</span></div>
             <div id="nav-psicologia" class="nav-item" onclick="showView('psicologia', this)"><i class="fas fa-brain"></i> <span>Psicología</span></div>
-            <div id="nav-jefatura-psicologia" class="nav-item" onclick="showView('jefatura-psicologia', this)"><i class="fas fa-balance-scale"></i> <span>Jefatura Psicología</span></div>
+            <div id="nav-jefatura-psicologia" class="nav-item" onclick="showView('jefatura-psicologia', this)"><i class="fas fa-user-shield"></i> <span>Jefatura Psicología</span></div>
+            <div id="nav-general-localidades" class="nav-item" onclick="showView('general-localidades', this)"><i class="fas fa-map-marked-alt"></i> <span>General Localidades</span></div>
+            <div id="nav-escolar" class="nav-item" onclick="showView('escolar', this)"><i class="fas fa-school"></i> <span>Req. Escolares</span></div>
+            <div id="nav-territorial" class="nav-item" onclick="showView('territorial', this)"><i class="fas fa-city"></i> <span>Resumen Territorial</span></div>
         </nav>
         <div class="nav-exit" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> <span>CERRAR SESIÓN</span></div>
     </div>
 
     <div class="main-content">
         <div class="top-bar">
+        
             <div style="display:flex; align-items:center; gap:20px;">
                 <i class="fas fa-bars" id="btn-toggle"></i>
                 <h2 id="view-title" style="margin:0;">Panel</h2>
             </div>
-            
+            <div style="flex-grow: 1; max-width: 400px; margin: 0 20px; position: relative;">
+    <i class="fas fa-search" style="position: absolute; left: 12px; top: 10px; color: #64748b;"></i>
+    <input type="text" id="global-search-input" placeholder="BUSCAR POR NOMBRE, FOLIO O CAMPO CLAVE..." 
+        onkeyup="window.reprocesarTodo()" 
+        style="width: 90%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
+</div>
             <div style="flex-grow: 1; max-width: 400px; margin: 0 20px; position: relative;">
                 <i class="fas fa-map-marker-alt" style="position: absolute; left: 12px; top: 10px; color: #64748b;"></i>
                 <input type="text" id="global-zone-search" placeholder="BUSCAR POR ZONA / LOCALIDAD..." 
                     onkeyup="window.reprocesarTodo()" 
-                    style="width: 100%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
+                    style="width: 90%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
             </div>
-
+            <div style="margin: 0 15px;">
+    <select id="global-month-filter" onchange="window.reprocesarTodo()" 
+        style="padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; font-weight: bold; outline: none; cursor: pointer;">
+        <option value="all">📅 TODOS LOS MESES</option>
+        <option value="01">Enero</option>
+        <option value="02">Febrero</option>
+        <option value="03">Marzo</option>
+        <option value="04">Abril</option>
+        <option value="05">Mayo</option>
+        <option value="06">Junio</option>
+        <option value="07">Julio</option>
+        <option value="08">Agosto</option>
+        <option value="09">Septiembre</option>
+        <option value="10">Octubre</option>
+        <option value="11">Noviembre</option>
+        <option value="12">Diciembre</option>
+    </select>
+</div>
             <div id="reloj"></div>
         </div>        
+        
 
         <div id="view-vulnerable" class="view-container">
             <div class="access-card" style="background: var(--vulnerable-color);"><div><b>Población Vulnerable</b></div><a href="vulnerable.html" class="btn-open">Módulo</a></div>
@@ -155,12 +243,10 @@
                 <div class="stat-box"><small>Pacientes H</small><div id="p-hombres" style="color:var(--primary)">0</div></div>
                 <div class="stat-box"><small>Pacientes M</small><div id="p-mujeres" style="color:var(--psico-color)">0</div></div>
                 <div class="stat-box"><small>Pacientes Menores</small><div id="p-menores" style="color:var(--warning)">0</div></div>
-
                 <div class="stat-box" style="border-top:3px solid #64748b"><small>Total Acompañantes</small><div id="p-total-a">0</div></div>
                 <div class="stat-box"><small>Acompañantes H</small><div id="p-hombres-a" style="color:var(--primary)">0</div></div>
                 <div class="stat-box"><small>Acompañantes M</small><div id="p-mujeres-a" style="color:var(--psico-color)">0</div></div>
                 <div class="stat-box"><small>Acompañantes Menores</small><div id="p-menores-a" style="color:var(--warning)">0</div></div>
-                
                 <div class="stat-box" style="border-top:3px solid var(--success)"><small>Total Sesiones</small><div id="p-ses">0</div></div>
             </div>
             <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;">
@@ -170,23 +256,66 @@
         </div>
 
         <div id="view-jefatura-psicologia" class="view-container">
-    <div class="access-card" style="background: #701a27;">
-        <div><b>Jefatura de Psicología</b></div>
-        <a href="jefatura_psicologia.html" class="btn-open">Módulo Registro</a>
-    </div>
-    <div class="filter-bar"></div>
+            <div class="access-card" style="background: #701a27;"><div><b>Jefatura de Psicología</b></div><a href="jefatura_psicologia.html" class="btn-open">Módulo</a></div>
+            <div class="filter-bar"></div>
+            <div class="stats-grid">
+                <div class="stat-box" style="border-top:3px solid #701a27"><small>Total Actividades</small><div id="jp-total">0</div></div>
+                <div class="stat-box"><small>Valoraciones</small><div id="jp-val" style="color:var(--primary)">0</div></div>
+                <div class="stat-box"><small>Entrevistas</small><div id="jp-ent" style="color:var(--success)">0</div></div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px;">
+                <div class="panel"><b>Resumen por Dependencia</b><div id="jp-list-actividades"></div></div>
+                <div class="panel"><b>Zonas de Intervención</b><div id="jp-list-geo"></div></div>
+            </div>
+        </div>
+
+        <div id="view-general-localidades" class="view-container">
+            <div class="access-card" style="background: var(--genloc-color);"><div><b>General Localidades</b></div><a href="general_localidades.html" class="btn-open">Módulo</a></div>
+            <div class="filter-bar"></div>
+            <div class="stats-grid">
+                <div class="stat-box" style="border-top:3px solid var(--genloc-color)"><small>Total Registros</small><div id="gl-total">0</div></div>
+                <div class="stat-box"><small>Finalizados</small><div id="gl-ent" style="color:var(--success)">0</div></div>
+                <div class="stat-box"><small>Pendientes</small><div id="gl-pen" style="color:var(--danger)">0</div></div>
+            </div>
+            <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px;">
+                <div class="panel"><b>Resumen por Responsable</b><div id="gl-list-actividades"></div></div>
+                <div class="panel"><b>Zonas / Localidades</b><div id="gl-list-geo"></div></div>
+            </div>
+        </div>
+
+    <div id="view-escolar" class="view-container"><div class="access-card" style="background: #1e3a8a;"><div><b>Solicitudes Generales</b></div><a href="solicitudes.html" class="btn-open">Módulo</a></div>
     <div class="stats-grid">
-        <div class="stat-box" style="border-top:3px solid #701a27"><small>Total Actividades</small><div id="jp-total">0</div></div>
-        <div class="stat-box"><small>Valoraciones</small><div id="jp-val" style="color:var(--primary)">0</div></div>
-        <div class="stat-box"><small>Entrevistas</small><div id="jp-ent" style="color:var(--success)">0</div></div>
+        <div class="stat-box"><small>Solicitudes</small><div id="re-total">0</div></div>
+        <div class="stat-box"><small>Atendidos</small><div id="re-ate" style="color:var(--success)">0</div></div>
+        <div class="stat-box"><small>Pendientes</small><div id="re-pen" style="color:var(--warning)">0</div></div>
+        <div class="stat-box"><small>No Procede</small><div id="re-nop" style="color:var(--danger)">0</div></div>
     </div>
-    <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px;">
-        <div class="panel"><b>Resumen por Dependencia / Actividad</b><div id="jp-list-actividades"></div></div>
-        <div class="panel"><b>Zonas de Intervención</b><div id="jp-list-geo"></div></div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1.2fr; gap:20px;">
+        <div class="panel"><b>Resumen por Área</b><div id="re-list-areas"></div></div>
+        <div class="panel"><b>Por Responsable</b><div id="re-list-responsables"></div></div>
+        <div class="panel"><b>Localidad y Requerimiento</b><div id="re-list-geo"></div></div>
     </div>
-</div>
     </div>
 
+   <div id="view-territorial" class="view-container">
+    <div class="access-card" style="background: var(--genloc-color);">
+        <b><i class="fas fa-map-marked-alt"></i> Concentrado Territorial Multidepartamental</b>
+    </div>
+    
+    <div class="stats-grid">
+        <div class="stat-box"><small>Total Atenciones</small><div id="t-total-atn">0</div></div>
+        <div class="stat-box"><small>Localidades Activas</small><div id="t-total-loc">0</div></div>
+        <div class="stat-box"><small>Apoyos Entregados</small><div id="t-total-ok" style="color:var(--success)">0</div></div>
+    </div>
+
+    <div class="panel" style="height: auto; min-height: 500px;">
+        <b>Desglose por Zona y Departamento</b>
+        <div id="territorial-master-list">
+            </div>
+    </div>
+</div>
+</div>
+</div>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -202,33 +331,61 @@
     document.getElementById('btn-toggle').addEventListener('click', () => { document.querySelector('.sidebar').classList.toggle('collapsed'); });
 
     // --- FUNCIONES DE UTILIDAD ---
-    const cumpleFiltros = (d, s, m) => {
-        const term = s.toLowerCase().trim();
-        const zonaBusqueda = document.getElementById('global-zone-search').value.toLowerCase().trim();
-        const fRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_ingreso || d.fecha_atencion || "";
-        const matchMes = (m === "all") || (fRaw.includes("-") && fRaw.split("-")[1] === m);
-        const localidad = (d.col_loc || d.localidad || d.colonia || d.lugar || "").toLowerCase();
-        const matchZona = localidad.includes(zonaBusqueda);
-        const searchable = `${d.nombre||''} ${d.apellido_paterno||''} ${d.paciente||''} ${d.denunciado||''} ${d.codigo||''} ${d.no||''} ${d.asunto||''} ${d.programa||''}`.toLowerCase();
-        return matchMes && matchZona && searchable.includes(term);
-    };
+  const cumpleFiltros = (d, s, m) => {
+    const term = s.toLowerCase().trim();
+    const zonaBusqueda = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
+    const mesSeleccionado = document.getElementById('global-month-filter')?.value || "all";
+    
+    // --- LÓGICA DE CORTE MENSUAL REFORZADA ---
+    // Vulnerable a veces usa 'fecha_apoyo', otros usan 'fecha'. Buscamos en todos:
+    const fechaRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_atencion || d.fecha_ingreso || "";
+    
+    // Extraer mes: manejamos formatos "2026-04-07" o "07/04/2026"
+    let mesRegistro = "";
+    if (fechaRaw.includes("-")) {
+        mesRegistro = fechaRaw.split("-")[1]; // Formato ISO
+    } else if (fechaRaw.includes("/")) {
+        mesRegistro = fechaRaw.split("/")[1]; // Formato Latino
+    }
+    
+    const matchMes = (mesSeleccionado === "all") || (mesRegistro === mesSeleccionado);
+    if (!matchMes) return false;
+
+    // --- FILTRO DE ZONA ---
+    const localidad = (d.col_loc || d.localidad || d.colonia || d.lugar || "").toLowerCase();
+    if (zonaBusqueda && !localidad.includes(zonaBusqueda)) return false;
+
+    // --- BÚSQUEDA POR TEXTO ---
+    const act = document.querySelector('.view-container.active')?.id || "";
+    let dataString = "";
+
+    // Especial para Vulnerable: Incluimos código y tipo de apoyo
+    if (act.includes('vulnerable')) {
+        dataString = `${d.nombre} ${d.apellido_paterno} ${d.codigo} ${d.tipo_apoyo} ${d.estatus}`;
+    } else {
+        // Genérico para los demás
+        dataString = JSON.stringify(d); 
+    }
+
+    return dataString.toLowerCase().includes(term);
+};
 
     const renderM = (id, gs, c) => {
         let h = "";
-        const esMóduloEstatus = (id.startsWith('v-') || id.startsWith('s-'));
+        const esMóduloEstatus = (id.startsWith('v-') || id.startsWith('s-') || id.startsWith('gl-'));
         Object.keys(gs).sort().forEach(k => {
             h += `<div class="group-container" style="border-left-color:${c}">
                 <div class="group-header"><span>${k}</span><b>${gs[k].length}</b></div>
                 ${gs[k].map(i => {
                     let badge = "";
                     if(esMóduloEstatus && i.s) {
-                        const isE = i.s.toLowerCase() === 'entregado' || i.s.toLowerCase() === 'realizado';
-                        badge = `<span style="margin-left:6px; padding:2px 5px; border-radius:4px; font-size:7px; text-transform:uppercase; background:${isE ? 'var(--success)':'var(--danger)'}; color:white; font-weight:bold;">${isE ? 'ENTREGADO':'PENDIENTE'}</span>`;
+                        const isE = i.s.toLowerCase() === 'entregado' || i.s.toLowerCase() === 'realizado' || i.s.toLowerCase() === 'finalizado';
+                        badge = `<span style="margin-left:6px; padding:2px 5px; border-radius:4px; font-size:7px; text-transform:uppercase; background:${isE ? 'var(--success)':'var(--danger)'}; color:white; font-weight:bold;">${isE ? 'OK':'PEND'}</span>`;
                     }
                     return `<div class="member-line">
                         <div style="display:flex; align-items:center;"><span>${i.n}</span>${badge}</div>
                         <div style="text-align:right;">
-                            <small style="color:#64748b; display:block; font-style:italic; font-size:8px;">(${i.l})</small>
+                            <small style="color:#64748b; font-style:italic; font-size:8px;">(${i.l})</small><br>
                             <span style="font-weight:bold; color:${c}">${i.x}</span>
                         </div>
                     </div>`;
@@ -238,9 +395,8 @@
         const el = document.getElementById(id); if(el) el.innerHTML = h || "Sin registros.";
     };
 
-    // --- BASES DE DATOS EN MEMORIA ---
-   // --- BASES DE DATOS EN MEMORIA ---
-    let DB_V = [], DB_S = [], DB_P = [], DB_M = [], DB_PS = [], DB_JP = [];
+    // --- BASES DE DATOS ---
+    let DB_V = [], DB_S = [], DB_P = [], DB_M = [], DB_PS = [], DB_JP = [], DB_GL = [], DB_RE = []; // Añadir DB_RE
 
     onSnapshot(collection(db, "apoyos"), s => { DB_V = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "trabajo_social"), s => { DB_S = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
@@ -248,56 +404,86 @@
     onSnapshot(collection(db, "area_medica"), s => { DB_M = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "psicologia"), s => { DB_PS = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
     onSnapshot(collection(db, "jefatura_psicologia"), s => { DB_JP = s.docs.map(d => d.data()); window.reprocesarTodo(); });
+    onSnapshot(collection(db, "general_localidades"), s => { DB_GL = s.docs.map(d => d.data()); window.reprocesarTodo(); });
+    onSnapshot(collection(db, "requerimientos_escuelas"), s => { DB_RE = s.docs.map(d => d.data()); window.reprocesarTodo(); });
+    
+window.reprocesarTodo = () => {
+    const s = document.getElementById('global-search-input').value.toLowerCase().trim();
+    const z = document.getElementById('global-zone-search').value.toLowerCase().trim();
+    const m = document.getElementById('global-month-filter').value;
+    
+    const filtroTerritorial = z || s;
+    const isFiltered = m !== "all";
 
-    window.reprocesarTodo = () => {
-        const act = document.querySelector('.view-container.active');
-        const s = act ? (act.querySelector('.global-search')?.value || "") : "";
-        const m = act ? (act.querySelector('.month-filter')?.value || "all") : "all";
-        
-        window.procVul(s, m); 
-        window.procSoc(s, m); 
-        window.procPro(s, m); 
-        window.procMed(s, m); 
-        window.procPsi(s, m);
-        window.procJefPsic(s, m);
-    };
+    // --- LÓGICA DE COLORES DINÁMICOS ---
+    const allStats = document.querySelectorAll('.stat-box div, .stat-box b');
+    
+    allStats.forEach(el => {
+        const parent = el.closest('.stat-box');
+        const isSuccess = el.id.includes('ent') || el.id.includes('ate') || el.style.color.includes('success') || el.parentElement.innerHTML.includes('E:');
+        const isDanger = el.id.includes('pen') || el.id.includes('nop') || el.style.color.includes('danger') || el.parentElement.innerHTML.includes('P:');
 
-    // --- MÓDULO: VULNERABLE ---
+        if (isFiltered) {
+            // Colores especiales cuando hay filtro (Modo Azul Informativo)
+            if (isSuccess) el.style.color = "#0ea5e9"; // Azul turquesa (Éxito filtrado)
+            else if (isDanger) el.style.color = "#6366f1"; // Azul violeta (Pendiente filtrado)
+            else el.style.color = "#2563eb"; // Azul puro (Totales filtrados)
+            
+            // Opcional: poner el texto en negrita extra para resaltar
+            el.style.fontWeight = "900";
+        } else {
+            // Restaurar colores originales del sistema
+            if (isSuccess) el.style.color = "var(--success)";
+            else if (isDanger) el.style.color = "var(--danger)";
+            else el.style.color = "#0f172a";
+            
+            el.style.fontWeight = "800";
+        }
+    });
+// Añade esto al final de tu función reprocesarTodo
+const selector = document.getElementById('global-month-filter');
+if (isFiltered) {
+    selector.style.background = "#dbeafe";
+    selector.style.borderColor = "#2563eb";
+    selector.style.color = "#1e40af";
+} else {
+    selector.style.background = "white";
+    selector.style.borderColor = "#cbd5e1";
+    selector.style.color = "black";
+}
+    // --- EJECUCIÓN DE PROCESADORES ---
+    if (typeof window.procVul === "function") window.procVul(s, m);
+    if (typeof window.procSoc === "function") window.procSoc(s, m);
+    if (typeof window.procPro === "function") window.procPro(s, m);
+    if (typeof window.procMed === "function") window.procMed(s, m);
+    if (typeof window.procPsi === "function") window.procPsi(s, m);
+    if (typeof window.procJefPsic === "function") window.procJefPsic(s, m);
+    if (typeof window.procGenLoc === "function") window.procGenLoc(s, m);
+    if (typeof window.procEscolar === "function") window.procEscolar(s, m);
+
+    if (typeof window.procTerritorial === "function") {
+        window.procTerritorial(filtroTerritorial, m);
+    }
+};
+    // --- PROCESADORES ---
     window.procVul = (s, m) => {
-        let ent = 0, tal = {}, apo = {}, geo = {};
+        let ent = 0, tal = {}, apo = {}, geo = {}, grpStatus = {};
         let sCarp = new Set(), sPana = new Set(), sCoci = new Set(), sOtr = new Set();
-        let grpStatus = {};
         let fil = DB_V.filter(d => cumpleFiltros(d, s, m));
-
         fil.forEach(d => {
             const est = (d.estatus || "").toUpperCase();
             if (est === 'ENTREGADO' || est === 'REALIZADO') ent++;
-            const n = `${d.nombre || ''} ${d.apellido_paterno || ''} ${d.apellido_materno || ''}`.toUpperCase();
-            const c = (d.codigo || 'S/C').toUpperCase();
-            const t = (d.tipo_apoyo || "").toUpperCase();
-            const l = (d.col_loc || "S/L").toUpperCase();
-
+            const n = `${d.nombre || ''} ${d.apellido_paterno || ''} ${d.apellido_materno || ''}`.toUpperCase(), c = (d.codigo || 'S/C').toUpperCase(), t = (d.tipo_apoyo || "").toUpperCase(), l = (d.col_loc || "S/L").toUpperCase();
             if (c.startsWith('CARP') || c.startsWith('PANAD') || c.startsWith('COC') || c.startsWith('COST') || t.includes("TALLER")) {
                 if (!tal[c]) tal[c] = []; tal[c].push({ n, x: c, l, s: est });
-                if (!grpStatus[c]) grpStatus[c] = { pendientes: 0 };
-                if (est !== 'ENTREGADO' && est !== 'REALIZADO') grpStatus[c].pendientes++;
+                if (!grpStatus[c]) grpStatus[c] = { p: 0 }; if (est !== 'ENTREGADO' && est !== 'REALIZADO') grpStatus[c].p++;
                 if (c.startsWith('CARP')) sCarp.add(c); else if (c.startsWith('PANAD')) sPana.add(c); else if (c.startsWith('COC')) sCoci.add(c); else sOtr.add(c);
-            } else {
-                if (!apo[t || "OTROS"]) apo[t || "OTROS"] = []; apo[t || "OTROS"].push({ n, x: c, l, s: est }); 
-            }
+            } else { if (!apo[t || "OTROS"]) apo[t || "OTROS"] = []; apo[t || "OTROS"].push({ n, x: c, l, s: est }); }
             if (!geo[l]) geo[l] = []; geo[l].push({ n, x: c, l, s: est });
         });
-
-        const countEP = (set) => {
-            let e = 0, p = 0;
-            set.forEach(id => { if (grpStatus[id] && grpStatus[id].pendientes > 0) p++; else e++; });
-            return { e, p };
-        };
-
+        const countEP = (set) => { let e = 0, p = 0; set.forEach(id => { if (grpStatus[id]?.p > 0) p++; else e++; }); return { e, p }; };
         if (document.getElementById('v-total')) {
-            document.getElementById('v-total').innerText = fil.length;
-            document.getElementById('v-ent').innerText = ent;
-            document.getElementById('v-pen').innerText = fil.length - ent;
+            document.getElementById('v-total').innerText = fil.length; document.getElementById('v-ent').innerText = ent; document.getElementById('v-pen').innerText = fil.length - ent;
             const cC = countEP(sCarp); document.getElementById('v-g-carp-e').innerText = cC.e; document.getElementById('v-g-carp-p').innerText = cC.p; document.getElementById('v-g-carp').innerText = sCarp.size;
             const cP = countEP(sPana); document.getElementById('v-g-pana-e').innerText = cP.e; document.getElementById('v-g-pana-p').innerText = cP.p; document.getElementById('v-g-pana').innerText = sPana.size;
             const cCo = countEP(sCoci); document.getElementById('v-g-coci-e').innerText = cCo.e; document.getElementById('v-g-coci-p').innerText = cCo.p; document.getElementById('v-g-coci').innerText = sCoci.size;
@@ -306,13 +492,11 @@
         }
     };
 
-    // --- MÓDULO: TRABAJO SOCIAL ---
     window.procSoc = (s, m) => {
         let fin = 0, prg = {}, geo = {}, asuCounts = {}, progCounts = {};
         let fil = DB_S.filter(d => cumpleFiltros(d,s,m));
         fil.forEach(d => {
-            const est = (d.estatus||"").toLowerCase();
-            if(['entregado','realizado'].includes(est)) fin++;
+            const est = (d.estatus||"").toLowerCase(); if(['entregado','realizado'].includes(est)) fin++;
             const p = (d.programa||"S/P").toUpperCase(), asu = (d.asunto||"S/A").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
             progCounts[p] = (progCounts[p] || 0) + 1; asuCounts[asu] = (asuCounts[asu] || 0) + 1;
             if(!prg[p]) prg[p]=[]; prg[p].push({n, x: d.folio_expediente||'S/F', l: asu, s: est});
@@ -321,25 +505,23 @@
         if(document.getElementById('s-total')){
             document.getElementById('s-total').innerText = fil.length; document.getElementById('s-ent').innerText = fin;
             const container = document.getElementById('s-dynamic-programs');
-            if(container) { container.innerHTML = ""; Object.keys(progCounts).sort().forEach(pr => {
+            if(container) { container.innerHTML = ""; Object.keys(progCounts).forEach(pr => {
                 const card = document.createElement('div'); card.className="stat-box"; card.style.borderTop="3px solid var(--social-color)";
                 card.innerHTML = `<small>${pr}</small><div>${progCounts[pr]}</div>`; container.appendChild(card);
             }); }
             renderM('s-list-programas', prg, 'var(--social-color)'); renderM('s-list-geo', geo, '#64748b');
-            let t = `<table>`; Object.keys(asuCounts).sort().forEach(k => { t += `<tr><td>${k}</td><td align="right"><b>${asuCounts[k]}</b></td></tr>`; });
+            let t = `<table>`; Object.keys(asuCounts).sort().forEach(k => t += `<tr><td>${k}</td><td align="right"><b>${asuCounts[k]}</b></td></tr>`);
             document.getElementById('s-list-asuntos-count').innerHTML = t + "</table>";
         }
     };
 
-    // --- MÓDULO: PROCURADURÍA ---
     window.procPro = (s, m) => {
         let mix = 0, cA = {}, lD = {}, geo = {};
         let fil = DB_P.filter(d => cumpleFiltros(d,s,m));
         fil.forEach(d => {
             if(d.horarios_mixtos === 'Si') mix++;
             const asu = (d.asuntos||"GENERAL").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.col_loc || d.localidad || d.colonia || d.lugar || "S/L").toUpperCase();
-            cA[asu] = (cA[asu]||0)+1; 
-            if(!lD[asu]) lD[asu]=[]; lD[asu].push({n, x: d.no||'S/E', l});
+            cA[asu] = (cA[asu]||0)+1; if(!lD[asu]) lD[asu]=[]; lD[asu].push({n, x: d.no||'S/E', l});
             if(!geo[l]) geo[l]=[]; geo[l].push({n, x: asu, l});
         });
         if(document.getElementById('pr-total')){
@@ -350,7 +532,6 @@
         }
     };
 
-    // --- MÓDULO: ÁREA MÉDICA ---
     window.procMed = (s, m) => {
         let med = 0, ser = {}, dia = {}, geo = {};
         let fil = DB_M.filter(d => cumpleFiltros(d,s,m));
@@ -367,157 +548,270 @@
         }
     };
 
-    // --- MÓDULO: PSICOLOGÍA (Lógica Separada) ---
     window.procPsi = (s, m) => {
-        let ses = 0;
-        let pSet = new Set(), aSet = new Set();
-        let mot = {}, seg = {};
-        let pH = 0, pM = 0, pMen = 0;
-        let aH = 0, aM = 0, aMen = 0;
-        let pacUnicos = new Set(), acoUnicos = new Set();
-
+        let ses = 0, pSet = new Set(), aSet = new Set(), mot = {}, seg = {};
+        let pH = 0, pM = 0, pMen = 0, aH = 0, aM = 0, aMen = 0;
         let fil = DB_PS.filter(d => cumpleFiltros(d, s, m));
-
         fil.forEach(d => {
-            ses++;
-            const pNom = (d.paciente || '').toUpperCase();
-            const aNom = (d.nombre_a || '').toUpperCase();
-
-            // Pacientes
+            ses++; const pNom = (d.paciente || '').toUpperCase(), aNom = (d.nombre_a || '').toUpperCase();
             if(pNom) {
-                pSet.add(pNom);
-                if(!pacUnicos.has(pNom)) {
-                    const g = (d.genero_p || "").toUpperCase();
-                    const e = parseInt(d.edad_p) || 0;
-                    if(g === 'MASCULINO') pH++; if(g === 'FEMENINO') pM++; if(e > 0 && e < 18) pMen++;
-                    pacUnicos.add(pNom);
+                if(!pSet.has(pNom)) {
+                    const g = (d.genero_p || "").toUpperCase(), e = parseInt(d.edad_p) || 0;
+                    if(g === 'MASCULINO') pH++; else if(g === 'FEMENINO') pM++; if(e > 0 && e < 18) pMen++;
+                    pSet.add(pNom);
                 }
             }
-            // Acompañantes
             if(aNom && aNom !== "S/N" && aNom !== "NINGUNO") {
-                aSet.add(aNom);
-                if(!acoUnicos.has(aNom)) {
-                    const g = (d.genero_a || "").toUpperCase();
-                    const e = parseInt(d.edad_a) || 0;
-                    if(g === 'MASCULINO') aH++; if(g === 'FEMENINO') aM++; if(e > 0 && e < 18) aMen++;
-                    acoUnicos.add(aNom);
+                if(!aSet.has(aNom)) {
+                    const g = (d.genero_a || "").toUpperCase(), e = parseInt(d.edad_a) || 0;
+                    if(g === 'MASCULINO') aH++; else if(g === 'FEMENINO') aM++; if(e > 0 && e < 18) aMen++;
+                    aSet.add(aNom);
                 }
             }
-
-            const mo = (d.tema || "GENERAL").toUpperCase();
-            const l = (d.col_loc || "S/L").toUpperCase();
+            const mo = (d.tema || "GENERAL").toUpperCase(), l = (d.col_loc || "S/L").toUpperCase();
             if(!mot[mo]) mot[mo] = []; mot[mo].push({ n: pNom, x: `FOLIO: ${d.no}`, l: `Acompaña: ${aNom || 'Solo'}` });
             if(!seg[l]) seg[l] = []; seg[l].push({ n: pNom, x: d.fecha || '', l: mo });
         });
-
         if(document.getElementById('p-total')){
-            document.getElementById('p-total').innerText = pSet.size;
-            document.getElementById('p-total-a').innerText = aSet.size;
-            document.getElementById('p-ses').innerText = ses;
+            document.getElementById('p-total').innerText = pSet.size; document.getElementById('p-total-a').innerText = aSet.size; document.getElementById('p-ses').innerText = ses;
             document.getElementById('p-hombres').innerText = pH; document.getElementById('p-mujeres').innerText = pM; document.getElementById('p-menores').innerText = pMen;
             document.getElementById('p-hombres-a').innerText = aH; document.getElementById('p-mujeres-a').innerText = aM; document.getElementById('p-menores-a').innerText = aMen;
             renderM('p-list-motivos', mot, 'var(--psico-color)'); renderM('p-list-seguimiento', seg, '#64748b');
         }
     };
-// --- MÓDULO: JEFATURA DE PSICOLOGÍA (Lógica Separada) ---
+
     window.procJefPsic = (s, m) => {
-    let val = 0, ent = 0, acts = {}, geo = {};
-    let fil = DB_JP.filter(d => cumpleFiltros(d, s, m));
+        let val = 0, ent = 0, acts = {}, geo = {};
+        let fil = DB_JP.filter(d => cumpleFiltros(d, s, m));
+        fil.forEach(d => {
+            const act = (d.actividad || "").toUpperCase(); 
+            if(act.includes("VALORACION")) val++; 
+            if(act.includes("ENTREVISTA")) ent++;
+            
+            const dep = (d.dependencia || "S/D").toUpperCase(), 
+                  n = (d.paciente || "S/N").toUpperCase(), 
+                  l = (d.localidad || "S/L").toUpperCase();
 
-    fil.forEach(d => {
-        const act = (d.actividad || "").toUpperCase();
-        if(act.includes("VALORACION")) val++;
-        if(act.includes("ENTREVISTA")) ent++;
+            if(!acts[dep]) acts[dep] = []; 
+            acts[dep].push({ n, x: act, l });
+            
+            if(!geo[l]) geo[l] = []; 
+            geo[l].push({ n, x: dep, l });
+        });
 
-        const dep = (d.dependencia || "S/D").toUpperCase();
-        const n = (d.paciente || "S/N").toUpperCase();
-        const l = (d.colonia || d.localidad || "S/L").toUpperCase();
-
-        if(!acts[dep]) acts[dep] = [];
-        acts[dep].push({ n, x: act, l });
-
-        if(!geo[l]) geo[l] = [];
-        geo[l].push({ n, x: dep, l });
-    });
-
-    if(document.getElementById('jp-total')){
-        document.getElementById('jp-total').innerText = fil.length;
-        document.getElementById('jp-val').innerText = val;
-        document.getElementById('jp-ent').innerText = ent;
-        renderM('jp-list-actividades', acts, '#701a27');
-        renderM('jp-list-geo', geo, '#64748b');
-    }
-};
-
-   window.showView = (v, e) => {
-        document.querySelectorAll('.view-container').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        const t = document.getElementById('view-' + v);
-        if(t) { 
-            t.classList.add('active'); 
-            e.classList.add('active'); 
-            document.getElementById('view-title').innerText = e.querySelector('span').innerText; 
-            window.reprocesarTodo(); 
+        if(document.getElementById('jp-total')){
+            document.getElementById('jp-total').innerText = fil.length;
+            document.getElementById('jp-val').innerText = val;
+            document.getElementById('jp-ent').innerText = ent;
+            renderM('jp-list-actividades', acts, '#701a27');
+            renderM('jp-list-geo', geo, '#64748b');
         }
     };
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const fHTML = `
-            <div class="filter-group">
-                <label>🔍 Buscar...</label>
-                <input type="text" class="global-search" onkeyup="reprocesarTodo()">
-            </div>
-            <div class="filter-group" style="flex:0.4;">
-                <label>📅 Mes</label>
-                <select class="month-filter" onchange="reprocesarTodo()">
-                    <option value="all">Todo el Año</option>
-                    <option value="01">Ene</option><option value="02">Feb</option>
-                    <option value="03">Mar</option><option value="04">Abr</option>
-                    <option value="05">May</option><option value="06">Jun</option>
-                    <option value="07">Jul</option><option value="08">Ago</option>
-                    <option value="09">Sep</option><option value="10">Oct</option>
-                    <option value="11">Nov</option><option value="12">Dic</option>
-                </select>
-            </div>`;
+    window.procGenLoc = (s, m) => {
+        let fin = 0, respGrp = {}, geo = {};
+        let fil = DB_GL.filter(d => cumpleFiltros(d, s, m));
+        fil.forEach(d => {
+            const est = (d.estatus || "").toUpperCase(); 
+            if(est === 'FINALIZADO' || est === 'REALIZADO') fin++;
+            
+            const res = (d.responsable || "S/R").toUpperCase(), 
+                  det = (d.detalles || "S/D").toUpperCase(), 
+                  l = (d.col_loc || "S/L").toUpperCase();
 
-        document.querySelectorAll('.filter-bar').forEach(b => b.innerHTML = fHTML);
-        document.getElementById('role-tag').innerText = (sesion || "").toUpperCase();
-     
-        const admins = ['admin', 'lorena.gonzalez'];
-        const permisos = { 
-            'vulnerable': ['vulnerable','ramon.guapillo'], 
-            'social': ['social','juanita.campechano','monse.plata'], 
-            'procuraduria': ['procuraduria','edmundo.pechi'], 
-            'medica': ['medica','enfermeria.gral'], 
-            'psicologia': ['psicologia','psico.ayuda','samuel.pucheta'],
-            'jefatura-psicologia': ['admin', 'lorena.gonzalez', 'jefatura.psico', 'veronica.velasco'] 
-        };
-        
-        if (!admins.includes(sesion)) {
-            let vAsignada = "";
-            ['vulnerable','social','procuraduria','medica','psicologia', 'jefatura-psicologia'].forEach(dep => {
-                if (!permisos[dep]?.includes(sesion)) {
-                    const nav = document.getElementById('nav-' + dep); 
-                    if(nav) nav.style.display = 'none';
-                } else { 
-                    if(!vAsignada) vAsignada = dep; 
-                }
-            });
-            if (vAsignada) {
-                showView(vAsignada, document.getElementById('nav-' + vAsignada));
-            } else { 
-                alert("Sin permisos de acceso."); 
-                cerrarSesion(); 
-            }
-        } else { 
-            showView('vulnerable', document.getElementById('nav-vulnerable')); 
+            if(!respGrp[res]) respGrp[res] = []; 
+            respGrp[res].push({ n: det, x: d.no || 'S/N', l, s: est });
+            
+            if(!geo[l]) geo[l] = []; 
+            geo[l].push({ n: det, x: res, l, s: est });
+        });
+
+        if(document.getElementById('gl-total')){
+            document.getElementById('gl-total').innerText = fil.length;
+            document.getElementById('gl-ent').innerText = fin;
+            document.getElementById('gl-pen').innerText = fil.length - fin;
+            renderM('gl-list-actividades', respGrp, 'var(--genloc-color)');
+            renderM('gl-list-geo', geo, '#64748b');
         }
+    };
+
+window.procEscolar = (s, m) => {
+    let ate = 0, nop = 0, areas = {}, resps = {}, geo = {};
+    let fil = DB_RE.filter(d => cumpleFiltros(d, s, m));
+
+    fil.forEach(d => {
+        const est = (d.estatus || "").toUpperCase(); 
+        if(est === 'ATENDIDO' || est === 'FINALIZADO') ate++; 
+        else if(est === 'NO PROCEDE') nop++;
+        
+        const esc = (d.nombre_escuela || "S/N").toUpperCase();
+        const area = (d.area || "GENERAL").toUpperCase();
+        const resp = (d.responsable || "SIN ASIGNAR").toUpperCase();
+        const requerimiento = (d.requerimiento || d.descripcion || "S/R").toUpperCase();
+        const localidad = (d.col_loc || d.localidad || "S/L").toUpperCase();
+
+        // Agrupar por Área
+        if(!areas[area]) areas[area] = [];
+        areas[area].push({ n: esc, x: requerimiento, l: localidad });
+
+        // Agrupar por Responsable
+        if(!resps[resp]) resps[resp] = [];
+        resps[resp].push({ n: esc, x: area, l: localidad });
+
+        // Agrupar por Localidad (Dashboard de Requerimientos)
+        if(!geo[localidad]) geo[localidad] = [];
+        geo[localidad].push({ n: esc, x: requerimiento, l: resp });
     });
 
-    setInterval(() => { 
+    if(document.getElementById('re-total')){
+        document.getElementById('re-total').innerText = fil.length; 
+        document.getElementById('re-ate').innerText = ate;
+        document.getElementById('re-nop').innerText = nop;
+        document.getElementById('re-pen').innerText = fil.length - ate - nop;
+        
+        // Renderizamos los 3 paneles con la información solicitada
+        renderM('re-list-areas', areas, '#1e3a8a');
+        renderM('re-list-responsables', resps, 'var(--success)');
+        renderM('re-list-geo', geo, '#64748b');
+    }
+};
+
+window.procTerritorial = (term) => {
+    const t = term.toLowerCase().trim();
+    const master = {}; // Agrupador por Localidad
+    let totalAtn = 0;
+    let totalOk = 0;
+
+    // Función auxiliar para normalizar y añadir datos de cualquier DB
+    const addData = (db, deptoName, color, nameKey, supportKey) => {
+        db.forEach(d => {
+            const loc = (d.col_loc || d.localidad || d.colonia || "SIN ESPECIFICAR").toUpperCase();
+            const estatus = (d.estatus || d.estado || "PENDIENTE").toLowerCase();
+            
+            // Filtro de búsqueda (si el usuario escribe en la barra superior)
+            if (t && !loc.toLowerCase().includes(t) && !deptoName.toLowerCase().includes(t)) return;
+
+            if (!master[loc]) master[loc] = [];
+            
+            master[loc].push({
+                depto: deptoName,
+                color: color,
+                nombre: (d[nameKey] || d.paciente || d.responsable || "S/N").toUpperCase(),
+                apoyo: (d[supportKey] || d.tipo_apoyo || d.asunto || "GENERAL").toUpperCase(),
+                estatus: estatus,
+                fecha: d.fecha || d.fecha_registro || "-"
+            });
+
+            totalAtn++;
+            if (['entregado', 'realizado', 'finalizado', 'atendido'].includes(estatus)) totalOk++;
+        });
+    };
+
+    // Mapeo de todas tus bases de datos actuales
+    addData(DB_V, 'VULNERABLE', 'var(--vulnerable-color)', 'nombre', 'tipo_apoyo');
+    addData(DB_S, 'SOCIAL', 'var(--social-color)', 'nombre', 'asunto');
+    addData(DB_P, 'PROCURADURÍA', 'var(--procu-color)', 'nombre', 'asuntos');
+    addData(DB_M, 'MÉDICA', 'var(--med-color)', 'nombre', 'tipo_apoyo');
+    addData(DB_PS, 'PSICOLOGÍA', 'var(--psico-color)', 'paciente', 'tema');
+    addData(DB_RE, 'ESCOLAR', 'var(--escolar-color)', 'nombre_escuela', 'requerimiento');
+    addData(DB_GL, 'GRAL. LOC.', 'var(--genloc-color)', 'responsable', 'detalles');
+
+    // Renderizado del HTML
+    let html = "";
+    Object.keys(master).sort().forEach(loc => {
+        html += `
+            <div class="group-container" style="border-left: 5px solid #475569; background: white; margin-bottom: 20px;">
+                <div class="group-header" style="background:#f1f5f9; padding:10px; border-radius: 8px 8px 0 0;">
+                    <span><i class="fas fa-map-marker-alt"></i> ${loc}</span>
+                    <b style="color:var(--primary)">${master[loc].length} SERVICIOS</b>
+                </div>
+                <table style="width:100%; font-size:11px; border-collapse: collapse;">
+                    <thead style="background:#f8fafc; color:#64748b; text-align:left;">
+                        <tr>
+                            <th style="padding:8px;">DEPTO.</th>
+                            <th>BENEFICIARIO / RESP.</th>
+                            <th>TIPO DE APOYO / ASUNTO</th>
+                            <th>ESTATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${master[loc].map(reg => {
+                            const isOk = ['entregado', 'realizado', 'finalizado', 'atendido'].includes(reg.estatus);
+                            return `
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding:8px;"><span style="background:${reg.color}; color:white; padding:2px 6px; border-radius:4px; font-size:9px; font-weight:bold;">${reg.depto}</span></td>
+                                <td><b>${reg.nombre}</b></td>
+                                <td>${reg.apoyo}</td>
+                                <td>
+                                    <span style="color:${isOk ? 'var(--success)' : 'var(--danger)'}; font-weight:800;">
+                                        <i class="fas ${isOk ? 'fa-check-circle' : 'fa-clock'}"></i> ${reg.estatus.toUpperCase()}
+                                    </span>
+                                </td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    });
+
+    // Actualizar interfaz
+    const container = document.getElementById('territorial-master-list');
+    if (container) container.innerHTML = html || "<div style='padding:20px; text-align:center;'>No hay datos para esta zona.</div>";
+    
+    document.getElementById('t-total-atn').innerText = totalAtn;
+    document.getElementById('t-total-loc').innerText = Object.keys(master).length;
+    document.getElementById('t-total-ok').innerText = totalOk;
+};
+    // --- SEGURIDAD Y VISTAS ---
+    const PERMISOS = {
+        "admin": "TODOS", "lorena.gonzalez": "TODOS",
+        "vulnerable": ["vulnerable"], "ramon.guapillo": ["vulnerable"],
+        "social": ["social"], "juanita.campechano": ["social"], "monse.plata": ["social"],
+        "procuraduria": ["procuraduria"], "edmundo.pechi": ["procuraduria"],
+        "medica": ["medica"], "psicologia": ["psicologia"], "samuel.pucheta": ["psicologia"],
+        "veronica.velasco": ["jefatura-psicologia"], "jefatura.psico": ["jefatura-psicologia"],
+        "ariana.reyes": ["general-localidades", "escolar"],
+        "escolar": ["escolar"], "apoyo.escolar": ["escolar"]
+    };
+
+    window.showView = (id, el) => {
+        document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
+        const target = document.getElementById('view-' + id);
+        if(target) target.classList.add('active');
+        if(el) el.classList.add('active');
+        document.getElementById('view-title').innerText = el ? el.innerText : "Panel";
+        window.reprocesarTodo();
+    };
+
+    function aplicarSeguridad() {
+        const misPermisos = PERMISOS[sesion];
+        if (!misPermisos) return window.location.href = "index.html";
+        if (misPermisos === "TODOS") {
+            document.getElementById('role-tag').innerText = "ADMINISTRADOR GLOBAL";
+            showView('vulnerable', document.getElementById('nav-vulnerable'));
+            return;
+        }
+        document.querySelectorAll('.nav-item').forEach(i => i.style.display = 'none');
+        misPermisos.forEach((id, index) => {
+            const nav = document.getElementById('nav-' + id);
+            if (nav) {
+                nav.style.display = 'flex';
+                if (index === 0) showView(id, nav);
+            }
+        });
+        document.getElementById('role-tag').innerText = "DPTO: " + sesion.toUpperCase();
+    }
+
+    // Reloj
+    setInterval(() => {
+        const n = new Date();
         const r = document.getElementById('reloj');
-        if(r) r.innerText = new Date().toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' }).toUpperCase(); 
+        if(r) r.innerText = n.toLocaleTimeString();
     }, 1000);
+
+    // Inicio
+    aplicarSeguridad();
 </script>
 </body>
 </html>

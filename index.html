@@ -135,31 +135,41 @@
         const pass = document.getElementById('pass').value;
         const error = document.getElementById('error-msg');
 
-
         // Configuración de cuentas (Usuario: { p: contraseña, url: destino })
   const cuentas = {
-    "lorena.gonzalez": { p: "logoke.15", url: "admin_global.html" }, 
+    // ADMINISTRACIÓN GLOBAL
     "admin": { p: "master2026", url: "admin_global.html" },
+    "lorena.gonzalez": { p: "logoke.15", url: "admin_global.html" }, 
 
+    // POBLACIÓN VULNERABLE
     "vulnerable": { p: "vul123", url: "vulnerable.html" }, 
     "ramon.guapillo": { p: "Fatima20", url: "vulnerable.html" },
 
+    // TRABAJO SOCIAL
     "social": { p: "soc123", url: "social.html" },
     "juanita.campechano": { p: "Juanita123..", url: "social.html" }, 
     "monse.plata": { p: "Monse123..", url: "social.html" },
 
+    // PROCURADURÍA
     "procuraduria": { p: "pro123", url: "procuraduria.html" },
     "edmundo.pechi": { p: "Edmundo123..", url: "procuraduria.html" },
 
+    // ÁREA MÉDICA
     "medica": { p: "med123", url: "medica.html" },
-    
 
+    // PSICOLOGÍA
     "psicologia": { p: "psi123", url: "psicologia.html" },
     "samuel.pucheta": { p: "Samuel123..", url: "psicologia.html" },
-    
-    // NUEVA CUENTA JEFATURA
     "veronica.velasco": { p: "Veronica123..", url: "jefatura_psicologia.html" },
-    "jefatura.psico": { p: "jefe.psi.2026", url: "jefatura_psicologia.html" } 
+    "jefatura.psico": { p: "jefe.psi.2026", url: "jefatura_psicologia.html" },
+
+    // GENERAL LOCALIDADES / SOLICITUDES
+    "localidades": { p: "DIF.gen.loc", url: "general_localidades.html" },
+    "ariana.reyes": { p: "Ariana123..", url: "general_localidades.html" },
+
+    // --- NUEVO MÓDULO: REQUERIMIENTOS ESCOLARES ---
+    "escolar": { p: "esc123", url: "solicitudes.html" },
+    "apoyo.escolar": { p: "DIF.esc.2026", url: "solicitudes.html" }
 };
 
         if (cuentas[user] && cuentas[user].p === pass) {

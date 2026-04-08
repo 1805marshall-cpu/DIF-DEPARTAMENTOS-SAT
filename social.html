@@ -9,7 +9,7 @@
     <style>
         :root { 
             --primary: #1e40af; --success: #059669; --warning: #f59e0b; 
-            --danger: #dc2626; --bg: #f8fafc; --social: #1e40af;
+            --danger: #dc2626; --bg: #f8fafc; --social: #1e40af; --excel: #1d6f42;
         }
         
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
@@ -38,9 +38,15 @@
         tr:hover { background-color: #fcfcfc; }
         
         .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        .bg-entregado { background: #dcfce7; color: #15803d; }
-        .bg-pendiente { background: #fef3c7; color: #b45309; }
-        .bg-realizado { background: #e0f2fe; color: #0369a1; }
+        .bg-atendido { background: #dcfce7; color: #15803d; }
+        .bg-realizado { background: #dcfce7; color: #15803d; }
+        .bg-validado { background: #dcfce7; color: #7dbe95; }
+        .bg-entregado { background: #e0f2fe; color: #0369a1; }
+        .bg-pendiente { background: #ff9849; color: #b45309; }
+        .bg-cancelado { background: #f77979; color: #b40909; }
+        .bg-en proceso { background: #e0f2fe; color: #54859f; }
+       
+
 
         .paginacion-bar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 20px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
         .btn-pag { padding: 6px 12px; border: 1px solid #cbd5e1; background: white; border-radius: 4px; cursor: pointer; font-size: 11px; }
@@ -67,19 +73,20 @@
             <div class="form-group"><label>Fecha</label><input type="date" id="fecha_registro"></div>
             <div class="form-group" style="grid-column: span 2;"><label>Nombre del Beneficiario</label><input type="text" id="nombre"></div>
             <div class="form-group"><label>Teléfono</label><input type="tel" id="telefono"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Dirección</label><input type="text" id="direccion"></div>
             <div class="form-group"><label>Colonia/Localidad</label><input type="text" id="col_loc"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Dirección</label><input type="text" id="direccion"></div>
             <div class="form-group">
                 <label>Programa</label>
                 <select id="programa">
                     <option value="">-- SELECCIONAR --</option>
                     <option value="APOYO">APOYO</option>
+                    <option value="APOYO FUNCIONAL">APOYO FUNCIONAL</option>
                     <option value="ASILO">ASILO</option>
                     <option value="ATENCIÓN CIUDADANA">ATENCIÓN CIUDADANA</option>
                     <option value="CAMPAÑA">CAMPAÑA</option>
                     <option value="DESCUENTO">DESCUENTO</option>
                     <option value="GESTION DE CITAS">GESTION DE CITAS</option>
-                    <option value="INVESTIGACION DE CAMPO">INVESTIGACION DE CAMPO</option>
+                    <option value="INVESTIGACION DE CAMPO">INVESTIGACIÓN DE CAMPO</option>
                     <option value="ESTUDIO SOCIO ECONÓMICO">ESTUDIO SOCIO ECONÓMICO</option>
                     <option value="VISITA DOMICILIARIA">VISITA DOMICILIARIA</option>
                     <option value="SOLICITUD">SOLICITUD</option>
@@ -91,6 +98,7 @@
             <div class="form-group">
                 <label>Estatus</label>
                 <select id="estatus">
+                    <option value="PENDIENTE">ATENDIDO</option>
                     <option value="PENDIENTE">PENDIENTE</option>
                     <option value="ENTREGADO">ENTREGADO</option>
                     <option value="REALIZADO">REALIZADO</option>
@@ -105,7 +113,7 @@
                     <option value="">-- SELECCIONAR --</option>
                     <option value="JUANITA C. CAMPECHANO QUEZADA">JUANITA C. CAMPECHANO QUEZADA</option>
                     <option value="MONSERRAT PLATA FLORES">MONSERRAT PLATA FLORES</option>
-                    <option value="MONSERRAT PLATA FLORES">J.C.C.Q. & M.P.F.</option>
+                    <option value="MONSERRAT PLATA FLORES">J.C.C.Q. / M.P.F.</option>
                 </select>
             </div>
             <div class="form-group" style="grid-column: span 2;"><label>Detalles</label><input type="text" id="detalles"></div>
@@ -115,6 +123,14 @@
         <div class="btn-box">
             <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
             <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
+            <button class="btn" style="background:var(--excel)" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
+            
+            <label class="btn" style="background:#6366f1; cursor:pointer;">
+                <i class="fas fa-upload"></i> IMPORTAR EXCEL
+                <input type="file" id="import-excel" accept=".xlsx, .xls" style="display:none" onchange="importarDesdeExcel(event)">
+            </label>
+
+            <button class="btn" style="background:var(--danger)" onclick="eliminarTodoBaseDatos()"><i class="fas fa-trash-alt"></i> BORRAR TODO</button>
             <button class="btn" style="background:#94a3b8" onclick="limpiarForm()"><i class="fas fa-eraser"></i> LIMPIAR</button>
         </div>
     </div>
@@ -166,7 +182,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E",
@@ -198,7 +214,7 @@
         window.filtrar();
     });
 
-window.guardar = async () => {
+    window.guardar = async () => {
     const data = obtenerValoresForm();
     if(!data.nombre) return alert("El nombre del beneficiario es obligatorio.");
 
@@ -235,6 +251,51 @@ window.guardar = async () => {
         limpiarForm();
         alert("✅ Registro actualizado correctamente.");
     };
+
+    window.importarDesdeExcel = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            try {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true, dateNF: 'yyyy-mm-dd' });
+                const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { raw: false });
+                
+                let count = 0;
+                const batch = writeBatch(db);
+
+                for (const f of json) {
+                    const nuevoDoc = {
+                        numero_consecutivo: String(f.No || f.numero_consecutivo || proximoNo + count),
+                        fecha_registro: String(f.Fecha || f.fecha_registro || ""),
+                        nombre: String(f.Nombre || f.nombre || "").toUpperCase(),
+                        telefono: String(f.Telefono || f.telefono || ""),
+                        direccion: String(f.Direccion || f.direccion || "").toUpperCase(),
+                        col_loc: String(f.Col_Loc || f.col_loc || "").toUpperCase(),
+                        programa: String(f.Programa || f.programa || "").toUpperCase(),
+                        asunto: String(f.Asunto || f.asunto || "").toUpperCase(),
+                        horarios_mixtos: String(f["Horarios Mixtos"] || f.horarios_mixtos || "NO").toUpperCase(),
+                        folio_expediente: String(f["Folio Expediente"] || f.folio_expediente || ""),
+                        estatus: String(f.Estatus || f.estatus || "PENDIENTE").toUpperCase(),
+                        detalles: String(f.Detalles || f.detalles || "").toUpperCase(),
+                        usuario: String(f.Usuario || f.usuario || "").toUpperCase(),
+                        observaciones: String(f.Observaciones || f.observaciones || "").toUpperCase()
+                    };
+                    const docRef = doc(apoyosRef);
+                    batch.set(docRef, nuevoDoc);
+                    count++;
+                }
+                await batch.commit();
+                alert(`✅ Se importaron ${count} registros con éxito.`);
+            } catch (err) {
+                console.error(err);
+                alert("Error al procesar el Excel. Verifique el formato.");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
    window.filtrar = () => {
         const term = document.getElementById('buscador').value.toLowerCase();
         datosFiltrados = todosLosDatos.filter(r => 
@@ -247,6 +308,7 @@ window.guardar = async () => {
         });
         renderTabla();
     };
+
     function renderTabla() {
         const inicio = (paginaActual - 1) * filasPorPagina;
         const segmento = datosFiltrados.slice(inicio, inicio + filasPorPagina);
@@ -281,6 +343,29 @@ window.guardar = async () => {
         if(estatus === 'REALIZADO') return 'bg-realizado';
         return 'bg-pendiente';
     }
+
+    window.exportarExcel = () => {
+        const datosMapeados = datosFiltrados.map(r => ({
+            "No": r.numero_consecutivo,
+            "Fecha": r.fecha_registro,
+            "Nombre": r.nombre,
+            "Telefono": r.telefono,
+            "Direccion": r.direccion,
+            "Col_Loc": r.col_loc,
+            "Programa": r.programa,
+            "Asunto": r.asunto,
+            "Horarios Mixtos": r.horarios_mixtos,
+            "Folio Expediente": r.folio_expediente,
+            "Estatus": r.estatus,
+            "Detalles": r.detalles,
+            "Usuario": r.usuario,
+            "Observaciones": r.observaciones
+        }));
+        const ws = XLSX.utils.json_to_sheet(datosMapeados);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "TrabajoSocial");
+        XLSX.writeFile(wb, `Trabajo_Social_DIF_2026.xlsx`);
+    };
 
     window.editarLocal = (id) => {
         const reg = todosLosDatos.find(r => r.id === id);
@@ -325,6 +410,16 @@ window.guardar = async () => {
 
     window.eliminarDoc = async (id) => { if(confirm("¿Eliminar registro permanentemente?")) await deleteDoc(doc(db, "trabajo_social", id)); };
 
+    window.eliminarTodoBaseDatos = async () => {
+        if(confirm("¿ESTÁS SEGURO DE BORRAR TODO? Esta acción no se puede deshacer.") && prompt("Escribe ELIMINAR para confirmar") === "ELIMINAR") {
+            const snap = await getDocs(apoyosRef);
+            const batch = writeBatch(db);
+            snap.forEach(d => batch.delete(d.ref));
+            await batch.commit();
+            alert("Base de datos vaciada.");
+        }
+    };
+    
     window.cambiarPagina = (dir) => {
         const max = Math.ceil(datosFiltrados.length / filasPorPagina);
         if(paginaActual + dir > 0 && paginaActual + dir <= max) { paginaActual += dir; renderTabla(); }

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIF | General Localidades</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { 
+            --primary: #1e3a8a; --primary-light: #3b82f6; --success: #10b981; 
+            --warning: #f59e0b; --danger: #ef4444; --bg: #f1f5f9; --border: #cbd5e1;
+        }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
+        header { background: #fff; padding: 15px 40px; border-bottom: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .container { max-width: 1800px; margin: 20px auto; padding: 0 20px; }
+        
+        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); margin-bottom: 20px; }
+        h3 { margin: 0 0 15px 0; font-size: 11px; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; letter-spacing: 1px; }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-size: 10px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 5px; }
+        input, select, textarea { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; outline: none; transition: 0.3s; }
+        input:focus, select:focus { border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        
+        .btn-box { display: flex; gap: 10px; margin-top: 25px; flex-wrap: wrap; }
+        .btn { padding: 10px 18px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 11px; color: white; display: flex; align-items: center; gap: 8px; text-transform: uppercase; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
+
+        .search-box { background: #fff; padding: 15px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 15px; display: flex; gap: 20px; align-items: flex-end; }
+        
+        .table-wrap { background: #fff; border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        th { background: #f8fafc; padding: 14px; text-align: left; font-size: 10px; color: #64748b; border-bottom: 2px solid #e2e8f0; text-transform: uppercase; }
+        td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; }
+        tr:hover { background-color: #f8fafc; }
+        
+        .badge { padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+        .entregado { background: #dcfce7; color: #166534; }
+        .pendiente { background: #fee2e2; color: #991b1b; }
+
+        .pag-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #fff; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--border); }
+        
+        @media print { .no-print { display: none !important; } }
+    </style>
+</head>
+<body>
+
+<header class="no-print">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <h2 style="margin:0; color: var(--primary);"><i class="fas fa-map-marked-alt"></i> GENERAL LOCALIDADES</h2>
+    </div>
+    <button class="btn" style="background: var(--primary)" onclick="location.href='admin_global.html'"><i class="fas fa-home"></i> INICIO</button>
+</header>
+
+<div class="container">
+    <div class="card no-print">
+        <h3><i class="fas fa-edit"></i> Registro de Actividades por Departamento</h3>
+        <input type="hidden" id="edit-id">
+        <div class="form-grid">
+            <div class="form-group"><label>No. Registro</label><input type="text" id="numero" readonly style="background:#f8fafc; font-weight:bold;"></div>
+            <div class="form-group"><label>Fecha</label><input type="date" id="fecha"></div>
+            <div class="form-group"><label>Responsable</label><input type="text" id="responsable" placeholder="Nombre del encargado"></div>
+            <div class="form-group">
+                <label>Estatus</label>
+                <select id="estatus">
+                    <option value="PENDIENTE">PENDIENTE</option>
+                    <option value="ENTREGADO">ENTREGADO</option>
+                </select>
+            </div>
+            <div class="form-group" style="grid-column: span 2;"><label>Detalles del Apoyo/Actividad</label><input type="text" id="detalles"></div>
+            <div class="form-group" style="grid-column: span 2;"><label>Observaciones</label><textarea id="observaciones" rows="1"></textarea></div>
+        </div>
+
+        <div class="btn-box">
+            <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
+            <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
+            <button class="btn" style="background:#1d6f42" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXCEL</button>
+            <button class="btn" style="background:#64748b" onclick="limpiarForm()"><i class="fas fa-eraser"></i> LIMPIAR</button>
+        </div>
+    </div>
+
+    <div class="search-box no-print">
+        <div class="form-group" style="flex:3;"><label>🔍 Buscar en General</label><input type="text" id="buscador" placeholder="Buscar por responsable, detalles o fecha..." onkeyup="filtrar()"></div>
+        <div class="form-group" style="flex:1;">
+            <label>Mostrar</label>
+            <select id="rows-per-page" onchange="cambiarFilas()">
+                <option value="10">10 registros</option>
+                <option value="50" selected>50 registros</option>
+                <option value="100">100 registros</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="pag-bar">
+        <div id="info-total" style="font-weight: bold; color: var(--primary);"></div>
+        <div id="paginacion"></div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Fecha</th>
+                    <th>Responsable</th>
+                    <th>Detalles</th>
+                    <th>Estatus</th>
+                    <th>Observaciones</th>
+                    <th class="no-print">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTabla"></tbody>
+        </table>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", 
+        projectId: "poblacion-vulnerable---dif" 
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const mainRef = collection(db, "general_localidades");
+
+    let DATA = [];
+    let DATA_FILTRADA = [];
+    let PAGINA = 1;
+    let FILAS = 50;
+
+    // Carga de datos en tiempo real
+    onSnapshot(query(mainRef, orderBy("fecha", "desc")), (snap) => {
+        DATA = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Generar número consecutivo sugerido
+        if(!document.getElementById('edit-id').value) {
+            document.getElementById('numero').value = DATA.length + 1;
+        }
+        filtrar();
+    });
+
+    window.guardar = async () => {
+        const resp = document.getElementById('responsable').value;
+        if(!resp) return alert("Por favor, ingresa un responsable.");
+
+        const docData = {
+            numero: document.getElementById('numero').value,
+            fecha: document.getElementById('fecha').value,
+            responsable: resp.toUpperCase(),
+            detalles: document.getElementById('detalles').value.toUpperCase(),
+            estatus: document.getElementById('estatus').value,
+            observaciones: document.getElementById('observaciones').value.toUpperCase()
+        };
+
+        await addDoc(mainRef, docData);
+        limpiarForm();
+        alert("✅ Registro exitoso.");
+    };
+
+    window.actualizar = async () => {
+        const id = document.getElementById('edit-id').value;
+        const docData = {
+            fecha: document.getElementById('fecha').value,
+            responsable: document.getElementById('responsable').value.toUpperCase(),
+            detalles: document.getElementById('detalles').value.toUpperCase(),
+            estatus: document.getElementById('estatus').value,
+            observaciones: document.getElementById('observaciones').value.toUpperCase()
+        };
+
+        await updateDoc(doc(db, "general_localidades", id), docData);
+        limpiarForm();
+        alert("🔄 Registro actualizado.");
+    };
+
+  // Localiza la función filtrar en tu script y reemplázala por esta:
+
+window.filtrar = () => {
+    const busqueda = document.getElementById('buscador').value.toLowerCase();
+    
+    // Filtramos y luego ordenamos de Mayor a Menor
+    DATA_FILTRADA = DATA.filter(r => 
+        Object.values(r).some(v => String(v).toLowerCase().includes(busqueda))
+    ).sort((a, b) => {
+        // Convertimos a número para asegurar el orden matemático (Ej: 10 es mayor que 2)
+        const numA = parseInt(a.numero) || 0;
+        const numB = parseInt(b.numero) || 0;
+        return numB - numA; // B menos A ordena de mayor a menor
+    });
+
+    render();
+};
+
+    function render() {
+        const inicio = (PAGINA - 1) * FILAS;
+        const fin = inicio + FILAS;
+        const visible = DATA_FILTRADA.slice(inicio, fin);
+        
+        const tbody = document.getElementById('cuerpoTabla');
+        tbody.innerHTML = visible.map(r => `
+            <tr>
+                <td><b>${r.numero}</b></td>
+                <td>${r.fecha}</td>
+                <td><b>${r.responsable}</b></td>
+                <td>${r.detalles}</td>
+                <td><span class="badge ${r.estatus.toLowerCase()}">${r.estatus}</span></td>
+                <td><small>${r.observaciones || '-'}</small></td>
+                <td class="no-print">
+                    <button onclick="cargarEdicion('${r.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
+                    <button onclick="eliminar('${r.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
+
+        document.getElementById('info-total').innerText = `Mostrando ${DATA_FILTRADA.length} registros`;
+    }
+
+    window.cargarEdicion = (id) => {
+        const r = DATA.find(x => x.id === id);
+        document.getElementById('edit-id').value = r.id;
+        document.getElementById('numero').value = r.numero;
+        document.getElementById('fecha').value = r.fecha;
+        document.getElementById('responsable').value = r.responsable;
+        document.getElementById('detalles').value = r.detalles;
+        document.getElementById('estatus').value = r.estatus;
+        document.getElementById('observaciones').value = r.observaciones;
+        
+        document.getElementById('btn-save').style.display = 'none';
+        document.getElementById('btn-update').style.display = 'inline-block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.limpiarForm = () => {
+        document.getElementById('edit-id').value = "";
+        document.getElementById('numero').value = DATA.length + 1;
+        document.getElementById('fecha').value = "";
+        document.getElementById('responsable').value = "";
+        document.getElementById('detalles').value = "";
+        document.getElementById('estatus').value = "PENDIENTE";
+        document.getElementById('observaciones').value = "";
+        document.getElementById('btn-save').style.display = 'inline-block';
+        document.getElementById('btn-update').style.display = 'none';
+    };
+
+    window.eliminar = async (id) => {
+        if(confirm("¿Eliminar este registro permanentemente?")) {
+            await deleteDoc(doc(db, "general_localidades", id));
+        }
+    };
+
+    window.exportarExcel = () => {
+        const ws = XLSX.utils.json_to_sheet(DATA_FILTRADA);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Localidades");
+        XLSX.writeFile(wb, "Reporte_General_Localidades.xlsx");
+    };
+
+    window.cambiarFilas = () => {
+        FILAS = parseInt(document.getElementById('rows-per-page').value);
+        PAGINA = 1;
+        render();
+    };
+</script>
+</body>
+</html>

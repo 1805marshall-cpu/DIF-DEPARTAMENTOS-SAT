@@ -46,12 +46,17 @@
 </head>
 <body>
 
-<header class="no-print">
+<header class="no-print" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px;">
     <div style="display: flex; align-items: center; gap: 20px;">
-        <h2 style="margin:0; color: var(--procu); font-size: 18px;"><i class="fas fa-balance-scale"></i> PROCURADURÍA DIF</h2>
-        <button class="btn" style="background: var(--primary)" onclick="location.href='admin_global.html'"><i class="fa-solid fa-house"></i> MENÚ PRINCIPAL</button>
+        <h2 style="margin:0; color: var(--procu); font-size: 18px;">
+            <i class="fas fa-balance-scale"></i> PROCURADURÍA DIF | SISTEMA 2026
+        </h2>
+        <div id="user-display" style="font-size: 11px; font-weight: bold; color: #ffffff; background: rgb(243, 238, 238); padding: 4px 10px; border-radius: 4px;"></div>
     </div>
-    <div id="user-display" style="font-size: 11px; font-weight: bold; color: #64748b;"></div>
+
+    <button class="btn" style="background: var(--primary); margin-left: auto;" onclick="location.href='admin_global.html'">
+        <i class="fa-solid fa-house"></i> DASHBOARD
+    </button>
 </header>
 
 <div class="container">
@@ -77,7 +82,17 @@
         <div class="btn-box">
             <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
             <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
+            <button class="btn" style="background:var(--excel)" onclick="exportarExcel()"><i class="fas fa-download"></i> DESCARGAR EXCEL</button>
+            
+            <label class="btn" style="background:#6366f1; cursor:pointer;">
+                <i class="fas fa-file-import"></i> IMPORTAR DATOS
+                <input type="file" id="import-excel" accept=".xlsx, .xls" style="display:none" onchange="importarDesdeExcel(event)">
+            </label>
+
             <button class="btn" style="background:#64748b" onclick="limpiarForm()"><i class="fas fa-broom"></i> LIMPIAR</button>
+            
+            <button class="btn" style="background:var(--danger)" onclick="borrarTodaLaBase()"><i class="fas fa-trash-alt"></i> VACIAR BASE</button>
+            <button class="btn" style="background:#94a3b8" onclick="limpiarForm()"><i class="fas fa-plus"></i> NUEVO</button>
         </div>
     </div>
 
@@ -163,6 +178,64 @@
     const sesion = sessionStorage.getItem('sesion_activa');
     document.getElementById('user-display').innerText = `MODO: ${sesion ? sesion.toUpperCase() : 'INVITADO'}`;
 
+    window.importarDesdeExcel = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            try {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                
+                let count = 0;
+                let currentMax = proximoNo;
+
+                for (const f of json) {
+                    const getV = (keys) => {
+                        const found = Object.keys(f).find(k => keys.includes(k.trim().toUpperCase()));
+                        return found ? f[found] : null;
+                    };
+
+                    let valorFecha = getV(["FECHA"]);
+                    let fechaFinal = new Date().toISOString().split('T')[0];
+
+                    if (valorFecha) {
+                        if (valorFecha instanceof Date) {
+                            fechaFinal = valorFecha.toISOString().split('T')[0];
+                        } else if (!isNaN(valorFecha) && typeof valorFecha === 'number') {
+                            const dateObj = new Date((valorFecha - 25569) * 86400 * 1000);
+                            fechaFinal = dateObj.toISOString().split('T')[0];
+                        } else {
+                            fechaFinal = String(valorFecha);
+                        }
+                    }
+
+                    await addDoc(dataRef, {
+                        no: String(getV(["NO", "NUMERO", "FOLIO", "NO."]) || currentMax++),
+                        fecha: fechaFinal,
+                        nombre: String(getV(["NOMBRE"]) || "SIN NOMBRE").toUpperCase(),
+                        domicilio: String(getV(["DOMICILIO"]) || "").toUpperCase(),
+                        lugar: String(getV(["LUGAR", "LOCALIDAD", "COMUNIDAD"]) || "").toUpperCase(),
+                        asuntos: String(getV(["ASUNTOS", "ASUNTO"]) || "").toUpperCase(),
+                        detalles: String(getV(["DETALLES", "OBSERVACIONES"]) || ""),
+                        horarios_mixtos: String(getV(["HORARIOS MIXTOS", "MIXTO"]) || "No"),
+                        elaboro: String(getV(["ELABORO"]) || "IMPORTADO").toUpperCase(),
+                        t: new Date().getTime()
+                    });
+                    count++;
+                }
+                alert(`✅ Importación exitosa: ${count} registros.`);
+                e.target.value = "";
+            } catch (err) {
+                console.error(err);
+                alert("Error al importar el archivo Excel.");
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
     window.guardar = async () => {
         const data = obtenerValoresForm();
         if(!data.nombre) return alert("El nombre es obligatorio");
@@ -179,13 +252,26 @@
         alert("✅ Registro actualizado.");
     };
 
+    window.borrarTodaLaBase = async () => {
+        if (confirm("⚠️ ¿Desea eliminar TODA la información? Esta acción es irreversible.")) {
+            const password = prompt("Escriba 'ELIMINAR' para confirmar:");
+            if (password === "ELIMINAR") {
+                const querySnapshot = await getDocs(dataRef);
+                const batch = writeBatch(db);
+                querySnapshot.forEach((doc) => batch.delete(doc.ref));
+                await batch.commit();
+                alert("✅ Base de datos vaciada.");
+            }
+        }
+    };
+
     window.eliminarDoc = async (id) => { 
         if(confirm("¿Seguro que desea eliminar este registro?")) {
             await deleteDoc(doc(db, "procuraduria", id)); 
         }
     };
 
- window.filtrar = () => {
+window.filtrar = () => {
     const term = document.getElementById('buscador').value.toLowerCase().trim();
     
     // 1. Filtramos los datos según el término de búsqueda
@@ -291,6 +377,31 @@
         filasPorPagina = parseInt(document.getElementById('rows-per-page').value);
         paginaActual = 1;
         renderTabla();
+    };
+
+    window.exportarExcel = () => {
+        const datosOrdenados = [...datosMostrados].sort((a, b) => (parseInt(a.no) || 0) - (parseInt(b.no) || 0));
+
+        const datosExportar = datosOrdenados.map(r => ({
+            "No.": r.no, 
+            "Fecha": r.fecha,
+            "Nombre": r.nombre, 
+            "Domicilio": r.domicilio, 
+            "Lugar": r.lugar,
+            "Asuntos": r.asuntos, 
+            "Detalles": r.detalles, 
+            "Horarios Mixtos": r.horarios_mixtos, 
+            "Elaboró": r.elaboro
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(datosExportar);
+        const wscols = [{wch: 6}, {wch: 12}, {wch: 35}, {wch: 30}, {wch: 25}, {wch: 25}, {wch: 45}, {wch: 15}, {wch: 20}];
+        ws['!cols'] = wscols;
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Padron_Procuraduria");
+        const fHoy = new Date().toISOString().split('T')[0];
+        XLSX.writeFile(wb, `Reporte_Procuraduria_${fHoy}.xlsx`);
     };
 
     window.limpiarForm();
