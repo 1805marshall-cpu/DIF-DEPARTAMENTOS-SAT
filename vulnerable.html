@@ -133,7 +133,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>NO.</th><th>FOTO</th><th>CÓDIGO</th><th>BENEFICIARIO</th><th>LOCALIDAD / DIRECCIÓN</th><th>APOYO</th><th>ESTATUS</th><th class="no-print">ACCIONES</th>
+                    <th>NO.</th><th>FOTO</th><th>CÓDIGO</th><th>BENEFICIARIO</th><th>FECHA DE NACIMIENTO</th><th>LOCALIDAD / DIRECCIÓN</th><th>APOYO</th><th>ESTATUS</th><th class="no-print">ACCIONES</th>
                 </tr>
             </thead>
             <tbody id="tabla-beneficiarios"></tbody>
@@ -202,6 +202,7 @@ function render() {
             <td>${r.ine_img ? `<img src="${r.ine_img}" onclick="abrirVisor('${r.ine_img}', '${r.nombre}')" style="width:35px;height:35px;object-fit:cover;cursor:pointer;border-radius:4px;">` : '-'}</td>
             <td style="color:var(--primary); font-weight:bold;">${r.codigo || ''}</td>
             <td><b>${r.apellido_paterno || ''} ${r.apellido_materno || ''} ${r.nombre || ''}</b><span class="sub-text">${r.curp || ''}</span></td>
+            <td>${r.fecha_nac || ''}</td>
             <td><b>${r.col_loc || ''}</b><span class="sub-text">${r.direccion || ''}</span></td>
             <td>${r.tipo_apoyo || ''}</td>
             <td><span class="badge-status" style="background:${r.estatus==='Entregado'?'#dcfce7':'#fef3c7'}; color:${r.estatus==='Entregado'?'#15803d':'#b45309'}">${r.estatus}</span></td>
@@ -308,12 +309,14 @@ window.guardar = async () => {
     window.eliminar = async (id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, "apoyos", id)); };
 
  window.exportarExcel = () => {
+    // 1. Definimos el orden y los nombres de las columnas (Headers)
     const encabezados = {
         n: "NO.",
         codigo: "CÓDIGO",
         apellido_paterno: "APELLIDO PATERNO",
         apellido_materno: "APELLIDO MATERNO",
         nombre_completo: "NOMBRE(S)",
+        fecha_nac: "FECHA DE NACIMIENTO",
         curp: "CURP",
         localidad_direccion: "LOCALIDAD / DIRECCIÓN",
         tipo_apoyo: "APOYO",
@@ -322,13 +325,15 @@ window.guardar = async () => {
         fecha_ingreso: "FECHA INGRESO"
     };
 
+    // 2. Mapeamos la data filtrada al formato de los encabezados
     const dataParaExportar = DATA_FILTRADA.map((r, index) => {
         return {
-            [encabezados.n]: DATA_FILTRADA.length - index,
+            [encabezados.n]: index + 1,
             [encabezados.codigo]: r.codigo || '',
             [encabezados.apellido_paterno]: `${r.apellido_paterno || ''}`.trim(),
             [encabezados.apellido_materno]: `${r.apellido_materno || ''}`.trim(),
             [encabezados.nombre_completo]: `${r.nombre || ''}`.trim(),
+            [encabezados.fecha_nac]: `${r.fecha_nac || ''}`.trim(),
             [encabezados.curp]: r.curp || '',
             [encabezados.localidad_direccion]: `${r.col_loc || ''} - ${r.direccion || ''}`.trim(),
             [encabezados.tipo_apoyo]: r.tipo_apoyo || '',
@@ -338,18 +343,32 @@ window.guardar = async () => {
         };
     });
 
+    // 3. Creamos el libro de Excel
     const ws = XLSX.utils.json_to_sheet(dataParaExportar);
+    
+    // Ajuste opcional: Definir anchos de columna para que se vea profesional
     const wscols = [
-        {wch: 5}, {wch: 15}, {wch: 20}, {wch: 20}, {wch: 20}, {wch: 20},
-        {wch: 45}, {wch: 20}, {wch: 15}, {wch: 30}, {wch: 15}
+        {wch: 5},  // NO.
+        {wch: 15}, // CÓDIGO
+        {wch: 20}, // PATERNO
+        {wch: 20}, // MATERNO
+        {wch: 20}, // NOMBRE
+        {wch: 20}, // FECHA DE NACIMIENTO
+        {wch: 20}, // CURP
+        {wch: 45}, // LOCALIDAD / DIRECCIÓN
+        {wch: 20}, // APOYO
+        {wch: 15}, // ESTATUS
+        {wch: 30}, // OBSERVACIONES
+        {wch: 15}  // FECHA
     ];
     ws['!cols'] = wscols;
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Beneficiarios 2026");
+    
+    // 4. Descargar
     XLSX.writeFile(wb, `Reporte_Poblacion_Vulnerable_${new Date().toISOString().split('T')[0]}.xlsx`);
 };
-
     window.abrirVisor = (src, n) => {
         document.getElementById('modal-visor').style.display='flex'; 
         document.getElementById('img-grande').src = src; 
