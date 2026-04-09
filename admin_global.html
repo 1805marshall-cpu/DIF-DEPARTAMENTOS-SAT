@@ -255,19 +255,19 @@
             </div>
         </div>
 
-        <div id="view-jefatura-psicologia" class="view-container">
-            <div class="access-card" style="background: #701a27;"><div><b>Jefatura de Psicología</b></div><a href="jefatura_psicologia.html" class="btn-open">Módulo</a></div>
-            <div class="filter-bar"></div>
-            <div class="stats-grid">
-                <div class="stat-box" style="border-top:3px solid #701a27"><small>Total Actividades</small><div id="jp-total">0</div></div>
-                <div class="stat-box"><small>Valoraciones</small><div id="jp-val" style="color:var(--primary)">0</div></div>
-                <div class="stat-box"><small>Entrevistas</small><div id="jp-ent" style="color:var(--success)">0</div></div>
-            </div>
-            <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px;">
-                <div class="panel"><b>Resumen por Dependencia</b><div id="jp-list-actividades"></div></div>
-                <div class="panel"><b>Zonas de Intervención</b><div id="jp-list-geo"></div></div>
-            </div>
-        </div>
+<div id="view-jefatura-psicologia" class="view-container">
+    <div class="access-card" style="background: #701a27;"><div><b>Jefatura de Psicología</b></div><a href="jefatura_psicologia.html" class="btn-open">Módulo</a></div>
+    <div class="filter-bar"></div>
+    <div class="stats-grid">
+        <div class="stat-box" style="border-top:3px solid #701a27"><small>Total de Actividades</small><div id="jp-total">0</div></div>
+        
+        <div class="stat-box"><small>Personas</small><div id="jp-ent" style="color:var(--success)">0</div></div>
+    </div>
+    <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px;">
+        <div class="panel"><b>Resumen por Dependencia</b><div id="jp-list-actividades"></div></div>
+        <div class="panel"><b>Zonas de Intervención</b><div id="jp-list-geo"></div></div>
+    </div>
+</div>
 
         <div id="view-general-localidades" class="view-container">
             <div class="access-card" style="background: var(--genloc-color);"><div><b>General Localidades</b></div><a href="general_localidades.html" class="btn-open">Módulo</a></div>
@@ -579,34 +579,38 @@ if (isFiltered) {
             renderM('p-list-motivos', mot, 'var(--psico-color)'); renderM('p-list-seguimiento', seg, '#64748b');
         }
     };
+window.procJefPsic = (s, m) => {
+    let personasAtendidas = 0, acts = {}, geo = {};
+    let fil = DB_JP.filter(d => cumpleFiltros(d, s, m));
+    
+    fil.forEach(d => {
+        // Sumamos el valor del campo personas (asegurando que sea número)
+        // Si el campo en tu DB tiene otro nombre (ej. 'cantidad_personas'), cámbialo aquí:
+        personasAtendidas += Number(d.personas || 0); 
+        
+        const n = (d.paciente || d.nombre || "S/N").toUpperCase(), 
+              dep = (d.dependencia || "OTRA").toUpperCase(), 
+              l = (d.colonia || d.localidad || "S/L").toUpperCase(), 
+              act = (d.actividad || "ACTIVIDAD").toUpperCase();
+        
+        if (!acts[dep]) acts[dep] = []; 
+        acts[dep].push({ n, x: act, l });
+        
+        if (!geo[l]) geo[l] = []; 
+        geo[l].push({ n, x: act, l });
+    });
 
-    window.procJefPsic = (s, m) => {
-        let val = 0, ent = 0, acts = {}, geo = {};
-        let fil = DB_JP.filter(d => cumpleFiltros(d, s, m));
-        fil.forEach(d => {
-            const act = (d.actividad || "").toUpperCase(); 
-            if(act.includes("VALORACION")) val++; 
-            if(act.includes("ENTREVISTA")) ent++;
-            
-            const dep = (d.dependencia || "S/D").toUpperCase(), 
-                  n = (d.paciente || "S/N").toUpperCase(), 
-                  l = (d.localidad || "S/L").toUpperCase();
+    if (document.getElementById('jp-total')) {
+        // Total de actividades es el conteo de registros filtrados
+        document.getElementById('jp-total').innerText = fil.length;
+        // El ID 'jp-ent' ahora muestra el acumulado de personas
+        document.getElementById('jp-ent').innerText = personasAtendidas;
+        
+        renderM('jp-list-actividades', acts, '#701a27');
+        renderM('jp-list-geo', geo, '#701a27');
+    }
+};
 
-            if(!acts[dep]) acts[dep] = []; 
-            acts[dep].push({ n, x: act, l });
-            
-            if(!geo[l]) geo[l] = []; 
-            geo[l].push({ n, x: dep, l });
-        });
-
-        if(document.getElementById('jp-total')){
-            document.getElementById('jp-total').innerText = fil.length;
-            document.getElementById('jp-val').innerText = val;
-            document.getElementById('jp-ent').innerText = ent;
-            renderM('jp-list-actividades', acts, '#701a27');
-            renderM('jp-list-geo', geo, '#64748b');
-        }
-    };
 
     window.procGenLoc = (s, m) => {
         let fin = 0, respGrp = {}, geo = {};
