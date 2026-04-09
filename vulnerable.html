@@ -308,7 +308,7 @@ window.guardar = async () => {
 
     window.eliminar = async (id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, "apoyos", id)); };
 
- window.exportarExcel = () => {
+window.exportarExcel = () => {
     // 1. Definimos el orden y los nombres de las columnas (Headers)
     const encabezados = {
         n: "NO.",
@@ -321,6 +321,14 @@ window.guardar = async () => {
         localidad_direccion: "LOCALIDAD / DIRECCIÓN",
         tipo_apoyo: "APOYO",
         estatus: "ESTATUS",
+        clave_entidad: "CLAVE ENTIDAD",
+        entidad: "ENTIDAD",
+        cve_mpio: "CLAVE MUNICIPIO",
+        municipio: "MUNICIPIO",
+        clave_col_loc: "CLAVE COL/COL",
+        col_loc: "COL/COL",
+        direccion: "DIRECCION",
+        telefono: "TELEFONO",
         observaciones: "OBSERVACIONES",
         fecha_ingreso: "FECHA INGRESO"
     };
@@ -335,9 +343,17 @@ window.guardar = async () => {
             [encabezados.nombre_completo]: `${r.nombre || ''}`.trim(),
             [encabezados.fecha_nac]: `${r.fecha_nac || ''}`.trim(),
             [encabezados.curp]: r.curp || '',
-            [encabezados.localidad_direccion]: `${r.col_loc || ''} - ${r.direccion || ''}`.trim(),
             [encabezados.tipo_apoyo]: r.tipo_apoyo || '',
+            [encabezados.localidad_direccion]: `${r.col_loc || ''} - ${r.direccion || ''}`.trim(),
             [encabezados.estatus]: r.estatus || '',
+            [encabezados.clave_entidad]: r.clave_entidad || '',
+            [encabezados.entidad]: r.entidad || '',
+            [encabezados.cve_mpio]: r.cve_mpio || '',
+            [encabezados.municipio]: r.municipio || '',
+            [encabezados.clave_col_loc]: r.clave_col_loc || '',
+            [encabezados.col_loc]: r.col_loc || '',
+            [encabezados.direccion]: r.direccion || '',
+            [encabezados.telefono]: r.telefono || '',
             [encabezados.observaciones]: r.observaciones || '',
             [encabezados.fecha_ingreso]: r.fecha_ingreso || ''
         };
@@ -355,11 +371,17 @@ window.guardar = async () => {
         {wch: 20}, // NOMBRE
         {wch: 20}, // FECHA DE NACIMIENTO
         {wch: 20}, // CURP
-        {wch: 45}, // LOCALIDAD / DIRECCIÓN
         {wch: 20}, // APOYO
-        {wch: 15}, // ESTATUS
+        {wch: 20}, // ESTATUS
+        {wch: 5}, // CLAVE ENTIDAD
+        {wch: 20}, // ENTIDAD
+        {wch: 5}, // CLAVE MUNICIPIO
+        {wch: 20}, // MUNICIPIO
+        {wch: 5}, // CLAVE LOC/COL
+        {wch: 20}, // DIRECCION
+        {wch: 20}, // TELEFONO
         {wch: 30}, // OBSERVACIONES
-        {wch: 15}  // FECHA
+        {wch: 15}  // FECHA DE INGRESO
     ];
     ws['!cols'] = wscols;
 
