@@ -104,6 +104,7 @@
                 <option value="">-- SELECCIONE DEPENDENCIA PRIMERO --</option>
             </select>
         </div>
+                <div class="form-group"><label>Número de Personas</label><input type="number" id="f-personas" placeholder="0" min="0"></div>
         <div class="form-group"><label>Fecha de Registro</label><input type="date" id="f-fecha"></div>
         <div class="form-group"><label>Horario</label><input type="time" id="f-horario"></div>
         <div class="form-group"><label>Folio Interno</label><input type="number" id="f-no"></div>
@@ -126,7 +127,6 @@
         <button class="btn" id="btn-save" style="background:var(--success)" onclick="saveData()"><i class="fas fa-save"></i> GUARDAR ACTIVIDAD</button>
         <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="updateData()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
         <button class="btn" style="background:#64748b" onclick="limpiarForm()"><i class="fas fa-eraser"></i> NUEVO REGISTRO</button>
-
     <div style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px 20px; border: 1px solid var(--border); border-bottom: none; border-radius: 12px 12px 0 0;">
         <span id="pagi-info" style="font-size: 12px; color: #64748b; font-weight: bold;"></span>
         <div id="pagi-buttons" style="display: flex; gap: 5px;"></div>
@@ -141,6 +141,7 @@
                     <th>DEPENDENCIA</th>
                     <th>ACTIVIDAD</th>
                     <th>PACIENTE / BENEFICIARIO</th>
+                    <th>PERS.</th>
                     <th>OFICIO/EXP</th>
                     <th>LOCALIDAD</th>
                     <th>RESPONSABLE</th>
@@ -200,6 +201,7 @@
                 <td><span class="badge-dep">${d.dependencia || ''}</span></td>
                 <td><b>${d.actividad || ''}</b></td>
                 <td>${d.paciente || ''}</td>
+                <td style="text-align:center;"><b>${d.personas || '0'}</b></td>
                 <td><small>${d.oficio || ''}</small></td>
                 <td>${d.colonia || ''}</td>
                 <td><small>${d.usuario || ''}</small></td>
@@ -231,6 +233,7 @@
         fecha: document.getElementById('f-fecha').value,
         horario: document.getElementById('f-horario').value,
         paciente: document.getElementById('f-paciente').value.toUpperCase(),
+        personas: Number(document.getElementById('f-personas').value || 0),
         oficio: document.getElementById('f-oficio').value.toUpperCase(),
         colonia: document.getElementById('f-colonia').value.toUpperCase(),
         usuario: document.getElementById('f-usuario').value.toUpperCase(),
@@ -255,6 +258,7 @@
         document.getElementById('f-fecha').value = d.fecha;
         document.getElementById('f-horario').value = d.horario || "";
         document.getElementById('f-paciente').value = d.paciente;
+        document.getElementById('f-personas').value = d.personas || 0;
         document.getElementById('f-oficio').value = d.oficio;
         document.getElementById('f-colonia').value = d.colonia;
         document.getElementById('f-usuario').value = d.usuario;
@@ -279,7 +283,7 @@
         const ahora = new Date();
         document.getElementById('f-horario').value = ahora.getHours().toString().padStart(2, '0') + ':' + ahora.getMinutes().toString().padStart(2, '0');
 
-        ['f-no','f-dependencia','f-actividad','f-paciente','f-oficio','f-colonia','f-usuario','f-observaciones'].forEach(id => document.getElementById(id).value = "");
+        ['f-no','f-dependencia','f-actividad','f-paciente','f-personas','f-oficio','f-colonia','f-usuario','f-observaciones'].forEach(id => document.getElementById(id).value = "");
         document.getElementById('btn-save').style.display = 'inline-block';
         document.getElementById('btn-update').style.display = 'none';
         const max = dataList.reduce((m, i) => Math.max(m, Number(i.no) || 0), 0);
@@ -296,6 +300,7 @@
             "DEPENDENCIA": rest.dependencia,
             "ACTIVIDAD": rest.actividad,
             "PACIENTE": rest.paciente,
+            "NUM. PERSONAS": rest.personas || 0,
             "OFICIO": rest.oficio,
             "LOCALIDAD": rest.colonia,
             "RESPONSABLE": rest.usuario,
