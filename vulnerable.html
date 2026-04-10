@@ -60,7 +60,12 @@
             <div class="form-group"><label>Paterno</label><input type="text" id="apellido_paterno"></div>
             <div class="form-group"><label>Materno</label><input type="text" id="apellido_materno"></div>
             <div class="form-group"><label>Nombre(s)</label><input type="text" id="nombre"></div>
-            <div class="form-group"><label>F. Nacimiento</label><input type="text" id="fecha_nac" placeholder="DD/MM/AAAA"></div>
+            <div class="form-group"><label>F. Nacimiento (Número o Formato)</label><input type="text" id="fecha_nac" placeholder="Ej: 15051990"></div>
+            <div class="form-group">
+                <label>Edad Calculada</label>
+                <input type="text" id="edad_calculada" readonly style="background: #f1f5f9; font-weight: bold; color: var(--primary);">
+                <span id="mensaje_programa" style="font-size: 9px; font-weight: bold; margin-top: 4px; padding: 2px 5px; border-radius: 4px; display: none;"></span>
+            </div>            
             <div class="form-group"><label>CURP</label><input type="text" id="curp" maxlength="18"></div>
             <div class="form-group"><label>Tipo de Apoyo</label><input type="text" id="tipo_apoyo"></div>
             <div class="form-group">
@@ -94,7 +99,9 @@
             <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
             <button class="btn" id="btn-upd" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
             <button class="btn" style="background:#1d6f42" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
+            <label class="btn" style="background:#6366f1; cursor:pointer;"><i class="fas fa-upload"></i> IMPORTAR EXCEL <input type="file" onchange="importarSincronizado(event)" hidden></label>
             <button class="btn" style="background:#94a3b8" onclick="location.reload()"><i class="fas fa-eraser"></i> LIMPIAR</button>
+            <button class="btn" style="background:var(--danger); margin-left: auto;" onclick="vaciarBaseDeDatos()"><i class="fas fa-trash-alt"></i> VACIAR BASE DE DATOS</button>
         </div>
     </div>
 
@@ -115,16 +122,11 @@
         <label style="font-size: 10px; color: #64748b;">MOSTRAR:</label>
         <select id="selector-filas" onchange="cambiarFilas(this.value)" style="padding: 2px 5px; font-size: 11px;">
             <option value="10">10</option>
-            <option value="20">20</option>
-            <option value="30">30</option>
-            <option value="40">40</option>
             <option value="50" selected>50</option>
             <option value="100">100</option>
-            <option value="200">200</option>
             <option value="500">500</option>
         </select>
     </div>
-    
     <div id="info-total" style="font-size: 11px; font-weight: bold; color: var(--primary);"></div>
     <div id="pag-container"></div>
 </div>
@@ -133,7 +135,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>NO.</th><th>FOTO</th><th>CÓDIGO</th><th>BENEFICIARIO</th><th>FECHA DE NACIMIENTO</th><th>LOCALIDAD / DIRECCIÓN</th><th>APOYO</th><th>ESTATUS</th><th class="no-print">ACCIONES</th>
+                    <th>NO.</th><th>FOTO</th><th>CÓDIGO</th><th>BENEFICIARIO</th><th>F. NACIMIENTO</th><th>LOCALIDAD / DIRECCIÓN</th><th>APOYO</th><th>ESTATUS</th><th class="no-print">ACCIONES</th>
                 </tr>
             </thead>
             <tbody id="tabla-beneficiarios"></tbody>
@@ -171,57 +173,164 @@
         filtrarYRender();
     });
 
-window.filtrarYRender = () => {
-    const val = document.getElementById('input-busqueda').value.toLowerCase();
-    const est = document.getElementById('filtro-estatus').value;
-    
-    DATA_FILTRADA = DATA_ACTUAL.filter(r => {
-        const campos = Object.values(r).join(" ").toLowerCase();
-        return campos.includes(val) && (est === "Todos" || r.estatus === est);
-    });
+    // --- CÁLCULO DE EDAD Y VALIDACIÓN PROGRAMA ---
+    window.calcularEdadActual = () => {
+        const raw = document.getElementById('fecha_nac').value.trim();
+        const output = document.getElementById('edad_calculada');
+        if (!raw) { output.value = ""; return; }
 
-    // ORDENAR POR CÓDIGO (De mayor a menor por No.)
-    DATA_FILTRADA.sort((a, b) => {
-        return (b.codigo || "").localeCompare(a.codigo || "", undefined, {numeric: true});
-    });
+        let clean = raw.replace(/\D/g, ''); 
+        let d, m, a;
 
-    PAGINA_ACTUAL = 1;
-    render();
-};
+        if (clean.length === 8) {
+            if (parseInt(clean.substring(0, 4)) > 1900) { a = clean.substring(0, 4); m = clean.substring(4, 6); d = clean.substring(6, 8); }
+            else { d = clean.substring(0, 2); m = clean.substring(2, 4); a = clean.substring(4, 8); }
+        } else {
+            const p = raw.split(/[-./ ]/);
+            if(p.length === 3) {
+                if(p[0].length === 4) { a=p[0]; m=p[1]; d=p[2]; }
+                else { d=p[0]; m=p[1]; a=p[2]; }
+            }
+        }
 
-function render() {
-    const inicio = (PAGINA_ACTUAL - 1) * FILAS_POR_PAGINA;
-    const lista = DATA_FILTRADA.slice(inicio, inicio + FILAS_POR_PAGINA);
-    document.getElementById('info-total').innerText = `REGISTROS: ${DATA_FILTRADA.length}`;
-    
-    const totalRegistros = DATA_FILTRADA.length;
+        const f = new Date(a, m - 1, d);
+        const hoy = new Date();
+        if (isNaN(f.getTime()) || f > hoy) { output.value = ""; return; }
 
-    document.getElementById('tabla-beneficiarios').innerHTML = lista.map((r, i) => `
-        <tr>
-            <td><b>${totalRegistros - (inicio + i)}</b></td>
-            <td>${r.ine_img ? `<img src="${r.ine_img}" onclick="abrirVisor('${r.ine_img}', '${r.nombre}')" style="width:35px;height:35px;object-fit:cover;cursor:pointer;border-radius:4px;">` : '-'}</td>
-            <td style="color:var(--primary); font-weight:bold;">${r.codigo || ''}</td>
-            <td><b>${r.apellido_paterno || ''} ${r.apellido_materno || ''} ${r.nombre || ''}</b><span class="sub-text">${r.curp || ''}</span></td>
-            <td>${r.fecha_nac || ''}</td>
-            <td><b>${r.col_loc || ''}</b><span class="sub-text">${r.direccion || ''}</span></td>
-            <td>${r.tipo_apoyo || ''}</td>
-            <td><span class="badge-status" style="background:${r.estatus==='Entregado'?'#dcfce7':'#fef3c7'}; color:${r.estatus==='Entregado'?'#15803d':'#b45309'}">${r.estatus}</span></td>
-            <td class="no-print">
-                <button onclick="editar('${r.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
-                <button onclick="eliminar('${r.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
-            </td>
-        </tr>
-    `).join('');
+        let edadAnios = hoy.getFullYear() - f.getFullYear();
+        if (hoy.getMonth() < (m-1) || (hoy.getMonth() === (m-1) && hoy.getDate() < d)) edadAnios--;
+        
+        let edadMilisegundos = hoy - f;
+        const dosAniosMilisegundos = 2 * 365.25 * 24 * 60 * 60 * 1000;
+
+        output.value = (edadAnios === 0) ? "INFANTE" : `${edadAnios} AÑOS`;
+
+        if (edadMilisegundos < dosAniosMilisegundos) {
+            output.style.color = "#0d9488";
+            alert("ES MENOR DE 2 AÑOS, ES APTO PARA EL PROGRAMA DE 1000 DÍAS");
+        } else {
+            output.style.color = "#dc2626";
+            alert("ES MAYOR DE 2 AÑOS, NO ES APTO PARA EL PROGRAMA DE 1000 DÍAS");
+        }
+    };
+
+    document.getElementById('fecha_nac').addEventListener('input', window.calcularEdadActual);
+
+    // --- FILTRADO Y RENDERIZADO ---
+    window.filtrarYRender = () => {
+        const val = document.getElementById('input-busqueda').value.toLowerCase();
+        const est = document.getElementById('filtro-estatus').value;
+        DATA_FILTRADA = DATA_ACTUAL.filter(r => {
+            const txt = Object.values(r).join(" ").toLowerCase();
+            return txt.includes(val) && (est === "Todos" || r.estatus === est);
+        });
+        PAGINA_ACTUAL = 1;
+        render();
+    };
+
+    function render() {
+        const inicio = (PAGINA_ACTUAL - 1) * FILAS_POR_PAGINA;
+        const lista = DATA_FILTRADA.slice(inicio, inicio + FILAS_POR_PAGINA);
+        document.getElementById('info-total').innerText = `TOTAL: ${DATA_FILTRADA.length}`;
+        
+        document.getElementById('tabla-beneficiarios').innerHTML = lista.map((r, i) => `
+            <tr>
+                <td><b>${DATA_FILTRADA.length - (inicio + i)}</b></td>
+                <td>${r.ine_img ? `<img src="${r.ine_img}" onclick="abrirVisor('${r.ine_img}', '${r.nombre}')" style="width:35px;height:35px;object-fit:cover;cursor:pointer;border-radius:4px;">` : '-'}</td>
+                <td style="color:var(--primary); font-weight:bold;">${r.codigo || ''}</td>
+                <td><b>${r.apellido_paterno || ''} ${r.apellido_materno || ''} ${r.nombre || ''}</b><span class="sub-text">${r.curp || ''}</span></td>
+                <td>${r.fecha_nac || ''} <br> <small style="color:var(--primary); font-weight:bold;">${r.edad_calculada || ''}</small></td>
+                <td><b>${r.col_loc || ''}</b><span class="sub-text">${r.direccion || ''}</span></td>
+                <td>${r.tipo_apoyo || ''}</td>
+                <td><span class="badge-status" style="background:${r.estatus==='Entregado'?'#dcfce7':'#fef3c7'}; color:${r.estatus==='Entregado'?'#15803d':'#b45309'}">${r.estatus}</span></td>
+                <td class="no-print">
+                    <button onclick="editar('${r.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
+                    <button onclick="eliminar('${r.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
+                </td>
+            </tr>
+        `).join('');
 
         const tPag = Math.ceil(DATA_FILTRADA.length / FILAS_POR_PAGINA);
-        let pagHTML = `<button class="btn-pag" onclick="irPagina(${PAGINA_ACTUAL - 1})" ${PAGINA_ACTUAL === 1 ? 'disabled' : ''}>Anterior</button>`;
-        pagHTML += `<span style="margin:0 15px">Página ${PAGINA_ACTUAL} de ${tPag || 1}</span>`;
-        pagHTML += `<button class="btn-pag" onclick="irPagina(${PAGINA_ACTUAL + 1})" ${PAGINA_ACTUAL >= tPag ? 'disabled' : ''}>Siguiente</button>`;
-        document.getElementById('pag-container').innerHTML = pagHTML;
+        document.getElementById('pag-container').innerHTML = `
+            <button class="btn-pag" onclick="irPagina(${PAGINA_ACTUAL-1})" ${PAGINA_ACTUAL===1?'disabled':''}>Anterior</button>
+            <span style="margin:0 10px">Pág ${PAGINA_ACTUAL} de ${tPag||1}</span>
+            <button class="btn-pag" onclick="irPagina(${PAGINA_ACTUAL+1})" ${PAGINA_ACTUAL>=tPag?'disabled':''}>Siguiente</button>
+        `;
     }
 
     window.irPagina = (p) => { PAGINA_ACTUAL = p; render(); };
+    window.cambiarFilas = (v) => { FILAS_POR_PAGINA = parseInt(v); render(); };
 
+    // --- GESTIÓN DE DATOS (CRUD) ---
+    const obtenerDataForm = () => {
+        const d = {};
+        document.querySelectorAll('#main-form input, #main-form select').forEach(i => { if(i.id) d[i.id] = i.value; });
+        return d;
+    };
+
+    window.guardar = async () => {
+        const d = obtenerDataForm();
+        if(!d.codigo) return alert("Código requerido");
+        await addDoc(apoyosRef, d);
+        alert("Guardado");
+        location.reload();
+    };
+
+    window.actualizar = async () => {
+        const id = document.getElementById('edit-id').value;
+        if (!id) return;
+        try {
+            await updateDoc(doc(db, "apoyos", id), obtenerDataForm());
+            alert("¡Registro actualizado!");
+            location.reload();
+        } catch (e) { alert("Error al actualizar"); }
+    };
+
+    window.editar = (id) => {
+        const r = DATA_ACTUAL.find(x => x.id === id);
+        if (!r) return;
+        document.querySelectorAll('#main-form input, #main-form select').forEach(i => i.value = "");
+        Object.keys(r).forEach(key => {
+            const el = document.getElementById(key);
+            if (el) el.value = r[key] || "";
+        });
+        if (r.ine_img) {
+            document.getElementById('box-preview').innerHTML = `<img src="${r.ine_img}" style="width:100%">`;
+            document.getElementById('ine_img').value = r.ine_img;
+        }
+        document.getElementById('edit-id').value = id;
+        document.getElementById('btn-save').style.display = 'none'; 
+        document.getElementById('btn-upd').style.display = 'inline-block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.eliminar = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "apoyos", id)); };
+
+    // --- IMPORTAR / EXPORTAR ---
+    window.exportarExcel = () => {
+        if (DATA_FILTRADA.length === 0) return alert("No hay datos para exportar.");
+
+        const encabezados = { 
+            codigo: "CÓDIGO", fecha_ingreso: "F. INGRESO", apellido_paterno: "PATERNO", apellido_materno: "MATERNO", 
+            nombre: "NOMBRE", fecha_nac: "F. NAC", edad_calculada: "EDAD", curp: "CURP", tipo_apoyo: "APOYO", 
+            estatus: "ESTATUS", clave_entidad: "CVE ENT", entidad: "ENTIDAD", cve_mpio: "CVE MPIO", 
+            municipio: "MUNICIPIO", clave_col_loc: "CVE COL/LOC", col_loc: "COLONIA/LOC", direccion: "DIRECCION", 
+            telefono: "TEL", observaciones: "OBS" 
+        };
+
+        const excelData = DATA_FILTRADA.map((r, index) => {
+            let fila = { "NO.": index + 1 };
+            Object.keys(encabezados).forEach(llave => { fila[encabezados[llave]] = r[llave] || ''; });
+            return fila;
+        });
+
+        const ws = XLSX.utils.json_to_sheet(excelData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Beneficiarios");
+        XLSX.writeFile(wb, `Reporte_DIF_Filtrado.xlsx`);
+    };
+
+    // --- UTILIDADES (FOTO, VISOR, VACIAR) ---
     window.handleFoto = (e) => {
         const fr = new FileReader();
         fr.onload = (ev) => { 
@@ -231,166 +340,6 @@ function render() {
         fr.readAsDataURL(e.target.files[0]);
     };
 
-    const obtenerDatosForm = () => {
-        const d = {};
-        document.querySelectorAll('#main-form input, #main-form select').forEach(i => {
-            if(i.id) d[i.id] = i.value;
-        });
-        return d;
-    };
-
-window.guardar = async () => {
-        const data = obtenerDatosForm();
-        if(!data.codigo) return alert("Código requerido");
-        if(!data.nombre || !data.curp) return alert("Nombre y CURP son obligatorios para validar duplicados");
-
-        const duplicado = DATA_ACTUAL.find(r => 
-            r.curp?.trim().toUpperCase() === data.curp.trim().toUpperCase() && 
-            r.nombre?.trim().toLowerCase() === data.nombre.trim().toLowerCase()
-        );
-
-        if (duplicado) {
-            const mensaje = `¡ATENCIÓN! El beneficiario ${duplicado.nombre} con CURP ${duplicado.curp} ya existe en el sistema.\n\n` +
-                            `Apoyo previo: ${duplicado.tipo_apoyo || 'No especificado'}\n` +
-                            `Estatus actual: ${duplicado.estatus}\n\n` +
-                            `¿Deseas registrarlo de todos modos?`;
-            
-            if (!confirm(mensaje)) return;
-        }
-
-        try {
-            await addDoc(apoyosRef, data);
-            alert("Guardado correctamente");
-            location.reload();
-        } catch (error) {
-            console.error("Error al guardar:", error);
-            alert("Error al intentar guardar el registro.");
-        }
-    };
-
-    window.editar = (id) => {
-        const r = DATA_ACTUAL.find(x => x.id === id);
-        if(!r) return;
-
-        document.querySelectorAll('#main-form input').forEach(i => i.value = "");
-
-        Object.keys(r).forEach(k => {
-            const input = document.getElementById(k);
-            if(input) input.value = r[k];
-        });
-
-        const valorMpio = r.cve_mpio || r.clave_municipio || r.clave_mpio || r.cve_municipio || "";
-        document.getElementById('cve_mpio').value = valorMpio;
-
-        const valorTel = r.telefono || r.teléfono || r.tel || "";
-        document.getElementById('telefono').value = valorTel;
-
-        if(r.ine_img) {
-            document.getElementById('box-preview').innerHTML = `<img src="${r.ine_img}" style="width:100%">`;
-            document.getElementById('ine_img').value = r.ine_img;
-        } else {
-            document.getElementById('box-preview').innerHTML = `<i class="fas fa-image" style="color:#cbd5e1; font-size: 20px;"></i>`;
-        }
-
-        document.getElementById('edit-id').value = id;
-        document.getElementById('btn-save').style.display = 'none'; 
-        document.getElementById('btn-upd').style.display = 'inline-block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    window.actualizar = async () => {
-        const id = document.getElementById('edit-id').value;
-        const data = obtenerDatosForm();
-        await updateDoc(doc(db, "apoyos", id), data);
-        alert("Actualizado correctamente");
-        location.reload();
-    };
-
-    window.eliminar = async (id) => { if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, "apoyos", id)); };
-
-window.exportarExcel = () => {
-    // 1. Definimos el orden y los nombres de las columnas (Headers)
-    const encabezados = {
-        n: "NO.",
-        codigo: "CÓDIGO",
-        apellido_paterno: "APELLIDO PATERNO",
-        apellido_materno: "APELLIDO MATERNO",
-        nombre_completo: "NOMBRE(S)",
-        fecha_nac: "FECHA DE NACIMIENTO",
-        curp: "CURP",
-        localidad_direccion: "LOCALIDAD / DIRECCIÓN",
-        tipo_apoyo: "APOYO",
-        estatus: "ESTATUS",
-        clave_entidad: "CLAVE ENTIDAD",
-        entidad: "ENTIDAD",
-        cve_mpio: "CLAVE MUNICIPIO",
-        municipio: "MUNICIPIO",
-        clave_col_loc: "CLAVE COL/COL",
-        col_loc: "COL/COL",
-        direccion: "DIRECCION",
-        telefono: "TELEFONO",
-        observaciones: "OBSERVACIONES",
-        fecha_ingreso: "FECHA INGRESO"
-    };
-
-    // 2. Mapeamos la data filtrada al formato de los encabezados
-    const dataParaExportar = DATA_FILTRADA.map((r, index) => {
-        return {
-            [encabezados.n]: index + 1,
-            [encabezados.codigo]: r.codigo || '',
-            [encabezados.apellido_paterno]: `${r.apellido_paterno || ''}`.trim(),
-            [encabezados.apellido_materno]: `${r.apellido_materno || ''}`.trim(),
-            [encabezados.nombre_completo]: `${r.nombre || ''}`.trim(),
-            [encabezados.fecha_nac]: `${r.fecha_nac || ''}`.trim(),
-            [encabezados.curp]: r.curp || '',
-            [encabezados.tipo_apoyo]: r.tipo_apoyo || '',
-            [encabezados.localidad_direccion]: `${r.col_loc || ''} - ${r.direccion || ''}`.trim(),
-            [encabezados.estatus]: r.estatus || '',
-            [encabezados.clave_entidad]: r.clave_entidad || '',
-            [encabezados.entidad]: r.entidad || '',
-            [encabezados.cve_mpio]: r.cve_mpio || '',
-            [encabezados.municipio]: r.municipio || '',
-            [encabezados.clave_col_loc]: r.clave_col_loc || '',
-            [encabezados.col_loc]: r.col_loc || '',
-            [encabezados.direccion]: r.direccion || '',
-            [encabezados.telefono]: r.telefono || '',
-            [encabezados.observaciones]: r.observaciones || '',
-            [encabezados.fecha_ingreso]: r.fecha_ingreso || ''
-        };
-    });
-
-    // 3. Creamos el libro de Excel
-    const ws = XLSX.utils.json_to_sheet(dataParaExportar);
-    
-    // Ajuste opcional: Definir anchos de columna para que se vea profesional
-    const wscols = [
-        {wch: 5},  // NO.
-        {wch: 15}, // CÓDIGO
-        {wch: 20}, // PATERNO
-        {wch: 20}, // MATERNO
-        {wch: 20}, // NOMBRE
-        {wch: 20}, // FECHA DE NACIMIENTO
-        {wch: 20}, // CURP
-        {wch: 20}, // APOYO
-        {wch: 20}, // ESTATUS
-        {wch: 5}, // CLAVE ENTIDAD
-        {wch: 20}, // ENTIDAD
-        {wch: 5}, // CLAVE MUNICIPIO
-        {wch: 20}, // MUNICIPIO
-        {wch: 5}, // CLAVE LOC/COL
-        {wch: 20}, // DIRECCION
-        {wch: 20}, // TELEFONO
-        {wch: 30}, // OBSERVACIONES
-        {wch: 15}  // FECHA DE INGRESO
-    ];
-    ws['!cols'] = wscols;
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Beneficiarios 2026");
-    
-    // 4. Descargar
-    XLSX.writeFile(wb, `Reporte_Poblacion_Vulnerable_${new Date().toISOString().split('T')[0]}.xlsx`);
-};
     window.abrirVisor = (src, n) => {
         document.getElementById('modal-visor').style.display='flex'; 
         document.getElementById('img-grande').src = src; 
@@ -398,11 +347,13 @@ window.exportarExcel = () => {
         document.getElementById('link-descarga').href = src;
     };
     window.cerrarVisor = () => document.getElementById('modal-visor').style.display='none';
-
-    window.cambiarFilas = (valor) => {
-        FILAS_POR_PAGINA = parseInt(valor);
-        PAGINA_ACTUAL = 1; 
-        render();
+    
+    window.vaciarBaseDeDatos = async () => {
+        if(!confirm("¿BORRAR TODO?")) return;
+        const snap = await getDocs(apoyosRef);
+        const batch = writeBatch(db);
+        snap.forEach(d => batch.delete(d.ref));
+        await batch.commit(); location.reload();
     };
 </script>
 </body>
