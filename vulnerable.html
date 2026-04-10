@@ -56,6 +56,7 @@
         <input type="hidden" id="edit-id">
         <div class="form-grid" id="main-form">
             <div class="form-group"><label>Código</label><input type="text" id="codigo" placeholder="ID-2026"></div>
+            <div class="form-group"><label>Tipo de Apoyo</label><input type="text" id="tipo_apoyo"></div>
             <div class="form-group"><label>Fecha Ingreso</label><input type="date" id="fecha_ingreso"></div>
             <div class="form-group"><label>Paterno</label><input type="text" id="apellido_paterno"></div>
             <div class="form-group"><label>Materno</label><input type="text" id="apellido_materno"></div>
@@ -67,7 +68,6 @@
                 <span id="mensaje_programa" style="font-size: 9px; font-weight: bold; margin-top: 4px; padding: 2px 5px; border-radius: 4px; display: none;"></span>
             </div>            
             <div class="form-group"><label>CURP</label><input type="text" id="curp" maxlength="18"></div>
-            <div class="form-group"><label>Tipo de Apoyo</label><input type="text" id="tipo_apoyo"></div>
             <div class="form-group">
                 <label>Estatus</label>
                 <select id="estatus">
@@ -99,7 +99,6 @@
             <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
             <button class="btn" id="btn-upd" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
             <button class="btn" style="background:#94a3b8" onclick="location.reload()"><i class="fas fa-eraser"></i> LIMPIAR</button>
-            <button class="btn" style="background:#1d6f42" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
         </div>
     </div>
 
@@ -171,48 +170,83 @@
         filtrarYRender();
     });
 
-    // --- CÁLCULO DE EDAD Y VALIDACIÓN PROGRAMA ---
+    // --- CÁLCULO DE EDAD Y VALIDACIÓN PROGRAMA (Solo para Lactantes) ---
+   // --- CÁLCULO DE EDAD DETALLADO Y VALIDACIÓN DE CRITERIO ---
     window.calcularEdadActual = () => {
-        const raw = document.getElementById('fecha_nac').value.trim();
+        const inputFecha = document.getElementById('fecha_nac').value.trim();
+        const apoyo = document.getElementById('tipo_apoyo').value.toUpperCase();
+        const codigo = document.getElementById('codigo').value.toUpperCase();
         const output = document.getElementById('edad_calculada');
-        if (!raw) { output.value = ""; return; }
+        
+        if (!inputFecha) { output.value = ""; return; }
 
-        let clean = raw.replace(/\D/g, ''); 
+        // 1. Normalización de fecha (maneja formatos DDMMYYYY o YYYY-MM-DD)
+        let clean = inputFecha.replace(/\D/g, ''); 
         let d, m, a;
-
         if (clean.length === 8) {
             if (parseInt(clean.substring(0, 4)) > 1900) { a = clean.substring(0, 4); m = clean.substring(4, 6); d = clean.substring(6, 8); }
             else { d = clean.substring(0, 2); m = clean.substring(2, 4); a = clean.substring(4, 8); }
         } else {
-            const p = raw.split(/[-./ ]/);
+            const p = inputFecha.split(/[-./ ]/);
             if(p.length === 3) {
                 if(p[0].length === 4) { a=p[0]; m=p[1]; d=p[2]; }
                 else { d=p[0]; m=p[1]; a=p[2]; }
             }
         }
 
-        const f = new Date(a, m - 1, d);
+        const fNac = new Date(a, m - 1, d);
         const hoy = new Date();
-        if (isNaN(f.getTime()) || f > hoy) { output.value = ""; return; }
+        if (isNaN(fNac.getTime()) || fNac > hoy) { output.value = ""; return; }
 
-        let edadAnios = hoy.getFullYear() - f.getFullYear();
-        if (hoy.getMonth() < (m-1) || (hoy.getMonth() === (m-1) && hoy.getDate() < d)) edadAnios--;
-        
-        let edadMilisegundos = hoy - f;
-        const dosAniosMilisegundos = 2 * 365.25 * 24 * 60 * 60 * 1000;
+        // 2. Cálculo detallado de edad
+        let diffAnios = hoy.getFullYear() - fNac.getFullYear();
+        let diffMeses = hoy.getMonth() - fNac.getMonth();
+        let diffDias = hoy.getDate() - fNac.getDate();
 
-        output.value = (edadAnios === 0) ? "INFANTE" : `${edadAnios} AÑOS`;
+        if (diffDias < 0) {
+            diffMeses--;
+            let ultimoDiaMesPasado = new Date(hoy.getFullYear(), hoy.getMonth(), 0).getDate();
+            diffDias += ultimoDiaMesPasado;
+        }
+        if (diffMeses < 0) {
+            diffAnios--;
+            diffMeses += 12;
+        }
 
-        if (edadMilisegundos < dosAniosMilisegundos) {
-            output.style.color = "#0d9488";
-            alert("ES MENOR DE 2 AÑOS, ES APTO PARA EL PROGRAMA DE 1000 DÍAS");
+        const diffMilisegundos = hoy - fNac;
+        const semanasTotales = Math.floor(diffMilisegundos / (1000 * 60 * 60 * 24 * 7));
+
+        // 3. Formatear texto de salida
+        let partes = [];
+        if (diffAnios > 0) partes.push(`${diffAnios} AÑOS`);
+        if (diffMeses > 0) partes.push(`${diffMeses} MESES`);
+        // Mostramos semanas solo si es menor de un año para mayor precisión
+        if (diffAnios === 0 && semanasTotales > 0) partes.push(`${semanasTotales} SEM.`);
+        if (diffAnios === 0 && diffMeses === 0) partes.push(`${diffDias} DÍAS`);
+
+        output.value = partes.join(' ');
+
+        // 4. Validación de criterio: 1000DIAS + LACTANTE
+        const esProgramaCorrecto = codigo.includes("1000DIAS") && apoyo.includes("LACTANTE");
+        const limite2Anios = 2 * 365.25 * 24 * 60 * 60 * 1000;
+
+        if (esProgramaCorrecto) {
+            if (diffMilisegundos < limite2Anios) {
+                output.style.color = "#0d9488"; // Verde esmeralda (Apto)
+            } else {
+                output.style.color = "#dc2626"; // Rojo (No apto)
+                alert("⚠️ ATENCIÓN: El beneficiario excede los 2 años. No cumple el criterio de 1000 DÍAS / LACTANTE.");
+            }
         } else {
-            output.style.color = "#dc2626";
-            alert("ES MAYOR DE 2 AÑOS, NO ES APTO PARA EL PROGRAMA DE 1000 DÍAS");
+            output.style.color = "#1e293b"; // Color oscuro normal
         }
     };
 
+    // --- DISPARADORES DE EVENTOS (Fuera de la función) ---
     document.getElementById('fecha_nac').addEventListener('input', window.calcularEdadActual);
+    document.getElementById('tipo_apoyo').addEventListener('input', window.calcularEdadActual);
+    document.getElementById('codigo').addEventListener('input', window.calcularEdadActual);
+
 
     // --- FILTRADO Y RENDERIZADO ---
     window.filtrarYRender = () => {
