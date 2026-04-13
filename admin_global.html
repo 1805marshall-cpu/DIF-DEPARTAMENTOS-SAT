@@ -6,7 +6,7 @@
     <title>SISTEMA DIF 2026 - 2029 | Admin Global</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-    
+        
         :root { 
             --sidebar-bg: #0f172a; --primary: #2563eb; --success: #10b981; 
             --warning: #f59e0b; --danger: #ef4444; --bg: #f8fafc; 
@@ -116,6 +116,35 @@
 .sidebar.collapsed .nav-exit i {
     font-size: 18px;
 }
+
+/* Layout específico para Psicología */
+    .psicos-grid-layout { display: grid;
+    /* Creamos un grid de 3 columnas iguales */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+    /* Hacemos que los cuadros de "Total" resalten un poco más */
+    .main-total {
+    background: #fff;
+    padding: 15px !important;
+}
+
+    .main-total div {
+    font-size: 1.8rem !important; /* Número más grande para los totales */
+    font-weight: 800;
+}
+
+    /* En dispositivos móviles, podemos bajar a 1 columna si es necesario */
+    @media (max-width: 768px) {
+    .psicos-grid-layout {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .main-total:last-child {
+        grid-column: span 2; /* El total de sesiones ocuparía el ancho completo en móvil */
+    }
+}
     </style>
 </head>
 <body>
@@ -133,7 +162,7 @@
             <div id="nav-psicologia" class="nav-item" onclick="showView('psicologia', this)"><i class="fas fa-brain"></i> <span>Psicología</span></div>
             <div id="nav-jefatura-psicologia" class="nav-item" onclick="showView('jefatura-psicologia', this)"><i class="fas fa-user-shield"></i> <span>Jefatura Psicología</span></div>
             <div id="nav-general-localidades" class="nav-item" onclick="showView('general-localidades', this)"><i class="fas fa-map-marked-alt"></i> <span>General Localidades</span></div>
-            <div id="nav-escolar" class="nav-item" onclick="showView('escolar', this)"><i class="fas fa-school"></i> <span>Solicitudes Generales</span></div>
+            <div id="nav-escolar" class="nav-item" onclick="showView('escolar', this)"><i class="fas fa-school"></i> <span>Req. Escolares</span></div>
             <div id="nav-territorial" class="nav-item" onclick="showView('territorial', this)"><i class="fas fa-city"></i> <span>Resumen Territorial</span></div>
         </nav>
         <div class="nav-exit" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> <span>CERRAR SESIÓN</span></div>
@@ -235,25 +264,64 @@
             </div>
         </div>
 
-        <div id="view-psicologia" class="view-container">
-            <div class="access-card" style="background: var(--psico-color);"><div><b>Psicología</b></div><a href="psicologia.html" class="btn-open">Módulo</a></div>
-            <div class="filter-bar"></div>
-            <div class="stats-grid">
-                <div class="stat-box" style="border-top:3px solid var(--psico-color)"><small>Total Pacientes</small><div id="p-total">0</div></div>
-                <div class="stat-box"><small>Pacientes H</small><div id="p-hombres" style="color:var(--primary)">0</div></div>
-                <div class="stat-box"><small>Pacientes M</small><div id="p-mujeres" style="color:var(--psico-color)">0</div></div>
-                <div class="stat-box"><small>Pacientes Menores</small><div id="p-menores" style="color:var(--warning)">0</div></div>
-                <div class="stat-box" style="border-top:3px solid #64748b"><small>Total Acompañantes</small><div id="p-total-a">0</div></div>
-                <div class="stat-box"><small>Acompañantes H</small><div id="p-hombres-a" style="color:var(--primary)">0</div></div>
-                <div class="stat-box"><small>Acompañantes M</small><div id="p-mujeres-a" style="color:var(--psico-color)">0</div></div>
-                <div class="stat-box"><small>Acompañantes Menores</small><div id="p-menores-a" style="color:var(--warning)">0</div></div>
-                <div class="stat-box" style="border-top:3px solid var(--success)"><small>Total Sesiones</small><div id="p-ses">0</div></div>
-            </div>
-            <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;">
-                <div class="panel"><b>Motivos / Sesiones</b><div id="p-list-motivos"></div></div>
-                <div class="panel"><b>Zonas</b><div id="p-list-seguimiento"></div></div>
-            </div>
+<div id="view-psicologia" class="view-container">
+    <div class="access-card" style="background: var(--psico-color);">
+        <div><b>Psicología</b></div>
+        <a href="psicologia.html" class="btn-open">Módulo</a>
+    </div>
+
+    <div class="filter-bar"></div>
+
+  <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+    
+    <div class="stat-box" style="border-top:4px solid var(--psico-color); background: #fff;">
+        <small style="font-weight:bold; color:#64748b;">TOTAL PACIENTES</small>
+        <div id="p-total" style="font-weight:800; font-size:1.8rem; color:#1e293b;">0</div>
+    </div>
+    <div class="stat-box" style="border-top:4px solid #64748b; background: #fff;">
+        <small style="font-weight:bold; color:#64748b;">TOTAL ACOMPAÑANTES</small>
+        <div id="p-total-a" style="font-weight:800; font-size:1.8rem; color:#1e293b;">0</div>
+    </div>
+    <div class="stat-box" style="border-top:4px solid var(--success); background: #fff;">
+        <small style="font-weight:bold; color:#64748b;">TOTAL SESIONES</small>
+        <div id="p-ses" style="font-weight:800; font-size:1.8rem; color:var(--success);">0</div>
+    </div>
+
+    <div class="stat-box" style="border-left:4px solid #2563eb;"> <small style="color:#2563eb; font-weight:bold;">PACIENTES H</small>
+        <div id="p-hombres" style="font-size:1.5rem; font-weight:700; color:#2563eb;">0</div>
+    </div>
+    <div class="stat-box" style="border-left:4px solid #db2777;"> <small style="color:#db2777; font-weight:bold;">PACIENTES M</small>
+        <div id="p-mujeres" style="font-size:1.5rem; font-weight:700; color:#db2777;">0</div>
+    </div>
+    <div class="stat-box" style="border-left:4px solid #f59e0b;"> <small style="color:#f59e0b; font-weight:bold;">PACIENTES MENORES</small>
+        <div id="p-menores" style="font-size:1.5rem; font-weight:700; color:#f59e0b;">0</div>
+    </div>
+
+    <div class="stat-box" style="border-left:4px solid #2563eb; opacity: 0.9;">
+        <small style="color:#2563eb; font-weight:bold;">ACOMPAÑANTES H</small>
+        <div id="p-hombres-a" style="font-size:1.3rem; font-weight:700; color:#2563eb;">0</div>
+    </div>
+    <div class="stat-box" style="border-left:4px solid #db2777; opacity: 0.9;">
+        <small style="color:#db2777; font-weight:bold;">ACOMPAÑANTES M</small>
+        <div id="p-mujeres-a" style="font-size:1.3rem; font-weight:700; color:#db2777;">0</div>
+    </div>
+    <div class="stat-box" style="border-left:4px solid #f59e0b; opacity: 0.9;">
+        <small style="color:#f59e0b; font-weight:bold;">ACOMPAÑANTES MENORES</small>
+        <div id="p-menores-a" style="font-size:1.3rem; font-weight:700; color:#f59e0b;">0</div>
+    </div>
+</div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;">
+        <div class="panel">
+            <b><i class="fas fa-notes-medical"></i> Motivos / Sesiones</b>
+            <div id="p-list-motivos" style="margin-top:10px;"></div>
         </div>
+        <div class="panel">
+            <b><i class="fas fa-map-marker-alt"></i> Zonas / Localidades</b>
+            <div id="p-list-seguimiento" style="margin-top:10px;"></div>
+        </div>
+    </div>
+</div>
 
 <div id="view-jefatura-psicologia" class="view-container">
     <div class="access-card" style="background: #701a27;"><div><b>Jefatura de Psicología</b></div><a href="jefatura_psicologia.html" class="btn-open">Módulo</a></div>
@@ -452,7 +520,7 @@ if (isFiltered) {
     selector.style.color = "black";
 }
     // --- EJECUCIÓN DE PROCESADORES ---
-    if (typeof window.procVul === "function") window.procVul(s, m);
+   if (typeof window.procVul === "function") window.procVul(s, m);
     if (typeof window.procSoc === "function") window.procSoc(s, m);
     if (typeof window.procPro === "function") window.procPro(s, m);
     if (typeof window.procMed === "function") window.procMed(s, m);
@@ -548,37 +616,166 @@ if (isFiltered) {
         }
     };
 
-    window.procPsi = (s, m) => {
-        let ses = 0, pSet = new Set(), aSet = new Set(), mot = {}, seg = {};
-        let pH = 0, pM = 0, pMen = 0, aH = 0, aM = 0, aMen = 0;
-        let fil = DB_PS.filter(d => cumpleFiltros(d, s, m));
-        fil.forEach(d => {
-            ses++; const pNom = (d.paciente || '').toUpperCase(), aNom = (d.nombre_a || '').toUpperCase();
-            if(pNom) {
-                if(!pSet.has(pNom)) {
-                    const g = (d.genero_p || "").toUpperCase(), e = parseInt(d.edad_p) || 0;
-                    if(g === 'MASCULINO') pH++; else if(g === 'FEMENINO') pM++; if(e > 0 && e < 18) pMen++;
-                    pSet.add(pNom);
-                }
-            }
-            if(aNom && aNom !== "S/N" && aNom !== "NINGUNO") {
-                if(!aSet.has(aNom)) {
-                    const g = (d.genero_a || "").toUpperCase(), e = parseInt(d.edad_a) || 0;
-                    if(g === 'MASCULINO') aH++; else if(g === 'FEMENINO') aM++; if(e > 0 && e < 18) aMen++;
-                    aSet.add(aNom);
-                }
-            }
-            const mo = (d.tema || "GENERAL").toUpperCase(), l = (d.col_loc || "S/L").toUpperCase();
-            if(!mot[mo]) mot[mo] = []; mot[mo].push({ n: pNom, x: `FOLIO: ${d.no}`, l: `Acompaña: ${aNom || 'Solo'}` });
-            if(!seg[l]) seg[l] = []; seg[l].push({ n: pNom, x: d.fecha || '', l: mo });
-        });
-        if(document.getElementById('p-total')){
-            document.getElementById('p-total').innerText = pSet.size; document.getElementById('p-total-a').innerText = aSet.size; document.getElementById('p-ses').innerText = ses;
-            document.getElementById('p-hombres').innerText = pH; document.getElementById('p-mujeres').innerText = pM; document.getElementById('p-menores').innerText = pMen;
-            document.getElementById('p-hombres-a').innerText = aH; document.getElementById('p-mujeres-a').innerText = aM; document.getElementById('p-menores-a').innerText = aMen;
-            renderM('p-list-motivos', mot, 'var(--psico-color)'); renderM('p-list-seguimiento', seg, '#64748b');
+// ==========================================
+// 1. PSICOLOGÍA (ACTUALIZADO CON MENORES)
+// ==========================================
+window.procPsi = (s, m) => {
+    let hP = 0, mP = 0, menoresP = 0; // Contadores Pacientes
+    let hA = 0, mA = 0, menoresA = 0; // Contadores Acompañantes
+    let visitasTotales = 0;           // Sustituye la suma de número_sesion
+    let motivos = {}, zonas = {};
+
+    let fil = DB_PS.filter(d => cumpleFiltros(d, s, m));
+
+    fil.forEach(d => {
+        // --- CONTADOR DE VISITAS (OPCIÓN A) ---
+        visitasTotales += 1; // Cada registro cuenta como una asistencia/sesión
+
+        // --- LÓGICA PACIENTES ---
+        const edadP = parseInt(d.edad || d.edad_p || 0);
+        const genP = (d.genero || d.genero_p || "").trim().toUpperCase();
+
+        if (edadP > 0 && edadP < 18) {
+            menoresP++; // Segmento Menores
+        } else {
+            // Segmento Adultos
+            if (genP.startsWith('MASC')) hP++;
+            else if (genP.startsWith('FEME')) mP++;
         }
-    };
+
+        // --- LÓGICA ACOMPAÑANTES ---
+        if (d.nombre_a && d.nombre_a.trim().length > 0) {
+            const edadA = parseInt(d.edad_a || 0);
+            const genA = (d.genero_a || "").trim().toUpperCase();
+
+            if (edadA > 0 && edadA < 18) {
+                menoresA++; 
+            } else {
+                if (genA.startsWith('MASC')) hA++;
+                else if (genA.startsWith('FEME')) mA++;
+            }
+        }
+
+        // --- PREPARACIÓN DE PANELES ---
+        const nom = (d.paciente || d.nombre || "SIN NOMBRE").toUpperCase();
+        const mot = (d.motivo_consulta || d.tema || "OTROS").toUpperCase();
+        const loc = (d.localidad || d.col_loc || "S/L").toUpperCase();
+
+        if(!motivos[mot]) motivos[mot] = [];
+        motivos[mot].push({ n: nom, x: `Sesión ${d.numero_sesion || 1}`, l: loc });
+
+        if(!zonas[loc]) zonas[loc] = [];
+        zonas[loc].push({ n: nom, x: mot, l: loc });
+    });
+
+    // --- CÁLCULO DE TOTALES ---
+    const totalPacientes = hP + mP + menoresP;
+    const totalAcompanantes = hA + mA + menoresA;
+
+    // --- RENDERIZADO EN DASHBOARD ---
+    const actTxt = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+
+    // Bloque Pacientes
+    actTxt('p-total', totalPacientes);
+    actTxt('p-hombres', hP);
+    actTxt('p-mujeres', mP);
+    actTxt('p-menores', menoresP);
+    
+    // Bloque Acompañantes
+    actTxt('p-total-a', totalAcompanantes);
+    actTxt('p-hombres-a', hA);
+    actTxt('p-mujeres-a', mA);
+    actTxt('p-menores-a', menoresA);
+    
+    // Total Sesiones (ahora basado en registros totales)
+    actTxt('p-ses', visitasTotales);
+
+    renderM('p-list-motivos', motivos, 'var(--psico-color)');
+    renderM('p-list-seguimiento', zonas, 'var(--psico-color)');
+};
+
+// 2. JEFATURA DE PSICOLOGÍA
+window.procJefPsic = (s, m) => {
+    let totalAct = 0, personasAtendidas = 0;
+    let dependencias = {}, zonas = {};
+
+    let fil = DB_JP.filter(d => cumpleFiltros(d, s, m));
+    fil.forEach(d => {
+        totalAct++;
+        personasAtendidas += parseInt(d.cantidad_personas || 0);
+
+        const dep = (d.dependencia || "OTRA").toUpperCase();
+        if(!dependencias[dep]) dependencias[dep] = [];
+        dependencias[dep].push({ n: d.actividad, x: `Pax: ${d.cantidad_personas}`, l: d.lugar });
+
+        const loc = (d.lugar || "S/L").toUpperCase();
+        if(!zonas[loc]) zonas[loc] = [];
+        zonas[loc].push({ n: d.actividad, x: dep, l: loc });
+    });
+
+    document.getElementById('jp-total').innerText = totalAct;
+    document.getElementById('jp-ent').innerText = personasAtendidas;
+    renderM('jp-list-actividades', dependencias, '#701a27');
+    renderM('jp-list-geo', zonas, '#701a27');
+};
+
+// 3. GENERAL LOCALIDADES
+window.procGenLoc = (s, m) => {
+    let ent = 0, pen = 0, responsables = {}, zonas = {};
+
+    let fil = DB_GL.filter(d => cumpleFiltros(d, s, m));
+    fil.forEach(d => {
+        const est = (d.estatus || "").toUpperCase();
+        if (est === 'FINALIZADO' || est === 'REALIZADO') ent++; else pen++;
+
+        const resp = (d.responsable || "SIN ASIGNAR").toUpperCase();
+        if(!responsables[resp]) responsables[resp] = [];
+        responsables[resp].push({ n: d.actividad || d.asunto, x: est, l: d.localidad, s: est });
+
+        const loc = (d.localidad || "S/L").toUpperCase();
+        if(!zonas[loc]) zonas[loc] = [];
+        zonas[loc].push({ n: d.actividad, x: resp, l: loc });
+    });
+
+    document.getElementById('gl-total').innerText = fil.length;
+    document.getElementById('gl-ent').innerText = ent;
+    document.getElementById('gl-pen').innerText = pen;
+    renderM('gl-list-actividades', responsables, 'var(--genloc-color)');
+    renderM('gl-list-geo', zonas, 'var(--genloc-color)');
+};
+
+// 4. REQUERIMIENTOS ESCOLARES / SOLICITUDES
+window.procEscolar = (s, m) => {
+    let ate = 0, pen = 0, nop = 0, areas = {}, resps = {}, zonas = {};
+
+    let fil = DB_RE.filter(d => cumpleFiltros(d, s, m));
+    fil.forEach(d => {
+        const est = (d.estatus || "").toUpperCase();
+        if (est.includes('ATENDIDO')) ate++; 
+        else if (est.includes('NO PROCEDE')) nop++; 
+        else pen++;
+
+        const area = (d.area_dirigida || "GENERAL").toUpperCase();
+        if(!areas[area]) areas[area] = [];
+        areas[area].push({ n: d.nombre_solicitante, x: d.requerimiento, l: d.localidad });
+
+        const resp = (d.responsable || "PENDIENTE").toUpperCase();
+        if(!resps[resp]) resps[resp] = [];
+        resps[resp].push({ n: d.nombre_solicitante, x: est, l: d.localidad });
+
+        const loc = (d.localidad || "S/L").toUpperCase();
+        if(!zonas[loc]) zonas[loc] = [];
+        zonas[loc].push({ n: d.requerimiento, x: area, l: loc });
+    });
+
+    document.getElementById('re-total').innerText = fil.length;
+    document.getElementById('re-ate').innerText = ate;
+    document.getElementById('re-pen').innerText = pen;
+    document.getElementById('re-nop').innerText = nop;
+    renderM('re-list-areas', areas, '#1e3a8a');
+    renderM('re-list-responsables', resps, '#1e3a8a');
+    renderM('re-list-geo', zonas, '#1e3a8a');
+};
 window.procJefPsic = (s, m) => {
     let personasAtendidas = 0, acts = {}, geo = {};
     let fil = DB_JP.filter(d => cumpleFiltros(d, s, m));
