@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIF 2026 | Población Vulnerable</title>
+    <title>DIF 2026 - 2029 | Población Vulnerable</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -102,17 +102,32 @@
         </div>
     </div>
 
-    <div class="search-box no-print">
-        <div class="form-group" style="flex:2;"><label>🔍 Buscador</label><input type="text" id="input-busqueda" onkeyup="filtrarYRender()"></div>
-        <div class="form-group" style="flex:1;">
-            <label>Filtrar Estatus</label>
-            <select id="filtro-estatus" onchange="filtrarYRender()">
-                <option value="Todos">TODOS</option>
-                <option value="Pendiente">PENDIENTE</option>
-                <option value="Entregado">ENTREGADO</option>
-            </select>
-        </div>
+<div class="search-box no-print" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+    <div class="form-group"><label>🔍 Código</label><input type="text" id="f-cod" onkeyup="filtrarAvanzado()" placeholder="ID..."></div>
+    <div class="form-group"><label>👤 Nombre/Apellido</label><input type="text" id="f-nom" onkeyup="filtrarAvanzado()" placeholder="Nombre..."></div>
+    <div class="form-group"><label>📍 Localidad</label><input type="text" id="f-loc" onkeyup="filtrarAvanzado()" placeholder="Colonia..."></div>
+    <div class="form-group">
+        <label>🎁 Apoyo</label>
+        <select id="f-apo" onchange="filtrarAvanzado()">
+            <option value="">TODOS</option>
+            <option value="LACTANTE">LACTANTE</option>
+            <option value="EMBARAZADA">EMBARAZADA</option>
+            <option value="ESCOLAR">ESCOLAR</option>
+            <option value="DISCAPACIDAD">DISCAPACIDAD</option>
+        </select>
     </div>
+    <div class="form-group">
+        <label>🚩 Estatus</label>
+        <select id="f-est" onchange="filtrarAvanzado()">
+            <option value="">TODOS</option>
+            <option value="Pendiente">PENDIENTE</option>
+            <option value="Entregado">ENTREGADO</option>
+        </select>
+    </div>
+    <div class="form-group" style="justify-content: flex-end;">
+        <button class="btn" style="background:#64748b; width:100%" onclick="limpiarFiltros()"><i class="fas fa-filter-circle-xmark"></i> LIMPIAR</button>
+    </div>
+</div>
 
    <div class="paginacion-bar no-print">
     <div style="display: flex; align-items: center; gap: 8px;">
@@ -249,16 +264,32 @@
 
 
     // --- FILTRADO Y RENDERIZADO ---
-    window.filtrarYRender = () => {
-        const val = document.getElementById('input-busqueda').value.toLowerCase();
-        const est = document.getElementById('filtro-estatus').value;
-        DATA_FILTRADA = DATA_ACTUAL.filter(r => {
-            const txt = Object.values(r).join(" ").toLowerCase();
-            return txt.includes(val) && (est === "Todos" || r.estatus === est);
-        });
-        PAGINA_ACTUAL = 1;
-        render();
-    };
+ window.filtrarAvanzado = () => {
+    const filtroCod = document.getElementById('f-cod').value.toLowerCase();
+    const filtroNom = document.getElementById('f-nom').value.toLowerCase();
+    const filtroLoc = document.getElementById('f-loc').value.toLowerCase();
+    const filtroApo = document.getElementById('f-apo').value;
+    const filtroEst = document.getElementById('f-est').value;
+
+    DATA_FILTRADA = DATA_ACTUAL.filter(r => {
+        // Usamos "" como respaldo si el campo está vacío en la base de datos
+        const nom = (r.nombre || "").toLowerCase();
+        const pat = (r.apellido_paterno || "").toLowerCase();
+        const mat = (r.apellido_materno || "").toLowerCase();
+        const full = `${nom} ${pat} ${mat}`;
+        
+        const c1 = (r.codigo || "").toLowerCase().includes(filtroCod);
+        const c2 = full.includes(filtroNom);
+        const c3 = (r.col_loc || "").toLowerCase().includes(filtroLoc);
+        const c4 = filtroApo === "" || r.tipo_apoyo === filtroApo;
+        const c5 = filtroEst === "" || r.estatus === filtroEst;
+
+        return c1 && c2 && c3 && c4 && c5;
+    });
+
+    PAGINA_ACTUAL = 1;
+    render();
+};
 
     function render() {
         const inicio = (PAGINA_ACTUAL - 1) * FILAS_POR_PAGINA;
@@ -339,54 +370,10 @@
     window.eliminar = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "apoyos", id)); };
 
     // --- IMPORTAR / EXPORTAR ---
-    window.exportarExcel = () => {
-        if (DATA_FILTRADA.length === 0) return alert("No hay datos para exportar.");
-
-        const encabezados = { 
-            codigo: "CÓDIGO", fecha_ingreso: "F. INGRESO", apellido_paterno: "PATERNO", apellido_materno: "MATERNO", 
-            nombre: "NOMBRE", fecha_nac: "F. NAC", edad_calculada: "EDAD", curp: "CURP", tipo_apoyo: "APOYO", 
-            estatus: "ESTATUS", clave_entidad: "CVE ENT", entidad: "ENTIDAD", cve_mpio: "CVE MPIO", 
-            municipio: "MUNICIPIO", clave_col_loc: "CVE COL/LOC", col_loc: "COLONIA/LOC", direccion: "DIRECCION", 
-            telefono: "TEL", observaciones: "OBS" 
-        };
-
-        const excelData = DATA_FILTRADA.map((r, index) => {
-            let fila = { "NO.": index + 1 };
-            Object.keys(encabezados).forEach(llave => { fila[encabezados[llave]] = r[llave] || ''; });
-            return fila;
-        });
-
-        const ws = XLSX.utils.json_to_sheet(excelData);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Beneficiarios");
-        XLSX.writeFile(wb, `Reporte_DIF_Filtrado.xlsx`);
-    };
 
     // --- UTILIDADES (FOTO, VISOR, VACIAR) ---
-    window.handleFoto = (e) => {
-        const fr = new FileReader();
-        fr.onload = (ev) => { 
-            document.getElementById('ine_img').value = ev.target.result; 
-            document.getElementById('box-preview').innerHTML = `<img src="${ev.target.result}" style="width:100%">`; 
-        };
-        fr.readAsDataURL(e.target.files[0]);
-    };
 
-    window.abrirVisor = (src, n) => {
-        document.getElementById('modal-visor').style.display='flex'; 
-        document.getElementById('img-grande').src = src; 
-        document.getElementById('visor-titulo').innerText = n;
-        document.getElementById('link-descarga').href = src;
-    };
-    window.cerrarVisor = () => document.getElementById('modal-visor').style.display='none';
-    
-    window.vaciarBaseDeDatos = async () => {
-        if(!confirm("¿BORRAR TODO?")) return;
-        const snap = await getDocs(apoyosRef);
-        const batch = writeBatch(db);
-        snap.forEach(d => batch.delete(d.ref));
-        await batch.commit(); location.reload();
-    };
+ 
 </script>
 </body>
 </html>
