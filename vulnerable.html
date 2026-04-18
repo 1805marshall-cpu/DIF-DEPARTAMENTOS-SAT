@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIF 2026 - 2029 | Población Vulnerable</title>
+    <title>DIF 2026 | Población Vulnerable</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -98,6 +98,7 @@
         <div class="btn-box">
             <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
             <button class="btn" id="btn-upd" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
+            <button class="btn" style="background:#1d6f42" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
             <button class="btn" style="background:#94a3b8" onclick="location.reload()"><i class="fas fa-eraser"></i> LIMPIAR</button>
         </div>
     </div>
@@ -180,13 +181,23 @@
     let PAGINA_ACTUAL = 1;
     let FILAS_POR_PAGINA = 50;
 
+    // Escucha en tiempo real
     onSnapshot(query(apoyosRef, orderBy("codigo", "asc")), (snap) => {
         DATA_ACTUAL = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        filtrarYRender();
+        window.filtrarAvanzado(); 
     });
 
-    // --- CÁLCULO DE EDAD Y VALIDACIÓN PROGRAMA (Solo para Lactantes) ---
-   // --- CÁLCULO DE EDAD DETALLADO Y VALIDACIÓN DE CRITERIO ---
+    // --- UTILIDADES DE FORMULARIO ---
+    window.limpiarFormulario = () => {
+        document.getElementById('edit-id').value = "";
+        document.querySelectorAll('#main-form input, #main-form select').forEach(i => i.value = "");
+        document.getElementById('box-preview').innerHTML = '<i class="fas fa-image" style="color:#cbd5e1; font-size: 20px;"></i>';
+        document.getElementById('btn-save').style.display = 'inline-block';
+        document.getElementById('btn-upd').style.display = 'none';
+        document.getElementById('edad_calculada').style.color = "#1e293b";
+    };
+
+    // --- CÁLCULO DE EDAD ---
     window.calcularEdadActual = () => {
         const inputFecha = document.getElementById('fecha_nac').value.trim();
         const apoyo = document.getElementById('tipo_apoyo').value.toUpperCase();
@@ -195,7 +206,6 @@
         
         if (!inputFecha) { output.value = ""; return; }
 
-        // 1. Normalización de fecha (maneja formatos DDMMYYYY o YYYY-MM-DD)
         let clean = inputFecha.replace(/\D/g, ''); 
         let d, m, a;
         if (clean.length === 8) {
@@ -211,86 +221,54 @@
 
         const fNac = new Date(a, m - 1, d);
         const hoy = new Date();
-        if (isNaN(fNac.getTime()) || fNac > hoy) { output.value = ""; return; }
+        if (isNaN(fNac.getTime()) || fNac > hoy) { output.value = "Fecha Inválida"; return; }
 
-        // 2. Cálculo detallado de edad
         let diffAnios = hoy.getFullYear() - fNac.getFullYear();
         let diffMeses = hoy.getMonth() - fNac.getMonth();
-        let diffDias = hoy.getDate() - fNac.getDate();
+        if (hoy.getDate() < fNac.getDate()) diffMeses--;
+        if (diffMeses < 0) { diffAnios--; diffMeses += 12; }
 
-        if (diffDias < 0) {
-            diffMeses--;
-            let ultimoDiaMesPasado = new Date(hoy.getFullYear(), hoy.getMonth(), 0).getDate();
-            diffDias += ultimoDiaMesPasado;
-        }
-        if (diffMeses < 0) {
-            diffAnios--;
-            diffMeses += 12;
-        }
+        output.value = `${diffAnios} AÑOS, ${diffMeses} MESES`;
 
-        const diffMilisegundos = hoy - fNac;
-        const semanasTotales = Math.floor(diffMilisegundos / (1000 * 60 * 60 * 24 * 7));
-
-        // 3. Formatear texto de salida
-        let partes = [];
-        if (diffAnios > 0) partes.push(`${diffAnios} AÑOS`);
-        if (diffMeses > 0) partes.push(`${diffMeses} MESES`);
-        // Mostramos semanas solo si es menor de un año para mayor precisión
-        if (diffAnios === 0 && semanasTotales > 0) partes.push(`${semanasTotales} SEM.`);
-        if (diffAnios === 0 && diffMeses === 0) partes.push(`${diffDias} DÍAS`);
-
-        output.value = partes.join(' ');
-
-        // 4. Validación de criterio: 1000DIAS + LACTANTE
-        const esProgramaCorrecto = codigo.includes("1000DIAS") && apoyo.includes("LACTANTE");
-        const limite2Anios = 2 * 365.25 * 24 * 60 * 60 * 1000;
-
-        if (esProgramaCorrecto) {
-            if (diffMilisegundos < limite2Anios) {
-                output.style.color = "#0d9488"; // Verde esmeralda (Apto)
-            } else {
-                output.style.color = "#dc2626"; // Rojo (No apto)
-                alert("⚠️ ATENCIÓN: El beneficiario excede los 2 años. No cumple el criterio de 1000 DÍAS / LACTANTE.");
-            }
+        // Validación Programa 1000 Días
+        const esLactante = codigo.includes("1000DIAS") && apoyo.includes("LACTANTE");
+        if (esLactante) {
+            const limite2Anios = 2 * 365.25 * 24 * 60 * 60 * 1000;
+            output.style.color = (hoy - fNac < limite2Anios) ? "var(--success)" : "var(--danger)";
         } else {
-            output.style.color = "#1e293b"; // Color oscuro normal
+            output.style.color = "var(--primary)";
         }
     };
 
-    // --- DISPARADORES DE EVENTOS (Fuera de la función) ---
     document.getElementById('fecha_nac').addEventListener('input', window.calcularEdadActual);
     document.getElementById('tipo_apoyo').addEventListener('input', window.calcularEdadActual);
-    document.getElementById('codigo').addEventListener('input', window.calcularEdadActual);
 
+    // --- FILTRADO AVANZADO ---
+    window.filtrarAvanzado = () => {
+        const fCod = document.getElementById('f-cod').value.toLowerCase();
+        const fNom = document.getElementById('f-nom').value.toLowerCase();
+        const fLoc = document.getElementById('f-loc').value.toLowerCase();
+        const fApo = document.getElementById('f-apo').value;
+        const fEst = document.getElementById('f-est').value;
 
-    // --- FILTRADO Y RENDERIZADO ---
- window.filtrarAvanzado = () => {
-    const filtroCod = document.getElementById('f-cod').value.toLowerCase();
-    const filtroNom = document.getElementById('f-nom').value.toLowerCase();
-    const filtroLoc = document.getElementById('f-loc').value.toLowerCase();
-    const filtroApo = document.getElementById('f-apo').value;
-    const filtroEst = document.getElementById('f-est').value;
+        DATA_FILTRADA = DATA_ACTUAL.filter(r => {
+            const full = `${r.nombre} ${r.apellido_paterno} ${r.apellido_materno}`.toLowerCase();
+            return (r.codigo || "").toLowerCase().includes(fCod) &&
+                   full.includes(fNom) &&
+                   (r.col_loc || "").toLowerCase().includes(fLoc) &&
+                   (fApo === "" || r.tipo_apoyo === fApo) &&
+                   (fEst === "" || r.estatus === fEst);
+        });
+        PAGINA_ACTUAL = 1;
+        render();
+    };
 
-    DATA_FILTRADA = DATA_ACTUAL.filter(r => {
-        // Usamos "" como respaldo si el campo está vacío en la base de datos
-        const nom = (r.nombre || "").toLowerCase();
-        const pat = (r.apellido_paterno || "").toLowerCase();
-        const mat = (r.apellido_materno || "").toLowerCase();
-        const full = `${nom} ${pat} ${mat}`;
-        
-        const c1 = (r.codigo || "").toLowerCase().includes(filtroCod);
-        const c2 = full.includes(filtroNom);
-        const c3 = (r.col_loc || "").toLowerCase().includes(filtroLoc);
-        const c4 = filtroApo === "" || r.tipo_apoyo === filtroApo;
-        const c5 = filtroEst === "" || r.estatus === filtroEst;
+    window.limpiarFiltros = () => {
+        ['f-cod', 'f-nom', 'f-loc', 'f-apo', 'f-est'].forEach(id => document.getElementById(id).value = "");
+        window.filtrarAvanzado();
+    };
 
-        return c1 && c2 && c3 && c4 && c5;
-    });
-
-    PAGINA_ACTUAL = 1;
-    render();
-};
-
+    // --- RENDERIZADO ---
     function render() {
         const inicio = (PAGINA_ACTUAL - 1) * FILAS_POR_PAGINA;
         const lista = DATA_FILTRADA.slice(inicio, inicio + FILAS_POR_PAGINA);
@@ -307,8 +285,8 @@
                 <td>${r.tipo_apoyo || ''}</td>
                 <td><span class="badge-status" style="background:${r.estatus==='Entregado'?'#dcfce7':'#fef3c7'}; color:${r.estatus==='Entregado'?'#15803d':'#b45309'}">${r.estatus}</span></td>
                 <td class="no-print">
-                    <button onclick="editar('${r.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
-                    <button onclick="eliminar('${r.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
+                    <button onclick="editar('${r.id}')" title="Editar">✏️</button>
+                    <button onclick="eliminar('${r.id}')" title="Eliminar">🗑️</button>
                 </td>
             </tr>
         `).join('');
@@ -324,35 +302,32 @@
     window.irPagina = (p) => { PAGINA_ACTUAL = p; render(); };
     window.cambiarFilas = (v) => { FILAS_POR_PAGINA = parseInt(v); render(); };
 
-    // --- GESTIÓN DE DATOS (CRUD) ---
-    const obtenerDataForm = () => {
+    // --- CRUD ---
+    window.guardar = async () => {
         const d = {};
         document.querySelectorAll('#main-form input, #main-form select').forEach(i => { if(i.id) d[i.id] = i.value; });
-        return d;
-    };
-
-    window.guardar = async () => {
-        const d = obtenerDataForm();
         if(!d.codigo) return alert("Código requerido");
-        await addDoc(apoyosRef, d);
-        alert("Guardado");
-        location.reload();
+        try {
+            await addDoc(apoyosRef, d);
+            alert("¡Registro guardado con éxito!");
+            window.limpiarFormulario();
+        } catch (e) { alert("Error al guardar"); }
     };
 
     window.actualizar = async () => {
         const id = document.getElementById('edit-id').value;
-        if (!id) return;
+        const d = {};
+        document.querySelectorAll('#main-form input, #main-form select').forEach(i => { if(i.id) d[i.id] = i.value; });
         try {
-            await updateDoc(doc(db, "apoyos", id), obtenerDataForm());
-            alert("¡Registro actualizado!");
-            location.reload();
+            await updateDoc(doc(db, "apoyos", id), d);
+            alert("¡Actualizado!");
+            window.limpiarFormulario();
         } catch (e) { alert("Error al actualizar"); }
     };
 
     window.editar = (id) => {
         const r = DATA_ACTUAL.find(x => x.id === id);
         if (!r) return;
-        document.querySelectorAll('#main-form input, #main-form select').forEach(i => i.value = "");
         Object.keys(r).forEach(key => {
             const el = document.getElementById(key);
             if (el) el.value = r[key] || "";
@@ -367,13 +342,109 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    window.eliminar = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "apoyos", id)); };
+    window.eliminar = async (id) => { if(confirm("¿Seguro que desea eliminar este registro?")) await deleteDoc(doc(db, "apoyos", id)); };
 
-    // --- IMPORTAR / EXPORTAR ---
+    // --- EXPORTAR ---
+ window.exportarExcel = () => {
+    if (DATA_FILTRADA.length === 0) return alert("No hay datos para exportar.");
 
-    // --- UTILIDADES (FOTO, VISOR, VACIAR) ---
+    // 1. Definimos el orden exacto y el nombre de la cabecera
+    // El orden en este objeto será el orden de las columnas en Excel
+    const estructuraColumnas = {
+        codigo: "CÓDIGO",
+        tipo_apoyo: "TIPO DE APOYO",
+        fecha_ingreso: "FECHA INGRESO",
+        nombre: "NOMBRE(S)",
+        apellido_paterno: "APELLIDO PATERNO",
+        apellido_materno: "APELLIDO MATERNO",
+        fecha_nac: "F. NACIMIENTO",
+        edad_calculada: "EDAD",
+        curp: "CURP",
+        estatus: "ESTATUS",
+        col_loc: "COLONIA/LOCALIDAD",
+        direccion: "DIRECCIÓN",
+        telefono: "TELÉFONO",
+        observaciones: "OBSERVACIONES"
+    };
 
- 
+    // 2. Transformamos la data filtrada al nuevo formato ordenado
+    const dataOrdenada = DATA_FILTRADA.map((registro, index) => {
+        let fila = { "NO.": index + 1 }; // Agregamos contador
+        
+        // Iteramos sobre nuestra estructura para asegurar el orden
+        Object.keys(estructuraColumnas).forEach(llave => {
+            const nombreColumna = estructuraColumnas[llave];
+            fila[nombreColumna] = registro[llave] || ""; // Asignamos valor o vacío
+        });
+        
+        return fila;
+    });
+
+    // 3. Creamos el libro y la hoja
+    const ws = XLSX.utils.json_to_sheet(dataOrdenada);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Beneficiarios");
+
+    // 4. Descarga
+    const fechaPersonalizada = new Date().toISOString().slice(0,10);
+    XLSX.writeFile(wb, `Reporte_Poblacion_${fechaPersonalizada}.xlsx`);
+};
+
+    // --- IMPORTAR ---
+    window.importarSincronizado = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            const workbook = XLSX.read(evt.target.result, { type: 'binary' });
+            const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+            if(!confirm(`¿Importar ${json.length} registros?`)) return;
+            const batch = writeBatch(db);
+            json.forEach(f => {
+                const newRef = doc(apoyosRef);
+                batch.set(newRef, {
+                    codigo: String(f.CÓDIGO || f.codigo || ""),
+                    nombre: String(f.NOMBRE || f.nombre || ""),
+                    apellido_paterno: String(f.PATERNO || f.apellido_paterno || ""),
+                    apellido_materno: String(f.MATERNO || f.apellido_materno || ""),
+                    tipo_apoyo: String(f.APOYO || f.tipo_apoyo || ""),
+                    estatus: f.ESTATUS || f.estatus || "Pendiente",
+                    curp: String(f.CURP || f.curp || ""),
+                    col_loc: String(f["COLONIA/LOC"] || f.col_loc || ""),
+                    direccion: String(f.DIRECCION || f.direccion || "")
+                });
+            });
+            await batch.commit();
+            alert("Importación exitosa");
+        };
+        reader.readAsBinaryString(file);
+    };
+
+    // --- UI UTILIDADES ---
+    window.handleFoto = (e) => {
+        const fr = new FileReader();
+        fr.onload = (ev) => { 
+            document.getElementById('ine_img').value = ev.target.result; 
+            document.getElementById('box-preview').innerHTML = `<img src="${ev.target.result}" style="width:100%">`; 
+        };
+        fr.readAsDataURL(e.target.files[0]);
+    };
+
+    window.abrirVisor = (src, n) => {
+        document.getElementById('modal-visor').style.display='flex'; 
+        document.getElementById('img-grande').src = src; 
+        document.getElementById('visor-titulo').innerText = n;
+        document.getElementById('link-descarga').href = src;
+    };
+    window.cerrarVisor = () => document.getElementById('modal-visor').style.display='none';
+    
+    window.vaciarBaseDeDatos = async () => {
+        if(!confirm("⚠️ ADVERTENCIA: Se borrarán TODOS los datos permanentemente. ¿Continuar?")) return;
+        const snap = await getDocs(apoyosRef);
+        const batch = writeBatch(db);
+        snap.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+        alert("Base de datos vaciada.");
+    };
 </script>
 </body>
 </html>
