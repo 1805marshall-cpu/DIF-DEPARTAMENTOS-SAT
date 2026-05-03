@@ -63,87 +63,126 @@
     </div>
 </header>
 
-
 <div class="container">
     <div class="card no-print">
-        <h3><i class="fas fa-folder-plus"></i> Registro de Casos y Apoyos</h3>
-        <input type="hidden" id="edit-id">
+    <h3 style="margin-bottom: 25px; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+        <i class="fas fa-folder-plus"></i> Registro de Casos y Apoyos
+    </h3>
+    <input type="hidden" id="edit-id">
+    
+    <div class="form-grid" style="display: flex; flex-direction: column; gap: 20px;">
         
-        <div class="form-grid">
-            <div class="form-group"><label>No.</label><input type="text" id="numero_consecutivo" readonly style="background:#f1f5f9; font-weight:bold;"></div>
-            <div class="form-group"><label>Fecha</label><input type="date" id="fecha_registro"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Nombre del Beneficiario</label><input type="text" id="nombre"></div>
-            <div class="form-group"><label>Teléfono</label><input type="tel" id="telefono"></div>
-            <div class="form-group"><label>Colonia/Localidad</label><input type="text" id="col_loc"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Dirección</label><input type="text" id="direccion"></div>
-            <div class="form-group">
-                <label>Programa</label>
-                <select id="programa">
-                    <option value="">-- SELECCIONAR --</option>
-                    <option value="INVESTIGACION DE CAMPO">INVESTIGACIÓN DE CAMPO</option>
-                    <option value="VISITA DOMICILIARIA">VISITA DOMICILIARIA</option>
-                    <option value="ATENCION CIUDADANA">ATENCION CIUDADANA</option>
-                    <option value="GESTION DE CITAS">GESTION DE CITAS</option>
-                    <option value="ESTUDIO SOCIOECONOMICO">ESTUDIO SOCIOECONOMICO</option>
-                    <option value="TRASLADOS">TRASLADOS</option>
-                    <option value="CAMPAÑA ITINERANTE">CAMPAÑA ITINERANTE</option>
-                    <option value="PLATICA PREVENTIVA">PLATICA PREVENTIVA</option>
-                </select>
+        <!-- SECCIÓN 1: IDENTIFICACIÓN Y DATOS PERSONALES -->
+        <fieldset style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #ffffff;">
+            <legend style="padding: 0 15px; font-weight: 800; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="fas fa-user-circle"></i> Datos del Beneficiario
+            </legend>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                <div class="form-group"><label>No. Consecutivo</label><input type="text" id="numero_consecutivo" readonly style="background:#f8fafc; font-weight:bold;"></div>
+                <div class="form-group"><label>Fecha de Registro</label><input type="date" id="fecha_registro"></div>
+                <div class="form-group" style="grid-column: span 2;"><label>Nombre del Beneficiario</label><input type="text" id="nombre" placeholder="Nombre completo"></div>
+                
+                <div class="form-group"><label>Teléfono</label><input type="tel" id="telefono" placeholder="294..."></div>
+                <div class="form-group"><label>Colonia/Localidad</label><input type="text" id="col_loc"></div>
+                <div class="form-group" style="grid-column: span 2;"><label>Dirección Exacta</label><input type="text" id="direccion"></div>
             </div>
-                        <div class="form-group">
-                <label>Asunto</label>
-                <select id="asunto">
-                    <option value="">-- SELECCIONAR --</option>
-                    <option value="ASILO">ASILO</option>
-                    <option value="DESCUENTO TRANSPORTE"> DESCUENTO TRANSPORTE</option>
-                    <option value="DESCUENTO CMAPS">DESCUENTO CMAPS</option>
-                    <option value="APOYO ATAUD"> APOYO ATAUD</option>
-                    <option value="REGISTRO CIVIL">REGISTRO CIVIL</option>
-                    <option value="ESTUDIOS CLINICOS">ESTUDIOS CLINICOS</option>
-                    <option value="CERCIORAMIENTO DE TUTOR">CERCIORAMIENTO DE TUTOR</option>
-                    <option value="APOYO FUNCIONAL">APOYO FUNCIONAL</option>
-                    <option value="PROTESIS">PROTESIS</option>
-                    <option value="AUXILIAR AUDITIVO">AUXILIAR AUDITIVO</option>
-                    <option value="DIVERSOS">DIVERSOS</option>
-                    <option value="REINTREGACION DE MENOR">REINTREGACION DE MENOR</option>
-                    <option value="TRASLADO DE CUERPO">TRASLADO DE CUERPO</option>
-                    <option value="TERAPIAS CRISAT">TERAPIAS CRISAT</option>
-                    <option value="AUTISMO">AUTISMO</option>
-                </select>
-            </div>
-            <div class="form-group"><label>H. Mixtos</label><select id="horarios_mixtos"><option value="NO">NO</option><option value="SI">SI</option></select></div>
-            <div class="form-group"><label>Folio Expediente</label><input type="text" id="folio_expediente"></div>
-            <div class="form-group">
-                <label>Estatus</label>
-                <select id="estatus">
-                    <option value="PENDIENTE">ATENDIDO</option>
-                    <option value="PENDIENTE">PENDIENTE</option>
-                    <option value="ENTREGADO">ENTREGADO</option>
-                    <option value="REALIZADO">REALIZADO</option>
-                    <option value="CANCELADO">CANCELADO</option>
-                    <option value="EN PROCESO">EN PROCESO</option>
-                    <option value="VALIDADO">VALIDADO</option>
-                </select>
-            </div>
-        <div class="form-group">
-                <label>Usuario</label>
-                <select id="usuario">
-                    <option value="">-- SELECCIONAR --</option>
-                    <option value="JUANITA C. CAMPECHANO QUEZADA">JUANITA C. CAMPECHANO QUEZADA</option>
-                    <option value="MONSERRAT PLATA FLORES">MONSERRAT PLATA FLORES</option>
-                    <option value="MONSERRAT PLATA FLORES">J.C.C.Q. / M.P.F.</option>
-                </select>
-            </div>
-            <div class="form-group" style="grid-column: span 2;"><label>Detalles</label><input type="text" id="detalles"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Observaciones</label><input type="text" id="observaciones"></div>
-        </div>
+        </fieldset>
 
-        <div class="btn-box">
-            <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
-            <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
-            <button class="btn" style="background:#94a3b8" onclick="limpiarForm()"><i class="fas fa-eraser"></i> LIMPIAR</button>
-        </div>
+        <!-- SECCIÓN 2: CLASIFICACIÓN DEL SERVICIO -->
+        <fieldset style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #f8fafc;">
+            <legend style="padding: 0 15px; font-weight: 800; color: var(--med-color); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="fas fa-hand-holding-heart"></i> Detalles del Trámite o Apoyo
+            </legend>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                <div class="form-group">
+                    <label>Programa</label>
+                    <select id="programa">
+                        <option value="">-- SELECCIONAR --</option>
+                        <option value="INVESTIGACION DE CAMPO">INVESTIGACIÓN DE CAMPO</option>
+                        <option value="VISITA DOMICILIARIA">VISITA DOMICILIARIA</option>
+                        <option value="ATENCION CIUDADANA">ATENCION CIUDADANA</option>
+                        <option value="GESTION DE CITAS">GESTION DE CITAS</option>
+                        <option value="ESTUDIO SOCIOECONOMICO">ESTUDIO SOCIOECONOMICO</option>
+                        <option value="TRASLADOS">TRASLADOS</option>
+                        <option value="CAMPAÑA ITINERANTE">CAMPAÑA ITINERANTE</option>
+                        <option value="PLATICA PREVENTIVA">PLATICA PREVENTIVA</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Asunto</label>
+                    <select id="asunto">
+                        <option value="">-- SELECCIONAR --</option>
+                        <option value="ASILO">ASILO</option>
+                        <option value="DESCUENTO TRANSPORTE"> DESCUENTO TRANSPORTE</option>
+                        <option value="DESCUENTO CMAPS">DESCUENTO CMAPS</option>
+                        <option value="APOYO ATAUD"> APOYO ATAUD</option>
+                        <option value="REGISTRO CIVIL">REGISTRO CIVIL</option>
+                        <option value="ESTUDIOS CLINICOS">ESTUDIOS CLINICOS</option>
+                        <option value="CERCIORAMIENTO DE TUTOR">CERCIORAMIENTO DE TUTOR</option>
+                        <option value="APOYO FUNCIONAL">APOYO FUNCIONAL</option>
+                        <option value="PROTESIS">PROTESIS</option>
+                        <option value="AUXILIAR AUDITIVO">AUXILIAR AUDITIVO</option>
+                        <option value="DIVERSOS">DIVERSOS</option>
+                        <option value="REINTREGACION DE MENOR">REINTREGACION DE MENOR</option>
+                        <option value="TRASLADO DE CUERPO">TRASLADO DE CUERPO</option>
+                        <option value="TERAPIAS CRISAT">TERAPIAS CRISAT</option>
+                        <option value="AUTISMO">AUTISMO</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Folio Expediente</label><input type="text" id="folio_expediente" placeholder="Opcional"></div>
+                <div class="form-group" style="grid-column: span 3;"><label>Detalles Específicos</label><input type="text" id="detalles" placeholder="Descripción breve del caso"></div>
+            </div>
+        </fieldset>
+
+        <!-- SECCIÓN 3: CONTROL ADMINISTRATIVO -->
+        <fieldset style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; background-color: #ffffff;">
+            <legend style="padding: 0 15px; font-weight: 800; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="fas fa-clipboard-check"></i> Estatus y Seguimiento
+            </legend>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                <div class="form-group">
+                    <label>Estatus</label>
+                    <select id="estatus" style="background: #fffbeb; font-weight: bold;">
+                        <option value="PENDIENTE">PENDIENTE</option>
+                        <option value="ATENDIDO">ATENDIDO</option>
+                        <option value="ENTREGADO">ENTREGADO</option>
+                        <option value="REALIZADO">REALIZADO</option>
+                        <option value="CANCELADO">CANCELADO</option>
+                        <option value="EN PROCESO">EN PROCESO</option>
+                        <option value="VALIDADO">VALIDADO</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>H. Mixtos</label>
+                    <select id="horarios_mixtos"><option value="NO">NO</option><option value="SI">SI</option></select>
+                </div>
+                <div class="form-group">
+                    <label>Usuario que Atiende</label>
+                    <select id="usuario">
+                        <option value="">-- SELECCIONAR --</option>
+                        <option value="JUANITA C. CAMPECHANO QUEZADA">JUANITA C. CAMPECHANO QUEZADA</option>
+                        <option value="MONSERRAT PLATA FLORES">MONSERRAT PLATA FLORES</option>
+                        <option value="J.C.C.Q. / M.P.F.">J.C.C.Q. / M.P.F.</option>
+                    </select>
+                </div>
+                <div class="form-group" style="grid-column: span 3;"><label>Observaciones del Trabajador Social</label><input type="text" id="observaciones"></div>
+            </div>
+        </fieldset>
     </div>
+
+    <!-- BOTONERA -->
+    <div class="btn-box" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
+        <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
+        <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
+        <button class="btn" style="background:var(--excel)" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
+        
+        <label class="btn" style="background:#6366f1; cursor:pointer;">
+            <input type="file" id="import-excel" accept=".xlsx, .xls" style="display:none" onchange="importarDesdeExcel(event)">
+        </label>
+
+        <button class="btn" style="background:#94a3b8" onclick="limpiarForm()"><i class="fas fa-eraser"></i> LIMPIAR</button>
+    </div>
+</div>
 
     <div class="search-box no-print">
         <div class="form-group" style="flex:2;">
