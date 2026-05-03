@@ -61,30 +61,89 @@
 
 <div class="container">
     <div class="card no-print">
-        <h3><i class="fas fa-folder-plus"></i> Registro de Expediente</h3>
-        <input type="hidden" id="edit-id">
-        <div class="form-grid">
-            <div class="form-group"><label>No.</label><input type="text" id="no" readonly style="background:#f1f5f9; font-weight: bold;"></div>
-            <div class="form-group"><label>Fecha</label><input type="date" id="fecha"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Nombre</label><input type="text" id="nombre" placeholder="Nombre completo"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Domicilio</label><input type="text" id="domicilio"></div>
-            <div class="form-group"><label>Lugar</label><input type="text" id="lugar" placeholder="Comunidad / Colonia"></div>
-            <div class="form-group"><label>Asuntos</label><input type="text" id="asuntos" placeholder="Ej: Pensión Alimenticia"></div>
-            <div class="form-group">
-                <label>Horarios Mixtos</label>
-                <select id="horarios_mixtos"><option value="No">No</option><option value="Si">Si</option></select>
+    <h3 style="margin-bottom: 25px; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+        <i class="fas fa-folder-plus"></i> Registro de Expediente
+    </h3>
+    <input type="hidden" id="edit-id">
+    
+    <div class="form-grid" style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- SECCIÓN 1: DATOS GENERALES DEL EXPEDIENTE -->
+        <fieldset style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #ffffff;">
+            <legend style="padding: 0 15px; font-weight: 800; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="fas fa-id-card"></i> Información del Folio
+            </legend>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+                <div class="form-group">
+                    <label>No.</label>
+                    <input type="text" id="no" readonly style="background:#f8fafc; font-weight: bold; border: 1px solid #cbd5e1;">
+                </div>
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="date" id="fecha">
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Nombre del Solicitante</label>
+                    <input type="text" id="nombre" placeholder="Nombre completo">
+                </div>
             </div>
-            <div class="form-group"><label>Elaboró</label><input type="text" id="elaboro"></div>
-            <div class="form-group" style="grid-column: span 4;"><label>Detalles</label>
-                <textarea id="detalles" rows="2" placeholder="Observaciones detalladas del caso..."></textarea>
+        </fieldset>
+
+        <!-- SECCIÓN 2: UBICACIÓN Y CONTACTO -->
+        <fieldset style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #f8fafc;">
+            <legend style="padding: 0 15px; font-weight: 800; color: #0ea5e9; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="fas fa-map-marker-alt"></i> Domicilio y Procedencia
+            </legend>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                <div class="form-group">
+                    <label>Domicilio</label>
+                    <input type="text" id="domicilio" placeholder="Calle, número, etc.">
+                </div>
+                <div class="form-group">
+                    <label>Lugar</label>
+                    <input type="text" id="lugar" placeholder="Comunidad / Colonia">
+                </div>
             </div>
-        </div>
-        <div class="btn-box">
-            <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
-            <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
-            <button class="btn" style="background:#64748b" onclick="limpiarForm()"><i class="fas fa-broom"></i> LIMPIAR</button>
-        </div>
+        </fieldset>
+
+        <!-- SECCIÓN 3: DETALLES JURÍDICOS / ASUNTO -->
+        <fieldset style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; background-color: #ffffff;">
+            <legend style="padding: 0 15px; font-weight: 800; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+                <i class="fas fa-gavel"></i> Información del Caso
+            </legend>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Asunto(s)</label>
+                    <input type="text" id="asuntos" placeholder="Ej: Pensión Alimenticia, Guardia y Custodia...">
+                </div>
+                <div class="form-group">
+                    <label>Horarios Mixtos</label>
+                    <select id="horarios_mixtos">
+                        <option value="No">No</option>
+                        <option value="Si">Si</option>
+                    </select>
+                </div>
+                <div class="form-group" style="grid-column: span 3;">
+                    <label>Detalles y Observaciones</label>
+                    <textarea id="detalles" rows="3" placeholder="Observaciones detalladas del caso..." style="width: 100%; resize: vertical;"></textarea>
+                </div>
+                <div class="form-group" style="grid-column: span 3;">
+                    <label><i class="fas fa-pen-nib"></i> Elaboró:</label>
+                    <input type="text" id="elaboro" placeholder="Nombre del servidor público">
+                </div>
+            </div>
+        </fieldset>
     </div>
+
+    <!-- BOTONERA ACTUALIZADA -->
+    <div class="btn-box" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
+        <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
+        <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
+        <button class="btn" style="background:var(--excel)" onclick="exportarExcel()"><i class="fas fa-download"></i> DESCARGAR EXCEL</button>
+        <button class="btn" style="background:#64748b" onclick="limpiarForm()"><i class="fas fa-broom"></i> LIMPIAR</button>
+        <button class="btn" style="background:#94a3b8" onclick="limpiarForm()"><i class="fas fa-plus"></i> NUEVO</button>
+    </div>
+</div>
 
     <div class="search-box no-print">
         <div class="form-group" style="flex:2;">
