@@ -174,7 +174,6 @@
             <div id="nav-general-localidades" class="nav-item" onclick="showView('general-localidades', this)"><i class="fas fa-map-marked-alt"></i> <span>General Localidades</span></div>
            <div id="nav-escolar" class="nav-item" onclick="showView('escolar', this)"><i class="fa-solid fa-list-check"></i><span>Solicitudes Generales</span></div>
             <div id="nav-territorial" class="nav-item" onclick="showView('territorial', this)"><i class="fas fa-city"></i> <span>Resumen Territorial</span></div>
-            
         </nav>
         <div class="nav-exit" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> <span>CERRAR SESIÓN</span></div>
     </div>
@@ -221,7 +220,7 @@
         
 <!-- AREA DE POBLACION VULNERABLE -->
         <div id="view-vulnerable" class="view-container">
-            <div class="access-card" style="background: var(--vulnerable-color);"><div><b>Población Vulnerable</b></div><a href="vulnerable.html" class="btn-open">Módulo</a></div>
+            <div class="access-card" style="background: var(--vulnerable-color);"><div><b>Población Vulnerable</b></div><a href="vulnerable.html" class="btn-open">Ir al Módulo de Captura</a></div>
             <div class="filter-bar"></div>
             <div class="stats-grid">
                 <div class="stat-box"><small>Registros</small><div id="v-total">0</div></div>
@@ -244,10 +243,7 @@
         <!-- AREA DE TRABAJO SOCIAL -->
    
    <div id="view-social" class="view-container" style="font-size: 12px;"> <!-- Forzamos tamaño base -->
-    <div class="access-card" style="background: var(--social-color); margin-bottom: 15px; padding: 10px;">
-        <div style="font-size: 14px;"><b>Trabajo Social</b></div>
-        <a href="social.html" class="btn-open" style="font-size: 11px;">Módulo</a>
-    </div>
+    <div class="access-card" style="background: var(--social-color); margin-bottom: 15px; padding: 10px;"><div style="font-size: 14px;"><b>Trabajo Social</b></div><a href="social.html" class="btn-open" style="font-size: 11px;">Ir al Módulo de Captura</a></div>
 
     <div class="stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin-bottom: 10px;">
         <div class="stat-box" style="padding: 10px;">
@@ -278,11 +274,9 @@
     </div>
 </div>
         <!-- AREA DE PROCURADURIA -->
+
 <div id="view-procuraduria" class="view-container" style="font-size: 12px;"> <!-- Forzamos tamaño base -->
-    <div class="access-card" style="background: var(--procu-color); margin-bottom: 15px; padding: 10px;">
-        <div style="font-size: 14px;"><b>Procuraduría</b></div>
-        <a href="procuraduria.html" class="btn-open" style="font-size: 11px;">Módulo</a>
-    </div>
+    <div class="access-card" style="background: var(--procu-color); margin-bottom: 15px; padding: 10px;"><div style="font-size: 14px;"><b>Procuraduría</b></div><a href="procuraduria.html" class="btn-open" style="font-size: 11px;">Ir al Módulo de Captura</a></div>
 
     <div class="stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin-bottom: 15px;">
         <div class="stat-box" style="padding: 10px;">
@@ -310,13 +304,11 @@
         </div>
     </div>
 </div>
+
         <!-- AREA DE MEDICINA -->
 <div id="view-medica" class="view-container">
-    <!-- ACCESO DIRECTO -->
-    <div class="access-card" style="background: var(--med-color); margin-bottom: 20px;">
-        <div><b>Área Médica</b></div>
-        <a href="medica.html" class="btn-open">Ir al Módulo de Captura</a>
-    </div> 
+<!-- ACCESO DIRECTO -->
+<div class="access-card" style="background: var(--med-color); margin-bottom: 20px;"><div><b>Área Médica</b></div><a href="medica.html" class="btn-open">Ir al Módulo de Captura</a></div> 
 
     <!-- NIVEL 1: INDICADORES PRINCIPALES (3 COLUMNAS) -->
     <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap:15px; margin-bottom: 20px;">
@@ -387,15 +379,9 @@
 
 <!-- AREA DE PSICOLOGIA -->
 <div id="view-psicologia" class="view-container">
-    <div class="access-card" style="background: var(--psico-color);">
-        <div><b>Psicología</b></div>
-        <a href="psicologia.html" class="btn-open">Módulo</a>
-    </div>
-
+    <div class="access-card" style="background: var(--psico-color);"><div><b>Psicología</b></div><a href="psicologia.html" class="btn-open">Ir al Módulo de Captura</a> </div>
     <div class="filter-bar"></div>
-
   <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
-    
     <div class="stat-box" style="border-top:4px solid var(--psico-color); background: #fff;">
         <small style="font-weight:bold; color:#64748b;">TOTAL PACIENTES</small>
         <div id="p-total" style="font-weight:800; font-size:1.8rem; color:#1e293b;">0</div>
@@ -446,7 +432,7 @@
 </div>
 <!-- AREA DE JEFATURA DE PSICOLOGIA -->
 <div id="view-jefatura-psicologia" class="view-container">
-    <div class="access-card" style="background: #701a27;"><div><b>Jefatura de Psicología</b></div><a href="jefatura_psicologia.html" class="btn-open">Módulo</a></div>
+    <div class="access-card" style="background: #701a27;"><div><b>Jefatura de Psicología</b></div><a href="jefatura_psicologia.html" class="btn-open">Ir al Módulo de Captura</a></div>
     <div class="filter-bar"></div>
     <div class="stats-grid">
         <div class="stat-box" style="border-top:3px solid #701a27"><small>Total de Actividades</small><div id="jp-total">0</div></div>
@@ -461,7 +447,7 @@
 
 <!-- AREA DE GENERAL LOCALIDADES -->
         <div id="view-general-localidades" class="view-container">
-            <div class="access-card" style="background: var(--genloc-color);"><div><b>General Localidades</b></div><a href="general_localidades.html" class="btn-open">Módulo</a></div>
+            <div class="access-card" style="background: var(--genloc-color);"><div><b>General Localidades</b></div><a href="general_localidades.html" class="btn-open">Ir al Módulo de Captura</a></div>
             <div class="filter-bar"></div>
             <div class="stats-grid">
                 <div class="stat-box" style="border-top:3px solid var(--genloc-color)"><small>Total Registros</small><div id="gl-total">0</div></div>
@@ -474,7 +460,7 @@
             </div>
         </div>
 
-        <div id="view-escolar" class="view-container"><div class="access-card" style="background: #1e3a8a;"><div><b>Solicitudes Generales</b></div><a href="solicitudes.html" class="btn-open">Módulo</a></div>
+        <div id="view-escolar" class="view-container"><div class="access-card" style="background: #1e3a8a;"><div><b>Solicitudes Generales</b></div><a href="solicitudes.html" class="btn-open">Ir al Módulo de Captura</a></div>
     <div class="stats-grid">
         <div class="stat-box"><small>Solicitudes</small><div id="re-total">0</div></div>
         <div class="stat-box"><small>Atendidos</small><div id="re-ate" style="color:var(--success)">0</div></div>
@@ -506,8 +492,6 @@
     </div>
     
 </div>
-</div>
-
 </div>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -640,6 +624,25 @@ if (isFiltered) {
     if (typeof window.procTerritorial === "function") {
         window.procTerritorial(filtroTerritorial, m);
     }
+// ... (esto va después de procTerritorial)
+
+    setTimeout(() => {
+        // Recolectamos los números que ya están en las tarjetas del dashboard
+        const conteos = {
+            social: parseInt(document.getElementById('s-total')?.innerText) || 0,
+            procu: parseInt(document.getElementById('pr-total')?.innerText) || 0,
+            vulnerable: parseInt(document.getElementById('v-total')?.innerText) || 0, 
+            medica: parseInt(document.getElementById('m-total')?.innerText) || 0,
+            psico: parseInt(document.getElementById('psi-total')?.innerText) || 0 
+        };
+
+        // Verificamos que la función de dibujo exista y le pasamos los datos
+        if (typeof window.renderGlobalCharts === "function") {
+            window.renderGlobalCharts(conteos);
+        } else {
+            console.warn("La función renderGlobalCharts aún no está lista.");
+        }
+    }, 500); // Subí a 500ms para dar más tiempo a que Firebase responda
 };
     // --- PROCESADORES ---
     window.procVul = (s, m) => {
@@ -768,13 +771,13 @@ if (isFiltered) {
                     <td style="padding:10px;">${fStr}</td>
                     <td><b>${(d.nombre || '').toUpperCase()}</b></td>
                     <td><span style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${d.edad || '0'}</span></td>
-                    <td style="color:var(--med-color); font-weight:bold;">${(d.servicio || 'General').toUpperCase()}</td>
+                    <td style="color:var(--med-color); font-weight:bold;">${(d.tipo_estudio || 'General').toUpperCase()}</td>
                     <td style="color:#64748b; font-size:11px;">${locNombre}</td>
                     <td style="text-align:right; font-weight:bold;">$${costo.toFixed(2)}</td>
                 </tr>`;
 
             // Conteo de Servicios
-            const sv = (d.servicio || "Consulta").toUpperCase();
+            const sv = (d.tipo_estudio || "Consulta").toUpperCase();
             servicios[sv] = (servicios[sv] || 0) + 1;
 
             // Conteo de Edades
@@ -1222,6 +1225,8 @@ window.procTerritorial = (term) => {
 
     // Inicio
     aplicarSeguridad();
-</script>
+
+
+</script>  
 </body>
 </html>
