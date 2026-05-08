@@ -12,15 +12,7 @@
             --bg: #f1f5f9;
             --danger: #dc2626;
         }
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg);  display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         .login-card {
             background: white;
             padding: 40px;
@@ -95,6 +87,34 @@
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
+
+        .btn-nav {
+    background: white;
+    color: #1e40af;
+    border: 1px solid #e2e8f0;
+    padding: 15px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+}
+
+.btn-nav i {
+    font-size: 1.5rem;
+}
+
+.btn-nav:hover {
+    background: #f1f5f9;
+    border-color: #1e40af;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
     </style>
 </head>
 <body>
@@ -140,6 +160,8 @@
     // ADMINISTRACIÓN GLOBAL
     "admin": { p: "master2026", url: "admin_global.html" },
     "lorena.gonzalez": { p: "logoke.15", url: "admin_global.html" }, 
+    "angel.vidal": { p: "Angel123..", url: "admin_global.html" }, 
+
 
     // POBLACIÓN VULNERABLE
     "vulnerable": { p: "vul123", url: "vulnerable.html" }, 
@@ -154,8 +176,32 @@
     "procuraduria": { p: "pro123", url: "procuraduria.html" },
     "edmundo.pechi": { p: "Edmundo123..", url: "procuraduria.html" },
 
-    // ÁREA MÉDICA
-    "medica": { p: "med123", url: "medica.html" },
+    // Recepcionistas (Área Médica 2)
+    "recepcion": { p: "medica2026", url: "medica2.html" },
+    "olga.perez": { p: "Olga123..", url: "medica2.html" },
+    "sonia.xala": { p: "Sonia123..", url: "medica2.html" },
+
+    // Enfermería
+    "enfermeria": { p: "enf123", url: "enfermeria.html" },
+    "guardia.enfermeria": { p: "dif.enf.26", url: "enfermeria.html" },
+    "gael.maldonado": { p: "Gael123..", url: "enfermeria.html" },
+    "francisco.gomez": { p: "Paco123..", url: "enfermeria.html" },
+
+    // Doctores (Consulta en Turno)
+    "doctor": { p: "doc123", url: "consulta_doctor.html" },
+    "medico.turno": { p: "consulta.2026", url: "consulta_doctor.html" },
+    "hector.gonzalez": { p: "Hector123..", url: "consulta_doctor.html" },
+    "oscar.perrotin": { p: "Oscar123..", url: "consulta_doctor.html" },
+
+    // Director del Área Médica (Acceso a Historial y Farmacia)
+    // Nota: El director suele entrar a Historial General, 
+    // pero puede navegar a Farmacia desde ahí.
+    "director.medico": { p: "dir1234", url: "historial_general.html" },
+
+    // Farmacia (Responsable y Director)
+    "farmacia": { p: "far123", url: "farmacia.html" },
+    "farmacia": { p: "far123", url: "farmacia.html" },
+    "responsable.farma": { p: "farma.dif", url: "farmacia.html" },
 
     // PSICOLOGÍA
     "psicologia": { p: "psi123", url: "psicologia.html" },
@@ -173,30 +219,56 @@
 };
 
         if (cuentas[user] && cuentas[user].p === pass) {
-            // Guardar datos de sesión simple
-            sessionStorage.setItem('sesion_activa', user);
-            sessionStorage.setItem('rol', user === 'admin' ? 'ADMIN' : 'USER');
-            
-            // Efecto visual de carga opcional
-            const btn = document.querySelector('.btn-login');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
-            btn.style.opacity = '0.7';
+        // 1. Guardar sesión
+        sessionStorage.setItem('sesion_activa', user);
+        sessionStorage.setItem('rol', (user === 'admin' || user === 'director.medico') ? 'ADMIN' : 'USER');
+        
+        // 2. Efecto visual de carga
+        const btn = document.querySelector('.btn-login');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+        btn.style.opacity = '0.7';
 
-            setTimeout(() => {
+        // 3. LÓGICA DE REDIRECCIÓN O PANEL MAESTRO
+        setTimeout(() => {
+            // Si es de los que deben ver todos los botones:
+            if (user === "director.medico") {
+                mostrarPanelMaestro();
+            } else {
+                // Si es un usuario común, va directo a su URL
                 window.location.href = cuentas[user].url;
-            }, 600);
+            }
+        }, 600);
 
-        } else {
-            // Mostrar error con animación
-            error.style.display = 'block';
-            setTimeout(() => { 
-                error.style.display = 'none'; 
-            }, 3000);
-            
-            // Limpiar campo de contraseña para reintento
-            document.getElementById('pass').value = "";
-        }
+    } else {
+        // Mostrar error si falla
+        error.style.display = 'block';
+        setTimeout(() => { error.style.display = 'none'; }, 3000);
+        document.getElementById('pass').value = "";
     }
+}
+
+    function mostrarPanelMaestro() {
+    const card = document.querySelector('.login-card');
+    const usuario = sessionStorage.getItem('sesion_activa');
+
+    card.innerHTML = `
+        <div class="icon-header"><i class="fas fa-th-large"></i></div>
+        <h2>PANEL MAESTRO</h2>
+        <p>Bienvenido: <b>${usuario.toUpperCase()}</b><br>Seleccione el módulo a supervisar:</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+            <button class="btn-nav" onclick="window.location.href='medica2.html'"><i class="fas fa-file-medical"></i> Recepción</button>
+            <button class="btn-nav" onclick="window.location.href='enfermeria.html'"><i class="fas fa-user-nurse"></i> Enfermería</button>
+            <button class="btn-nav" onclick="window.location.href='consulta_doctor.html'"><i class="fas fa-stethoscope"></i> Consultorio</button>
+            <button class="btn-nav" onclick="window.location.href='farmacia.html'"><i class="fas fa-pills"></i> Farmacia</button>
+            <button class="btn-nav" style="grid-column: span 2; background: #f5f6f9da;" onclick="window.location.href='historial_general.html'"><i class="fas fa-chart-line"></i> Historial y Firmas (Dirección)</button>
+        </div>
+
+        <button onclick="sessionStorage.clear(); location.reload();" style="margin-top:20px; background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px; font-weight:bold;">
+            <i class="fas fa-power-off"></i> CERRAR SESIÓN
+        </button>
+    `;
+}
 </script>
 
 </body>
