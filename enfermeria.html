@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>DIF | Triaje y Enfermería (Control de Médicos en Vivo)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --med-primary: #0369a1; --med-bg: #f0f9ff; --money: #059669; --danger: #991b1b; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; margin: 0; display: flex; height: 100vh; }
+        
+        /* Barra Lateral - Lista de Pacientes */
+        .sidebar { width: 320px; background: white; border-right: 1px solid #e2e8f0; padding: 20px; overflow-y: auto; }
+        .patient-card { padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; background: #fff; }
+        .patient-card:hover { border-color: var(--med-primary); background: var(--med-bg); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .patient-card b { color: var(--med-primary); font-size: 13px; display: block; margin-bottom: 4px; text-transform: uppercase; }
+        
+        /* Área Principal */
+        .main { flex: 1; padding: 40px; overflow-y: auto; display: flex; justify-content: center; }
+        .form-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-top: 6px solid var(--med-primary); width: 100%; max-width: 900px; height: fit-content; }
+        
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        .full-width { grid-column: span 3; }
+        
+        label { font-size: 9px; font-weight: bold; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; }
+        input[readonly] { background: #f1f5f9; color: #475569; font-weight: bold; border-color: #e2e8f0; }
+        
+        /* Indicador de Estado del Médico */
+        #status-doctor-vivo { font-size: 11px; font-weight: bold; margin-top: 5px; display: flex; align-items: center; gap: 5px; }
+        .dot-viva { width: 10px; height: 10px; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+
+        .costo-resaltado { color: var(--money) !important; border-left: 4px solid var(--money) !important; }
+        .section-header { grid-column: span 3; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; margin-top: 15px; color: var(--med-primary); font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        
+        .btn-save { background: var(--med-primary); color: white; border: none; padding: 16px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 25px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        .btn-save:hover { background: #075985; transform: translateY(-1px); }
+        .status-empty { text-align: center; color: #94a3b8; margin-top: 40px; font-size: 14px; }
+        .btn-logout {
+    background-color: #ef4444; /* Rojo para indicar salida */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.btn-logout:hover {
+    background-color: #b91c1c;
+    transform: scale(1.05);
+}
+
+/* Si tu diseño es para móvil, esto ayuda a que no estorbe */
+@media (max-width: 600px) {
+    .btn-logout span { display: none; } /* Solo muestra el icono en pantallas chicas */
+}
+    </style>
+</head>
+<body>
+<!-- Botón de Cerrar Sesión -->
+<div style="position: absolute; top: 15px; right: 20px; z-index: 1000;">
+    <button onclick="cerrarSesion()" class="btn-logout">
+        <i class="fas fa-power-off"></i> Salir del Sistema
+    </button>
+</div>
+<div class="sidebar">
+    <h3 style="color:var(--med-primary); margin-top:0;"><i class="fas fa-hospital-user"></i> Lista de Espera</h3>
+    <hr style="border:0; border-top:1px solid #f1f5f9; margin-bottom:20px;">
+    <div id="lista-espera"><div class="status-empty">Buscando pacientes...</div></div>
+</div>
+
+<div class="main">
+    <div class="form-container">
+        <h2 id="p-nombre" style="margin:0; color:#1e293b;">Seleccione un paciente</h2>
+        <p id="p-meta" style="color:#64748b; margin: 8px 0 0 0; font-size: 13px;">Revisión de expediente y triaje.</p>
+        
+        <form id="form-signos">
+            <input type="hidden" id="f-id">
+            <div class="grid">
+                <div class="section-header">Información de Recepción</div>
+                <div class="form-group">
+                    <label>Edad</label>
+                    <input type="text" id="f-edad" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Lugar/Colonia</label>
+                    <input type="text" id="f-lugar" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Población</label>
+                    <input type="text" id="f-tipo_pob" readonly>
+                </div>
+                <div class="form-group full-width">
+                    <label>Costo del Servicio ($)</label>
+                    <input type="text" id="f-costo" readonly class="costo-resaltado">
+                </div>
+                
+                <div class="section-header">Signos Vitales y Triaje</div>
+                <div class="form-group">
+                    <label>T.A. (Presión)</label>
+                    <input type="text" id="f-ta" placeholder="120/80">
+                </div>
+                <div class="form-group">
+                    <label>F.A. (Respiración)</label>
+                    <input type="number" id="f-fa" placeholder="RPM">
+                </div>
+                <div class="form-group">
+                    <label>Temp. (°C)</label>
+                    <input type="number" step="0.1" id="f-temp" placeholder="36.5">
+                </div>
+                <div class="form-group">
+                    <label>SPO2 (%)</label>
+                    <input type="number" id="f-spo2" placeholder="98">
+                </div>
+                <div class="form-group">
+                    <label>Peso (kg)</label>
+                    <input type="number" step="0.1" id="f-peso" placeholder="70.0">
+                </div>
+                <div class="form-group">
+                    <label>Talla (cm)</label>
+                    <input type="number" id="f-talla" placeholder="170">
+                </div>
+
+                <div class="form-group full-width" style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
+                    <label><i class="fas fa-user-md"></i> Médico en Turno</label>
+                  <!-- Archivo: enfermeria.html -->
+                    <select id="f-medico" onchange="verificarEstadoDoctor()">
+                    <option value="">-- SELECCIONE MÉDICO --</option>
+                    <option value="DR. HECTOR ARTURO GONZALEZ DOMINGUEZ">DR. HECTOR ARTURO GONZALEZ DOMINGUEZ</option>
+                    <option value="DR. OSCAR ALEXIS PERROTIN ORTEGA">DR. OSCAR ALEXIS PERROTIN ORTEGA</option>
+                    </select>
+                    <!-- INDICADOR DE ESTADO EN VIVO -->
+                    <div id="status-doctor-vivo">
+                        <span class="dot-viva" id="luz-doctor" style="background: #cbd5e1;"></span>
+                        <span id="texto-doctor">Seleccione médico para ver disponibilidad</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" class="btn-save" onclick="enviarAlDoctor()">
+                <i class="fas fa-share-square"></i> ENVIAR AL CONSULTORIO MÉDICO
+            </button>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // --- 1. VALIDACIÓN DE SEGURIDAD (EL CANDADO) ---
+    if (!sessionStorage.getItem('sesion_activa')) {
+        window.location.href = "index.html";
+    }
+
+    // --- 2. CONFIGURACIÓN DE FIREBASE ---
+    const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
+    const db = getFirestore(initializeApp(firebaseConfig));
+
+    let estadosDoctores = {};
+
+    // 1. MONITOREO DE DOCTORES (CONEXIÓN EN VIVO)
+    onSnapshot(collection(db, "personal_medico"), (snap) => {
+        snap.forEach(d => { estadosDoctores[d.id] = d.data().estado; });
+        verificarEstadoDoctor(); // Actualiza luz si el doctor cambia de estado mientras está seleccionado
+    });
+
+    window.verificarEstadoDoctor = () => {
+        const medico = document.getElementById('f-medico').value;
+        const luz = document.getElementById('luz-doctor');
+        const texto = document.getElementById('texto-doctor');
+
+        if (!medico) {
+            luz.style.background = "#cbd5e1";
+            texto.innerText = "Seleccione médico para ver disponibilidad";
+            return;
+        }
+
+        if (estadosDoctores[medico] === "ACTIVO") {
+            luz.style.background = "#059669";
+            texto.innerHTML = `<span style="color:#059669">MÉDICO DISPONIBLE EN CONSULTORIO</span>`;
+        } else {
+            luz.style.background = "#991b1b";
+            texto.innerHTML = `<span style="color:#991b1b">MÉDICO DESCONECTADO (No disponible)</span>`;
+        }
+    };
+
+    // 2. CARGA DE PACIENTES PENDIENTES
+    const qPacientes = query(collection(db, "area_medica_v2"), where("estado", "==", "PENDIENTE_ENFERMERIA"));
+    onSnapshot(qPacientes, (snap) => {
+        const list = document.getElementById('lista-espera');
+        if(snap.empty) {
+            list.innerHTML = `<div class="status-empty">No hay pacientes en espera.</div>`;
+            return;
+        }
+        list.innerHTML = "";
+        snap.forEach(d => {
+            const p = d.data();
+            list.innerHTML += `
+                <div class="patient-card" onclick="setPaciente('${d.id}', '${p.nombre}', '${p.edad}', '${p.servicio}', '${p.tipo_pob}', '${p.lugar}', '${p.costo}')">
+                    <b>${p.nombre}</b>
+                    <small><i class="fas fa-stethoscope"></i> ${p.servicio || 'General'}</small>
+                </div>`;
+        });
+    });
+
+    window.setPaciente = (id, nombre, edad, servicio, poblacion, lugar, costo) => {
+        document.getElementById('f-id').value = id;
+        document.getElementById('p-nombre').innerText = nombre;
+        document.getElementById('p-meta').innerText = "Servicio: " + (servicio || "Consulta General");
+        document.getElementById('f-edad').value = edad + " Años";
+        document.getElementById('f-tipo_pob').value = poblacion || "N/A";
+        document.getElementById('f-lugar').value = lugar || "N/A";
+        document.getElementById('f-costo').value = costo ? "$" + costo : "$0.00";
+    };
+
+    // 3. ENVÍO AL DOCTOR CON VALIDACIÓN
+    window.enviarAlDoctor = async () => {
+        const id = document.getElementById('f-id').value;
+        const medico = document.getElementById('f-medico').value;
+
+        if(!id) return alert("Por favor, seleccione un paciente de la lista.");
+        if(!medico) return alert("Debe asignar un médico para continuar.");
+
+        // Validación de seguridad si el doctor no está activo
+        if (estadosDoctores[medico] !== "ACTIVO") {
+            const confirmar = confirm("El médico aparece como DESCONECTADO. ¿Desea enviar al paciente de todos modos?");
+            if (!confirmar) return;
+        }
+
+        try {
+            await updateDoc(doc(db, "area_medica_v2", id), {
+                ta: document.getElementById('f-ta').value || "N/A",
+                fa: document.getElementById('f-fa').value || "N/A",
+                temp: document.getElementById('f-temp').value || "N/A",
+                spo2: document.getElementById('f-spo2').value || "N/A",
+                peso: document.getElementById('f-peso').value || "N/A",
+                talla: document.getElementById('f-talla').value || "N/A",
+                medico_turno: medico,
+                estado: "PENDIENTE_DOCTOR" 
+            });
+            alert("✅ Paciente enviado exitosamente con el " + medico);
+            document.getElementById('form-signos').reset();
+            document.getElementById('p-nombre').innerText = "Seleccione un paciente";
+            verificarEstadoDoctor();
+        } catch (e) { alert("Error al enviar: " + e.message); }
+    };
+
+    // Pega esto al final de tu script o después de inicializar Firebase
+window.cerrarSesion = function() {
+    if(confirm("¿Desea salir del módulo de Enfermería?")) {
+        sessionStorage.clear();
+        window.location.href = "index.html";
+    }
+};
+</script>
+</body>
+</html>
