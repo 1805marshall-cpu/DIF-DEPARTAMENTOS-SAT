@@ -53,6 +53,29 @@
 .btn-salir:active {
     transform: translateY(0);
 }
+.btn-nav {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+}
+
+.btn-nav:hover {
+    background: white;
+    color: #1e40af;
+    transform: translateY(-2px);
+}
+
+.btn-nav i { font-size: 14px; }
     </style>
 </head>
 <body>
@@ -584,6 +607,19 @@ onSnapshot(query(mainRef, orderBy("t", "desc")), (snap) => {
     // Ejecutar validación inicial para que los bloqueos se apliquen por defecto
     validarCostoPorPoblacion();
 };
+// --- LÓGICA DE PRIVILEGIOS ---
+function verificarPrivilegios() {
+    const puesto = sessionStorage.getItem("puesto"); 
+    const rol = sessionStorage.getItem("rol");
+    const panel = document.getElementById('panel-directivos');
+
+    // Si es ADMIN o DIRECTOR, mostramos el panel de navegación rápida
+    if (puesto === "DIRECTOR" || rol === "ADMIN") {
+        panel.style.display = "block";
+    }
+}
+// Ejecutar inmediatamente al cargar
+verificarPrivilegios();
 </script>
 </body>
 </html>
