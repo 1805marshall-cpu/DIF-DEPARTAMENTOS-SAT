@@ -2,625 +2,256 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Historial Maestro | DIF Dirección</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIF 2026 | CONTROL DE FARMACIA</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --p: #991b1b; --s: #0369a1; --g: #059669; --bg: #f1f5f9; --dark: #1e293b; --warn: #d97706; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--dark); }
+        :root { 
+            --primary: #6366f1; --primary-dark: #4338ca;
+            --nav-bg: #1e40af; 
+            --danger: #ef4444; --success: #22c55e; --warning: #f59e0b; --bg: #f8fafc;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; font-size: 13px; display: flex; flex-direction: column; min-height: 100vh; }
         
-        /* DASHBOARD PRINCIPAL */
-        .dash { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; border-top: 5px solid var(--p); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .card.money { border-top-color: var(--g); }
-        .card.valid { border-top-color: var(--s); }
-        .card h3 { margin: 0; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-        .monto { font-size: 24px; font-weight: 800; display: block; margin: 8px 0; }
-
-        /* NUEVO: CUADRO DE RESUMEN DETALLADO */
-        .resumen-detallado { background: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .resumen-item h4 { font-size: 11px; color: var(--s); text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; }
-        .resumen-list { list-style: none; padding: 0; margin: 0; font-size: 12px; }
-        .resumen-list li { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #eee; }
-        .resumen-list b { color: var(--dark); }
-
-        /* FILTROS */
-        .filtros { background: var(--dark); padding: 20px; border-radius: 12px; display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 25px; align-items: flex-end; }
-        .filtros select, .filtros input { padding: 10px; border-radius: 8px; border: 1px solid #334155; background: #334155; color: white; outline: none; font-size: 13px; }
-        .filtros label { display: block; font-size: 10px; color: #94a3b8; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
-
-        /* TABLA */
-        .tabla-box { background: white; border-radius: 15px; overflow-x: auto; border: 1px solid #e2e8f0; }
-        table { width: 100%; border-collapse: collapse; min-width: 1100px; }
-        th { background: #f8fafc; padding: 15px; text-align: left; color: #64748b; font-size: 10px; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
-        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 13px; vertical-align: top; }
+        header { background: white; padding: 15px 40px; border-bottom: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; flex: 1; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         
-        .badge { padding: 4px 8px; border-radius: 5px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
-        .b-pend { background: #fff7ed; color: #c2410c; }
-        .b-ok { background: #f0fdf4; color: #166534; }
+        /* Usuario Loggeado */
+        .user-tag { background: #eef2ff; color: var(--nav-bg); padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 11px; display: flex; align-items: center; gap: 5px; border: 1px solid #c7d2fe; }
+
+        .form-entrada { 
+            display: grid; 
+            grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr; 
+            gap: 12px; 
+            margin-bottom: 25px; 
+            background: #f1f5f9; 
+            padding: 15px; 
+            border-radius: 10px; 
+            align-items: flex-end;
+            border: 1px solid #cbd5e1;
+        }
+        .edit-mode { border: 2px solid var(--warning); background: #fffbeb; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 10px; font-weight: bold; color: #475569; text-transform: uppercase; }
+        input, select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 13px; }
+
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-add { background: var(--primary); width: 100%; }
         
-        .btn-dir { background: var(--dark); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: bold; }
-        .btn-dir.success { background: var(--g); cursor: default; }
-        .sem-label { background: #cbd5e1; font-weight: 900; padding: 10px 20px; font-size: 12px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; border-radius: 8px; overflow: hidden; }
+        th { text-align: left; padding: 12px; border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 11px; text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
+        
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 10px; text-transform: uppercase; }
+        .origen-donado { background: #e0f2fe; color: #0369a1; }
+        .origen-propio { background: #fef3c7; color: #92400e; }
+        
+        .vencido { background: #000 !important; color: #fff !important; }
+        .caduca-critico { background: #fee2e2 !important; color: #dc2626 !important; }
+        .caduca-proximo { background: #fff7ed !important; color: #ea580c !important; }
+        .alerta-texto { font-size: 9px; display: block; font-weight: bold; margin-top: 2px; }
 
-        fieldset {border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; background: #ffffff; }
-        legend { font-size: 11px;font-weight: 800; color: var(--s);padding: 0 10px;text-transform: uppercase;letter-spacing: 1px;}
-        .grid-form {display: grid;grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));gap: 15px;}
-        .f-group label { display: block; font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
-        .f-group input, .f-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none;}
-        .f-group input:focus, .f-group select:focus { border-color: var(--s); box-shadow: 0 0 0 2px rgba(3, 105, 161, 0.1);}
-
-        /* Separación del formulario */
-        #form-registro {margin-bottom: 10px; /* Espacio generoso hacia abajo */
-        padding-bottom: 50px;}
-
-/* Línea divisoria decorativa */
-.separador-zona { border: none; border-top: 2px dashed #cbd5e1; margin-bottom: 10px; position: relative;}
-
-/* Etiqueta opcional sobre la línea para mayor claridad */
-.separador-zona::after { content: "CONSULTA DE HISTORIAL"; position: absolute;top: -10px; left: 50%;transform: translateX(-50%);background: #fff; padding: 0 15px; color: #64748b; font-size: 10px; font-weight: 800; letter-spacing: 1px;}
-
-/* Mejora visual de la zona de filtros */
-.filtros { background-color: #f8fafc; /* Fondo gris muy tenue para diferenciarlo */ padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;}
-
- .btn-logout {
-    background-color: #ef4444; /* Rojo para indicar salida */
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.btn-logout:hover {
-    background-color: #b91c1c;
-    transform: scale(1.05);
-}
-
-/* Si tu diseño es para móvil, esto ayuda a que no estorbe */
-@media (max-width: 600px) {
-    .btn-logout span { display: none; } /* Solo muestra el icono en pantallas chicas */
-}
+        .search-bar { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; }
+        
+        .btn-logout { background-color: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
 
-    <h2 style="color: var(--p);"><i class="fas fa-chart-pie"></i> Análisis y Corte Operativo</h2>
-<!-- Botón de Cerrar Sesión -->
-<div style="position: absolute; top: 15px; right: 20px; z-index: 1000;">
+<header>
+    <div>
+        <h2 style="margin:0"><i class="fas fa-pills"></i> FARMACIA DIF</h2>
+        <div id="display-usuario" class="user-tag" style="margin-top:5px;">
+            <i class="fas fa-user-circle"></i> <span id="user-name-span">Cargando usuario...</span>
+        </div>
+    </div>
     <button onclick="cerrarSesion()" class="btn-logout">
-        <i class="fas fa-power-off"></i> Salir del Sistema
+        <i class="fas fa-power-off"></i> <span>Salir</span>
     </button>
-</div>
-    <div class="dash">
-        <div class="card money">
-            <h3><i class="fas fa-cash-register"></i> Ingreso en Periodo</h3>
-            <span class="monto" id="t-caja">$0.00</span>
-        </div>
-        <div class="card valid">
-            <h3><i class="fas fa-check-double"></i> Ingreso Validado</h3>
-            <span class="monto" id="t-validado">$0.00</span>
-        </div>
-        <div class="card">
-            <h3><i class="fas fa-users"></i> Total Atenciones</h3>
-            <span class="monto" id="t-pacientes">0</span>
-        </div>
-    </div>
+</header>
 
-    <!-- SECCIÓN DE RESUMEN DETALLADO -->
-    <div class="resumen-detallado" id="panel-resumen">
-        <div class="resumen-item">
-            <h4><i class="fas fa-users-cog"></i> Tipo de Población</h4>
-            <ul class="resumen-list" id="res-poblacion"></ul>
-        </div>
-        <div class="resumen-item">
-            <h4><i class="fas fa-hospital-user"></i> Categoría Principal</h4>
-            <ul class="resumen-list" id="res-categorias"></ul>
-        </div>
-        <div class="resumen-item">
-            <h4><i class="fas fa-stethoscope"></i> Servicio Específico</h4>
-            <ul class="resumen-list" id="res-servicios"></ul>
-        </div>
-        <div class="resumen-item">
-            <h4><i class="fas fa-hand-holding-usd"></i> Detalle Económico</h4>
-            <ul class="resumen-list" id="res-economico"></ul>
-        </div>
-    </div>
-
-    <!-- FORMULARIO CON FIELDSET -->
-<form id="form-registro">
-    
-    <!-- GRUPO 1: DATOS PERSONALES -->
-    <fieldset>
-        <legend><i class="fas fa-user"></i> Datos del Beneficiario</legend>
-        <div class="grid-form">
-            <div class="f-group">
-                <label>Nombre Completo</label>
-                <input type="text" id="reg-nombre" placeholder="Nombre completo..." required>
+<div class="container">
+    <div class="card">
+        <h3 id="form-title" style="margin-top:0"><i class="fas fa-plus-circle"></i> Entrada de Medicamento</h3>
+        
+        <div class="form-entrada" id="main-form">
+            <div class="form-group">
+                <label>Medicamento / Insumo</label>
+                <input type="text" id="m-nombre" placeholder="Nombre y Presentación">
             </div>
-            <div class="f-group">
-                <label>Edad</label>
-                <input type="number" id="reg-edad" placeholder="0">
+            <div class="form-group">
+                <label>Cantidad</label>
+                <input type="number" id="m-cantidad" value="1" min="1">
             </div>
-      <div class="f-group">
-    <label>Tipo de Población</label>
-    <select id="reg-poblacion" onchange="validarCostoPorPoblacion()">
-        <option value="POBLACION EN GENERAL">POBLACIÓN EN GENERAL</option>
-        <option value="TRABAJADOR DE CONFIANZA">TRABAJADOR DE CONFIANZA</option>
-        <option value="FAM. TRAB. DE CONFIANZA">FAM. TRAB. DE CONFIANZA</option>
-        <option value="SINDICALIZADOS">SINDICALIZADOS</option>
-        <option value="FAM. SINDICALIZADO">FAM. DEL SINDICALIZADO</option>
-        <option value="POLICIAS">POLICÍAS</option>
-        <option value="FAM. POLICIAS">FAM. POLICÍAS</option>
-        <option value="TRANSITO">TRÁNSITO</option>
-        <option value="FAM. TRANSITOS">FAM. TRÁNSITO</option>
-    </select>
-</div>
-            <div class="f-group">
-                <label>Lugar / Procedencia</label>
-                <input type="text" id="reg-procedencia" placeholder="Colonia o Localidad">
+            <div class="form-group">
+                <label>Fecha de Caducidad</label>
+                <input type="date" id="m-caducidad">
             </div>
-        </div>
-    </fieldset>
-
-<!-- GRUPO 2: DETALLES INSTITUCIONALES -->
-    <fieldset style="margin-top: 20px; border-top: 5px solid var(--g);">
-        <legend><i class="fas fa-file-medical"></i> Detalles del Servicio y Vinculación</legend>
-        <div class="grid-form">
-            <div class="f-group">
-                <label>Tipo de Trámite</label>
-                <select id="reg-categoria" onchange="actualizarOpciones()">
-                    <option value="">-- SELECCIONE CATEGORÍA --</option>
-                    <option value="GABINETE">ESTUDIOS DE GABINETE</option>
-                    <option value="VINCULACION">VINCULACIONES</option>
+            <div class="form-group">
+                <label>Origen</label>
+                <select id="m-origen">
+                    <option value="DONACIÓN">DONACIÓN</option>
+                    <option value="RECURSO PROPIO">RECURSO PROPIO</option>
                 </select>
             </div>
-
-<div class="f-group">
-                <label>Servicio Específico</label>
-                <select id="reg-estudio" disabled style="background-color: #f1f5f9;">
-                    <option value="">-- SELECCIONE PRIMERO CATEGORÍA --</option>
-                </select>
-            </div>
-
-            <div class="f-group">
-                <label>Dependencia / Destino</label>
-                <input type="text" id="reg-dependencia" list="lista-dependencias" placeholder="Escriba o seleccione...">
-                <datalist id="lista-dependencias"></datalist>
-            </div>
-
-<div class="f-group">
-                <label>Cuota de Recuperación</label>
-                <input type="number" id="reg-costo" value="0.00" step="0.01">
+            <div class="form-group">
+                <button class="btn btn-add" id="btn-principal" onclick="procesarDatos()">
+                    <i class="fas fa-save"></i> GUARDAR
+                </button>
+                <button class="btn" id="btn-cancelar" style="display:none; background:#94a3b8; margin-top:5px;" onclick="cancelarEdicion()">
+                    CANCELAR
+                </button>
             </div>
         </div>
-    </fieldset>
 
-    <div style="text-align: right; margin-top: 15px;">
-        <button type="button" onclick="guardarRegistro()" class="btn-dir" style="background: var(--g); padding: 12px 25px; font-size: 12px; border-radius: 8px;">
-            <i class="fas fa-save"></i> GUARDAR EN HISTORIAL MAESTRO
-        </button>
+        <input type="text" class="search-bar" id="b-farmacia" placeholder="🔍 Buscar por nombre..." onkeyup="listarInventario()">
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Medicamento</th>
+                    <th>Existencia</th>
+                    <th>Origen</th>
+                    <th>Caducidad</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-inventario"></tbody>
+        </table>
     </div>
-</form>
-
-<!-- ESTA ES LA PIEZA CLAVE PARA SEPARAR -->
-<div class="separador-zona"></div>
-
-    <div class="filtros">
-        <div><label>Año</label><select id="f-year" onchange="run()"></select></div>
-        <div><label>Mes</label>
-        <select id="f-month" onchange="run()">
-        <option value="all">-- VER TODO EL AÑO --</option> <!-- Nueva opción -->
-        <option value="0">Enero</option><option value="1">Febrero</option>
-        <option value="2">Marzo</option><option value="3">Abril</option>
-        <option value="4">Mayo</option><option value="5">Junio</option>
-        <option value="6">Julio</option><option value="7">Agosto</option>
-        <option value="8">Septiembre</option><option value="9">Octubre</option>
-        <option value="10">Noviembre</option><option value="11">Diciembre</option>
-        </select>
-        </div>
-        <div><label>Corte Semanal</label><select id="f-week" onchange="run()">
-            <option value="all">Ver mes completo</option>
-            <option value="1">Semana 1</option><option value="2">Semana 2</option>
-            <option value="3">Semana 3</option><option value="4">Semana 4</option>
-            <option value="5">Semana 5</option>
-        </select></div>
-        <div style="flex-grow: 1;"><label>Buscador</label><input type="text" id="f-search" placeholder="Nombre o Folio..." onkeyup="run()" style="width: 100%;"></div>
-    </div>
-
- <div class="tabla-box">
-    <table>
-        <thead>
-            <tr>
-                <th>Fecha / Folio</th>
-                <th>Paciente / Población</th>
-                <th>Edad</th>
-                <th>Servicio / Estudio</th>
-                <th>Dependencia</th>
-                <th>Costo</th>
-                <th>Acción</th>
-            </tr>
-        </thead>
-        <tbody id="tbody"></tbody>
-    </table>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, addDoc, deleteDoc 
-           } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const farmaciaRef = collection(db, "inventario_farmacia");
 
-    let DB_RAW = [];
-    const hoy = new Date();
+    let inventario = [];
+    let editID = null;
 
-    // Configuración inicial de selects
-    const sy = document.getElementById('f-year');
-    for(let i=hoy.getFullYear(); i>=2024; i--) {
-        let o = document.createElement('option'); o.value=i; o.innerText=i; sy.appendChild(o);
+    // --- SEGURIDAD: VERIFICACIÓN DE USUARIO ---
+    const usuarioLoggeado = (sessionStorage.getItem("nombre_usuario") || "invitado").toLowerCase().trim();
+    const esAutorizado = ["ronaldo.bencomo", "director.medico"].includes(usuarioLoggeado);
+
+    // Mostrar el usuario en el header
+    document.getElementById('user-name-span').innerText = usuarioLoggeado;
+
+    // Si no es autorizado, deshabilitar el formulario de entrada
+    if (!esAutorizado) {
+        document.getElementById('main-form').style.opacity = "0.5";
+        document.getElementById('btn-principal').disabled = true;
+        document.getElementById('btn-principal').innerText = "SOLO LECTURA";
     }
-    document.getElementById('f-month').value = "all"; // Por defecto ver todo el año
 
-    // Función para obtener número de semana
-    const getW = (dStr) => {
-        const p = dStr.split('-');
-        const d = new Date(p[0], p[1]-1, p[2]);
-        return Math.ceil((d.getDate() + new Date(d.getFullYear(), d.getMonth(), 1).getDay()) / 7);
-    };
-
-    // Listener de Firebase
-    onSnapshot(query(collection(db, "area_medica_v2"), orderBy("t", "desc")), (snap) => {
-        DB_RAW = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        run();
+    onSnapshot(farmaciaRef, (snap) => {
+        inventario = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        listarInventario();
     });
 
-    // Función para renderizar los cuadritos de resumen
-    const renderList = (id, obj, symbol = "") => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.innerHTML = Object.entries(obj).map(([k, v]) => {
-            const valor = typeof v === 'number' ? v.toLocaleString() : v;
-            return `<li><span>${k.replace(/_/g, ' ')}</span><b>${symbol}${valor}</b></li>`;
+    window.procesarDatos = async () => {
+        if (!esAutorizado) return alert("No tienes permisos para modificar el inventario.");
+        
+        const nombre = document.getElementById('m-nombre').value.toUpperCase().trim();
+        const cantidad = parseInt(document.getElementById('m-cantidad').value);
+        const caducidad = document.getElementById('m-caducidad').value;
+        const origen = document.getElementById('m-origen').value;
+
+        if(!nombre || !caducidad) return alert("Complete todos los campos");
+
+        try {
+            if (editID) {
+                await updateDoc(doc(db, "inventario_farmacia", editID), {
+                    nombre, existencia: cantidad, caducidad, origen
+                });
+                alert("✅ Actualizado");
+                cancelarEdicion();
+            } else {
+                await addDoc(farmaciaRef, { 
+                    nombre, existencia: cantidad, caducidad, origen, t: Date.now()
+                });
+                alert("✅ Guardado");
+            }
+            limpiarCampos();
+        } catch (e) { alert("Error: " + e.message); }
+    };
+
+    window.listarInventario = () => {
+        const busqueda = document.getElementById('b-farmacia').value.toUpperCase();
+        const tbody = document.getElementById('tabla-inventario');
+        const hoy = new Date();
+        
+        const filtrados = inventario.filter(i => i.nombre.includes(busqueda));
+        filtrados.sort((a,b) => a.nombre.localeCompare(b.nombre));
+
+        tbody.innerHTML = filtrados.map(i => {
+            const fCaduca = new Date(i.caducidad + "T00:00:00");
+            const diasParaCaducar = Math.ceil((fCaduca - hoy) / (1000 * 60 * 60 * 24));
+            
+            let alertaClase = "";
+            let alertaTexto = "Vigente";
+            if (diasParaCaducar <= 0) { alertaClase = "vencido"; alertaTexto = "⚠️ VENCIDO"; }
+            else if (diasParaCaducar <= 15) { alertaClase = "caduca-critico"; alertaTexto = `⚠️ ${diasParaCaducar} DÍAS`; }
+            else if (diasParaCaducar <= 30) { alertaClase = "caduca-proximo"; alertaTexto = "⚠️ PRÓXIMO"; }
+
+            // Condicional para mostrar botones solo si es admin
+            const botonesAccion = esAutorizado ? `
+                <button class="btn" style="background:var(--warning); padding:5px 8px;" onclick="prepararEdicion('${i.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn" style="background:transparent; color:var(--danger); padding:5px 8px;" onclick="eliminarMed('${i.id}')"><i class="fas fa-trash"></i></button>
+            ` : `<i class="fas fa-lock" title="Sin permisos" style="color:#cbd5e1"></i>`;
+
+            return `
+                <tr class="${alertaClase}">
+                    <td><b>${i.nombre}</b><span class="alerta-texto">${alertaTexto}</span></td>
+                    <td><span class="badge" style="background:rgba(255,255,255,0.4)">${i.existencia} uds</span></td>
+                    <td><span class="badge ${i.origen === 'DONACIÓN' ? 'origen-donado' : 'origen-propio'}">${i.origen}</span></td>
+                    <td><b>${i.caducidad}</b></td>
+                    <td>${botonesAccion}</td>
+                </tr>
+            `;
         }).join('');
     };
 
-    window.firmarEntrega = async (id) => {
-        const pin = prompt("PIN Dirección:");
-        if(pin === "1234") { 
-            await updateDoc(doc(db, "area_medica_v2", id), { 
-                validado_dir: "SI", 
-                fecha_firma: new Date().toLocaleString() 
-            });
-        }
+    window.prepararEdicion = (id) => {
+        if (!esAutorizado) return;
+        const item = inventario.find(i => i.id === id);
+        editID = id;
+        document.getElementById('m-nombre').value = item.nombre;
+        document.getElementById('m-cantidad').value = item.existencia;
+        document.getElementById('m-caducidad').value = item.caducidad;
+        document.getElementById('m-origen').value = item.origen;
+        document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> EDITAR';
+        document.getElementById('main-form').classList.add('edit-mode');
+        document.getElementById('btn-principal').innerHTML = '<i class="fas fa-sync"></i> ACTUALIZAR';
+        document.getElementById('btn-cancelar').style.display = 'block';
     };
 
-    window.run = () => {
-    const sY = parseInt(document.getElementById('f-year').value);
-    const sM = document.getElementById('f-month').value;
-    const sW = document.getElementById('f-week').value;
-    const sS = document.getElementById('f-search').value.toLowerCase();
-    
-    const tbody = document.getElementById('tbody');
-    tbody.innerHTML = "";
-
-    let stats = {
-        caja: 0, valid: 0, total: 0,
-        poblacion: { "Niños": 0, "Adultos": 0, "Adultos Mayores": 0 },
-        cats: {}, servs: {}, econ: { "Con Cuota": 0, "Gratuitos": 0 }
+    window.cancelarEdicion = () => {
+        editID = null; limpiarCampos();
+        document.getElementById('form-title').innerHTML = '<i class="fas fa-plus-circle"></i> Entrada de Medicamento';
+        document.getElementById('main-form').classList.remove('edit-mode');
+        document.getElementById('btn-principal').innerHTML = '<i class="fas fa-save"></i> GUARDAR';
+        document.getElementById('btn-cancelar').style.display = 'none';
     };
 
-    const mesesNombres = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
-    const grupos = {};
+    function limpiarCampos() {
+        document.getElementById('m-nombre').value = "";
+        document.getElementById('m-cantidad').value = "1";
+        document.getElementById('m-caducidad').value = "";
+    }
 
-    DB_RAW.forEach(p => {
-        const fStr = p.fecha_cap || (p.t && typeof p.t === 'string' ? p.t.split('T')[0] : "");
-        if(!fStr) return;
-        
-        const partes = fStr.split('-');
-        const dObj = new Date(partes[0], partes[1]-1, partes[2]);
-        const mNum = dObj.getMonth();
-        const wNum = getW(fStr);
-
-        const coincideAño = dObj.getFullYear() === sY;
-        const coincideMes = (sM === "all" || mNum === parseInt(sM));
-        const coincideSem = (sW === "all" || wNum.toString() === sW);
-        const coincideBus = (p.nombre||"").toLowerCase().includes(sS);
-
-        if(coincideAño && coincideMes && coincideSem && coincideBus) {
-            const titulo = (sM === "all") ? mesesNombres[mNum] : `SEMANA ${wNum}`;
-            if(!grupos[titulo]) grupos[titulo] = [];
-            grupos[titulo].push(p);
-
-            const costo = parseFloat(p.costo || 0);
-            stats.caja += costo;
-            stats.total++;
-            if(p.validado_dir === "SI") stats.valid += costo;
-
-            const edad = parseInt(p.edad || 0);
-            if(edad <= 12) stats.poblacion["Niños"]++;
-            else if(edad < 60) stats.poblacion["Adultos"]++;
-            else stats.poblacion["Adultos Mayores"]++;
-
-            const cat = p.consulta_estudios || "General";
-            stats.cats[cat] = (stats.cats[cat] || 0) + 1;
-
-            const serv = p.servicio || "Otros";
-            stats.servs[serv] = (stats.servs[serv] || 0) + 1;
-
-            if(costo > 0) stats.econ["Con Cuota"]++; 
-            else stats.econ["Gratuitos"]++;
-        }
-    });
-
-    Object.keys(grupos).forEach(nombreGrupo => {
-        tbody.innerHTML += `<tr><td colspan="7" class="sem-label">${nombreGrupo}</td></tr>`;
-        grupos[nombreGrupo].forEach(p => {
-            const isV = p.validado_dir === "SI";
-
-            // --- LÓGICA DE COLORES POR POBLACIÓN ---
-            let colorPob = "#64748b"; // Gris por defecto
-            const tipoP = (p.tipo_poblacion || "GENERAL").toUpperCase();
-            
-            if (tipoP.includes("SINDICALIZADO")) colorPob = "#9333ea"; // Morado
-            if (tipoP.includes("POLICIA")) colorPob = "#1e40af"; // Azul
-            if (tipoP.includes("CONFIANZA")) colorPob = "#0d9488"; // Verde/Teal
-            if (tipoP.includes("TRANSITO")) colorPob = "#f59e0b"; // Naranja
-            // ---------------------------------------
-// Dentro del grupos[nombreGrupo].forEach(p => { ... })
-tbody.innerHTML += `
-    <tr>
-        <td><b>${p.fecha_cap}</b><br><small>${p.folio || ''}</small></td>
-        <td>
-            <b style="text-transform:uppercase">${p.nombre}</b><br>
-            <span style="color: ${colorPob}; font-weight: bold; font-size: 10px;">
-                 <i class="fas fa-id-badge"></i> ${tipoP}
-            </span>
-        </td>
-        <td><small>${p.ta || '-'}</small></td>
-        <td>
-            <b style="font-size:11px">${p.estudio_servicio || 'ESTUDIO'}</b><br>
-            <i style="color:#64748b; font-size:10px">${p.dependencia || 'N/A'}</i>
-        </td>
-        <td><span class="badge ${isV?'b-ok':'b-pend'}">${isV?'VALIDADO':'PENDIENTE'}</span></td>
-        <td style="font-weight:800;">$${parseFloat(p.costo||0).toFixed(2)}</td>
-        <td>
-           <div class="acciones-flex">
-        ${isV ? '<span class="check-v">✓</span>' : 
-            `<button class="btn-tabla btn-firma" onclick="firmarEntrega('${p.id}')" title="Firmar">
-                <i class="fas fa-pen-fancy"></i>
-            </button>`
-        }
-        <button class="btn-tabla btn-edit" onclick="prepararEdicion('${p.id}')" title="Editar">
-            <i class="fas fa-edit"></i>
-        </button>
-        <button class="btn-tabla btn-delete" onclick="borrarRegistro('${p.id}')" title="Eliminar">
-            <i class="fas fa-trash"></i>
-        </button>
-    </div>
-        </td>
-    </tr>
-`;
-        });
-    });
-
-    document.getElementById('t-caja').innerText = `$${stats.caja.toLocaleString()}`;
-    document.getElementById('t-validado').innerText = `$${stats.valid.toLocaleString()}`;
-    document.getElementById('t-pacientes').innerText = stats.total;
-
-    renderList('res-poblacion', stats.poblacion);
-    renderList('res-categorias', stats.cats);
-    renderList('res-servicios', stats.servs);
-    renderList('res-economico', stats.econ);
-};
-   window.actualizarOpciones = () => {
-    const categoria = document.getElementById('reg-categoria').value;
-    const selectEstudio = document.getElementById('reg-estudio');
-    const dataListDep = document.getElementById('lista-dependencias');
-    const inputDep = document.getElementById('reg-dependencia');
-    
-    // 1. Limpieza inicial
-    selectEstudio.innerHTML = '<option value="">-- SELECCIONE OPCIÓN --</option>';
-    dataListDep.innerHTML = "";
-    inputDep.value = ""; // Limpia la dependencia al cambiar de trámite
-
-    const opcionesServicios = {
-        'GABINETE': [
-            "MASTOGRAFÍA", "TOMOGRAFÍA", "ELECTROCARDIOGRAMA", 
-            "RESONANCIAS MAGNÉTICAS", "ULTRASONIDOS", 
-            "RAYOS X", "ESTUDIO DE LABORATORIO CLÍNICO"
-        ],
-        'VINCULACION': [
-            "SERVICIOS MÉDICOS DE 2° NIVEL", 
-            "SERVICIOS MÉDICOS DE 3° NIVEL"
-        ]
+    window.eliminarMed = async (id) => {
+        if (!esAutorizado) return;
+        if(confirm("¿Eliminar este lote?")) await deleteDoc(doc(db, "inventario_farmacia", id));
     };
 
-    // 2. Lógica de activación de servicios
-    if (categoria && opcionesServicios[categoria]) {
-        selectEstudio.disabled = false;
-        selectEstudio.style.backgroundColor = "#ffffff";
-        opcionesServicios[categoria].forEach(txt => {
-            let opt = document.createElement('option');
-            opt.value = txt; opt.innerText = txt;
-            selectEstudio.appendChild(opt);
-        });
-    } else {
-        selectEstudio.disabled = true;
-        selectEstudio.style.backgroundColor = "#f1f5f9";
-    }
-};
-
-// --- NUEVA FUNCIÓN: ESCUCHA EL NIVEL MÉDICO PARA SUGERIR HOSPITALES ---
-// --- LÓGICA DE SUGERENCIAS INTELIGENTES PARA DEPENDENCIAS ---
-document.getElementById('reg-estudio').addEventListener('change', function() {
-    const servicio = this.value;
-    const dataListDep = document.getElementById('lista-dependencias');
-    const inputDep = document.getElementById('reg-dependencia');
-    
-    dataListDep.innerHTML = ""; // Limpiar sugerencias
-    inputDep.value = ""; // Limpiar campo para nueva selección
-
-    let sugerencias = [];
-
-    // Lógica por Estudio de Gabinete
-    const mapeoGabinete = {
-        "MASTOGRAFÍA": ["CRUZ ROJA"],
-        "TOMOGRAFÍA": ["TOMOGRAFIA DE LOS TUXTLAS", "CRUZ ROJA", "SALUD DIGNA", "COVADONGA"],
-        "ELECTROCARDIOGRAMA": ["CRUZ ROJA"],
-        "RESONANCIAS MAGNÉTICAS": ["TOMOGRAFIA DE LOS TUXTLA", "COVADONGA", "SALUD DIGNA"],
-        "ULTRASONIDOS": ["CRUZ ROJA"],
-        "RAYOS X": ["CRUZ ROJA"],
-        "ESTUDIO DE LABORATORIO CLÍNICO": ["LABO-MEDIC", "CRUZ ROJA"]
+    window.cerrarSesion = () => {
+        if(confirm("¿Cerrar sesión?")) { sessionStorage.clear(); window.location.href = "index.html"; }
     };
-
-    // Lógica por Vinculación (Niveles)
-    const mapeoVinculacion = {
-        "SERVICIOS MÉDICOS DE 2° NIVEL": ["IMSS", "ISSSTE", "HOSP. DR. BERNARDO PEÑA"],
-        "SERVICIOS MÉDICOS DE 3° NIVEL": ["CECAN (CENTRO DE CANCEROLOGÍA)", "CAEV (CENTRO DE ALTA ESPECIALIDAD DE VERACRUZ)"]
-    };
-
-    // Combinar sugerencias según lo seleccionado
-    if (mapeoGabinete[servicio]) {
-        sugerencias = mapeoGabinete[servicio];
-    } else if (mapeoVinculacion[servicio]) {
-        sugerencias = mapeoVinculacion[servicio];
-    }
-
-    // Insertar las sugerencias oficiales en el Datalist
-    sugerencias.forEach(dep => {
-        let opt = document.createElement('option');
-        opt.value = dep;
-        dataListDep.appendChild(opt);
-    });
-
-    // Retroalimentar con dependencias históricas (Aprendizaje del sistema)
-    if (typeof window.retroalimentarDeps === "function") {
-        window.retroalimentarDeps(); 
-    }
-
-}); 
-window.validarCostoPorPoblacion = () => {
-    const poblacion = document.getElementById('reg-poblacion').value;
-    const inputCosto = document.getElementById('reg-costo');
-    const estudio = document.getElementById('reg-estudio').value;
-
-    // Ejemplo de reglas de negocio para el DIF:
-    // Si es trabajador o policía, el costo suele ser 0 en servicios internos
-    const esExento = [
-        "TRABAJADOR DE CONFIANZA", 
-        "SINDICALIZADOS", 
-        "POLICIAS", 
-        "TRANSITO"
-    ].includes(poblacion);
-
-    if (esExento) {
-        inputCosto.value = "0.00";
-        inputCosto.style.backgroundColor = "#f0fdf4"; // Verde claro indicando gratuidad
-    } else {
-        inputCosto.style.backgroundColor = "#ffffff";
-        // Aquí podrías poner el costo base si lo tienes definido
-    }
-
-    console.log(`Validando costo para: ${poblacion} en el servicio: ${estudio}`);
-};
-
-// Asegúrate de importar estas funciones si usas módulos: 
-// import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-// 1. PRIMERO: Asegúrate de que tu línea de importación incluya "addDoc"
-// Debería quedar así al principio de tu script:
-// import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-window.guardarRegistro = async () => {
-    // ... (Mantén toda tu recolección de datos igual) ...
-    const nombre = document.getElementById('reg-nombre').value.trim();
-    // ... etc
-    
-    const datos = {
-        // ... (Tu objeto de datos igual que antes) ...
-    };
-
-    try {
-        if (editandoID) {
-            // SI ESTAMOS EDITANDO
-            await updateDoc(doc(db, "area_medica_v2", editandoID), datos);
-            alert("✅ Registro actualizado");
-            editandoID = null; // Resetear modo edición
-            
-            // Regresar el botón a su estado original
-            const btn = document.querySelector('button[onclick="guardarRegistro()"]');
-            btn.innerHTML = '<i class="fas fa-save"></i> GUARDAR EN HISTORIAL MAESTRO';
-            btn.style.background = "var(--g)";
-        } else {
-            // SI ES UN REGISTRO NUEVO
-            await addDoc(collection(db, "area_medica_v2"), datos);
-            alert("✅ Guardado exitosamente");
-        }
-        
-        document.getElementById('form-registro').reset();
-    } catch (e) {
-        alert("Error: " + e.message);
-    }
-};
-
-window.borrarRegistro = async (id) => {
-    if (confirm("¿Estás seguro de eliminar este registro? Esta acción no se puede deshacer.")) {
-        try {
-            await deleteDoc(doc(db, "area_medica_v2", id));
-            alert("Registro eliminado correctamente.");
-        } catch (e) {
-            alert("Error al eliminar: " + e.message);
-        }
-    }
-};
-
-let editandoID = null; // Variable para saber si estamos editando
-
-window.prepararEdicion = (id) => {
-    // Buscar el paciente en nuestro arreglo local DB_RAW
-    const p = DB_RAW.find(item => item.id === id);
-    if (!p) return;
-
-    // Llenar el formulario con los datos actuales
-    document.getElementById('reg-nombre').value = p.nombre;
-    document.getElementById('reg-edad').value = p.edad;
-    document.getElementById('reg-poblacion').value = p.tipo_poblacion;
-    document.getElementById('reg-procedencia').value = p.procedencia;
-    document.getElementById('reg-categoria').value = p.consulta_estudios;
-    
-    // Disparar manualmente el cambio de categoría para activar el select de estudios
-    actualizarOpciones();
-    
-    document.getElementById('reg-estudio').value = p.estudio_servicio;
-    document.getElementById('reg-dependencia').value = p.dependencia;
-    document.getElementById('reg-costo').value = p.costo;
-
-    // Cambiar el comportamiento del botón de guardar
-    editandoID = id;
-    const btnGuardar = document.querySelector('button[onclick="guardarRegistro()"]');
-    btnGuardar.innerHTML = '<i class="fas fa-sync"></i> ACTUALIZAR REGISTRO';
-    btnGuardar.style.background = "#3b82f6"; // Azul para distinguir
-    
-    // Subir el scroll hasta el formulario
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
-    // Pega esto al final de tu script o después de inicializar Firebase
-window.cerrarSesion = function() {
-    if(confirm("¿Desea salir del módulo de Enfermería?")) {
-        sessionStorage.clear();
-        window.location.href = "index.html";
-    }
-};
 </script>
 </body>
 </html>
