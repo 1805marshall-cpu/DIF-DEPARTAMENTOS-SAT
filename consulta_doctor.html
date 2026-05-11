@@ -2,262 +2,183 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Consultorio Médico | Expediente Unificado</title>
+    <title>Consultorio Médico | DIF</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --primary: #991b1b; --secondary: #0369a1; --success: #059669; --bg: #f1f5f9; --dark: #1e293b; --warning: #f59e0b; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        :root { --primary: #1e3a8a; --secondary: #3b82f6; --success: #059669; --danger: #dc2626; --bg: #f1f5f9; --dark: #0f172a; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        /* Sidebar: Lista de pacientes enviados por enfermería */
-        .sidebar { width: 300px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; }
+        /* Panel de Navegación Superior (Directivos) */
+        #panel-directivos { background: #1e40af; padding: 10px; border-bottom: 3px solid #1e3a8a; display: none; }
+        .nav-container { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+        .btn-nav-boss {
+            background: rgba(255, 255, 255, 0.15);
+            color: white; border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 6px 12px; border-radius: 6px; font-size: 11px;
+            font-weight: bold; cursor: pointer; transition: 0.3s;
+            display: flex; align-items: center; gap: 5px; text-transform: uppercase;
+        }
+        .btn-nav-boss:hover { background: white; color: #1e40af; }
+
+        /* Estructura del Cuerpo */
+        .content-wrapper { display: flex; flex: 1; overflow: hidden; }
+
+        /* Sidebar */
+        .sidebar { width: 320px; background: white; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
         .sidebar-header { padding: 20px; background: var(--primary); color: white; }
         .lista-pacientes { flex: 1; overflow-y: auto; padding: 10px; }
-        .p-espera-card { padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 8px; cursor: pointer; transition: 0.3s; background: #fff; }
-        .p-espera-card:hover { border-color: var(--secondary); background: #f0f9ff; }
-        .p-espera-card b { display: block; color: var(--dark); text-transform: uppercase; font-size: 13px; }
+        .p-espera-card { padding: 15px; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; background: #fff; }
+        .p-espera-card:hover { border-color: var(--secondary); background: #eff6ff; transform: scale(1.02); }
+        .p-espera-card b { display: block; color: var(--primary); text-transform: uppercase; font-size: 13px; margin-bottom: 4px; }
         
-        /* Área Principal */
+        /* Main Content */
         .main-content { flex: 1; overflow-y: auto; padding: 25px; }
-        .grid-expediente { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .container-fluid { max-width: 1000px; margin: 0 auto; width: 100%; }
         
-        .info-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        .info-card h4 { margin: 0 0 15px 0; color: var(--secondary); border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; font-size: 14px; }
-        .data-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; }
+        .grid-expediente { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .info-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .info-card h4 { margin: 0 0 15px 0; color: var(--secondary); border-bottom: 2px solid #f8fafc; padding-bottom: 8px; font-size: 13px; text-transform: uppercase; }
+        
+        .data-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; }
         .data-label { font-weight: bold; color: #64748b; }
         
-        .nota-card { background: white; padding: 25px; border-radius: 15px; border-left: 5px solid var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        textarea { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #e2e8f0; border-radius: 8px; font-family: inherit; resize: none; }
-        
-        .med-tag { display: inline-flex; align-items: center; background: #ecfdf5; color: #065f46; padding: 6px 12px; border-radius: 20px; margin: 5px; font-weight: bold; border: 1px solid #a7f3d0; font-size: 12px; }
-        .btn-del-med { margin-left: 10px; color: #991b1b; cursor: pointer; border: none; background: none; }
+        .nota-card { background: white; padding: 25px; border-radius: 15px; border-left: 6px solid var(--primary); box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        textarea { width: 100%; padding: 15px; margin: 10px 0; border: 1px solid #cbd5e1; border-radius: 10px; font-family: inherit; resize: none; box-sizing: border-box; }
 
-        .btn-finalizar { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 15px; }
-        .doctor-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 15px; border-radius: 10px; }
-        /* Contenedor del interruptor */
-        .status-container { display: flex;  flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 15px;
-    background: #f8fafc;
-    border-radius: 12px;
-    width: fit-content;
-}
+        .med-tag { display: inline-flex; align-items: center; background: #f0fdf4; color: #166534; padding: 8px 15px; border-radius: 8px; margin: 5px; font-weight: bold; border: 1px solid #bbf7d0; font-size: 13px; }
+        .btn-del-med { margin-left: 10px; color: var(--danger); cursor: pointer; }
 
-/* El Switch (el área deslizable) */
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 34px;
-}
+        .btn-finalizar { background: var(--primary); color: white; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
 
-.switch input { opacity: 0; width: 0; height: 0; }
+        /* Status Switch */
+        .status-container { display: flex; align-items: center; gap: 12px; background: white; padding: 10px 20px; border-radius: 50px; border: 1px solid #e2e8f0; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        .status-text { font-weight: 900; font-size: 11px; color: #64748b; }
+        .text-active { color: var(--success); }
 
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #cbd5e1; /* Color Apagado */
-    transition: .4s;
-    border-radius: 34px;
-}
+        .header-inst { background: var(--primary); color: white; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .alerta-critica { color: var(--danger) !important; font-weight: 800; animation: pulse 2s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 26px; width: 26px;
-    left: 4px; bottom: 4px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-}
-
-/* Colores cuando está prendido */
-input:checked + .slider { background-color: #22c55e; } /* Verde DIF */
-input:focus + .slider { box-shadow: 0 0 1px #22c55e; }
-input:checked + .slider:before { transform: translateX(26px); }
-
-/* Texto debajo del botón */
-.status-text {
-    font-weight: bold;
-    font-size: 12px;
-    letter-spacing: 1px;
-    color: #64748b;
-}
-
-.text-active { color: #16a34a; }
-.btn-exit {
-    background-color: #f87171; /* Rojo suave para no ser agresivo visualmente */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 800;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(255,255,255,0.2);
-}
-
-.btn-exit:hover {
-    background-color: #ef4444; /* Rojo intenso al pasar el mouse */
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-.btn-exit:active {
-    transform: translateY(0);
-}
-
-.btn-logout-med {
-    background-color: #f87171; /* Rojo suave */
-    color: white;
-    border: 1px solid rgba(255,255,255,0.3);
-    padding: 8px 18px;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-}
-
-.btn-logout-med:hover {
-    background-color: #ef4444; /* Rojo intenso */
-    transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-.btn-logout-med:active {
-    transform: translateY(0);
-}
     </style>
 </head>
 <body>
-<div class="sidebar">
-    <div class="sidebar-header">
-        <h3 style="margin:0; font-size: 16px;"><i class="fas fa-user-clock"></i> Pacientes en Espera</h3>
-    </div>
-    <div id="lista-espera-doctor" class="lista-pacientes">
-        <p style="text-align:center; color:#94a3b8; font-size: 12px; margin-top:20px;">Seleccione su nombre para ver pacientes</p>
-    </div>
-</div>
 
-<div class="main-content">
-<header style="background: #1e3a8a; color: white; padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #3b82f6;">
+<!-- PANEL SUPERIOR PARA JEFES/ADMIN -->
+
+<header class="header-inst">
     <div style="display: flex; align-items: center; gap: 15px;">
-        <i class="fas fa-user-md" style="font-size: 24px;"></i>
+        <i class="fas fa-stethoscope" style="font-size: 24px;"></i>
         <div>
-            <h1 style="margin: 0; font-size: 16px; letter-spacing: 1px;">CONSULTORIO MÉDICO</h1>
-            <small style="opacity: 0.8; font-size: 10px;">SISTEMA INTEGRADO DIF 2026</small>
+            <h1 style="margin: 0; font-size: 14px; letter-spacing: 1px; font-weight: 800;">DIF | CONSULTORIO MÉDICO</h1>
+            <small style="opacity: 0.7; font-size: 9px;">ATENCIÓN CLÍNICA INTEGRAL</small>
         </div>
     </div>
-
-    <div style="display: flex; align-items: center; gap: 20px;">
-        <!-- Indicador de sesión activa -->
-        <div id="user-display" style="font-size: 11px; background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);">
-            <i class="fas fa-lock"></i> Sesión Protegida
-        </div>
-        
-        <button onclick="cerrarSesion()" class="btn-logout-doctor" style="font-size: 11px; background: rgba(232, 232, 237, 0.57); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(246, 246, 246, 0.2);">
-            <i class="fas fa-sign-out-alt"></i> FINALIZAR TURNO
-        </button>
-    </div>
+    <button onclick="cerrarSesion()" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 15px; border-radius: 20px; font-size: 11px; cursor: pointer; font-weight: bold;">
+        <i class="fas fa-power-off"></i> FINALIZAR TURNO
+    </button>
 </header>
-    <div class="doctor-header">
-    
+
+<div class="content-wrapper">
+    <!-- BARRA LATERAL -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3 style="margin:0; font-size: 15px;"><i class="fas fa-user-clock"></i> PACIENTES EN ESPERA</h3>
+        </div>
+        <div id="lista-espera-doctor" class="lista-pacientes">
+            <p style="text-align:center; color:#94a3b8; font-size: 12px; margin-top:30px;">Seleccione su nombre para ver pacientes</p>
+        </div>
+    </div>
+
+    <!-- AREA DE CONSULTA -->
+    <div class="main-content">
+        <div class="container-fluid">
+            
+       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; background: white; padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div id="indicador-luz" style="width: 12px; height: 12px; background: #cbd5e1; border-radius: 50%; box-shadow: 0 0 10px rgba(0,0,0,0.1);"></div>
         <div>
-            <label style="font-size: 10px; font-weight: bold; color: #64748b;">DOCTOR EN TURNO:</label><br>
-            <select id="select-medico" onchange="cambiarDoctor()" style="padding:5px; border-radius:5px; font-weight: bold;">
-                <option value="">-- SELECCIONAR --</option>
-                    <option value="DR. HECTOR ARTURO GONZALEZ DOMINGUEZ">DR. HECTOR ARTURO GONZALEZ DOMINGUEZ</option>
-                    <option value="DR. OSCAR ALEXIS PERROTIN ORTEGA">DR. OSCAR ALEXIS PERROTIN ORTEGA</option>
-            </select>
+            <span style="font-size: 10px; font-weight: bold; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Médico en Turno</span>
+            <h2 id="txt-bienvenida" style="margin: 0; font-size: 18px; color: var(--primary);">-</h2>
         </div>
-      <div class="status-container">
-    <label class="switch">
-        <input type="checkbox" id="btn-status" onchange="toggleStatus(this)">
-        <span class="slider round"></span>
-    </label>
-    <div id="status-label" class="status-text">DESACTIVADO</div>
-</div>
     </div>
+    
+    <!-- Mantenemos el select oculto para que el código siga funcionando internamente -->
+    <select id="select-medico" style="display: none;">
+        <option value="">--</option>
+        <option value="DR. HECTOR ARTURO GONZALEZ DOMINGUEZ">DR. HECTOR ARTURO GONZALEZ DOMINGUEZ</option>
+        <option value="DR. OSCAR ALEXIS PERROTIN ORTEGA">DR. OSCAR ALEXIS PERROTIN ORTEGA</option>
+    </select>
 
-    <div id="panel-consulta" style="display: none;">
-        <h2 id="view-nombre-paciente" style="margin: 0 0 20px 0; color: var(--dark);">Nombre del Paciente</h2>
-        
-        <div class="grid-expediente">
-            <div class="info-card">
-                <h4><i class="fas fa-id-card"></i> Datos de Recepción</h4>
-                <div class="data-row"><span class="data-label">Edad:</span> <span id="v-edad">-</span></div>
-                <div class="data-row"><span class="data-label">Lugar:</span> <span id="v-lugar">-</span></div>
-                <div class="data-row"><span class="data-label">Población:</span> <span id="v-pob">-</span></div>
-                <div class="data-row"><span class="data-label">Servicio:</span> <span id="v-servicio">-</span></div>
-                <div class="data-row"><span class="data-label">Costo:</span> <b style="color:var(--success)" id="v-costo">$0.00</b></div>
-            </div>
-
-            <div class="info-card">
-                <h4><i class="fas fa-heartbeat"></i> Signos Vitales (Enfermería)</h4>
-                <div class="data-row">
-                    <span><b>T.A:</b> <span id="v-ta">-</span></span>
-                    <span><b>Temp:</b> <span id="v-temp">-</span>°C</span>
-                </div>
-                <div class="data-row">
-                    <span><b>SPO2:</b> <span id="v-spo2">-</span>%</span>
-                    <span><b>F.A:</b> <span id="v-fa">-</span></span>
-                </div>
-                <div class="data-row">
-                    <span><b>Peso:</b> <span id="v-peso">-</span>kg</span>
-                    <span><b>Talla:</b> <span id="v-talla">-</span>cm</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="nota-card">
-            <h4><i class="fas fa-pen-nib"></i> Diagnóstico y Tratamiento</h4>
-            <textarea id="f-diag" rows="4" placeholder="Escriba el diagnóstico médico..."></textarea>
-            <textarea id="f-obs" rows="2" placeholder="Observaciones adicionales..."></textarea>
-
-            <!-- CONEXIÓN CON INVENTARIO -->
-            <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0;">
-                <label style="font-weight: bold; font-size: 12px; color: var(--secondary);"><i class="fas fa-pills"></i> RECETA ELECTRÓNICA (SISTEMA DE FARMACIA)</label>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <input type="text" id="m-nom" list="lista-farmacia-stock" placeholder="Escriba nombre del medicamento..." style="flex:3; padding:10px; border-radius:5px; border:1px solid #cbd5e1;">
-                    <datalist id="lista-farmacia-stock"></datalist>
-                    
-                    <input type="number" id="m-cant" value="1" min="1" style="flex:1; padding:10px; border-radius:5px; border:1px solid #cbd5e1; text-align: center;">
-                    <button onclick="addMed()" style="background:var(--success); color:white; border:none; padding:0 20px; border-radius:8px; cursor:pointer;"><i class="fas fa-plus"></i></button>
-                </div>
-                <div id="lista-receta" style="margin-top:15px; min-height: 40px; border-top: 1px dashed #cbd5e1; padding-top: 10px;"></div>
-            </div>
-
-            <button class="btn-finalizar" onclick="finalizarConsulta()">
-                <i class="fas fa-save"></i> GUARDAR CONSULTA Y DESCONTAR DE FARMACIA
-            </button>
-        </div>
+    <div style="text-align: right;">
+        <span id="status-label" style="font-size: 10px; font-weight: 900; color: #64748b; display: block;">ESTADO DEL CONSULTORIO</span>
+        <span id="txt-estado-online" style="font-size: 12px; font-weight: bold; color: #94a3b8;">SINCRONIZANDO...</span>
     </div>
 </div>
 
+            <div id="panel-consulta" style="display: none;">
+                <h2 id="view-nombre-paciente" style="margin: 0 0 20px 0; color: var(--dark); font-size: 24px;">-</h2>
+                
+                <div class="grid-expediente">
+                    <div class="info-card">
+                        <h4><i class="fas fa-address-card"></i> Datos Generales</h4>
+                        <div class="data-row"><span class="data-label">Edad:</span> <span id="v-edad">-</span></div>
+                        <div class="data-row"><span class="data-label">Lugar:</span> <span id="v-lugar">-</span></div>
+                        <div class="data-row"><span class="data-label">Población:</span> <span id="v-pob">-</span></div>
+                        <div class="data-row"><span class="data-label">Costo:</span> <b style="color:var(--success)" id="v-costo">$0.00</b></div>
+                    </div>
+
+                    <div class="info-card" style="background: #f8fafc;">
+                        <h4><i class="fas fa-heartbeat"></i> Signos Vitales</h4>
+                        <div class="data-row">
+                            <span><b>T.A:</b> <span id="v-ta">-</span></span>
+                            <span><b>Temp:</b> <span id="v-temp">-</span>°C</span>
+                        </div>
+                        <div class="data-row">
+                            <span><b>SPO2:</b> <span id="v-spo2">-</span>%</span>
+                            <span><b>F.R:</b> <span id="v-fa">-</span></span>
+                        </div>
+                        <div class="data-row">
+                            <span><b>Peso:</b> <span id="v-peso">-</span> kg</span>
+                            <span><b>Talla:</b> <span id="v-talla">-</span> cm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nota-card">
+                    <h4><i class="fas fa-pen-fancy"></i> Diagnóstico y Tratamiento</h4>
+                    <textarea id="f-diag" rows="4" placeholder="Diagnóstico médico principal..."></textarea>
+                    <textarea id="f-obs" rows="2" placeholder="Observaciones adicionales..."></textarea>
+
+                    <div style="background: #f1f5f9; padding: 18px; border-radius: 12px; margin-top: 15px;">
+                        <label style="font-weight: 800; font-size: 11px; color: var(--primary); display: block; margin-bottom: 10px;">RECETA ELECTRÓNICA</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="m-nom" list="lista-farmacia-stock" placeholder="Buscar medicamento..." style="flex:3; padding:12px; border-radius:8px; border:1px solid #cbd5e1;">
+                            <datalist id="lista-farmacia-stock"></datalist>
+                            <input type="number" id="m-cant" value="1" min="1" style="flex:0.5; padding:12px; border-radius:8px; border:1px solid #cbd5e1; text-align: center;">
+                            <button onclick="addMed()" style="background:var(--success); color:white; border:none; padding:0 25px; border-radius:8px; cursor:pointer; font-weight: bold;">AGREGAR</button>
+                        </div>
+                        <div id="lista-receta" style="margin-top:15px; border-top: 2px dashed #cbd5e1; padding-top: 15px;"></div>
+                    </div>
+
+                    <button class="btn-finalizar" onclick="finalizarConsulta()">
+                        <i class="fas fa-save"></i> FINALIZAR Y GUARDAR CONSULTA
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <script type="module">
-// --- SEGURIDAD: VALIDAR ACCESO ANTES DE CARGAR LA CONSULTA ---
-    if (!sessionStorage.getItem('sesion_activa')) {
-        window.location.href = "index.html";
-    }
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, where, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, query, where, doc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    window.cerrarSesion = function() {
-        if (confirm("¿Desea cerrar la sesión del consultorio?")) {
-            sessionStorage.clear();
-            window.location.href = "index.html";
-        }
-    };
+    if (!sessionStorage.getItem('sesion_activa')) { window.location.href = "index.html"; }
 
     const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
     const db = getFirestore(initializeApp(firebaseConfig));
@@ -266,158 +187,149 @@ input:checked + .slider:before { transform: translateX(26px); }
     let recetaActual = [];
     let inventarioReal = [];
 
-    // 1. ESCUCHAR INVENTARIO DE FARMACIA EN TIEMPO REAL
+    // --- 1. AUTOMATIZACIÓN AL CARGAR LA PÁGINA ---
+    window.addEventListener('DOMContentLoaded', async () => {
+        const nombreMedico = sessionStorage.getItem('nombre_medico');
+        const selector = document.getElementById('select-medico'); // Asegúrate de tener este ID en tu HTML
+        
+        if (nombreMedico) {
+            console.log("Iniciando sesión automática para:", nombreMedico);
+            
+            // Seteamos el valor interno para que las consultas de pacientes funcionen
+            if(selector) selector.value = nombreMedico;
+
+            // 1. Forzar el estado ACTIVO en Firebase de inmediato
+            await autoConectarMedico(nombreMedico);
+
+            // 2. Iniciar el "Heartbeat" (Latido) cada 3 minutos
+            // Esto mantiene la luz verde en Enfermería aunque el doctor no cambie de página
+            setInterval(async () => {
+                console.log("Enviando señal de presencia...");
+                await updateDoc(doc(db, "personal_medico", nombreMedico), {
+                    ultima_conexion: new Date().toISOString(),
+                    estado: "ACTIVO" // Reforzamos que sigue activo
+                });
+            }, 180000); // 180,000ms = 3 minutos
+
+            // 3. Cargar la lista de pacientes inicial
+            window.cambiarDoctor();
+        }
+    });
+
+// --- 2. FUNCIÓN DE CONEXIÓN VISUAL ---
+    const autoConectarMedico = async (nombreMedico) => {
+        const luz = document.getElementById('indicador-luz');
+        const txtEstado = document.getElementById('txt-estado-online');
+        const txtBienvenida = document.getElementById('txt-bienvenida');
+
+        try {
+            await setDoc(doc(db, "personal_medico", nombreMedico), { 
+                estado: "ACTIVO",
+                ultima_conexion: new Date().toISOString() 
+            }, { merge: true });
+            
+            // Actualizar Interfaz
+            if(txtBienvenida) txtBienvenida.innerText = nombreMedico;
+            if(luz) {
+                luz.style.background = "#22c55e";
+                luz.style.boxShadow = "0 0 15px rgba(34, 197, 94, 0.5)";
+            }
+            if(txtEstado) {
+                txtEstado.innerText = "EN LINEA / DISPONIBLE";
+                txtEstado.style.color = "#16a34a";
+            }
+        } catch (e) { 
+            console.error("Error en conexión inicial:", e);
+            if(txtEstado) txtEstado.innerText = "ERROR DE CONEXIÓN";
+        }
+    };
+
+    // --- MONITOREO DE INVENTARIO ---
     onSnapshot(collection(db, "inventario_farmacia"), (snap) => {
         inventarioReal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         const dl = document.getElementById('lista-farmacia-stock');
-        dl.innerHTML = inventarioReal.map(i => 
-            `<option value="${i.nombre}">Existencia: ${i.existencia} | Caduca: ${i.caducidad}</option>`
-        ).join('');
+        dl.innerHTML = inventarioReal.map(i => `<option value="${i.nombre}">Stock: ${i.existencia}</option>`).join('');
     });
 
-    // 2. GESTIÓN DE ESTADO DOCTOR
-  window.toggleStatus = async (el) => {
-    const medicoSeleccionado = document.getElementById('select-medico').value;
-    const label = document.getElementById('status-label');
-    
-    if(!medicoSeleccionado) { 
-        el.checked = false; 
-        return alert("⚠️ Por favor, selecciona tu nombre antes de activar el turno."); 
-    }
-
-    try {
-        // 1. Limpieza: Desactivamos a todos primero para que solo haya uno activo
-        const medicosNombres = ["DR. OSCAR ALEXIS PERROTIN", "DR. HECTOR ARTURO GONZALEZ"];
-        for (const nombre of medicosNombres) {
-            await setDoc(doc(db, "personal_medico", nombre), { estado: "INACTIVO" }, { merge: true });
-        }
-
-        // 2. Activamos al médico actual
-        const nuevoEstado = el.checked ? "ACTIVO" : "INACTIVO";
-        await setDoc(doc(db, "personal_medico", medicoSeleccionado), {
-            estado: nuevoEstado,
-            ultima_conexion: new Date().toLocaleString()
-        }, { merge: true });
-
-        // 3. Cambio Visual del Texto
-        if (el.checked) {
-            label.innerText = "ACTIVADO";
-            label.classList.add("text-active");
-            document.getElementById('select-medico').disabled = true; // Bloqueamos el nombre mientras trabaja
-        } else {
-            label.innerText = "DESACTIVADO";
-            label.classList.remove("text-active");
-            document.getElementById('select-medico').disabled = false;
-        }
-
-    } catch (error) {
-        console.error("Error:", error);
-        el.checked = !el.checked; // Revertir si falla
-        alert("Error de conexión con la base de datos.");
-    }
-};
-
-    // 3. CAMBIAR DOCTOR / CARGAR LISTA
-    window.cambiarDoctor = () => {
+    // --- CAMBIO DE MÉDICO Y CARGA DE PACIENTES ---
+    window.cambiarDoctor = async () => {
         const medico = document.getElementById('select-medico').value;
         const listado = document.getElementById('lista-espera-doctor');
-        if(!medico) return;
 
-        const q = query(collection(db, "area_medica_v2"), where("estado", "==", "PENDIENTE_DOCTOR"), where("medico_turno", "==", medico));
-        
+        if (!medico) return;
+
+        const q = query(collection(db, "area_medica_v2"), 
+                        where("estado", "==", "PENDIENTE_DOCTOR"), 
+                        where("medico_turno", "==", medico));
+
         onSnapshot(q, (snap) => {
-            listado.innerHTML = "";
-            if(snap.empty) {
-                listado.innerHTML = '<p style="text-align:center; color:#94a3b8; font-size:12px;">Sin pacientes pendientes.</p>';
-                return;
-            }
+            listado.innerHTML = snap.empty ? '<p style="text-align:center; padding:20px; color:#94a3b8;">Sin pacientes.</p>' : "";
             snap.forEach(d => {
                 const p = d.data();
                 const card = document.createElement('div');
                 card.className = 'p-espera-card';
-                card.innerHTML = `<b>${p.nombre}</b><small>${p.servicio || 'Consulta'}</small>`;
+                card.innerHTML = `<b>${p.nombre}</b><small><i class="fas fa-clock"></i> Esperando consulta</small>`;
                 card.onclick = () => cargarExpediente(d.id, p);
                 listado.appendChild(card);
             });
         });
     };
 
-    // 4. CARGAR EXPEDIENTE
+    // --- CARGAR EXPEDIENTE ---
     window.cargarExpediente = (id, p) => {
         idPacienteActual = id;
         document.getElementById('panel-consulta').style.display = "block";
         document.getElementById('view-nombre-paciente').innerText = p.nombre;
         
-        document.getElementById('v-edad').innerText = p.edad + " años";
+        document.getElementById('v-edad').innerText = p.edad + " AÑOS";
         document.getElementById('v-lugar').innerText = p.lugar || "N/A";
         document.getElementById('v-pob').innerText = p.tipo_pob || "N/A";
-        document.getElementById('v-servicio').innerText = p.servicio || "Consulta";
         document.getElementById('v-costo').innerText = p.costo ? "$" + p.costo : "$0.00";
 
+        // Alertas de Signos
+        const elTemp = document.getElementById('v-temp');
+        elTemp.innerText = p.temp || "--";
+        elTemp.className = (parseFloat(p.temp) >= 38) ? "alerta-critica" : "";
+
+        const elSpo2 = document.getElementById('v-spo2');
+        elSpo2.innerText = p.spo2 || "--";
+        elSpo2.className = (parseFloat(p.spo2) < 92) ? "alerta-critica" : "";
+
         document.getElementById('v-ta').innerText = p.ta || "--";
-        document.getElementById('v-temp').innerText = p.temp || "--";
-        document.getElementById('v-spo2').innerText = p.spo2 || "--";
         document.getElementById('v-fa').innerText = p.fa || "--";
         document.getElementById('v-peso').innerText = p.peso || "--";
         document.getElementById('v-talla').innerText = p.talla || "--";
-        
+
         recetaActual = [];
         renderReceta();
     };
 
-    // 5. LÓGICA DE RECETA CON CONEXIÓN A FARMACIA
+    // --- GESTIÓN DE RECETA ---
     window.addMed = () => {
-        const nombreInput = document.getElementById('m-nom').value.toUpperCase().trim();
-        const cantidadPedida = parseInt(document.getElementById('m-cant').value);
-        
-        // Buscar el producto en el inventario que cargamos de Firebase
-        const productoEnStock = inventarioReal.find(i => i.nombre === nombreInput);
-
-        if (!productoEnStock) {
-            alert("❌ El medicamento no existe en el inventario de Farmacia.");
-            return;
-        }
-
-        if (productoEnStock.existencia < cantidadPedida) {
-            alert(`⚠️ No hay suficiente stock. Disponible: ${productoEnStock.existencia}`);
-            return;
-        }
-
-        // Agregar a la receta temporal
-        recetaActual.push({
-            idLote: productoEnStock.id, // ID del documento en la colección inventario_farmacia
-            n: productoEnStock.nombre,
-            c: cantidadPedida
-        });
-
+        const nom = document.getElementById('m-nom').value.toUpperCase().trim();
+        const cant = parseInt(document.getElementById('m-cant').value);
+        const prod = inventarioReal.find(i => i.nombre === nom);
+        if (!prod || prod.existencia < cant) return alert("Stock insuficiente.");
+        recetaActual.push({ idLote: prod.id, n: prod.nombre, c: cant });
         document.getElementById('m-nom').value = "";
-        document.getElementById('m-cant').value = "1";
         renderReceta();
     };
 
-    window.delMed = (index) => {
-        recetaActual.splice(index, 1);
-        renderReceta();
-    };
+    window.delMed = (idx) => { recetaActual.splice(idx, 1); renderReceta(); };
 
     function renderReceta() {
         const box = document.getElementById('lista-receta');
         box.innerHTML = recetaActual.map((m, i) => `
-            <span class="med-tag">
-                ${m.n} (${m.c}) 
-                <i class="fas fa-times btn-del-med" onclick="delMed(${i})"></i>
-            </span>
-        `).join('');
+            <span class="med-tag">${m.n} (${m.c}) 
+                <i class="fas fa-times-circle btn-del-med" onclick="delMed(${i})"></i>
+            </span>`).join('');
     }
 
-    // 6. FINALIZAR Y DESCONTAR STOCK AUTOMÁTICAMENTE
+    // --- FINALIZAR CONSULTA ---
     window.finalizarConsulta = async () => {
-        if(!idPacienteActual) return;
-        const diag = document.getElementById('f-diag').value;
-        if(!diag) return alert("El diagnóstico es obligatorio.");
-
+        const diag = document.getElementById('f-diag').value.trim();
+        if(!idPacienteActual || !diag) return alert("Falta diagnóstico.");
         try {
-            // A. Actualizar expediente del paciente
             await updateDoc(doc(db, "area_medica_v2", idPacienteActual), {
                 diagnostico: diag,
                 observaciones: document.getElementById('f-obs').value,
@@ -425,25 +337,28 @@ input:checked + .slider:before { transform: translateX(26px); }
                 estado: "PENDIENTE_FARMACIA",
                 fecha_atencion: new Date().toISOString()
             });
-
-            // B. Descontar de la colección "inventario_farmacia"
             for (const item of recetaActual) {
-                const medRef = doc(db, "inventario_farmacia", item.idLote);
-                const original = inventarioReal.find(i => i.id === item.idLote);
-                
-                // Nueva existencia = vieja - lo que recetó el doctor
-                const nuevaExistencia = original.existencia - item.c;
-                
-                await updateDoc(medRef, {
-                    existencia: nuevaExistencia
-                });
+                const actual = inventarioReal.find(i => i.id === item.idLote);
+                await updateDoc(doc(db, "inventario_farmacia", item.idLote), { existencia: actual.existencia - item.c });
             }
-            
-            alert("✅ Consulta guardada. El inventario de farmacia ha sido actualizado.");
+            alert("Consulta enviada a Farmacia.");
             location.reload();
-        } catch (e) { 
-            console.error(e);
-            alert("Error al guardar: " + e.message); 
+        } catch (e) { alert("Error al guardar."); }
+    };
+
+    // --- CERRAR SESIÓN (Luz Roja) ---
+window.cerrarSesion = async () => {
+        if(confirm("¿Cerrar turno y salir del sistema?")) {
+            const medico = document.getElementById('select-medico').value;
+            if(medico) {
+                // Notificamos a enfermería que el doctor se retiró
+                await setDoc(doc(db, "personal_medico", medico), { 
+                    estado: "INACTIVO",
+                    ultima_conexion: new Date().toISOString()
+                }, { merge: true });
+            }
+            sessionStorage.clear();
+            window.location.href = "index.html";
         }
     };
 </script>
