@@ -21,11 +21,10 @@
         .resumen-item h4 { font-size: 11px; color: var(--s); text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; }
         .resumen-list { list-style: none; padding: 0; margin: 0; font-size: 12px; }
         .resumen-list li { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #eee; }
-        .resumen-list b { color: var(--dark); }
 
         /* FILTROS */
         .filtros { background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 25px; align-items: flex-end; }
-        .filtros select, .filtros input { padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; color: var(--dark); outline: none; font-size: 13px; }
+        .filtros select, .filtros input { padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; color: var(--dark); font-size: 13px; }
         .filtros label { display: block; font-size: 10px; color: #64748b; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
 
         /* TABLA */
@@ -41,16 +40,12 @@
         .sem-label { background: #cbd5e1; font-weight: 900; padding: 10px 20px; font-size: 12px; }
 
         fieldset { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; background: #ffffff; }
-        legend { font-size: 11px; font-weight: 800; color: var(--s); padding: 0 10px; text-transform: uppercase; letter-spacing: 1px;}
+        legend { font-size: 11px; font-weight: 800; color: var(--s); padding: 0 10px; text-transform: uppercase; }
         .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         .f-group label { display: block; font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
         .f-group input, .f-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; }
 
-        .separador-zona { border: none; border-top: 2px dashed #cbd5e1; margin-bottom: 40px; position: relative; margin-top: 20px;}
-        .separador-zona::after { content: "CONSULTA DE HISTORIAL"; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: var(--bg); padding: 0 15px; color: #64748b; font-size: 10px; font-weight: 800; }
-
-        .btn-nav { background: var(--s); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
-        .btn-nav:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .btn-nav { background: var(--s); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
@@ -65,17 +60,13 @@
         </button>
     </div>
 
-    <h2 style="color: var(--p); margin-bottom: 25px;"><i class="fas fa-chart-pie"></i> Análisis y Corte Operativo</h2>
-
-    <!-- CONTENEDOR DE BOTONES SUPERIORES (Solo Admin) -->
+    <!-- BOTONES FLOTANTES -->
     <div id="contenedor-flotante" style="position: fixed; top: 80px; right: 20px; z-index: 9999; display: none; flex-direction: column; gap: 12px; align-items: flex-end;">
-        <button id="btn-farmacia-flotante" onclick="window.open('farmacia.html', '_blank')" class="btn-nav" style="background: #059669; box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4); padding: 12px 20px; font-size: 12px; border-radius: 50px; border: 2px solid white;">
-            <i class="fas fa-pills"></i> FARMACIA
-        </button>
-        <button id="btn-dash-flotante" onclick="window.open('admin_global.html', '_blank')" class="btn-nav" style="background: #1e40af; box-shadow: 0 4px 15px rgba(30, 64, 175, 0.4); padding: 12px 20px; font-size: 12px; border-radius: 50px; border: 2px solid white;">
-            <i class="fas fa-chart-line"></i> DASHBOARD
-        </button>
+        <button onclick="window.open('farmacia.html', '_blank')" class="btn-nav" style="background: #059669; border-radius: 50px; border: 2px solid white;"><i class="fas fa-pills"></i> FARMACIA</button>
+        <button onclick="window.open('admin_global.html', '_blank')" class="btn-nav" style="background: #1e40af; border-radius: 50px; border: 2px solid white;"><i class="fas fa-chart-line"></i> DASHBOARD</button>
     </div>
+
+    <h2 style="color: var(--p); margin-bottom: 25px;"><i class="fas fa-chart-pie"></i> Análisis y Corte Operativo</h2>
 
     <div class="dash">
         <div class="card money"><h3><i class="fas fa-cash-register"></i> Ingreso en Periodo</h3><span class="monto" id="t-caja">$0.00</span></div>
@@ -101,13 +92,9 @@
                     <select id="reg-poblacion">
                         <option value="POBLACION EN GENERAL">POBLACIÓN EN GENERAL</option>
                         <option value="TRABAJADOR DE CONFIANZA">TRABAJADOR DE CONFIANZA</option>
-                        <option value="FAM. TRAB. DE CONFIANZA">FAM. TRAB. DE CONFIANZA</option>
                         <option value="SINDICALIZADOS">SINDICALIZADOS</option>
-                        <option value="FAM. SINDICALIZADO">FAM. DEL SINDICALIZADO</option>
                         <option value="POLICIAS">POLICÍAS</option>
-                        <option value="FAM. POLICIAS">FAM. POLICÍAS</option>
                         <option value="TRANSITO">TRÁNSITO</option>
-                        <option value="FAM. TRANSITOS">FAM. TRÁNSITO</option>
                     </select>
                 </div>
                 <div class="f-group"><label>Lugar / Procedencia</label><input type="text" id="reg-procedencia"></div>
@@ -129,7 +116,11 @@
                     <label>Servicio Específico</label>
                     <select id="reg-estudio" disabled style="background-color: #f1f5f9;"><option value="">-- SELECCIONE CATEGORÍA --</option></select>
                 </div>
-                <div class="f-group"><label>Dependencia / Destino</label><input type="text" id="reg-dependencia" list="lista-dependencias"><datalist id="lista-dependencias"></datalist></div>
+                <div class="f-group">
+                    <label>Dependencia / Destino</label>
+                    <input type="text" id="reg-dependencia" list="lista-dependencias" placeholder="Seleccione o escriba...">
+                    <datalist id="lista-dependencias"></datalist>
+                </div>
                 <div class="f-group"><label>Cuota de Recuperación</label><input type="number" id="reg-costo" value="0.00" step="0.01"></div>
             </div>
         </fieldset>
@@ -141,9 +132,7 @@
         </div>
     </form>
 
-    <div class="separador-zona"></div>
-
-    <div class="filtros">
+    <div class="filtros" style="margin-top: 40px;">
         <div><label>Año</label><select id="f-year" onchange="run()"></select></div>
         <div><label>Mes</label>
             <select id="f-month" onchange="run()">
@@ -184,35 +173,78 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, addDoc, deleteDoc 
-           } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = getFirestore(initializeApp(firebaseConfig));
 
-    // --- LÓGICA DE PRIVILEGIOS ---
     let esAdmin = false;
     const usuarioActual = (sessionStorage.getItem("nombre_usuario") || "").toLowerCase().trim();
     
     function verificarPrivilegios() {
         const contenedorFlotante = document.getElementById('contenedor-flotante');
-        const spanNombre = document.getElementById('nombre-admin-span');
-        if (spanNombre) spanNombre.innerText = usuarioActual || "Invitado";
-
+        document.getElementById('nombre-admin-span').innerText = usuarioActual || "Invitado";
         const adminsPermitidos = ["director.medico", "ronaldo.bencomo"];
         esAdmin = adminsPermitidos.includes(usuarioActual);
-
-        if (esAdmin) {
-            if (contenedorFlotante) contenedorFlotante.style.display = "flex";
-        } else {
-            // Deshabilitar botón de guardado si no es admin
+        if (esAdmin) contenedorFlotante.style.display = "flex";
+        else {
             const btnG = document.getElementById('btn-guardar-maestro');
             if(btnG) { btnG.disabled = true; btnG.style.opacity = "0.5"; btnG.innerText = "SÓLO LECTURA"; }
         }
     }
     verificarPrivilegios();
 
+    // --- 1. LÓGICA DE MAPEADO DE SERVICIOS ---
+    window.actualizarOpciones = () => {
+        const cat = document.getElementById('reg-categoria').value;
+        const sel = document.getElementById('reg-estudio');
+        sel.innerHTML = '<option value="">-- SELECCIONE --</option>';
+        
+        const ops = { 
+            'GABINETE': ["MASTOGRAFÍA", "TOMOGRAFÍA", "ELECTROCARDIOGRAMA", "RESONANCIAS MAGNÉTICAS", "ULTRASONIDOS", "RAYOS X", "ESTUDIO DE LABORATORIO CLÍNICO"], 
+            'VINCULACION': ["SERVICIOS MÉDICOS DE 2° NIVEL", "SERVICIOS MÉDICOS DE 3° NIVEL"] 
+        };
+
+        if (ops[cat]) {
+            sel.disabled = false; sel.style.backgroundColor = "#fff";
+            ops[cat].forEach(t => { let o = document.createElement('option'); o.value=t; o.innerText=t; sel.appendChild(o); });
+        } else { sel.disabled = true; sel.style.backgroundColor = "#f1f5f9"; }
+    };
+
+    // --- 2. LÓGICA DE SUGERENCIAS INTELIGENTES Y DATALIST ---
+    document.getElementById('reg-estudio').addEventListener('change', function() {
+        const servicio = this.value;
+        const dataListDep = document.getElementById('lista-dependencias');
+        const inputDep = document.getElementById('reg-dependencia');
+        
+        dataListDep.innerHTML = ""; 
+        inputDep.value = ""; 
+
+        const mapeoGabinete = {
+            "MASTOGRAFÍA": ["CRUZ ROJA"],
+            "TOMOGRAFÍA": ["TOMOGRAFIA DE LOS TUXTLAS", "CRUZ ROJA", "SALUD DIGNA", "COVADONGA"],
+            "ELECTROCARDIOGRAMA": ["CRUZ ROJA"],
+            "RESONANCIAS MAGNÉTICAS": ["TOMOGRAFIA DE LOS TUXTLA", "COVADONGA", "SALUD DIGNA"],
+            "ULTRASONIDOS": ["CRUZ ROJA"],
+            "RAYOS X": ["CRUZ ROJA"],
+            "ESTUDIO DE LABORATORIO CLÍNICO": ["LABO-MEDIC", "CRUZ ROJA"]
+        };
+
+        const mapeoVinculacion = {
+            "SERVICIOS MÉDICOS DE 2° NIVEL": ["IMSS", "ISSSTE", "HOSP. DR. BERNARDO PEÑA"],
+            "SERVICIOS MÉDICOS DE 3° NIVEL": ["CECAN (CENTRO DE CANCEROLOGÍA)", "CAEV (CENTRO DE ALTA ESPECIALIDAD DE VERACRUZ)"]
+        };
+
+        let sugerencias = mapeoGabinete[servicio] || mapeoVinculacion[servicio] || [];
+
+        sugerencias.forEach(dep => {
+            let opt = document.createElement('option');
+            opt.value = dep;
+            dataListDep.appendChild(opt);
+        });
+    });
+
+    // --- LÓGICA DE TABLA Y FIREBASE ---
     let DB_RAW = [];
     const getW = (dStr) => {
         const p = dStr.split('-');
@@ -220,7 +252,6 @@
         return Math.ceil((d.getDate() + new Date(d.getFullYear(), d.getMonth(), 1).getDay()) / 7);
     };
 
-    // Escucha de datos
     onSnapshot(query(collection(db, "area_medica_v2"), orderBy("t", "desc")), (snap) => {
         DB_RAW = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         run();
@@ -239,14 +270,13 @@
         const grupos = {};
 
         DB_RAW.forEach(p => {
-            const fStr = p.fecha_cap || (p.t && typeof p.t === 'string' ? p.t.split('T')[0] : "");
+            const fStr = p.fecha_cap || "";
             if(!fStr) return;
             const parts = fStr.split('-');
             const dObj = new Date(parts[0], parts[1]-1, parts[2]);
             const mNum = dObj.getMonth();
             const wNum = getW(fStr);
 
-            // Filtrado principal
             if(dObj.getFullYear() === sY && (sM === "all" || mNum === parseInt(sM)) && (sW === "all" || wNum.toString() === sW) && (p.nombre||"").toLowerCase().includes(sS)) {
                 const titulo = (sM === "all") ? mesesNombres[mNum] : `SEMANA ${wNum}`;
                 if(!grupos[titulo]) grupos[titulo] = [];
@@ -259,8 +289,7 @@
                 if(edad > 0) {
                     if(edad <= 12) stats.poblacion["Niños"]++; else if(edad < 60) stats.poblacion["Adultos"]++; else stats.poblacion["Adultos Mayores"]++;
                 }
-                
-                const catKey = p.consulta_estudios || p.modulo || "Otros";
+                const catKey = p.consulta_estudios || "Otros";
                 stats.cats[catKey] = (stats.cats[catKey] || 0) + 1;
                 stats.servs[p.estudio_servicio || "Gral"] = (stats.servs[p.estudio_servicio || "Gral"] || 0) + 1;
                 costo > 0 ? stats.econ["Con Cuota"]++ : stats.econ["Gratuitos"]++;
@@ -271,36 +300,29 @@
             tbody.innerHTML += `<tr><td colspan="7" class="sem-label">${nombreGrupo}</td></tr>`;
             grupos[nombreGrupo].forEach(p => {
                 const isV = p.validado_dir === "SI";
-                let colorPob = "#64748b";
-                const tipoP = (p.tipo_poblacion || "GENERAL").toUpperCase();
-                if (tipoP.includes("SINDICALIZADO")) colorPob = "#9333ea";
-                if (tipoP.includes("POLICIA")) colorPob = "#1e40af";
-                if (tipoP.includes("CONFIANZA")) colorPob = "#0d9488";
-                if (tipoP.includes("TRANSITO")) colorPob = "#f59e0b";
-
                 tbody.innerHTML += `
                     <tr>
                         <td><b>${p.fecha_cap}</b><br><small>${p.folio || ''}</small></td>
-                        <td><b style="text-transform:uppercase">${p.nombre}</b><br><span style="color:${colorPob}; font-weight:bold; font-size:10px;">${tipoP}</span></td>
+                        <td><b style="text-transform:uppercase">${p.nombre}</b><br><span style="font-size:10px;">${p.tipo_poblacion || 'GENERAL'}</span></td>
                         <td><small>${p.edad || '-'}</small></td>
-                        <td><b>${p.estudio_servicio || 'SERVICIO'}</b><br><i style="font-size:10px; color:var(--s)">${p.modulo || p.consulta_estudios || ''}</i></td>
+                        <td><b>${p.estudio_servicio || 'SERVICIO'}</b></td>
                         <td><span class="badge ${isV?'b-ok':'b-pend'}">${isV?'VALIDADO':'PENDIENTE'}</span></td>
                         <td style="font-weight:800;">$${parseFloat(p.costo||0).toFixed(2)}</td>
                         <td>
                             <div style="display:flex; gap:10px;">
                                 ${esAdmin ? `
-                                    ${isV ? '<span style="color:var(--g)"><i class="fas fa-check-circle"></i></span>' : `<button onclick="firmarEntrega('${p.id}')" title="Validar" style="color:var(--s); border:none; background:none; cursor:pointer;"><i class="fas fa-pen-fancy"></i></button>`}
-                                    <button onclick="prepararEdicion('${p.id}')" title="Editar" style="color:var(--warn); border:none; background:none; cursor:pointer;"><i class="fas fa-edit"></i></button>
-                                    <button onclick="borrarRegistro('${p.id}')" title="Eliminar" style="color:var(--p); border:none; background:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
-                                ` : '<i class="fas fa-lock" style="color:#cbd5e1" title="Solo lectura"></i>'}
+                                    ${isV ? '<span style="color:var(--g)"><i class="fas fa-check-circle"></i></span>' : `<button onclick="firmarEntrega('${p.id}')" style="color:var(--s); border:none; background:none; cursor:pointer;"><i class="fas fa-pen-fancy"></i></button>`}
+                                    <button onclick="prepararEdicion('${p.id}')" style="color:var(--warn); border:none; background:none; cursor:pointer;"><i class="fas fa-edit"></i></button>
+                                    <button onclick="borrarRegistro('${p.id}')" style="color:var(--p); border:none; background:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                                ` : '<i class="fas fa-lock" style="color:#cbd5e1"></i>'}
                             </div>
                         </td>
                     </tr>`;
             });
         });
 
-        document.getElementById('t-caja').innerText = `$${stats.caja.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-        document.getElementById('t-validado').innerText = `$${stats.valid.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        document.getElementById('t-caja').innerText = `$${stats.caja.toLocaleString()}`;
+        document.getElementById('t-validado').innerText = `$${stats.valid.toLocaleString()}`;
         document.getElementById('t-pacientes').innerText = stats.total;
         renderList('res-poblacion', stats.poblacion);
         renderList('res-categorias', stats.cats);
@@ -308,73 +330,51 @@
         renderList('res-economico', stats.econ);
     };
 
-    const renderList = (id, obj, symbol = "") => {
+    const renderList = (id, obj) => {
         const el = document.getElementById(id); if (!el) return;
-        el.innerHTML = Object.entries(obj).map(([k, v]) => `<li><span>${k}</span><b>${symbol}${v.toLocaleString()}</b></li>`).join('');
+        el.innerHTML = Object.entries(obj).map(([k, v]) => `<li><span>${k}</span><b>${v}</b></li>`).join('');
     };
 
-    window.actualizarOpciones = () => {
-        const cat = document.getElementById('reg-categoria').value;
-        const sel = document.getElementById('reg-estudio');
-        sel.innerHTML = '<option value="">-- SELECCIONE --</option>';
-        const ops = { 'GABINETE': ["MASTOGRAFÍA", "TOMOGRAFÍA", "ELECTROCARDIOGRAMA", "RESONANCIAS MAGNÉTICAS", "ULTRASONIDOS", "RAYOS X", "LABORATORIO CLÍNICO"], 'VINCULACION': ["MÉDICOS DE 2° NIVEL", "MÉDICOS DE 3° NIVEL"] };
-        if (ops[cat]) {
-            sel.disabled = false; sel.style.backgroundColor = "#fff";
-            ops[cat].forEach(t => { let o = document.createElement('option'); o.value=t; o.innerText=t; sel.appendChild(o); });
-        } else { sel.disabled = true; sel.style.backgroundColor = "#f1f5f9"; }
-    };
-
+    let editandoID = null;
     window.guardarRegistro = async () => {
-        if(!esAdmin) return alert("No tienes permisos para realizar esta acción");
-        const nombre = document.getElementById('reg-nombre').value.trim();
-        if(!nombre || !document.getElementById('reg-categoria').value) return alert("Nombre y Categoría obligatorios");
-        
+        if(!esAdmin) return;
         const datos = {
-            nombre: nombre.toUpperCase(), edad: document.getElementById('reg-edad').value, tipo_poblacion: document.getElementById('reg-poblacion').value,
-            procedencia: document.getElementById('reg-procedencia').value.toUpperCase(), consulta_estudios: document.getElementById('reg-categoria').value,
-            estudio_servicio: document.getElementById('reg-estudio').value, dependencia: document.getElementById('reg-dependencia').value.toUpperCase(),
-            costo: parseFloat(document.getElementById('reg-costo').value || 0), fecha_cap: new Date().toISOString().split('T')[0], t: new Date().toISOString()
+            nombre: document.getElementById('reg-nombre').value.toUpperCase(),
+            edad: document.getElementById('reg-edad').value,
+            tipo_poblacion: document.getElementById('reg-poblacion').value,
+            procedencia: document.getElementById('reg-procedencia').value.toUpperCase(),
+            consulta_estudios: document.getElementById('reg-categoria').value,
+            estudio_servicio: document.getElementById('reg-estudio').value,
+            dependencia: document.getElementById('reg-dependencia').value.toUpperCase(),
+            costo: parseFloat(document.getElementById('reg-costo').value || 0),
+            fecha_cap: new Date().toISOString().split('T')[0],
+            t: new Date().toISOString()
         };
         try {
             editandoID ? await updateDoc(doc(db, "area_medica_v2", editandoID), datos) : await addDoc(collection(db, "area_medica_v2"), { ...datos, folio: "HM-"+Math.floor(Math.random()*10000), validado_dir: "NO" });
-            alert("Operación exitosa"); document.getElementById('form-registro').reset(); editandoID = null;
-        } catch (e) { alert("Error: " + e.message); }
+            alert("Listo"); document.getElementById('form-registro').reset(); editandoID = null;
+        } catch (e) { alert(e.message); }
     };
 
-    window.firmarEntrega = async (id) => { 
-        if(!esAdmin) return;
-        if(prompt("PIN Dirección:") === "1234") await updateDoc(doc(db, "area_medica_v2", id), { validado_dir: "SI", fecha_firma: new Date().toLocaleString() }); 
-    };
+    window.firmarEntrega = async (id) => { if(prompt("PIN:") === "1234") await updateDoc(doc(db, "area_medica_v2", id), { validado_dir: "SI" }); };
+    window.borrarRegistro = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "area_medica_v2", id)); };
     
-    window.borrarRegistro = async (id) => { 
-        if(!esAdmin) return;
-        if(confirm("¿Eliminar este registro permanentemente?")) await deleteDoc(doc(db, "area_medica_v2", id)); 
-    };
-    
-    let editandoID = null;
     window.prepararEdicion = (id) => {
-        if(!esAdmin) return;
         const p = DB_RAW.find(i => i.id === id); if(!p) return;
-        document.getElementById('reg-nombre').value = p.nombre; 
-        document.getElementById('reg-categoria').value = p.consulta_estudios || "";
-        actualizarOpciones(); 
-        document.getElementById('reg-estudio').value = p.estudio_servicio || "";
-        document.getElementById('reg-costo').value = p.costo || 0; 
-        document.getElementById('reg-edad').value = p.edad || "";
-        document.getElementById('reg-poblacion').value = p.tipo_poblacion || "POBLACION EN GENERAL";
+        document.getElementById('reg-nombre').value = p.nombre;
+        document.getElementById('reg-categoria').value = p.consulta_estudios;
+        actualizarOpciones();
+        document.getElementById('reg-estudio').value = p.estudio_servicio;
+        document.getElementById('reg-dependencia').value = p.dependencia || "";
+        document.getElementById('reg-costo').value = p.costo;
+        document.getElementById('reg-edad').value = p.edad;
         editandoID = id; window.scrollTo(0,0);
     };
 
-    window.cerrarSesion = () => { if(confirm("¿Salir del sistema?")) { sessionStorage.clear(); window.location.href = "index.html"; } };
+    window.cerrarSesion = () => { sessionStorage.clear(); window.location.href = "index.html"; };
     
-    // Iniciar selects de año correctamente
-    const hoy = new Date();
     const sy = document.getElementById('f-year');
-    for(let i=hoy.getFullYear(); i>=2024; i--) { 
-        let o = document.createElement('option'); 
-        o.value=i; o.innerText=i; 
-        sy.appendChild(o); 
-    }
+    for(let i=new Date().getFullYear(); i>=2024; i--) { let o = document.createElement('option'); o.value=i; o.innerText=i; sy.appendChild(o); }
 </script>
 </body>
 </html>
