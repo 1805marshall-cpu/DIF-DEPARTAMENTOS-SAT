@@ -8,17 +8,30 @@
         :root { --med-primary: #0369a1; --med-bg: #f0f9ff; --money: #059669; --danger: #991b1b; --nav-blue: #1e40af; }
         body { font-family: 'Segoe UI', sans-serif; background: #f8fafc; margin: 0; display: flex; height: 100vh; flex-direction: column; }
         
-        /* Panel de Navegación Superior (Directivos) */
-        #panel-directivos { background: var(--nav-blue); padding: 10px; border-bottom: 3px solid #1e3a8a; display: none; }
-        .nav-container { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
-        .btn-nav-boss {
-            background: rgba(255, 255, 255, 0.15);
-            color: white; border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 6px 12px; border-radius: 6px; font-size: 11px;
-            font-weight: bold; cursor: pointer; transition: 0.3s;
-            display: flex; align-items: center; gap: 5px; text-transform: uppercase;
+        /* Barra Superior de Usuario y Salida */
+        .top-bar {
+            background: white;
+            padding: 10px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .btn-nav-boss:hover { background: white; color: var(--nav-blue); transform: translateY(-1px); }
+
+        .user-status-tag {
+            font-size: 12px; 
+            font-weight: 800; 
+            color: #15803d; 
+            background: #f0fdf4; 
+            padding: 6px 14px; 
+            border-radius: 8px; 
+            border: 1px solid #bbf7d0; 
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
         /* Estructura Principal */
         .content-wrapper { display: flex; flex: 1; overflow: hidden; }
@@ -30,7 +43,7 @@
         .patient-card b { color: var(--med-primary); font-size: 13px; display: block; margin-bottom: 4px; text-transform: uppercase; }
         
         /* Área Formulario */
-        .main { flex: 1; padding: 40px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
+        .main { flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; }
         .form-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); border-top: 6px solid var(--med-primary); width: 100%; max-width: 900px; height: fit-content; }
         
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; }
@@ -41,8 +54,8 @@
         input, select { padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; }
         input[readonly] { background: #f1f5f9; color: #475569; font-weight: bold; border-color: #e2e8f0; }
         
-        #status-doctor-vivo { font-size: 11px; font-weight: bold; margin-top: 5px; display: flex; align-items: center; gap: 5px; }
-        .dot-viva { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        #status-doctor-vivo { padding: 10px; border-radius: 8px; background: #f8fafc; margin-top: 10px; display: flex; align-items: center; gap: 10px; border: 1px solid #eef2f6; }
+        .dot-viva { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
 
         .costo-resaltado { color: var(--money) !important; border-left: 4px solid var(--money) !important; }
         .section-header { grid-column: span 3; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px; margin-top: 15px; color: var(--med-primary); font-size: 11px; font-weight: bold; text-transform: uppercase; }
@@ -50,49 +63,37 @@
         .btn-save { background: var(--med-primary); color: white; border: none; padding: 16px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 25px; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
         .btn-save:hover { background: #075985; transform: translateY(-1px); }
         
-        .btn-logout { background-color: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; position: absolute; top: 15px; right: 20px; z-index: 1000; }
-        
-        /* Alertas Triaje */
+        .btn-logout { background-color: #ef4444; color: white; border: none; padding: 8px 18px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-logout:hover { background-color: #b91c1c; }
+
         .alerta-roja { background-color: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
         .alerta-naranja { background-color: #ffedd5 !important; border-color: #f97316 !important; color: #c2410c !important; }
-    /* Estilo dinámico para el select según disponibilidad */
-select#f-medico {
-    transition: all 0.3s ease;
-    border-left: 5px solid #cbd5e1;
-}
 
-#status-doctor-vivo {
-    padding: 8px;
-    border-radius: 6px;
-    background: #f1f5f9;
-    margin-top: 8px;
-    display: inline-flex;
-    align-items: center;
-    width: 100%;
-}
-/* Esto ayuda a que los colores en el select se vean mejor */
-#f-medico option {
-    padding: 10px;
-    background-color: white;
-}
-
-/* Opcional: un borde que cambie según la selección */
-#f-medico {
-    transition: border-color 0.3s;
-    font-weight: bold;
-}
+        select#f-medico { font-weight: bold; border-left: 5px solid #cbd5e1; }
     </style>
 </head>
 <body>
-<button onclick="cerrarSesion()" class="btn-logout">
-    <i class="fas fa-power-off"></i> <span>Salir del Sistema</span>
-</button>
+
+<div class="top-bar">
+    <div style="color: var(--med-primary); font-weight: 900; letter-spacing: 1px;">
+        <i class="fas fa-heartbeat"></i> DIF | ENFERMERÍA
+    </div>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="user-status-tag">
+            <i class="fas fa-circle" style="font-size: 8px;"></i>
+            Conectado: <span id="display-usuario-nombre">Cargando...</span>
+        </div>
+        <button onclick="cerrarSesion()" class="btn-logout">
+            <i class="fas fa-power-off"></i> Salir
+        </button>
+    </div>
+</div>
 
 <div class="content-wrapper">
     <div class="sidebar">
         <h3 style="color:var(--med-primary); margin-top:0;"><i class="fas fa-hospital-user"></i> Lista de Espera</h3>
         <hr style="border:0; border-top:1px solid #f1f5f9; margin-bottom:20px;">
-        <div id="lista-espera"><div class="status-empty" style="text-align: center; color: #94a3b8; font-size: 12px; margin-top: 40px;">Buscando pacientes...</div></div>
+        <div id="lista-espera"><div style="text-align: center; color: #94a3b8; font-size: 12px;">Buscando pacientes...</div></div>
     </div>
 
     <div class="main">
@@ -129,7 +130,7 @@ select#f-medico {
                         </select>
                         <div id="status-doctor-vivo">
                             <span class="dot-viva" id="luz-doctor" style="background: #cbd5e1;"></span>
-                            <span id="texto-doctor">Seleccione médico para ver disponibilidad</span>
+                            <span id="texto-doctor" style="font-size: 11px; font-weight: bold;">Seleccione médico</span>
                         </div>
                     </div>
                 </div>
@@ -141,34 +142,28 @@ select#f-medico {
         </div>
     </div>
 </div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, onSnapshot, query, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+    // --- SEGURIDAD Y USUARIO ---
     if (!sessionStorage.getItem('sesion_activa')) { window.location.href = "index.html"; }
+    const nombreUsuario = (sessionStorage.getItem('nombre_usuario') || 'Usuario').toUpperCase();
+    document.getElementById('display-usuario-nombre').innerText = nombreUsuario;
 
     const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
     const db = getFirestore(initializeApp(firebaseConfig));
 
-    // VARIABLE GLOBAL - Asegúrate de que solo esté declarada una vez aquí arriba
     let estadosDoctores = {}; 
 
-    // --- MONITOREO DE DOCTORES CON COLORES EN EL SELECT ---
+    // --- MONITOREO DE DOCTORES ---
     onSnapshot(collection(db, "personal_medico"), (snap) => {
-        // IMPORTANTE: Eliminamos el "const" de aquí para usar la variable global
         estadosDoctores = {}; 
         const ahora = new Date();
+        snap.forEach(d => { estadosDoctores[d.id] = d.data(); });
 
-        // 1. Guardamos los datos que vienen de Firebase en la variable global
-        snap.forEach(d => { 
-            estadosDoctores[d.id] = d.data(); 
-        });
-
-        // 2. Referencia al selector de médicos
         const selectMedico = document.getElementById('f-medico');
-        if (!selectMedico) return;
-
-        // 3. Iteramos sobre las opciones del select
         for (let i = 1; i < selectMedico.options.length; i++) {
             const option = selectMedico.options[i];
             const nombreDoc = option.value;
@@ -176,163 +171,102 @@ select#f-medico {
 
             if (datos) {
                 const ultimaConexion = new Date(datos.ultima_conexion);
-                const diferenciaMinutos = (ahora - ultimaConexion) / 1000 / 60;
-
-                // Lógica de color: ACTIVO y menos de 10 min de inactividad
-                if (datos.estado === "ACTIVO" && diferenciaMinutos < 10) {
-                    option.style.color = "#059669"; // Verde
+                const dif = (ahora - ultimaConexion) / 1000 / 60;
+                if (datos.estado === "ACTIVO" && dif < 10) {
+                    option.style.color = "#059669";
                     option.text = "● " + nombreDoc + " (DISPONIBLE)";
-                    option.style.fontWeight = "bold";
                 } else {
-                    option.style.color = "#ef4444"; // Rojo
+                    option.style.color = "#ef4444";
                     option.text = "○ " + nombreDoc + " (DESCONECTADO)";
-                    option.style.fontWeight = "normal";
                 }
-            } else {
-                option.style.color = "#94a3b8";
-                option.text = "○ " + nombreDoc + " (SIN REGISTRO)";
             }
         }
-
-        // Llamamos a la función para actualizar la luz inferior si hay uno seleccionado
         window.verificarEstadoDoctor();
     });
 
-window.verificarEstadoDoctor = () => {
+    window.verificarEstadoDoctor = () => {
         const medico = document.getElementById('f-medico').value;
         const luz = document.getElementById('luz-doctor');
         const texto = document.getElementById('texto-doctor');
-        
-        if (!medico) {
-            luz.style.background = "#cbd5e1";
-            texto.innerHTML = "Seleccione médico para ver disponibilidad";
-            return;
-        }
+        if (!medico) { luz.style.background = "#cbd5e1"; texto.innerText = "Seleccione médico"; return; }
 
-        // Ahora 'datos' leerá correctamente de la variable global actualizada
         const datos = estadosDoctores[medico];
-
-        if (!datos) {
-            luz.style.background = "#991b1b";
-            texto.innerHTML = `<span style="color:#991b1b">MÉDICO NO REGISTRADO</span>`;
-            return;
-        }
-
         const ahora = new Date();
-        const ultimaConexion = datos.ultima_conexion ? new Date(datos.ultima_conexion) : new Date(0);
-        const diferenciaMinutos = (ahora - ultimaConexion) / 1000 / 60;
+        const dif = datos ? (ahora - new Date(datos.ultima_conexion)) / 1000 / 60 : 999;
 
-        if (datos.estado === "ACTIVO" && diferenciaMinutos < 10) {
+        if (datos && datos.estado === "ACTIVO" && dif < 10) {
             luz.style.background = "#059669";
-            luz.style.boxShadow = "0 0 8px rgba(5, 150, 105, 0.5)";
-            texto.innerHTML = `<b style="color:#059669">● DISPONIBLE EN CONSULTORIO</b>`;
+            texto.innerHTML = `<b style="color:#059669">● DISPONIBLE</b>`;
         } else {
             luz.style.background = "#ef4444";
-            luz.style.boxShadow = "none";
-            const motivo = datos.estado !== "ACTIVO" ? "DESCONECTADO" : "AUSENTE (SIN ACTIVIDAD)";
-            texto.innerHTML = `<span style="color:#b91c1c; font-weight:bold;">● ${motivo}</span>`;
+            texto.innerHTML = `<b style="color:#b91c1c">● NO DISPONIBLE</b>`;
         }
     };
 
-    // --- LÓGICA DE SALUD E IMC ---
-    const calcularResumenSalud = () => {
+    // --- LÓGICA DE TRIAGE Y PACIENTES ---
+    const calcularSalud = () => {
         const peso = parseFloat(document.getElementById('f-peso').value);
-        const tallaCm = parseFloat(document.getElementById('f-talla').value);
-        const metaElement = document.getElementById('p-meta');
-
-        if (peso > 0 && tallaCm > 0) {
-            const tallaM = tallaCm / 100;
-            const imc = (peso / (tallaM * tallaM)).toFixed(2);
-            let clasificacion = (imc < 18.5) ? "Bajo peso" : (imc < 25) ? "Normal" : (imc < 30) ? "Sobrepeso" : "Obesidad";
-
-            metaElement.innerHTML = `<strong>IMC: ${imc}</strong> — <small>${clasificacion}</small>`;
-            metaElement.style.color = (imc >= 30) ? "#991b1b" : "#0369a1";
+        const talla = parseFloat(document.getElementById('f-talla').value);
+        const meta = document.getElementById('p-meta');
+        if (peso > 0 && talla > 0) {
+            const imc = (peso / ((talla/100)**2)).toFixed(2);
+            meta.innerHTML = `<strong>IMC: ${imc}</strong>`;
+            meta.style.color = imc >= 30 ? "#991b1b" : "#0369a1";
         }
     };
 
-    // --- ALERTAS DINÁMICAS ---
-    document.getElementById('f-temp').addEventListener('input', (e) => {
-        const v = parseFloat(e.target.value);
-        e.target.className = v >= 38 ? 'alerta-roja' : '';
-    });
+    document.getElementById('f-temp').oninput = (e) => e.target.className = e.target.value >= 38 ? 'alerta-roja' : '';
+    document.getElementById('f-spo2').oninput = (e) => {
+        const v = e.target.value;
+        e.target.className = v < 90 ? 'alerta-roja' : (v < 94 ? 'alerta-naranja' : '');
+    };
+    document.getElementById('f-peso').oninput = calcularSalud;
+    document.getElementById('f-talla').oninput = calcularSalud;
 
-    document.getElementById('f-spo2').addEventListener('input', (e) => {
-        const v = parseFloat(e.target.value);
-        if(!v) { e.target.className = ''; return; }
-        e.target.className = (v < 90) ? 'alerta-roja' : (v < 94 ? 'alerta-naranja' : '');
-    });
-
-    document.getElementById('f-peso').addEventListener('input', calcularResumenSalud);
-    document.getElementById('f-talla').addEventListener('input', calcularResumenSalud);
-
-    // --- LISTA DE PACIENTES ---
-    const qPacientes = query(collection(db, "area_medica_v2"), where("estado", "==", "PENDIENTE_ENFERMERIA"));
-    onSnapshot(qPacientes, (snap) => {
+    onSnapshot(query(collection(db, "area_medica_v2"), where("estado", "==", "PENDIENTE_ENFERMERIA")), (snap) => {
         const list = document.getElementById('lista-espera');
-        list.innerHTML = "";
-        if (snap.empty) {
-            list.innerHTML = `<div style="text-align:center; color:#94a3b8; padding:20px;">Sin pacientes en espera.</div>`;
-            return;
-        }
+        list.innerHTML = snap.empty ? "Sin pacientes" : "";
         snap.forEach(d => {
             const p = d.data();
             const card = document.createElement('div');
             card.className = 'patient-card';
-            card.id = `card-${d.id}`;
-            card.innerHTML = `<b>${p.nombre}</b><small><i class="fas fa-stethoscope"></i> ${p.servicio || 'General'}</small>`;
-            card.onclick = () => setPaciente(d.id, p);
+            card.innerHTML = `<b>${p.nombre}</b><small>${p.consulta_estudios || 'General' }</small> </b><small>${p.tipo_estudio }</small>`;
+            card.onclick = () => {
+                document.getElementById('f-id').value = d.id;
+                document.getElementById('p-nombre').innerText = p.nombre;
+                document.getElementById('f-edad').value = p.edad + " Años";
+                document.getElementById('f-tipo_pob').value = p.tipo_pob || "N/A";
+                document.getElementById('f-lugar').value = p.lugar || "N/A";
+                document.getElementById('f-costo').value = "$" + (p.costo || 0);
+            };
             list.appendChild(card);
         });
     });
 
-    window.setPaciente = (id, p) => {
-        // Resaltar tarjeta seleccionada
-        document.querySelectorAll('.patient-card').forEach(c => c.style.borderLeft = "none");
-        document.getElementById(`card-${id}`).style.borderLeft = "5px solid var(--med-primary)";
-
-        document.getElementById('f-id').value = id;
-        document.getElementById('p-nombre').innerText = p.nombre;
-        document.getElementById('f-edad').value = p.edad + " Años";
-        document.getElementById('f-tipo_pob').value = p.tipo_pob || "N/A";
-        document.getElementById('f-lugar').value = p.lugar || "N/A";
-        document.getElementById('f-costo').value = p.costo ? "$" + p.costo : "$0.00";
-        calcularResumenSalud();
-    };
-
     window.enviarAlDoctor = async () => {
         const id = document.getElementById('f-id').value;
         const medico = document.getElementById('f-medico').value;
-
-        if(!id) return alert("Seleccione un paciente primero.");
-        if(!medico) return alert("Asigne un médico.");
-
-        const triageData = {
-            ta: document.getElementById('f-ta').value || "N/A",
-            fa: document.getElementById('f-fa').value || "N/A",
-            temp: document.getElementById('f-temp').value || "N/A",
-            spo2: document.getElementById('f-spo2').value || "N/A",
-            peso: document.getElementById('f-peso').value || "N/A",
-            talla: document.getElementById('f-talla').value || "N/A",
-            medico_turno: medico,
-            estado: "PENDIENTE_DOCTOR",
-            fecha_triaje: new Date().toISOString()
-        };
+        if(!id || !medico) return alert("Complete los datos");
 
         try {
-            await updateDoc(doc(db, "area_medica_v2", id), triageData);
-            alert("✅ Enviado al consultorio de " + medico);
-            resetFormulario();
-        } catch (e) { alert("Error al guardar: " + e.message); }
+            await updateDoc(doc(db, "area_medica_v2", id), {
+                ta: document.getElementById('f-ta').value,
+                fa: document.getElementById('f-fa').value,
+                temp: document.getElementById('f-temp').value,
+                spo2: document.getElementById('f-spo2').value,
+                peso: document.getElementById('f-peso').value,
+                talla: document.getElementById('f-talla').value,
+                medico_turno: medico,
+                estado: "PENDIENTE_DOCTOR",
+                fecha_triaje: new Date().toISOString()
+            });
+            alert("Enviado");
+            document.getElementById('form-signos').reset();
+            document.getElementById('p-nombre').innerText = "Seleccione un paciente";
+        } catch (e) { alert(e.message); }
     };
 
-    const resetFormulario = () => {
-        document.getElementById('form-signos').reset();
-        document.getElementById('p-nombre').innerText = "Seleccione un paciente";
-        document.getElementById('p-meta').innerText = "Revisión de expediente y triaje.";
-        document.getElementById('p-meta').style.color = "#64748b";
-    };
-
-    window.cerrarSesion = () => { if(confirm("¿Cerrar sesión?")) { sessionStorage.clear(); window.location.href = "index.html"; } };
+    window.cerrarSesion = () => { if(confirm("¿Salir?")) { sessionStorage.clear(); window.location.href = "index.html"; } };
 </script>
 </body>
 </html>
