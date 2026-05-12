@@ -12,6 +12,7 @@
             --primary: #991b1b; --primary-dark: #7f1d1d;
             --success: #059669; --warning: #f59e0b; --danger: #dc2626; 
             --bg: #f8fafc; --border: #e2e8f0;
+            --user-green: #15803d; /* Verde fuerte solicitado */
         }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
         header { background: #fff; padding: 15px 40px; border-bottom: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -28,70 +29,46 @@
         th { background: #f8fafc; padding: 12px; text-align: left; font-size: 10px; color: #475569; border-bottom: 2px solid var(--border); }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
         @media print { .no-print { display: none !important; } }
+        
+        /* Estilo para el usuario en el Header */
+        .user-welcome { font-size: 11px; font-weight: 600; margin-right: 15px; color: #64748b; }
+        
+        /* Clase especial para Olga y Sonia */
+        .user-special { 
+            color: var(--user-green) !important; 
+            font-weight: 900 !important; 
+            font-size: 13px;
+            background: #f0fdf4; 
+            padding: 5px 10px; 
+            border-radius: 6px; 
+            border: 1px solid #dcfce7;
+        }
+
         .btn-salir {
-    background-color: #ef4444;
-    color: white;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s ease;
-    text-transform: uppercase;
-}
-
-.btn-salir:hover {
-    background-color: #b91c1c;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
-}
-
-.btn-salir:active {
-    transform: translateY(0);
-}
-.btn-nav {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 8px 15px;
-    border-radius: 8px;
-    font-size: 10px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-transform: uppercase;
-}
-
-.btn-nav:hover {
-    background: white;
-    color: #1e40af;
-    transform: translateY(-2px);
-}
-
-.btn-nav i { font-size: 14px; }
+            background-color: #ef4444; color: white; border: none; padding: 10px 18px; border-radius: 10px;
+            font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px;
+            transition: all 0.2s ease; text-transform: uppercase;
+        }
+        .btn-salir:hover { background-color: #b91c1c; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
     </style>
 </head>
 <body>
 
-<!-- Barra Superior de Navegación / Salida -->
-<header style="background: #fff; padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; margin-bottom: 25px;">
+<header>
     <div style="color: #1e40af; font-weight: 800; font-size: 14px; letter-spacing: 0.5px;">
         <i class="fas fa-file-medical"></i> RECEPCIÓN MÉDICA | DIF 2026
     </div>
 
-    <button onclick="cerrarSesion()" class="btn-salir">
-        <i class="fas fa-power-off"></i> CERRAR SESIÓN
-    </button>
+    <div style="display: flex; align-items: center;">
+        <span class="user-welcome">BIENVENIDO: <span id="display-usuario">---</span></span>
+        <button onclick="cerrarSesion()" class="btn-salir">
+            <i class="fas fa-power-off"></i> CERRAR SESIÓN
+        </button>
+    </div>
 </header>
 
 <div class="container">
+   <!-- El resto de tu formulario se mantiene exactamente igual -->
    <div class="card no-print">
     <h3 style="margin-bottom: 25px; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
         <i class="fas fa-file-medical"></i> Registro Único de Atención Médica
@@ -108,116 +85,105 @@
             </div>
         </fieldset>
 
-        <!-- PACIENTE (Identificación del Beneficiario) -->
-<fieldset style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #f8fafc;">
-    <legend style="padding: 0 15px; font-weight: 800; color: #0369a1; font-size: 11px; text-transform: uppercase;">Identificación del Beneficiario</legend>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-        <div class="form-group" style="grid-column: span 2;">
-            <label>Nombre Completo</label>
-            <input type="text" id="f-nombre" placeholder="Nombre completo">
-        </div>
-        <div class="form-group">
-            <label>Edad</label>
-            <input type="number" id="f-edad">
-        </div>
-        <div class="form-group">
-            <label>Tipo de Población</label>
-            <select id="f-tipo_pob" onchange="validarCostoPorPoblacion()">
-                <option value="POBLACION EN GENERAL">POBLACIÓN EN GENERAL</option>
-                <option value="TRABAJADOR DE CONFIANZA">TRABAJADOR DE CONFIANZA</option>
-                <option value="FAM. TRAB. DE CONFIANZA">FAM. TRAB. DE CONFIANZA</option>
-                <option value="SINDICALIZADOS">SINDICALIZADOS</option>
-                <option value="FAM. SINDICALIZADO">FAM. DEL SINDICALIZADO</option>
-                <option value="POLICIAS">POLICÍAS</option>
-                <option value="FAM. POLICIAS">FAM. POLICÍAS</option>
-                <option value="TRANSITO">TRÁNSITO</option>
-                <option value="FAM. TRANSITOS">FAM. TRÁNSITO</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Área</label> 
-            <input type="text" id="f-area-beneficiario" value="MÉDICA">
-        </div>
-        <div class="form-group">
-            <label>Lugar / Procedencia</label>
-            <input type="text" id="f-lugar">
-        </div>
-        <div class="form-group">
-            <label>Costo de Atención ($)</label>
-            <input type="number" id="f-costo" value="0" style="font-weight: bold; color: var(--success); font-size: 14px;">
-        </div>
-    </div>
-</fieldset>
+        <!-- PACIENTE -->
+        <fieldset style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #f8fafc;">
+            <legend style="padding: 0 15px; font-weight: 800; color: #0369a1; font-size: 11px; text-transform: uppercase;">Identificación del Beneficiario</legend>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="f-nombre" placeholder="Nombre completo">
+                </div>
+                <div class="form-group">
+                    <label>Edad</label>
+                    <input type="number" id="f-edad">
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Población</label>
+                    <select id="f-tipo_pob" onchange="validarCostoPorPoblacion()">
+                        <option value="POBLACION EN GENERAL">POBLACIÓN EN GENERAL</option>
+                        <option value="TRABAJADOR DE CONFIANZA">TRABAJADOR DE CONFIANZA</option>
+                        <option value="FAM. TRAB. DE CONFIANZA">FAM. TRAB. DE CONFIANZA</option>
+                        <option value="SINDICALIZADOS">SINDICALIZADOS</option>
+                        <option value="FAM. SINDICALIZADO">FAM. DEL SINDICALIZADO</option>
+                        <option value="POLICIAS">POLICÍAS</option>
+                        <option value="FAM. POLICIAS">FAM. POLICÍAS</option>
+                        <option value="TRANSITO">TRÁNSITO</option>
+                        <option value="FAM. TRANSITOS">FAM. TRÁNSITO</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Área</label> 
+                    <input type="text" id="f-area-beneficiario" value="MÉDICA">
+                </div>
+                <div class="form-group">
+                    <label>Lugar / Procedencia</label>
+                    <input type="text" id="f-lugar">
+                </div>
+                <div class="form-group">
+                    <label>Costo de Atención ($)</label>
+                    <input type="number" id="f-costo" value="0" style="font-weight: bold; color: var(--success); font-size: 14px;">
+                </div>
+            </div>
+        </fieldset>
 
-<!-- SERVICIO (Detalles del Servicio) -->
-<fieldset style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px;">
-    <legend style="padding: 0 15px; font-weight: 800; color: #0891b2; font-size: 11px; text-transform: uppercase;">Detalles del Servicio</legend>
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-        
-        <div class="form-group">
-            <label>Categoría Principal</label>
-            <select id="f-consulta_estudios" onchange="gestionarCategorias()">
-                <option value="">-- SELECCIONE --</option>
-                <option value="CONSULTA">CONSULTA GENERAL / INTERNA</option>
-                <option value="ESTUDIOS_APOYOS">ENVÍO DE ESTUDIOS / APOYOS</option>
-            </select>
-        </div>
+        <!-- SERVICIO -->
+        <fieldset style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px;">
+            <legend style="padding: 0 15px; font-weight: 800; color: #0891b2; font-size: 11px; text-transform: uppercase;">Detalles del Servicio</legend>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                <div class="form-group">
+                    <label>Categoría Principal</label>
+                    <select id="f-consulta_estudios" onchange="gestionarCategorias()">
+                        <option value="">-- SELECCIONE --</option>
+                        <option value="CONSULTA">CONSULTA GENERAL / INTERNA</option>
+                        <option value="ESTUDIOS_APOYOS">ENVÍO DE ESTUDIOS / APOYOS</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Atención / Estudio</label>
+                    <select id="f-tipo_estudio" disabled>
+                        <option value="">-- SELECCIONE CATEGORÍA PRIMERO --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Servicio Específico</label>
+                    <input type="text" id="f-servicio" list="lista-servicios" placeholder="Ej: Limpieza dental...">
+                    <datalist id="lista-servicios"></datalist>
+                </div>
+                <div class="f-group">
+                    <label><i class="fas fa-building"></i> Dependencia / Institución</label>
+                    <div id="check-dependencia-container" style="display: flex; flex-wrap: wrap; gap: 10px; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                        <label style="font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="dep_check" value="DIF MUNICIPAL" checked onclick="setDependencia(this.value)"> DIF MUNICIPAL
+                        </label>
+                        <label style="font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="dep_check" value="CRUZ ROJA" onclick="setDependencia(this.value)"> CRUZ ROJA
+                        </label>
+                        <label style="font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="dep_check" value="LABO-MEDIC" onclick="setDependencia(this.value)"> LABO-MEDIC
+                        </label>
+                        <label style="font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="dep_check" value="OTROS" onclick="setDependencia('OTROS')"> OTROS
+                        </label>
+                    </div>
+                    <input type="text" id="f-dependencia" value="DIF MUNICIPAL" style="margin-top: 8px; display: none; width: 100%;">
+                </div>
+            </div>
+        </fieldset>
 
-        <div class="form-group">
-            <label>Tipo de Atención / Estudio</label>
-            <select id="f-tipo_estudio" disabled>
-                <option value="">-- SELECCIONE CATEGORÍA PRIMERO --</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Servicio Específico (Escriba para agregar)</label>
-            <input type="text" id="f-servicio" list="lista-servicios" placeholder="Ej: Limpieza dental, Rx de Tórax...">
-            <datalist id="lista-servicios">
-                <!-- Se retroalimenta dinámicamente -->
-            </datalist>
-        </div>
-
-        <div class="f-group">
-    <label><i class="fas fa-building"></i> Dependencia / Institución</label>
-    <div id="check-dependencia-container" style="display: flex; flex-wrap: wrap; gap: 10px; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
-        <label style="font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-            <input type="radio" name="dep_check" value="DIF MUNICIPAL" checked onclick="setDependencia(this.value)"> DIF MUNICIPAL
-        </label>
-        <label style="font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-            <input type="radio" name="dep_check" value="CRUZ ROJA" onclick="setDependencia(this.value)"> CRUZ ROJA
-        </label>
-        <label style="font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-            <input type="radio" name="dep_check" value="LABO-MEDIC" onclick="setDependencia(this.value)"> LABO-MEDIC
-        </label>
-        <label style="font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
-            <input type="radio" name="dep_check" value="OTROS" onclick="setDependencia('OTROS')"> OTROS
-        </label>
-    </div>
-    
-    <!-- Campo oculto que realmente se guarda en Firebase -->
-    <input type="text" id="f-dependencia" value="DIF MUNICIPAL" 
-           placeholder="Especifique dependencia..." 
-           style="margin-top: 8px; display: none; width: 100%; border-color: var(--s);">
-</div>
-        
-    </div>
-</fieldset>
-
-<!-- LABORAL (Información Laboral / Dependencia) -->
-<fieldset style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px;">
-    <legend style="padding: 0 15px; font-weight: 800; color: #64748b; font-size: 11px; text-transform: uppercase;">Información Laboral / Dependencia</legend>
-    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-        <div class="form-group">
-            <label>Nombre del Trabajador Titular</label> 
-            <input type="text" id="f-nom_trabajador" placeholder="Nombre completo del titular">
-        </div>
-        <div class="form-group">
-            <label>Área (Adscripción Titular)</label> 
-            <input type="text" id="f-area-titular" placeholder="Área donde labora">
-        </div>
-    </div>
-</fieldset>
+        <!-- LABORAL -->
+        <fieldset style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px;">
+            <legend style="padding: 0 15px; font-weight: 800; color: #64748b; font-size: 11px; text-transform: uppercase;">Información Laboral</legend>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                <div class="form-group">
+                    <label>Nombre del Trabajador Titular</label> 
+                    <input type="text" id="f-nom_trabajador" placeholder="Nombre completo del titular">
+                </div>
+                <div class="form-group">
+                    <label>Área (Adscripción Titular)</label> 
+                    <input type="text" id="f-area-titular" placeholder="Área donde labora">
+                </div>
+            </div>
+        </fieldset>
     </div>
 
     <div class="btn-box">
@@ -246,11 +212,21 @@
     </table>
 </div>
 
-
-  <script type="module">
-    // --- 1. SEGURIDAD: VALIDAR SESIÓN ANTES DE CARGAR NADA ---
+<script type="module">
+    // --- 1. LÓGICA DE USUARIO Y COLORES ---
+    const usuarioActivo = (sessionStorage.getItem('nombre_usuario') || 'Invitado').toUpperCase();
+    
     if (!sessionStorage.getItem('sesion_activa')) {
         window.location.href = "index.html";
+    }
+
+    // Seleccionamos el elemento del nombre y le aplicamos el estilo
+    const displayUser = document.getElementById('display-usuario');
+    displayUser.innerText = usuarioActivo;
+
+    // Si es OLGA o SONIA, aplicamos la clase verde resaltada
+    if (['OLGA', 'SONIA'].includes(usuarioActivo)) {
+        displayUser.classList.add('user-special');
     }
 
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -261,7 +237,6 @@
     const db = getFirestore(app);
     const mainRef = collection(db, "area_medica_v2");
 
-    // --- 2. FUNCIÓN PARA CERRAR SESIÓN ---
     window.cerrarSesion = () => {
         if (confirm("¿Seguro que desea salir del sistema de Recepción?")) {
             sessionStorage.clear();
@@ -271,161 +246,72 @@
 
     let dataList = [];
 
-   window.validarCostoPorPoblacion = () => {
-    const tipoPob = document.getElementById('f-tipo_pob').value;
-    
-    // Referencias a los campos
-    const campoCosto = document.getElementById('f-costo');
-    const campoNombreTitular = document.getElementById('f-nom_trabajador');
-    const campoAreaTitular = document.getElementById('f-area-titular');
+    window.validarCostoPorPoblacion = () => {
+        const tipoPob = document.getElementById('f-tipo_pob').value;
+        const campoCosto = document.getElementById('f-costo');
+        const campoNombreTitular = document.getElementById('f-nom_trabajador');
+        const campoAreaTitular = document.getElementById('f-area-titular');
 
-    // CASO 1: POBLACIÓN EN GENERAL (Paga y no hay titular)
-    if (tipoPob === "POBLACION EN GENERAL") {
-        campoCosto.disabled = false;
-        campoCosto.style.backgroundColor = "#fff";
-        if(campoCosto.value == 0) campoCosto.value = 50;
+        if (tipoPob === "POBLACION EN GENERAL") {
+            campoCosto.disabled = false;
+            campoCosto.style.backgroundColor = "#fff";
+            if(campoCosto.value == 0) campoCosto.value = 50;
+            [campoNombreTitular, campoAreaTitular].forEach(el => {
+                el.value = "N/A"; el.disabled = true; el.style.backgroundColor = "#f1f5f9";
+            });
+        } 
+        else if (["TRABAJADOR DE CONFIANZA", "SINDICALIZADOS", "POLICIAS", "TRANSITO"].includes(tipoPob)) {
+            campoCosto.value = 0; campoCosto.disabled = true; campoCosto.style.backgroundColor = "#f1f5f9";
+            [campoNombreTitular, campoAreaTitular].forEach(el => {
+                el.value = "TITULAR DIRECTO"; el.disabled = true; el.style.backgroundColor = "#f1f5f9";
+            });
+        }
+        else if (tipoPob.includes("FAM.")) {
+            campoCosto.value = 0; campoCosto.disabled = true; campoCosto.style.backgroundColor = "#f1f5f9";
+            [campoNombreTitular, campoAreaTitular].forEach(el => {
+                el.disabled = false; el.style.backgroundColor = "#fff";
+                if(el.value === "N/A" || el.value === "TITULAR DIRECTO") el.value = "";
+            });
+        }
+    };
 
-        // BLOQUEAR SECCIÓN LABORAL
-        [campoNombreTitular, campoAreaTitular].forEach(el => {
-            el.value = "N/A";
-            el.disabled = true;
-            el.style.backgroundColor = "#f1f5f9";
-        });
-    } 
+    window.saveData = async () => {
+        const nombre = document.getElementById('f-nombre').value;
+        const catPrincipal = document.getElementById('f-consulta_estudios').value;
+        const tipoAtencion = document.getElementById('f-tipo_estudio').value;
 
-    // CASO 2: TRABAJADORES DIRECTOS (No pagan y ellos son los titulares)
-    else if (["TRABAJADOR DE CONFIANZA", "SINDICALIZADOS", "POLICIAS", "TRANSITO"].includes(tipoPob)) {
-        campoCosto.value = 0;
-        campoCosto.disabled = true;
-        campoCosto.style.backgroundColor = "#f1f5f9";
+        if(!nombre || !catPrincipal || !tipoAtencion) return alert("⚠️ Datos obligatorios faltantes");
 
-        // BLOQUEAR SECCIÓN LABORAL (Porque el paciente es el empleado)
-        [campoNombreTitular, campoAreaTitular].forEach(el => {
-            el.value = "TITULAR DIRECTO";
-            el.disabled = true;
-            el.style.backgroundColor = "#f1f5f9";
-        });
-    }
+        const serviciosEnf = ["MEDICA", "OCULISTA", "DENTAL", "GLUCOSA", "CURACION", "CERTIFICADO MEDICO", "CERTIFICADO DE DISCAPACIDAD"];
+        let estado = serviciosEnf.includes(tipoAtencion) ? "PENDIENTE_ENFERMERIA" : "ATENDIDO";
 
-    // CASO 3: FAMILIARES (No pagan pero requieren datos del titular)
-    else if (tipoPob.includes("FAM.")) {
-        campoCosto.value = 0;
-        campoCosto.disabled = true;
-        campoCosto.style.backgroundColor = "#f1f5f9";
-
-        // HABILITAR SECCIÓN LABORAL (Para saber de quién es familiar)
-        [campoNombreTitular, campoAreaTitular].forEach(el => {
-            el.disabled = false;
-            el.style.backgroundColor = "#fff";
-            if(el.value === "N/A" || el.value === "TITULAR DIRECTO") el.value = "";
-        });
-    }
-};
-
-    // --- FIREBASE ACCIONES ---
-window.saveData = async () => {
-    const nombre = document.getElementById('f-nombre').value;
-    const catPrincipal = document.getElementById('f-consulta_estudios').value;
-    const tipoAtencion = document.getElementById('f-tipo_estudio').value;
-
-    if(!nombre || !catPrincipal || !tipoAtencion) {
-        return alert("⚠️ Nombre, Categoría y Tipo de Atención son obligatorios");
-    }
-
-    // Definimos el estado inicial según el tipo de atención seleccionado
-    const serviciosEnf = ["MEDICA", "OCULISTA", "DENTAL", "GLUCOSA", "CURACION", "CERTIFICADO MEDICO", "CERTIFICADO DE DISCAPACIDAD"];
-    let estado = serviciosEnf.includes(tipoAtencion) ? "PENDIENTE_ENFERMERIA" : "ATENDIDO";
-
-    try {
-        await addDoc(mainRef, {
-            fecha_cap: document.getElementById('f-fecha-captura').value,
-            nombre: nombre.toUpperCase(),
-            edad: document.getElementById('f-edad').value,
-            tipo_pob: document.getElementById('f-tipo_pob').value,
-            
-            // ÁREAS DIFERENCIADAS
-            area_beneficiario: document.getElementById('f-area-beneficiario').value.toUpperCase(),
-            area_titular: document.getElementById('f-area-titular').value.toUpperCase(),
-            
-            lugar: document.getElementById('f-lugar').value.toUpperCase(),
-            costo: parseFloat(document.getElementById('f-costo').value || 0),
-            
-            // DATOS DEL SERVICIO
-            consulta_estudios: catPrincipal, // CATEGORÍA (CONSULTA / ESTUDIOS)
-            tipo_estudio: tipoAtencion,       // TIPO (MEDICA, RADIOGRAFIA, etc)
-            servicio: document.getElementById('f-servicio').value.toUpperCase(), // ESPECÍFICO
-            dependencia: document.getElementById('f-dependencia').value.toUpperCase(),
-            
-            // TRABAJADOR
-            nom_trabajador: document.getElementById('f-nom_trabajador').value.toUpperCase(),
-            
-            estado: estado,
-            t: new Date().getTime()
-        });
-        alert("✅ Registro guardado con éxito");
-        limpiarForm();
-    } catch (e) { 
-        alert("Error al guardar: " + e.message); 
-    }
-};
-
-window.updateData = async () => {
-    const id = document.getElementById('f-id').value;
-    if(!id) return alert("❌ No hay un ID seleccionado");
-
-    try {
-        await updateDoc(doc(db, "area_medica_v2", id), {
-            nombre: document.getElementById('f-nombre').value.toUpperCase(),
-            edad: document.getElementById('f-edad').value,
-            tipo_pob: document.getElementById('f-tipo_pob').value,
-            
-            // ACTUALIZACIÓN DE ÁREAS
-            area_beneficiario: document.getElementById('f-area-beneficiario').value.toUpperCase(),
-            area_titular: document.getElementById('f-area-titular').value.toUpperCase(),
-            
-            lugar: document.getElementById('f-lugar').value.toUpperCase(),
-            costo: parseFloat(document.getElementById('f-costo').value || 0),
-            
-            // ACTUALIZACIÓN DE SERVICIO
-            consulta_estudios: document.getElementById('f-consulta_estudios').value,
-            tipo_estudio: document.getElementById('f-tipo_estudio').value,
-            servicio: document.getElementById('f-servicio').value.toUpperCase(),
-            dependencia: document.getElementById('f-dependencia').value.toUpperCase(),
-            
-            nom_trabajador: document.getElementById('f-nom_trabajador').value.toUpperCase(),
-            ultima_edicion: new Date().toISOString()
-        });
-
-        alert("✅ Registro actualizado correctamente");
-        limpiarForm();
-    } catch (e) { 
-        console.error("Error:", e);
-        alert("Error al actualizar: " + e.message); 
-    }
-};
-
-window.finalizarAtencion = async () => {
-    const id = document.getElementById('f-id').value;
-    if(!id) return;
-    if(confirm("¿Marcar atención como FINALIZADA?")) {
         try {
-            await updateDoc(doc(db, "area_medica_v2", id), { estado: "ATENDIDO" });
-            alert("✅ Folio Cerrado y Atendido");
+            await addDoc(mainRef, {
+                fecha_cap: document.getElementById('f-fecha-captura').value,
+                nombre: nombre.toUpperCase(),
+                edad: document.getElementById('f-edad').value,
+                tipo_pob: document.getElementById('f-tipo_pob').value,
+                area_beneficiario: document.getElementById('f-area-beneficiario').value.toUpperCase(),
+                area_titular: document.getElementById('f-area-titular').value.toUpperCase(),
+                lugar: document.getElementById('f-lugar').value.toUpperCase(),
+                costo: parseFloat(document.getElementById('f-costo').value || 0),
+                consulta_estudios: catPrincipal,
+                tipo_estudio: tipoAtencion,
+                servicio: document.getElementById('f-servicio').value.toUpperCase(),
+                dependencia: document.getElementById('f-dependencia').value.toUpperCase(),
+                nom_trabajador: document.getElementById('f-nom_trabajador').value.toUpperCase(),
+                estado: estado,
+                usuario_capturo: usuarioActivo,
+                t: new Date().getTime()
+            });
+            alert("✅ Registro guardado");
             limpiarForm();
-        } catch (e) { alert(e.message); }
-    }
-};
+        } catch (e) { alert("Error: " + e.message); }
+    };
 
-onSnapshot(query(mainRef, orderBy("t", "desc")), (snap) => {
-    dataList = snap.docs.map(d => ({id: d.id, ...d.data()}));
-    document.getElementById('table-body').innerHTML = dataList.map(d => {
-        // Escapamos comillas simples para evitar errores en nombres con apóstrofes
-        const nombreEsc = (d.nombre || "").replace(/'/g, "\\'");
-        const lugarEsc = (d.lugar || "").replace(/'/g, "\\'");
-        const trabajadorEsc = (d.nom_trabajador || "").replace(/'/g, "\\'");
-        const areaEsc = (d.area || "").replace(/'/g, "\\'");
-
-        return `
+    onSnapshot(query(mainRef, orderBy("t", "desc")), (snap) => {
+        dataList = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        document.getElementById('table-body').innerHTML = dataList.map(d => `
             <tr>
                 <td>${d.fecha_cap || '-'}</td>
                 <td><b>${d.nombre}</b></td>
@@ -437,189 +323,113 @@ onSnapshot(query(mainRef, orderBy("t", "desc")), (snap) => {
                 </span></td>
                 <td>$${d.costo}</td>
                 <td class="no-print">
-                    <button onclick="prepararEdicion('${d.id}', '${nombreEsc}', '${d.edad}', '${lugarEsc}', '${d.costo}', '${trabajadorEsc}', '${areaEsc}')" 
-                            style="border:none; background:none; cursor:pointer; font-size:16px;" title="Editar">✏️</button>
-               
+                    <button onclick="prepararEdicion('${d.id}')" style="border:none; background:none; cursor:pointer; font-size:16px;">✏️</button>
                 </td>
             </tr>
-        `;
-    }).join('');
-});
-window.prepararEdicion = (id, nombre, edad, lugar, costo, trabajador, area) => {
-    // 1. Asignar valores a los campos
-    document.getElementById('f-id').value = id;
-    document.getElementById('f-nombre').value = nombre;
-    document.getElementById('f-edad').value = edad;
-    document.getElementById('f-lugar').value = lugar;
-    document.getElementById('f-costo').value = costo;
-    document.getElementById('f-nom_trabajador').value = trabajador;
-    document.getElementById('f-area').value = area;
-
-    // 2. Forzar que los campos sean editables (por si estaban bloqueados por lógica de población)
-    const camposRelativos = ['f-nom_trabajador', 'f-area', 'f-costo', 'f-dependencia'];
-    camposRelativos.forEach(cid => {
-        const el = document.getElementById(cid);
-        if(el) {
-            el.disabled = false;
-            el.style.backgroundColor = "#fff";
-        }
+        `).join('');
     });
 
-    // 3. Control de botones
+    window.limpiarForm = () => {
+        document.getElementById('f-id').value = "";
+        document.getElementById('f-nombre').value = "";
+        document.getElementById('f-edad').value = "";
+        document.getElementById('f-lugar').value = "";
+        document.getElementById('f-costo').value = "50";
+        document.getElementById('f-fecha-captura').value = new Date().toISOString().split('T')[0];
+        document.getElementById('btn-save').style.display = 'inline-block';
+        document.getElementById('btn-update').style.display = 'none';
+        validarCostoPorPoblacion();
+    };
+
+    window.prepararEdicion = (id) => {
+    const registro = dataList.find(d => d.id === id);
+    if (!registro) return;
+
+    // Llenar campos ocultos y visibles
+    document.getElementById('f-id').value = id;
+    document.getElementById('f-fecha-captura').value = registro.fecha_cap || "";
+    document.getElementById('f-nombre').value = registro.nombre || "";
+    document.getElementById('f-edad').value = registro.edad || "";
+    document.getElementById('f-tipo_pob').value = registro.tipo_pob || "POBLACION EN GENERAL";
+    
+    // Disparar validación de costos/bloqueo de campos
+    validarCostoPorPoblacion();
+    
+    document.getElementById('f-lugar').value = registro.lugar || "";
+    document.getElementById('f-costo').value = registro.costo || 0;
+    
+    // Cargar categorías y tipos
+    document.getElementById('f-consulta_estudios').value = registro.consulta_estudios || "";
+    gestionarCategorias(); // Genera las opciones del segundo select
+    document.getElementById('f-tipo_estudio').value = registro.tipo_estudio || "";
+    
+    document.getElementById('f-servicio').value = registro.servicio || "";
+    document.getElementById('f-nom_trabajador').value = registro.nom_trabajador || "";
+    document.getElementById('f-area-titular').value = registro.area_titular || "";
+
+    // Gestionar botones
     document.getElementById('btn-save').style.display = 'none';
     document.getElementById('btn-update').style.display = 'inline-block';
     
-    // Si el estado es pendiente, mostrar botón de finalizar
-    const registro = dataList.find(d => d.id === id);
-    if(registro && registro.estado === 'PENDIENTE_ENFERMERIA') {
-        document.getElementById('btn-finalizar').style.display = 'inline-block';
-    } else {
-        document.getElementById('btn-finalizar').style.display = 'none';
-    }
-
+    // Scroll hacia arriba para editar cómodamente
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-window.limpiarForm = () => {
-    // Resetear formulario (usa el reset nativo si prefieres)
-    document.getElementById('f-id').value = "";
-    document.getElementById('f-nombre').value = "";
-    document.getElementById('f-edad').value = "";
-    document.getElementById('f-lugar').value = "";
-    document.getElementById('f-costo').value = "50";
-    document.getElementById('f-nom_trabajador').value = "";
-    document.getElementById('f-area').value = "MÉDICA";
-    document.getElementById('f-fecha-captura').value = new Date().toISOString().split('T')[0];
+// 2. Función para enviar la actualización a Firebase
+window.updateData = async () => {
+    const id = document.getElementById('f-id').value;
+    if (!id) return;
 
-    // Reset botones
-    document.getElementById('btn-save').style.display = 'inline-block';
-    document.getElementById('btn-update').style.display = 'none';
-    document.getElementById('btn-finalizar').style.display = 'none';
-};
-// Función para gestionar qué opciones se muestran y habilitar Dependencia
-window.gestionarCategorias = () => {
-    const categoria = document.getElementById('f-consulta_estudios').value;
-    const comboEstudio = document.getElementById('f-tipo_estudio');
-    const campoServicio = document.getElementById('f-servicio'); // Servicio Específico
-    const campoDependencia = document.getElementById('f-dependencia');
+    const docRef = doc(db, "area_medica_v2", id);
     
-    // Limpiar opciones previas del combo intermedio
-    comboEstudio.innerHTML = '<option value="">-- SELECCIONE OPCIÓN --</option>';
-    
-    if (categoria === "CONSULTA") {
-        // 1. Habilitar combo de tipos (Médica, Dental, etc.)
-        comboEstudio.disabled = false;
-
-        // 2. BLOQUEAR Servicio Específico y Dependencia
-        campoServicio.disabled = true;
-        campoServicio.value = "N/A";
-        campoServicio.style.backgroundColor = "#f1f5f9";
-
-        campoDependencia.disabled = true;
-        campoDependencia.value = "DIF MUNICIPAL";
-        campoDependencia.style.backgroundColor = "#f1f5f9";
-
-        // Cargar opciones de consulta
-        const opciones = ["MEDICA", "OCULISTA", "DENTAL", "GLUCOSA", "CURACION", "CERTIFICADO MEDICO", "CERTIFICADO DE DISCAPACIDAD"];
-        opciones.forEach(opt => {
-            let el = document.createElement("option");
-            el.value = opt; el.textContent = opt;
-            comboEstudio.appendChild(el);
+    try {
+        await updateDoc(docRef, {
+            fecha_cap: document.getElementById('f-fecha-captura').value,
+            nombre: document.getElementById('f-nombre').value.toUpperCase(),
+            edad: document.getElementById('f-edad').value,
+            tipo_pob: document.getElementById('f-tipo_pob').value,
+            lugar: document.getElementById('f-lugar').value.toUpperCase(),
+            costo: parseFloat(document.getElementById('f-costo').value || 0),
+            consulta_estudios: document.getElementById('f-consulta_estudios').value,
+            tipo_estudio: document.getElementById('f-tipo_estudio').value,
+            servicio: document.getElementById('f-servicio').value.toUpperCase(),
+            nom_trabajador: document.getElementById('f-nom_trabajador').value.toUpperCase(),
+            area_titular: document.getElementById('f-area-titular').value.toUpperCase()
         });
-
-    } else if (categoria === "ESTUDIOS_APOYOS") {
-        // 1. Habilitar todo para captura detallada
-        comboEstudio.disabled = false;
         
-        campoServicio.disabled = false;
-        campoServicio.value = "";
-        campoServicio.style.backgroundColor = "#fff";
-
-        campoDependencia.disabled = false;
-        campoDependencia.value = ""; 
-        campoDependencia.style.backgroundColor = "#fff";
-
-        // Cargar opciones de estudios
-        const opciones = ["RADIOGRAFIAS", "ULTRASONIDOS", "ANALISIS", "ELECTROCARDIOGRAMAS", "OTROS"];
-        opciones.forEach(opt => {
-            let el = document.createElement("option");
-            el.value = opt; el.textContent = opt;
-            comboEstudio.appendChild(el);
-        });
-
-    } else {
-        // Reset por defecto si no hay selección
-        [comboEstudio, campoServicio, campoDependencia].forEach(el => {
-            el.disabled = true;
-            el.value = "";
-        });
-    }
-};
-window.setDependencia = (valor) => {
-    const campoTexto = document.getElementById('f-dependencia');
-    
-    if (valor === 'OTROS') {
-        campoTexto.style.display = 'block';
-        campoTexto.value = ""; // Limpiar para que el usuario escriba
-        campoTexto.focus();
-    } else {
-        campoTexto.style.display = 'none';
-        campoTexto.value = valor;
+        alert("✨ Registro actualizado correctamente");
+        limpiarForm();
+    } catch (e) {
+        console.error("Error al actualizar:", e);
+        alert("Error al intentar actualizar el registro.");
     }
 };
 
-// Modifica tu función limpiarForm() existente para resetear esto:
-const limpiarFormOriginal = window.limpiarForm;
-window.limpiarForm = () => {
-    if(limpiarFormOriginal) limpiarFormOriginal();
-    
-    // Reset de los radios a DIF MUNICIPAL
-    document.querySelector('input[name="dep_check"][value="DIF MUNICIPAL"]').checked = true;
-    document.getElementById('f-dependencia').value = "DIF MUNICIPAL";
-    document.getElementById('f-dependencia').style.display = 'none';
-};
-// Función para retroalimentar el DataList (Servicio Específico)
-// Llama a esta función dentro de tu onSnapshot de Firebase
-const actualizarDataList = (datos) => {
-    const dl = document.getElementById('lista-servicios');
-    // Extraer servicios únicos de la base de datos
-    const serviciosUnicos = [...new Set(datos.map(d => d.servicio).filter(s => s))];
-    dl.innerHTML = serviciosUnicos.map(s => `<option value="${s}">`).join('');
-};
+    window.gestionarCategorias = () => {
+        const categoria = document.getElementById('f-consulta_estudios').value;
+        const comboEstudio = document.getElementById('f-tipo_estudio');
+        comboEstudio.innerHTML = '<option value="">-- SELECCIONE --</option>';
+        if (categoria) {
+            comboEstudio.disabled = false;
+            const opciones = categoria === "CONSULTA" 
+                ? ["MEDICA", "OCULISTA", "DENTAL", "GLUCOSA", "CURACION", "CERTIFICADO MEDICO", "CERTIFICADO DE DISCAPACIDAD"]
+                : ["RADIOGRAFIAS", "ULTRASONIDOS", "ANALISIS", "ELECTROCARDIOGRAMAS", "OTROS"];
+            opciones.forEach(opt => {
+                let el = document.createElement("option"); el.value = opt; el.textContent = opt;
+                comboEstudio.appendChild(el);
+            });
+        }
+    };
 
-// Modifica tu onSnapshot actual para incluir la actualización del datalist:
-onSnapshot(query(mainRef, orderBy("t", "desc")), (snap) => {
-    dataList = snap.docs.map(d => ({id: d.id, ...d.data()}));
-    
-    // AQUÍ ACTUALIZAMOS EL DATALIST CON LO QUE YA EXISTE EN FIREBASE
-    actualizarDataList(dataList);
-    
-    // ... resto de tu código para renderizar la tabla ...
-});
+    window.setDependencia = (valor) => {
+        const campo = document.getElementById('f-dependencia');
+        campo.style.display = valor === 'OTROS' ? 'block' : 'none';
+        campo.value = valor === 'OTROS' ? "" : valor;
+    };
 
-    window.delDoc = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "area_medica_v2", id)); };
-    window.limpiarForm = () => {
-    // ... otros campos ...
-    document.getElementById('f-area-beneficiario').value = "MÉDICA";
-    document.getElementById('f-area-titular').value = "N/A";
-    document.getElementById('f-nom_trabajador').value = "N/A";
-    
-    // Ejecutar validación inicial para que los bloqueos se apliquen por defecto
+    // Inicialización al cargar la página
+    document.getElementById('f-fecha-captura').value = new Date().toISOString().split('T')[0];
     validarCostoPorPoblacion();
-};
-// --- LÓGICA DE PRIVILEGIOS ---
-function verificarPrivilegios() {
-    const puesto = sessionStorage.getItem("puesto"); 
-    const rol = sessionStorage.getItem("rol");
-    const panel = document.getElementById('panel-directivos');
-
-    // Si es ADMIN o DIRECTOR, mostramos el panel de navegación rápida
-    if (puesto === "DIRECTOR" || rol === "ADMIN") {
-        panel.style.display = "block";
-    }
-}
-// Ejecutar inmediatamente al cargar
-verificarPrivilegios();
 </script>
 </body>
 </html>
