@@ -12,7 +12,7 @@
             --bg: #f1f5f9;
             --danger: #dc2626;
         }
-        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg);  display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
         .login-card {
             background: white;
             padding: 40px;
@@ -23,17 +23,11 @@
             text-align: center;
             border: 1px solid #e2e8f0;
         }
-        .icon-header {
-            font-size: 3rem;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
+        .icon-header { font-size: 3rem; color: var(--primary); margin-bottom: 15px; }
         h2 { color: var(--primary); margin: 0 0 5px 0; font-size: 1.4rem; letter-spacing: 1px; }
         p { color: #64748b; font-size: 12px; margin-bottom: 25px; font-weight: 500; }
-        
         .input-group { margin-bottom: 20px; text-align: left; }
         label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 6px; color: #475569; text-transform: uppercase; }
-        
         input {
             width: 100%;
             padding: 12px 15px;
@@ -44,11 +38,7 @@
             font-size: 14px;
             transition: all 0.2s;
         }
-        input:focus { 
-            border-color: var(--primary); 
-            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
-        }
-
+        input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1); }
         .btn-login {
             background: var(--primary);
             color: white;
@@ -68,53 +58,24 @@
             font-size: 13px;
         }
         .btn-login:hover { background: var(--primary-hover); transform: translateY(-1px); }
-        .btn-login:active { transform: translateY(0); }
-
         .error { 
-            color: var(--danger); 
-            font-size: 13px; 
-            margin-top: 15px; 
-            display: none; 
-            padding: 10px;
-            background: #fef2f2;
-            border-radius: 8px;
-            border: 1px solid #fee2e2;
+            color: var(--danger); font-size: 13px; margin-top: 15px; display: none; 
+            padding: 10px; background: #fef2f2; border-radius: 8px; border: 1px solid #fee2e2;
             animation: shake 0.4s ease-in-out;
         }
-
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
             75% { transform: translateX(5px); }
         }
-
         .btn-nav {
-    background: white;
-    color: #1e40af;
-    border: 1px solid #e2e8f0;
-    padding: 15px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    text-transform: uppercase;
-}
-
-.btn-nav i {
-    font-size: 1.5rem;
-}
-
-.btn-nav:hover {
-    background: #f1f5f9;
-    border-color: #1e40af;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
+            background: white; color: #1e40af; border: 1px solid #e2e8f0;  
+            padding: 15px 10px; border-radius: 12px; font-size: 11px; font-weight: bold;
+            cursor: pointer; transition: 0.3s; display: flex; flex-direction: column;
+            align-items: center; gap: 8px; text-transform: uppercase;
+        }
+        .btn-nav i { font-size: 1.5rem; }
+        .btn-nav:hover { background: #f1f5f9; border-color: #1e40af; transform: translateY(-3px); }
     </style>
 </head>
 <body>
@@ -143,132 +104,107 @@
 </div>
 
 <script>
-    // Permitir ingreso con la tecla Enter
-    document.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            validarAcceso();
-        }
-    });
+    // Permitir ingreso con Enter
+    document.addEventListener('keypress', (e) => { if (e.key === 'Enter') validarAcceso(); });
 
-    function validarAcceso() {
-        const user = document.getElementById('user').value.toLowerCase().trim();
-        const pass = document.getElementById('pass').value;
-        const error = document.getElementById('error-msg');
+ const cuentas = {
+        // ADMINISTRACIÓN GLOBAL
+        "admin": { p: "master2026", url: "admin_global.html", dep: "GLOBAL" },
+        "lorena.gonzalez": { p: "logoke.15", url: "admin_global.html", dep: "GLOBAL" }, 
+        "angel.vidal": { p: "Angel123..", url: "admin_global.html", dep: "GLOBAL" }, 
 
-        // Configuración de cuentas (Usuario: { p: contraseña, url: destino })
-  const cuentas = {
-    // ADMINISTRACIÓN GLOBAL
-    "admin": { p: "master2026", url: "admin_global.html" },
-    "lorena.gonzalez": { p: "logoke.15", url: "admin_global.html" }, 
-    "angel.vidal": { p: "Angel123..", url: "admin_global.html" }, 
+        // POBLACIÓN VULNERABLE
+        "vulnerable": { p: "vul123", url: "vulnerable.html", dep: "VULNERABLE" }, 
+        "ramon.guapillo": { p: "Fatima20", url: "vulnerable.html", dep: "VULNERABLE" },
 
+        // TRABAJO SOCIAL
+        "social": { p: "soc123", url: "social.html", dep: "SOCIAL" },
+        "juanita.campechano": { p: "Juanita123..", url: "social.html", dep: "SOCIAL" }, 
+        "monse.plata": { p: "Monse123..", url: "social.html", dep: "SOCIAL" },
 
-    // POBLACIÓN VULNERABLE
-    "vulnerable": { p: "vul123", url: "vulnerable.html" }, 
-    "ramon.guapillo": { p: "Fatima20", url: "vulnerable.html" },
+        // PROCURADURÍA
+        "procuraduria": { p: "pro123", url: "procuraduria.html", dep: "PROCURADURIA" },
+        "edmundo.pechi": { p: "Edmundo123..", url: "procuraduria.html", dep: "PROCURADURIA" },
 
-    // TRABAJO SOCIAL
-    "social": { p: "soc123", url: "social.html" },
-    "juanita.campechano": { p: "Juanita123..", url: "social.html" }, 
-    "monse.plata": { p: "Monse123..", url: "social.html" },
+        // RECEPCIÓN / MÉDICA
+        "recepcion": { p: "medica2026", url: "medica2.html", dep: "MEDICA" },
+        "olga.perez": { p: "Olga123..", url: "medica2.html", dep: "MEDICA" },
+        "sonia.xala": { p: "Sonia123..", url: "medica2.html", dep: "MEDICA" },
 
-    // PROCURADURÍA
-    "procuraduria": { p: "pro123", url: "procuraduria.html" },
-    "edmundo.pechi": { p: "Edmundo123..", url: "procuraduria.html" },
+        // ENFERMERÍA
+        "enfermeria": { p: "enf123", url: "enfermeria.html", dep: "MEDICA" },
+        "guardia.enfermeria": { p: "dif.enf.26", url: "enfermeria.html", dep: "MEDICA" },
+        "gael.maldonado": { p: "Gael123..", url: "enfermeria.html", dep: "MEDICA" },
+        "francisco.gomez": { p: "Paco123..", url: "enfermeria.html", dep: "MEDICA" },
 
-    // Recepcionistas (Área Médica 2)
-    "recepcion": { p: "medica2026", url: "medica2.html" },
-    "olga.perez": { p: "Olga123..", url: "medica2.html" },
-    "sonia.xala": { p: "Sonia123..", url: "medica2.html" },
+        // DOCTORES
+        "doctor": { p: "doc123", url: "consulta_doctor.html", dep: "MEDICA" },
+        "medico.turno": { p: "consulta.2026", url: "consulta_doctor.html", dep: "MEDICA" },
+        "hector.gonzalez": { p: "Hector123..", url: "consulta_doctor.html", dep: "MEDICA" },
+        "oscar.perrotin": { p: "Oscar123..", url: "consulta_doctor.html", dep: "MEDICA" },
 
-    // Enfermería
-    "enfermeria": { p: "enf123", url: "enfermeria.html" },
-    "guardia.enfermeria": { p: "dif.enf.26", url: "enfermeria.html" },
-    "gael.maldonado": { p: "Gael123..", url: "enfermeria.html" },
-    "francisco.gomez": { p: "Paco123..", url: "enfermeria.html" },
+        // DIRECCIÓN MÉDICA
+        "director.medico": { p: "dir1234", url: "historial_general.html", dep: "MEDICA" },
+        "ronaldo.bencomo": { p: "Ronald123..", url: "historial_general.html", dep: "MEDICA" },
 
-    // Doctores (Consulta en Turno)
-    "doctor": { p: "doc123", url: "consulta_doctor.html" },
-    "medico.turno": { p: "consulta.2026", url: "consulta_doctor.html" },
-    "hector.gonzalez": { p: "Hector123..", url: "consulta_doctor.html" },
-    "oscar.perrotin": { p: "Oscar123..", url: "consulta_doctor.html" },
+        // FARMACIA
+        "farmacia": { p: "far123", url: "farmacia.html", dep: "FARMACIA" },
+        "responsable.farma": { p: "farma.dif", url: "farmacia.html", dep: "FARMACIA" },
 
-    // Director del Área Médica (Acceso a Historial y Farmacia)
-    // Nota: El director suele entrar a Historial General, 
-    // pero puede navegar a Farmacia desde ahí.
-    "director.medico": { p: "dir1234", url: "historial_general.html" },
+        // PSICOLOGÍA
+        "psicologia": { p: "psi123", url: "psicologia.html", dep: "PSICOLOGIA" },
+        "samuel.pucheta": { p: "Samuel123..", url: "psicologia.html", dep: "PSICOLOGIA" },
+        "veronica.velasco": { p: "Veronica123..", url: "admin_global.html", dep: "PSICOLOGIA" },
+        "jefatura.psico": { p: "jefe.psi.2026", url: "jefatura_psicologia.html", dep: "PSICOLOGIA" },
 
-    // Farmacia (Responsable y Director)
-    "farmacia": { p: "far123", url: "farmacia.html" },
-    "farmacia": { p: "far123", url: "farmacia.html" },
-    "responsable.farma": { p: "farma.dif", url: "farmacia.html" },
+        // LOCALIDADES
+        "localidades": { p: "DIF.gen.loc", url: "general_localidades.html", dep: "LOCALIDADES" },
+        "ariana.reyes": { p: "Ariana123..", url: "general_localidades.html", dep: "LOCALIDADES" },
 
-    // PSICOLOGÍA
-    "psicologia": { p: "psi123", url: "psicologia.html" },
-    "samuel.pucheta": { p: "Samuel123..", url: "psicologia.html" },
-    "veronica.velasco": { p: "Veronica123..", url: "admin_global.html" },
-    "jefatura.psico": { p: "jefe.psi.2026", url: "jefatura_psicologia.html" },
+        // ESCOLAR
+        "escolar": { p: "esc123", url: "solicitudes.html", dep: "ESCOLAR" },
+        "apoyo.escolar": { p: "DIF.esc.2026", url: "solicitudes.html", dep: "ESCOLAR" }
+    };
 
-    // GENERAL LOCALIDADES / SOLICITUDES
-    "localidades": { p: "DIF.gen.loc", url: "general_localidades.html" },
-    "ariana.reyes": { p: "Ariana123..", url: "general_localidades.html" },
+   function validarAcceso() {
+    const user = document.getElementById('user').value.toLowerCase().trim();
+    const pass = document.getElementById('pass').value;
+    const error = document.getElementById('error-msg');
 
-    // --- NUEVO MÓDULO: REQUERIMIENTOS ESCOLARES ---
-    "escolar": { p: "esc123", url: "solicitudes.html" },
-    "apoyo.escolar": { p: "DIF.esc.2026", url: "solicitudes.html" }
-};
+    if (cuentas[user] && cuentas[user].p === pass) {
+        // 1. GUARDAR DATOS BÁSICOS
+        sessionStorage.setItem('sesion_activa', 'true'); 
+        sessionStorage.setItem('nombre_usuario', user);
+        sessionStorage.setItem('departamento', cuentas[user].dep);
 
-        if (cuentas[user] && cuentas[user].p === pass) {
-        // 1. Guardar sesión
-        sessionStorage.setItem('sesion_activa', user);
-        sessionStorage.setItem('rol', (user === 'admin' || user === 'director.medico') ? 'ADMIN' : 'USER');
+        // 2. MAPEO DE NOMBRES PARA DOCTORES (Para el sistema de luz verde)
+        // Aquí defines el nombre exacto que tienes en tu colección "personal_medico"
+     // Dentro de validarAcceso en index.html
+        const nombresMedicos = {
         
-        // 2. Efecto visual de carga
+         "hector.gonzalez": "DR. HECTOR ARTURO GONZALEZ DOMINGUEZ",
+         "oscar.perrotin": "DR. OSCAR ALEXIS PERROTIN ORTEGA" 
+        };
+
+if (nombresMedicos[user]) {
+    sessionStorage.setItem('nombre_medico', nombresMedicos[user]);
+}
+
+        // EFECTO DE CARGA
         const btn = document.querySelector('.btn-login');
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
-        btn.style.opacity = '0.7';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
 
-        // 3. LÓGICA DE REDIRECCIÓN O PANEL MAESTRO
+        // REDIRECCIÓN DIRECTA
         setTimeout(() => {
-            // Si es de los que deben ver todos los botones:
-            if (user === "director.medico") {
-                mostrarPanelMaestro();
-            } else {
-                // Si es un usuario común, va directo a su URL
-                window.location.href = cuentas[user].url;
-            }
-        }, 600);
-
+            window.location.href = cuentas[user].url;
+        }, 500);
     } else {
-        // Mostrar error si falla
         error.style.display = 'block';
         setTimeout(() => { error.style.display = 'none'; }, 3000);
-        document.getElementById('pass').value = "";
     }
 }
 
-    function mostrarPanelMaestro() {
-    const card = document.querySelector('.login-card');
-    const usuario = sessionStorage.getItem('sesion_activa');
 
-    card.innerHTML = `
-        <div class="icon-header"><i class="fas fa-th-large"></i></div>
-        <h2>PANEL MAESTRO</h2>
-        <p>Bienvenido: <b>${usuario.toUpperCase()}</b><br>Seleccione el módulo a supervisar:</p>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
-            <button class="btn-nav" onclick="window.location.href='medica2.html'"><i class="fas fa-file-medical"></i> Recepción</button>
-            <button class="btn-nav" onclick="window.location.href='enfermeria.html'"><i class="fas fa-user-nurse"></i> Enfermería</button>
-            <button class="btn-nav" onclick="window.location.href='consulta_doctor.html'"><i class="fas fa-stethoscope"></i> Consultorio</button>
-            <button class="btn-nav" onclick="window.location.href='farmacia.html'"><i class="fas fa-pills"></i> Farmacia</button>
-            <button class="btn-nav" style="grid-column: span 2; background: #f5f6f9da;" onclick="window.location.href='historial_general.html'"><i class="fas fa-chart-line"></i> Historial y Firmas (Dirección)</button>
-        </div>
-
-        <button onclick="sessionStorage.clear(); location.reload();" style="margin-top:20px; background:none; border:none; color:#ef4444; cursor:pointer; font-size:12px; font-weight:bold;">
-            <i class="fas fa-power-off"></i> CERRAR SESIÓN
-        </button>
-    `;
-}
 </script>
 
 </body>
