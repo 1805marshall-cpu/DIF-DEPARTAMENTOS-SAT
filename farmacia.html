@@ -8,14 +8,18 @@
     <style>
         :root { 
             --primary: #6366f1; --primary-dark: #4338ca;
+            --nav-bg: #1e40af; 
             --danger: #ef4444; --success: #22c55e; --warning: #f59e0b; --bg: #f8fafc;
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; font-size: 13px; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; font-size: 13px; display: flex; flex-direction: column; min-height: 100vh; }
+        
         header { background: white; padding: 15px 40px; border-bottom: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; flex: 1; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         
-        /* Formulario Estilizado */
+        /* Usuario Loggeado */
+        .user-tag { background: #eef2ff; color: var(--nav-bg); padding: 5px 12px; border-radius: 20px; font-weight: bold; font-size: 11px; display: flex; align-items: center; gap: 5px; border: 1px solid #c7d2fe; }
+
         .form-entrada { 
             display: grid; 
             grid-template-columns: 2fr 1fr 1fr 1.5fr 1fr; 
@@ -26,7 +30,6 @@
             border-radius: 10px; 
             align-items: flex-end;
             border: 1px solid #cbd5e1;
-            transition: all 0.3s;
         }
         .edit-mode { border: 2px solid var(--warning); background: #fffbeb; }
         .form-group { display: flex; flex-direction: column; gap: 5px; }
@@ -36,7 +39,6 @@
         .btn { padding: 10px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-add { background: var(--primary); width: 100%; }
         
-        /* Tablas y Alertas */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; border-radius: 8px; overflow: hidden; }
         th { text-align: left; padding: 12px; border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 11px; text-transform: uppercase; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
@@ -45,50 +47,28 @@
         .origen-donado { background: #e0f2fe; color: #0369a1; }
         .origen-propio { background: #fef3c7; color: #92400e; }
         
-        /* Semáforo de Caducidad */
         .vencido { background: #000 !important; color: #fff !important; }
         .caduca-critico { background: #fee2e2 !important; color: #dc2626 !important; }
         .caduca-proximo { background: #fff7ed !important; color: #ea580c !important; }
         .alerta-texto { font-size: 9px; display: block; font-weight: bold; margin-top: 2px; }
 
         .search-bar { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; }
-       .btn-logout {
-    background-color: #ef4444; /* Rojo para indicar salida */
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.btn-logout:hover {
-    background-color: #b91c1c;
-    transform: scale(1.05);
-}
-
-/* Si tu diseño es para móvil, esto ayuda a que no estorbe */
-@media (max-width: 600px) {
-    .btn-logout span { display: none; } /* Solo muestra el icono en pantallas chicas */
-}
+        
+        .btn-logout { background-color: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
     </style>
 </head>
 <body>
 
 <header>
-    <h2><i class="fas fa-pills"></i> FARMACIA DIF - CONTROL DE INVENTARIO</h2>
-  <!-- Botón de Cerrar Sesión -->
-<div style="position: absolute; top: 15px; right: 20px; z-index: 1000;">
+    <div>
+        <h2 style="margin:0"><i class="fas fa-pills"></i> FARMACIA DIF</h2>
+        <div id="display-usuario" class="user-tag" style="margin-top:5px;">
+            <i class="fas fa-user-circle"></i> <span id="user-name-span">Cargando usuario...</span>
+        </div>
+    </div>
     <button onclick="cerrarSesion()" class="btn-logout">
-        <i class="fas fa-power-off"></i> Salir del Sistema
+        <i class="fas fa-power-off"></i> <span>Salir</span>
     </button>
-</div>
 </header>
 
 <div class="container">
@@ -123,10 +103,9 @@
                     CANCELAR
                 </button>
             </div>
-
         </div>
 
-        <input type="text" class="search-bar" id="b-farmacia" placeholder="🔍 Buscar por nombre de medicamento..." onkeyup="listarInventario()">
+        <input type="text" class="search-bar" id="b-farmacia" placeholder="🔍 Buscar por nombre..." onkeyup="listarInventario()">
         
         <table>
             <thead>
@@ -155,14 +134,28 @@
     let inventario = [];
     let editID = null;
 
-    // 1. Escuchar cambios en Tiempo Real
+    // --- SEGURIDAD: VERIFICACIÓN DE USUARIO ---
+    const usuarioLoggeado = (sessionStorage.getItem("nombre_usuario") || "invitado").toLowerCase().trim();
+    const esAutorizado = ["ronaldo.bencomo", "director.medico"].includes(usuarioLoggeado);
+
+    // Mostrar el usuario en el header
+    document.getElementById('user-name-span').innerText = usuarioLoggeado;
+
+    // Si no es autorizado, deshabilitar el formulario de entrada
+    if (!esAutorizado) {
+        document.getElementById('main-form').style.opacity = "0.5";
+        document.getElementById('btn-principal').disabled = true;
+        document.getElementById('btn-principal').innerText = "SOLO LECTURA";
+    }
+
     onSnapshot(farmaciaRef, (snap) => {
         inventario = snap.docs.map(d => ({id: d.id, ...d.data()}));
         listarInventario();
     });
 
-    // 2. Procesar (Guardar Nuevo o Editar)
     window.procesarDatos = async () => {
+        if (!esAutorizado) return alert("No tienes permisos para modificar el inventario.");
+        
         const nombre = document.getElementById('m-nombre').value.toUpperCase().trim();
         const cantidad = parseInt(document.getElementById('m-cantidad').value);
         const caducidad = document.getElementById('m-caducidad').value;
@@ -175,20 +168,18 @@
                 await updateDoc(doc(db, "inventario_farmacia", editID), {
                     nombre, existencia: cantidad, caducidad, origen
                 });
-                alert("✅ Registro actualizado");
+                alert("✅ Actualizado");
                 cancelarEdicion();
             } else {
                 await addDoc(farmaciaRef, { 
-                    nombre, existencia: cantidad, caducidad, origen,
-                    t: Date.now()
+                    nombre, existencia: cantidad, caducidad, origen, t: Date.now()
                 });
-                alert("✅ Guardado correctamente");
+                alert("✅ Guardado");
             }
             limpiarCampos();
         } catch (e) { alert("Error: " + e.message); }
     };
 
-    // 3. Mostrar Tabla con Semáforo de Alertas
     window.listarInventario = () => {
         const busqueda = document.getElementById('b-farmacia').value.toUpperCase();
         const tbody = document.getElementById('tabla-inventario');
@@ -203,14 +194,15 @@
             
             let alertaClase = "";
             let alertaTexto = "Vigente";
+            if (diasParaCaducar <= 0) { alertaClase = "vencido"; alertaTexto = "⚠️ VENCIDO"; }
+            else if (diasParaCaducar <= 15) { alertaClase = "caduca-critico"; alertaTexto = `⚠️ ${diasParaCaducar} DÍAS`; }
+            else if (diasParaCaducar <= 30) { alertaClase = "caduca-proximo"; alertaTexto = "⚠️ PRÓXIMO"; }
 
-            if (diasParaCaducar <= 0) { 
-                alertaClase = "vencido"; alertaTexto = "⚠️ PRODUCTO VENCIDO"; 
-            } else if (diasParaCaducar <= 15) { 
-                alertaClase = "caduca-critico"; alertaTexto = `⚠️ VENCE EN ${diasParaCaducar} DÍAS`; 
-            } else if (diasParaCaducar <= 30) { 
-                alertaClase = "caduca-proximo"; alertaTexto = "⚠️ PRÓXIMO A VENCER"; 
-            }
+            // Condicional para mostrar botones solo si es admin
+            const botonesAccion = esAutorizado ? `
+                <button class="btn" style="background:var(--warning); padding:5px 8px;" onclick="prepararEdicion('${i.id}')"><i class="fas fa-edit"></i></button>
+                <button class="btn" style="background:transparent; color:var(--danger); padding:5px 8px;" onclick="eliminarMed('${i.id}')"><i class="fas fa-trash"></i></button>
+            ` : `<i class="fas fa-lock" title="Sin permisos" style="color:#cbd5e1"></i>`;
 
             return `
                 <tr class="${alertaClase}">
@@ -218,38 +210,31 @@
                     <td><span class="badge" style="background:rgba(255,255,255,0.4)">${i.existencia} uds</span></td>
                     <td><span class="badge ${i.origen === 'DONACIÓN' ? 'origen-donado' : 'origen-propio'}">${i.origen}</span></td>
                     <td><b>${i.caducidad}</b></td>
-                    <td>
-                        <button class="btn" style="background:var(--warning); padding:5px 8px;" onclick="prepararEdicion('${i.id}')"><i class="fas fa-edit"></i></button>
-                        <button class="btn" style="background:transparent; color:inherit; padding:5px 8px;" onclick="eliminarMed('${i.id}')"><i class="fas fa-trash"></i></button>
-                    </td>
+                    <td>${botonesAccion}</td>
                 </tr>
             `;
         }).join('');
     };
 
-    // 4. Funciones de Edición
     window.prepararEdicion = (id) => {
+        if (!esAutorizado) return;
         const item = inventario.find(i => i.id === id);
         editID = id;
         document.getElementById('m-nombre').value = item.nombre;
         document.getElementById('m-cantidad').value = item.existencia;
         document.getElementById('m-caducidad').value = item.caducidad;
         document.getElementById('m-origen').value = item.origen;
-
-        document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> EDITAR MEDICAMENTO';
+        document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> EDITAR';
         document.getElementById('main-form').classList.add('edit-mode');
         document.getElementById('btn-principal').innerHTML = '<i class="fas fa-sync"></i> ACTUALIZAR';
-        document.getElementById('btn-principal').style.background = 'var(--warning)';
         document.getElementById('btn-cancelar').style.display = 'block';
     };
 
     window.cancelarEdicion = () => {
-        editID = null;
-        limpiarCampos();
+        editID = null; limpiarCampos();
         document.getElementById('form-title').innerHTML = '<i class="fas fa-plus-circle"></i> Entrada de Medicamento';
         document.getElementById('main-form').classList.remove('edit-mode');
         document.getElementById('btn-principal').innerHTML = '<i class="fas fa-save"></i> GUARDAR';
-        document.getElementById('btn-principal').style.background = 'var(--primary)';
         document.getElementById('btn-cancelar').style.display = 'none';
     };
 
@@ -260,46 +245,13 @@
     }
 
     window.eliminarMed = async (id) => {
+        if (!esAutorizado) return;
         if(confirm("¿Eliminar este lote?")) await deleteDoc(doc(db, "inventario_farmacia", id));
     };
 
-    window.saveData = async () => {
-    const fechaInput = document.getElementById('f-fecha-captura').value;
-    const nombreInput = document.getElementById('f-nombre').value;
-    const servicioSeleccionado = document.getElementById('f-servicio').value;
-
-    if(!nombreInput || !fechaInput || !servicioSeleccionado) return alert("Faltan datos");
-
-    // Lógica de Estatus
-    const serviciosEnfermeria = ["TOMA DE GLUCOSA", "CURACIONES", "MÉDICA"];
-    const serviciosFarmacia = ["MEDICAMENTOS", "MATERIAL DE CURACION"];
-
-    let estadoFinal = "ATENDIDO"; // Administrativos
-    
-    if (serviciosEnfermeria.includes(servicioSeleccionado)) {
-        estadoFinal = "PENDIENTE_ENFERMERIA";
-    } else if (serviciosFarmacia.includes(servicioSeleccionado)) {
-        estadoFinal = "PENDIENTE_FARMACIA"; // <--- Nuevo estado
-    }
-
-    try {
-        await addDoc(mainRef, {
-            // ... tus campos actuales ...
-            estado: estadoFinal,
-            t: new Date().getTime()
-        });
-        alert("✅ Registro enviado a: " + estadoFinal);
-        limpiarForm();
-    } catch (e) { alert(e.message); }
-};
-
-    // Pega esto al final de tu script o después de inicializar Firebase
-window.cerrarSesion = function() {
-    if(confirm("¿Desea salir del módulo de Enfermería?")) {
-        sessionStorage.clear();
-        window.location.href = "index.html";
-    }
-};
+    window.cerrarSesion = () => {
+        if(confirm("¿Cerrar sesión?")) { sessionStorage.clear(); window.location.href = "index.html"; }
+    };
 </script>
 </body>
 </html>
