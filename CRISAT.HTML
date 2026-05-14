@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISTEMA CRISAT - 2026 | 2029 </title>
+    <title>SISTEMA CRISAT - Agenda Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #0284c7; --accent: #0ea5e9; --bg: #f1f5f9; --text: #334155; --border: #cbd5e1; }
@@ -23,19 +23,32 @@
         .full-width { grid-column: 1 / -1; }
         label { font-size: 0.8rem; font-weight: 700; }
         input, select, textarea { padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-family: inherit; }
-        input:disabled, select:disabled { background-color: #f1f5f9; cursor: not-allowed; opacity: 0.6; }
 
-        /* Estilos de Alertas en Tabla */
-        .alerta-roja { background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; border: 1px solid #f87171; font-weight: bold; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 5px; }
+        /* BUSCADOR Y CONTROLES */
+        .table-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; flex-wrap: wrap; }
+        .search-box { position: relative; flex-grow: 1; max-width: 400px; }
+        .search-box input { width: 100%; padding-left: 35px; box-sizing: border-box; }
+        .search-box i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--border); }
+
+        /* SEÑALES VISUALES */
+        .alerta-roja { background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; border: 1px solid #f87171; font-weight: bold; font-size: 0.75rem; }
         .tag-festivo { background: #fef9c3; color: #854d0e; padding: 4px 8px; border-radius: 4px; border: 1px solid #facc15; font-weight: bold; font-size: 0.75rem; }
         .asistencia-ok { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
+        .aviso-hoy { background: #0284c7; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
 
         .services-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; grid-column: 1 / -1; }
         .checkbox-item { display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0; }
 
-        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
         th { background-color: var(--primary); color: white; padding: 12px; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+        tr:hover { background-color: #f0f9ff; }
+
+        /* PAGINACIÓN */
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 20px; align-items: center; }
+        .btn-page { padding: 8px 15px; border: 1px solid var(--border); background: white; cursor: pointer; border-radius: 5px; }
+        .btn-page.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-page:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .btn-save { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 8px; font-weight: 800; cursor: pointer; width: 100%; text-transform: uppercase; display: flex; justify-content: center; gap: 10px; }
     </style>
@@ -51,13 +64,12 @@
     <form id="formCrisat">
         <input type="hidden" id="editIndex" value="-1">
         
-        <!-- BLOQUE 1: ADMINISTRATIVO -->
         <fieldset>
             <legend><i class="fas fa-calendar-alt"></i> Control Administrativo</legend>
             <div class="field"><label>Fecha de Captura</label><input type="date" id="fecha_captura" readonly></div>
             <div class="field"><label>Fecha de Cita</label><input type="date" id="fecha_cita" required></div>
             <div class="field"><label>Hora de Cita</label><input type="time" id="hora_cita" required></div>
-            <div class="field"><label>Estatus de Cita</label>
+            <div class="field"><label>Estatus</label>
                 <select id="estatus" onchange="toggleCamposEspeciales()">
                     <option value="Pendiente">Pendiente</option>
                     <option value="Asistió">Asistió</option>
@@ -75,7 +87,6 @@
             </div>
         </fieldset>
 
-        <!-- BLOQUE 2: PERSONALES (COMPLETO) -->
         <fieldset>
             <legend><i class="fas fa-user-injured"></i> Datos del Paciente</legend>
             <div class="field full-width"><label>Nombre Completo</label><input type="text" id="nombre" placeholder="Nombre completo"></div>
@@ -86,11 +97,10 @@
             <div class="field full-width"><label>Dirección</label><input type="text" id="direccion"></div>
         </fieldset>
 
-        <!-- BLOQUE 3: CLÍNICO (COMPLETO) -->
         <fieldset>
             <legend><i class="fas fa-notes-medical"></i> Valoración Clínica</legend>
             <div class="field full-width"><label>Diagnóstico</label><textarea id="diagnostico" rows="2"></textarea></div>
-            <div class="field"><label>¿Presenta Discapacidad?</label>
+            <div class="field"><label>¿Discapacidad?</label>
                 <select id="discapacidad" onchange="toggleDiscapacidad()"><option value="no">No</option><option value="si">Sí</option></select>
             </div>
             <div class="field"><label>Tipo Discapacidad</label>
@@ -104,7 +114,6 @@
             </div>
         </fieldset>
 
-        <!-- BLOQUE 4: TERAPIAS ORIGINALES -->
         <fieldset>
             <legend>Terapias</legend>
             <div class="services-container">
@@ -117,7 +126,6 @@
             </div>
         </fieldset>
 
-        <!-- BLOQUE 5: ELECTRO ORIGINALES -->
         <fieldset>
             <legend>Electro Terapia</legend>
             <div class="services-container">
@@ -127,31 +135,50 @@
             </div>
         </fieldset>
 
-        <button type="button" class="btn-save" id="btnAction" onclick="guardarRegistro()">
-            <i class="fas fa-save"></i> GUARDAR Y ACTUALIZAR AGENDA
+        <button type="button" class="btn-save" onclick="guardarRegistro()">
+            <i class="fas fa-save"></i> GUARDAR EN AGENDA
         </button>
     </form>
 </div>
 
 <div class="table-container">
+    <div class="table-controls">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="buscador" placeholder="Buscar por nombre o expediente..." onkeyup="filtrarYMostrar()">
+        </div>
+        <div>
+            Mostrar: 
+            <select id="pageSize" onchange="cambiarTamanoPagina()">
+                <option value="10">10 filas</option>
+                <option value="20">20 filas</option>
+                <option value="50">50 filas</option>
+            </select>
+        </div>
+    </div>
+
     <table id="tablaGeneral">
         <thead>
             <tr>
-                <th>F. Captura</th>
                 <th>F. Cita / Hora</th>
                 <th>Expediente</th>
                 <th>Paciente</th>
-                <th>Estatus / Alerta</th>
+                <th>Estatus / Señales</th>
                 <th>Terapias</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody id="cuerpoTabla"></tbody>
     </table>
+
+    <div class="pagination" id="paginacion"></div>
 </div>
 
 <script>
-    let registros = JSON.parse(localStorage.getItem('crisat_v_total')) || [];
+    let registros = JSON.parse(localStorage.getItem('crisat_v_pro')) || [];
+    let registrosFiltrados = [];
+    let paginaActual = 1;
+    let filasPorPagina = 10;
 
     document.getElementById('fecha_captura').valueAsDate = new Date();
 
@@ -202,61 +229,119 @@
         if(idx === -1) registros.push(data);
         else { registros[idx] = data; document.getElementById('editIndex').value = "-1"; }
 
-        localStorage.setItem('crisat_v_total', JSON.stringify(registros));
+        localStorage.setItem('crisat_v_pro', JSON.stringify(registros));
         document.getElementById('formCrisat').reset();
         document.getElementById('fecha_captura').valueAsDate = new Date();
-        toggleDiscapacidad();
-        toggleCamposEspeciales();
-        mostrar();
+        filtrarYMostrar();
     }
 
-    function mostrar() {
+    function filtrarYMostrar() {
+        const busqueda = document.getElementById('buscador').value.toLowerCase();
+        registrosFiltrados = registros.filter(r => 
+            r.nom.toLowerCase().includes(busqueda) || 
+            r.exp.toLowerCase().includes(busqueda)
+        );
+        
+        // Ordenar por fecha y hora
+        registrosFiltrados.sort((a,b) => new Date(a.fCit + ' ' + a.hora) - new Date(b.fCit + ' ' + b.hora));
+        
+        paginaActual = 1;
+        mostrarTabla();
+    }
+
+function obtenerFechaLocal() {
+        // Esta línea fuerza al navegador a usar la fecha de México, no la global
+        const ahora = new Date();
+        const opciones = { timeZone: 'America/Mexico_City', year: 'numeric', month: '2-digit', day: '2-digit' };
+        const partes = new Intl.DateTimeFormat('es-MX', opciones).formatToParts(ahora);
+        
+        const dia = partes.find(p => p.type === 'day').value;
+        const mes = partes.find(p => p.type === 'month').value;
+        const anio = partes.find(p => p.type === 'year').value;
+        
+        return `${anio}-${mes}-${dia}`; // Devuelve exactamente YYYY-MM-DD
+    }
+
+    // Al cargar la página, la fecha de captura será la correcta
+    document.getElementById('fecha_captura').value = obtenerFechaLocal();
+
+    function mostrarTabla() {
         const cuerpo = document.getElementById('cuerpoTabla');
         cuerpo.innerHTML = "";
-        registros.sort((a,b) => new Date(a.fCit + ' ' + a.hora) - new Date(b.fCit + ' ' + b.hora));
+        
+        const inicio = (paginaActual - 1) * filasPorPagina;
+        const fin = inicio + parseInt(filasPorPagina);
+        const paginados = registrosFiltrados.slice(inicio, fin);
 
-        registros.forEach((r, i) => {
+        // USAMOS LA NUEVA FUNCIÓN LOCAL
+        const hoyLocal = obtenerFechaLocal();
+
+        paginados.forEach((r) => {
+            const indexOriginal = registros.indexOf(r);
             let alertTag = "";
+            
             if(r.est === "Faltó") {
-                alertTag = r.just === "No" 
-                    ? `<span class="alerta-roja"><i class="fas fa-exclamation-triangle"></i> SIN JUSTIFICANTE</span>` 
-                    : `<span class="asistencia-ok">Faltó con Justificante</span>`;
+                alertTag = r.just === "No" ? `<span class="alerta-roja">SIN JUSTIFICANTE</span>` : `<span class="asistencia-ok">Faltó (Con Just.)</span>`;
             } else if(r.est === "Día Festivo") {
                 alertTag = `<span class="tag-festivo">FESTIVO</span>`;
             } else if(r.est === "Asistió") {
                 alertTag = `<span class="asistencia-ok">ASISTIÓ</span>`;
             } else {
-                alertTag = `<span>Pendiente</span>`;
+                // COMPARACIÓN TEXTUAL SIN HORAS DE POR MEDIO
+                if(r.fCit === hoyLocal) {
+                    alertTag = `<span class="aviso-hoy" style="background:#0284c7; color:white; padding: 4px 8px; border-radius: 4px; font-weight: bold; animation: pulse 2s infinite;">¡ES HOY!</span>`;
+                } else if(r.fCit < hoyLocal) {
+                    alertTag = `<span style="color:#ef4444; font-weight:bold;">FECHA PASADA</span>`;
+                } else {
+                    alertTag = `<span style="color:#94a3b8">Pendiente</span>`;
+                }
             }
 
             cuerpo.innerHTML += `<tr>
-                <td><small>${r.fCap}</small></td>
                 <td><strong>${r.fCit}</strong><br>${r.hora}</td>
                 <td>${r.exp}</td>
-                <td><strong>${r.nom}</strong><br><small>${r.mun}</small></td>
+                <td><strong>${r.nom}</strong></td>
                 <td>${alertTag}</td>
                 <td><small>${r.ter}</small></td>
                 <td>
-                    <button style="color:orange;border:none;background:none;cursor:pointer" onclick="editar(${i})"><i class="fas fa-edit"></i></button>
-                    <button style="color:red;border:none;background:none;cursor:pointer" onclick="borrar(${i})"><i class="fas fa-trash"></i></button>
+                    <button style="color:orange;border:none;background:none;cursor:pointer" onclick="editar(${indexOriginal})"><i class="fas fa-edit"></i></button>
+                    <button style="color:red;border:none;background:none;cursor:pointer" onclick="borrar(${indexOriginal})"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>`;
         });
+        dibujarPaginacion();
+    }
+    function dibujarPaginacion() {
+        const totalPaginas = Math.ceil(registrosFiltrados.length / filasPorPagina);
+        const divPag = document.getElementById('paginacion');
+        divPag.innerHTML = "";
+
+        if(totalPaginas <= 1) return;
+
+        for(let i = 1; i <= totalPaginas; i++) {
+            const btn = document.createElement('button');
+            btn.innerText = i;
+            btn.className = `btn-page ${i === paginaActual ? 'active' : ''}`;
+            btn.onclick = () => { paginaActual = i; mostrarTabla(); };
+            divPag.appendChild(btn);
+        }
+    }
+
+    function cambiarTamanoPagina() {
+        filasPorPagina = document.getElementById('pageSize').value;
+        paginaActual = 1;
+        mostrarTabla();
     }
 
     function editar(i) {
         const r = registros[i];
         document.getElementById('editIndex').value = i;
-        document.getElementById('fecha_captura').value = r.fCap;
         document.getElementById('fecha_cita').value = r.fCit;
         document.getElementById('hora_cita').value = r.hora;
         document.getElementById('estatus').value = r.est;
         toggleCamposEspeciales();
-        document.getElementById('justificante').value = r.just;
-        document.getElementById('expediente').value = r.exp;
-        document.getElementById('tipo_atencion').value = r.tipoA;
         document.getElementById('nombre').value = r.nom;
-        document.getElementById('sexo').value = r.sexo;
+        document.getElementById('expediente').value = r.exp;
         document.getElementById('fecha_nacimiento').value = r.fNac;
         document.getElementById('edad').value = r.edad;
         document.getElementById('municipio').value = r.mun;
@@ -264,9 +349,6 @@
         document.getElementById('diagnostico').value = r.diag;
         document.getElementById('discapacidad').value = r.disc;
         toggleDiscapacidad();
-        document.getElementById('tipo_discapacidad').value = r.tDisc;
-        document.getElementById('grado').value = r.grad;
-        document.getElementById('duracion').value = r.dura;
         
         document.querySelectorAll('.t-check, .e-check').forEach(c => {
             c.checked = r.ter.split(', ').includes(c.value);
@@ -274,9 +356,9 @@
         window.scrollTo({top: 0, behavior: 'smooth'});
     }
 
-    function borrar(i) { if(confirm("¿Eliminar registro?")) { registros.splice(i,1); localStorage.setItem('crisat_v_total', JSON.stringify(registros)); mostrar(); } }
+    function borrar(i) { if(confirm("¿Eliminar?")) { registros.splice(i,1); localStorage.setItem('crisat_v_pro', JSON.stringify(registros)); filtrarYMostrar(); } }
 
-    window.onload = mostrar;
+    window.onload = filtrarYMostrar;
 </script>
 </body>
 </html>
