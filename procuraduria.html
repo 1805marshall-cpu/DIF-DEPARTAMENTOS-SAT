@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIF 2026 | Procuraduría</title>
+    <title>DIF 2026 - 2029 | Procuraduría</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -49,18 +49,28 @@
 <header class="no-print" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px;">
     <div style="display: flex; align-items: center; gap: 20px;">
         <h2 style="margin:0; color: var(--procu); font-size: 18px;">
-            <i class="fas fa-balance-scale"></i> PROCURADURÍA DIF | SISTEMA 2026
+            <i class="fas fa-balance-scale"></i> PROCURADURÍA DIF | SISTEMA 2026-2029
         </h2>
-        <div id="user-display" style="font-size: 11px; font-weight: bold; color: #ffffff; background: rgb(243, 238, 238); padding: 4px 10px; border-radius: 4px;"></div>
+        <!-- Contenedor estilizado para el saludo del usuario activo -->
+        <div id="user-display" style="font-size: 11px; font-weight: bold; color: #1e3a8a; background: #eff6ff; border: 1px solid #bfdbfe; padding: 6px 12px; border-radius: 6px; display: flex; align-items: center; gap: 6px;">
+            <i class="fas fa-user-circle" style="font-size: 14px; color: #2563eb;"></i>
+            <span id="user-text">Cargando usuario...</span>
+        </div>
     </div>
 
-    <button class="btn" style="background: var(--primary); margin-left: auto;" onclick="location.href='admin_global.html'">
-        <i class="fa-solid fa-house"></i> DASHBOARD
-    </button>
+    <!-- Grupo de botones de navegación y sesión -->
+    <div style="display: flex; gap: 8px;">
+        <button class="btn" style="background: var(--primary);" onclick="location.href='admin_global.html'">
+            <i class="fa-solid fa-chart-pie"></i> DASHBOARD
+        </button>
+        <button class="btn" style="background: var(--danger);" onclick="cerrarSesion()">
+            <i class="fas fa-sign-out-alt"></i> CERRAR SESIÓN
+        </button>
+    </div>
 </header>
 
 <div class="container">
-    <div class="card no-print">
+<div class="card no-print">
     <h3 style="margin-bottom: 25px; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
         <i class="fas fa-folder-plus"></i> Registro de Expediente
     </h3>
@@ -135,13 +145,11 @@
         </fieldset>
     </div>
 
-    <!-- BOTONERA ACTUALIZADA -->
+    <!-- BOTONERA -->
     <div class="btn-box" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
         <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
         <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
-        <button class="btn" style="background:var(--excel)" onclick="exportarExcel()"><i class="fas fa-download"></i> DESCARGAR EXCEL</button>
         <button class="btn" style="background:#64748b" onclick="limpiarForm()"><i class="fas fa-broom"></i> LIMPIAR</button>
-        <button class="btn" style="background:#94a3b8" onclick="limpiarForm()"><i class="fas fa-plus"></i> NUEVO</button>
     </div>
 </div>
 
@@ -211,6 +219,27 @@
     let filasPorPagina = 10;
     let proximoNo = 1;
 
+    // Configuración global de la sesión al cargar la página
+    document.addEventListener("DOMContentLoaded", () => {
+        const sesionActiva = sessionStorage.getItem('sesion_activa');
+        const nombreUsuario = sessionStorage.getItem('nombre_usuario');
+        const departamento = sessionStorage.getItem('departamento');
+
+        if (sesionActiva === 'true' && nombreUsuario) {
+            document.getElementById('user-text').innerText = `BIENVENIDO: ${nombreUsuario.toUpperCase()} (${departamento || 'PROCURADURÍA'})`;
+        } else {
+            document.getElementById('user-text').innerText = "MODO: INVITADO";
+        }
+    });
+
+    // Función global expuesta para cerrar la sesión de forma segura
+    window.cerrarSesion = () => {
+        if(confirm("¿Está seguro de que desea cerrar la sesión actual?")) {
+            sessionStorage.clear();
+            window.location.href = 'index.html'; // Cambia por el nombre exacto de tu archivo de Login si difiere
+        }
+    };
+
     onSnapshot(dataRef, (snapshot) => {
         todosLosDatos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         if(todosLosDatos.length > 0) {
@@ -223,9 +252,6 @@
         }
         window.filtrar();
     });
-
-    const sesion = sessionStorage.getItem('sesion_activa');
-    document.getElementById('user-display').innerText = `MODO: ${sesion ? sesion.toUpperCase() : 'INVITADO'}`;
 
     window.importarDesdeExcel = async (e) => {
         const file = e.target.files[0];
@@ -320,24 +346,22 @@
         }
     };
 
-window.filtrar = () => {
-    const term = document.getElementById('buscador').value.toLowerCase().trim();
-    
-    // 1. Filtramos los datos según el término de búsqueda
-    datosMostrados = todosLosDatos.filter(r => 
-        Object.values(r).some(val => String(val).toLowerCase().includes(term))
-    );
+    window.filtrar = () => {
+        const term = document.getElementById('buscador').value.toLowerCase().trim();
+        
+        datosMostrados = todosLosDatos.filter(r => 
+            Object.values(r).some(val => String(val).toLowerCase().includes(term))
+        );
 
-    // 2. ORDENAR DE MAYOR A MENOR (Descendente)
-    datosMostrados.sort((a, b) => {
-        const numA = parseInt(a.no) || 0;
-        const numB = parseInt(b.no) || 0;
-        return numB - numA; // B menos A para que el mayor vaya primero
-    });
-    
-    paginaActual = 1; 
-    renderTabla();
-};
+        datosMostrados.sort((a, b) => {
+            const numA = parseInt(a.no) || 0;
+            const numB = parseInt(b.no) || 0;
+            return numB - numA;
+        });
+        
+        paginaActual = 1; 
+        renderTabla();
+    };
 
     function renderTabla() {
         const totalRegistros = datosMostrados.length;
@@ -389,7 +413,7 @@ window.filtrar = () => {
         };
     }
 
-   window.limpiarForm = () => {
+    window.limpiarForm = () => {
         ['edit-id','fecha','nombre','domicilio','lugar','asuntos','detalles','elaboro'].forEach(id => {
             document.getElementById(id).value = '';
         });
