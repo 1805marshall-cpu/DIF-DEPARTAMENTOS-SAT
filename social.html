@@ -55,9 +55,25 @@
 <body>
 
 <header class="no-print">
-    <div style="display: flex; align-items: center; gap: 20px;">
-        <h2 style="margin:0; color: var(--social); font-size: 18px;"><i class="fas fa-users-cog"></i> TRABAJO SOCIAL DIF</h2>
-        <button class="btn" style="background: var(--primary)" onclick="location.href='admin_global.html'"><i class="fa-solid fa-house"></i> DASHBOARD</button>
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+        <!-- LADO IZQUIERDO: Título y Bienvenida -->
+        <div style="display: flex; align-items: center; gap: 20px;">
+            <h2 style="margin:0; color: var(--social); font-size: 18px;">
+                <i class="fas fa-users-cog"></i> TRABAJO SOCIAL DIF
+            </h2>
+            <span id="bienvenida-usuario" style="font-size: 13px; font-weight: bold; color: #475569; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; display: none;"></span>
+        </div>
+        
+        <!-- LADO DERECHO: Botones de Acción -->
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <!-- Botón Dashboard con Diseño de Estadística -->
+            <button class="btn" style="background: #6366f1; box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);" onclick="location.href='admin_global.html'">
+                <i class="fa-solid fa-chart-pie"></i> DASHBOARD
+            </button>
+            <button class="btn" style="background: var(--danger);" onclick="cerrarSesion()">
+                <i class="fa-solid fa-sign-out-alt"></i> CERRAR SESIÓN
+            </button>
+        </div>
     </div>
 </header>
 
@@ -274,33 +290,43 @@
             limpiarForm();
         } catch (e) { alert("Error al actualizar."); }
     };
-
+    
     window.editarLocal = (id) => {
-        const reg = todosLosDatos.find(r => r.id === id);
-        if(!reg) return;
-        document.getElementById('edit-id').value = id;
-        
-        listaCampos.forEach(c => {
-            const el = document.getElementById(c);
-            if(el) el.value = reg[c] || "";
-        });
+    const reg = todosLosDatos.find(r => r.id === id);
+    if(!reg) return;
+    document.getElementById('edit-id').value = id;
+    
+    // 1. Cargar todos los campos base
+    listaCampos.forEach(c => {
+        const el = document.getElementById(c);
+        if(el) el.value = reg[c] || "";
+    });
 
-        // Disparar la lógica de menús anidados
-        window.actualizarAsuntos();
-        document.getElementById('asunto').value = reg.asunto || "";
-        
-        // Disparar manualmente el cambio de asunto para mostrar el detalle si existe
-        const evento = new Event('change');
-        document.getElementById('asunto').dispatchEvent(evento);
-        
-        setTimeout(() => {
-            if(reg.detalle_asunto) document.getElementById('detalle_asunto').value = reg.detalle_asunto;
-        }, 100);
+    // 2. Forzar la actualización del primer nivel de dependencia (Programa -> Asunto)
+    window.actualizarAsuntos();
+    
+    // 3. Volver a asignar el asunto (ya que actualizarAsuntos limpia este selector)
+    document.getElementById('asunto').value = reg.asunto || "";
+    
+    // 4. Ejecutar manualmente la lógica del sub-menú asignada en .onchange de Asunto
+    const asuntoSelect = document.getElementById('asunto');
+    if (typeof asuntoSelect.onchange === 'function') {
+        asuntoSelect.onchange(); 
+    }
+    
+    // 5. Asignar el valor específico guardado una vez que las opciones ya existen en el DOM
+    if(reg.detalle_asunto) {
+        const detalleSelect = document.getElementById('detalle_asunto');
+        if (detalleSelect) {
+            detalleSelect.value = reg.detalle_asunto;
+        }
+    }
 
-        document.getElementById('btn-save').style.display = 'none';
-        document.getElementById('btn-update').style.display = 'inline-block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
+    // Mostrar botones correctos e ir al inicio del formulario
+    document.getElementById('btn-save').style.display = 'none';
+    document.getElementById('btn-update').style.display = 'inline-block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
     function obtenerValoresForm() {
         const res = {};
@@ -435,6 +461,41 @@ window.actualizarAsuntos = () => {
             await batch.commit();
         }
     };
+
+    // Ejecutar al cargar la página
+document.addEventListener("DOMContentLoaded", () => {
+    const nombreSocial = sessionStorage.getItem('social_nombre');
+    const tituloSocial = sessionStorage.getItem('social_titulo');
+    const saludoContenedor = document.getElementById('bienvenida-usuario');
+    const selectUsuario = document.getElementById('usuario');
+
+    if (nombreSocial && tituloSocial) {
+        // 1. Mostrar el mensaje de bienvenida con Título y Nombre
+        saludoContenedor.innerText = `¡BIENVENIDA, ${tituloSocial} ${nombreSocial}!`;
+        saludoContenedor.style.display = 'inline-block';
+
+        // 2. Auto-seleccionar su nombre en el menú desplegable del formulario si coincide
+        if (selectUsuario) {
+            // Buscamos si el valor guardado coincide con alguna opción del select
+            for (let i = 0; i < selectUsuario.options.length; i++) {
+                if (selectUsuario.options[i].value === nombreSocial) {
+                    selectUsuario.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+    }
+});
+
+window.cerrarSesion = () => {
+    if (confirm("¿Está seguro de que desea cerrar sesión?")) {
+        // Limpiar los datos almacenados en la sesión actual
+        sessionStorage.clear();
+        
+        // Redirigir al archivo de login (ajusta el nombre si se llama diferente, por ejemplo index.html)
+        window.location.href = 'index.html';
+    }
+};
 </script>
 </body>
 </html>
