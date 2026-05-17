@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIF 2026 | Psicología - Registro Estructurado</title>
+    <title>DIF 2026 - 2029 | Psicología - Registro Estructurado</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
@@ -19,9 +19,66 @@
             display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
         }
 
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
         .container { max-width: 98%; margin: 15px auto; }
 
-        /* Estilo de los bloques divididos */
+        /* Estilos del contenedor de Usuarios Activos */
+        .online-users-bar {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .online-title {
+            font-weight: 800;
+            font-size: 11px;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .users-list {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .user-badge {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #334155;
+            text-transform: lowercase;
+        }
+        .user-badge i {
+            color: var(--success);
+            font-size: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
         fieldset {
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -59,7 +116,6 @@
             cursor: pointer; font-size: 10px; color: white; display: flex; align-items: center; gap: 6px; 
         }
 
-        /* Tabla */
         .table-wrap { background: #fff; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         table { width: 100%; border-collapse: collapse; min-width: 1700px; }
         th { background: #f8fafc; padding: 12px; text-align: left; font-size: 10px; color: #1e293b; border-bottom: 2px solid var(--border); }
@@ -73,10 +129,23 @@
 
 <header>
     <h2 style="margin:0; color:var(--primary); font-size: 1.2rem;"><i class="fas fa-hand-holding-heart"></i> PSICOLOGÍA DIF | SISTEMA 2026</h2>
-    <button class="btn" style="background: var(--primary)" onclick="location.href='admin_global.html'"><i class="fas fa-home"></i> DASHBOARD</button>
+    <div class="header-actions">
+        <button class="btn" style="background: #475569" onclick="location.href='admin_global.html'"><i class="fa-solid fa-chart-pie"></i> DASHBOARD</button>
+        <!-- BOTÓN DE CERRAR SESIÓN -->
+        <button class="btn" style="background: var(--primary)" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> CERRAR SESIÓN</button>
+    </div>
 </header>
 
 <div class="container">
+    
+    <!-- BARRA INTERACTIVA DE USUARIOS CONECTADOS -->
+    <div class="online-users-bar">
+        <div class="online-title"><i class="fas fa-users"></i> En Línea:</div>
+        <div class="users-list" id="active-users-container">
+            <!-- Los usuarios activos se inyectarán dinámicamente aquí -->
+        </div>
+    </div>
+
     <input type="hidden" id="f-id">
     
     <fieldset>
@@ -127,6 +196,16 @@
         <button class="btn" id="btn-save" style="background:var(--success)" onclick="saveData()"><i class="fas fa-save"></i> GUARDAR REGISTRO</button>
         <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="updateData()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
         <button class="btn" style="background:#64748b" onclick="limpiarForm()"><i class="fas fa-eraser"></i> LIMPIAR</button>
+        
+        <div style="flex-grow: 1;"></div> 
+        <button class="btn" style="background:#1d6f42" onclick="exportExcel()"><i class="fas fa-file-excel"></i> EXCEL</button>
+        <label class="btn" style="background:#4f46e5; cursor:pointer;">
+            <i class="fas fa-upload"></i> IMPORTAR
+            <input type="file" id="import-excel" style="display:none" onchange="importarDesdeExcel(event)">
+        </label>
+        <button class="btn" style="background:var(--danger)" onclick="eliminarTodo()"><i class="fas fa-trash-alt"></i> BORRAR TODO</button>
+    </div>
+
     <div style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 15px; border: 1px solid var(--border); border-bottom: none; border-radius: 8px 8px 0 0;">
         <div class="form-group" style="flex-direction: row; align-items: center; gap: 8px;">
             <label style="margin:0">Mostrar:</label>
@@ -136,16 +215,12 @@
                 <option value="30">30</option>
                 <option value="50">50</option>
                 <option value="100">100</option>
-                <option value="200">200</option>
-                <option value="300">300</option>
-                <option value="500">500</option>
             </select>
             <span id="pagi-info" style="font-size: 11px; color: #64748b; font-weight: bold;"></span>
         </div>
-        
-        <div style="display: flex; gap: 5px;" id="pagi-buttons">
-            </div>
+        <div style="display: flex; gap: 5px;" id="pagi-buttons"></div>
     </div>
+
     <div class="table-wrap">
         <table>
             <thead>
@@ -170,23 +245,78 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, query, orderBy, writeBatch, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    
     const mainRef = collection(db, "psicologia");
+    const usuariosRef = collection(db, "usuarios_activos");
 
+    const usuarioLogueado = sessionStorage.getItem('nombre_usuario') || "invitado";
     const sesion = (sessionStorage.getItem('sesion_activa') || "INVITADO").toUpperCase();
     
-    // VARIABLES DE PAGINACIÓN
     let dataList = [];
     let currentPage = 1;
     let rowsPerPage = 10;
 
+    // --- SISTEMA DE PRESENCIA DE USUARIOS ---
+    if(usuarioLogueado !== "invitado") {
+        setDoc(doc(db, "usuarios_activos", usuarioLogueado), {
+            usuario: usuarioLogueado,
+            ultimaConexion: new Date().getTime()
+        });
+
+        window.addEventListener('beforeunload', () => {
+            deleteDoc(doc(db, "usuarios_activos", usuarioLogueado));
+        });
+    }
+
+    onSnapshot(usuariosRef, (snap) => {
+        const contenedorUsuarios = document.getElementById('active-users-container');
+        if(snap.empty) {
+            contenedorUsuarios.innerHTML = '<span style="color:#94a3b8; font-style:italic; font-size:11px;">No hay personal identificado</span>';
+            return;
+        }
+        
+        contenedorUsuarios.innerHTML = snap.docs.map(doc => {
+            const u = doc.data().usuario;
+            return `
+                <div class="user-badge">
+                    <i class="fas fa-circle"></i> @${u}
+                </div>
+            `;
+        }).join('');
+    });
+
+    // FUNCIÓN GLOBAL DE CERRAR SESIÓN
+    window.cerrarSesion = async () => {
+        if(confirm("¿Estás seguro de que deseas cerrar tu sesión?")) {
+            try {
+                if(usuarioLogueado !== "invitado") {
+                    // Eliminamos el registro de en línea de Firebase inmediatamente
+                    await deleteDoc(doc(db, "usuarios_activos", usuarioLogueado));
+                }
+            } catch (e) {
+                console.error("Error al remover presencia:", e);
+            } finally {
+                // Limpiamos los datos del navegador y redirigimos al login
+                sessionStorage.clear();
+                window.location.href = 'index.html';
+            }
+        }
+    };
+    // --- FIN DEL SISTEMA DE PRESENCIA ---
+
+
     onSnapshot(query(mainRef, orderBy("no", "desc")), (snap) => {
         dataList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         renderUI();
+        if(!document.getElementById('f-id').value) {
+            const max = dataList.reduce((m, i) => Math.max(m, Number(i.no) || 0), 0);
+            document.getElementById('f-no').value = max + 1;
+        }
     });
 
     window.changePageLimit = () => {
@@ -201,12 +331,10 @@
     };
 
     window.renderUI = () => {
-        // 1. Calcular rango de datos para la página actual
         const start = (currentPage - 1) * rowsPerPage;
         const end = start + rowsPerPage;
         const paginatedData = dataList.slice(start, end);
 
-        // 2. Renderizar filas de la tabla
         document.getElementById('table-body').innerHTML = paginatedData.map(d => `
             <tr>
                 <td><b>#${d.no || ''}</b></td>
@@ -226,16 +354,13 @@
             </tr>
         `).join('');
 
-        // 3. Renderizar Controles de Paginación
-        const totalPages = Math.ceil(dataList.length / rowsPerPage);
+        const totalPages = Math.ceil(dataList.length / rowsPerPage) || 1;
         document.getElementById('pagi-info').innerText = `Total: ${dataList.length} registros | Pág. ${currentPage} de ${totalPages}`;
         
         let btns = '';
         if(totalPages > 1) {
-            // Botón Anterior
             btns += `<button class="btn" style="background:#64748b; padding:4px 8px" ${currentPage === 1 ? 'disabled' : ''} onclick="goToPage(${currentPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
             
-            // Números de página (limitado a mostrar 5 páginas cerca de la actual para no saturar)
             for (let i = 1; i <= totalPages; i++) {
                 if(i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
                     btns += `<button class="btn" style="background:${i === currentPage ? 'var(--primary)' : '#cbd5e1'}; color:${i === currentPage ? 'white' : '#1e293b'}; padding:4px 10px" onclick="goToPage(${i})">${i}</button>`;
@@ -244,29 +369,27 @@
                 }
             }
 
-            // Botón Siguiente
             btns += `<button class="btn" style="background:#64748b; padding:4px 8px" ${currentPage === totalPages ? 'disabled' : ''} onclick="goToPage(${currentPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
         }
         document.getElementById('pagi-buttons').innerHTML = btns;
     };
 
-    // --- EL RESTO DE TUS FUNCIONES SE MANTIENEN IGUAL ---
     window.getFormData = () => {
         return {
             no: Number(document.getElementById('f-no').value),
             fecha: document.getElementById('f-fecha').value,
             horario: document.getElementById('f-horario').value,
-            paciente: document.getElementById('f-paciente').value.toUpperCase(),
+            paciente: document.getElementById('f-paciente').value.toUpperCase().trim(),
             edad_p: document.getElementById('f-edad_p').value,
             genero_p: document.getElementById('f-genero_p').value,
-            nombre_a: document.getElementById('f-nombre_a').value.toUpperCase(),
+            nombre_a: document.getElementById('f-nombre_a').value.toUpperCase().trim(),
             edad_a: document.getElementById('f-edad_a').value,
             genero_a: document.getElementById('f-genero_a').value,
-            col_loc: document.getElementById('f-col_loc').value.toUpperCase(),
+            col_loc: document.getElementById('f-col_loc').value.toUpperCase().trim(),
             telefono: document.getElementById('f-telefono').value,
-            tema: document.getElementById('f-tema').value.toUpperCase(),
-            usuario: document.getElementById('f-usuario').value.toUpperCase(),
-            observaciones: document.getElementById('f-observaciones').value.toUpperCase(),
+            tema: document.getElementById('f-tema').value.toUpperCase().trim(),
+            usuario: document.getElementById('f-usuario').value.toUpperCase().trim(),
+            observaciones: document.getElementById('f-observaciones').value.toUpperCase().trim(),
             t: new Date().getTime()
         };
     };
@@ -274,28 +397,32 @@
     window.saveData = async () => {
         const data = getFormData();
         if(!data.paciente) return alert("El nombre del paciente es obligatorio");
-        await addDoc(mainRef, data);
-        limpiarForm();
+        try {
+            await addDoc(mainRef, data);
+            limpiarForm();
+        } catch (error) {
+            alert("Error al guardar el registro: " + error.message);
+        }
     };
 
     window.editMode = (id) => {
         const d = dataList.find(i => i.id === id);
         if(!d) return;
         document.getElementById('f-id').value = d.id;
-        document.getElementById('f-no').value = d.no;
-        document.getElementById('f-fecha').value = d.fecha;
-        document.getElementById('f-horario').value = d.horario;
-        document.getElementById('f-paciente').value = d.paciente;
-        document.getElementById('f-edad_p').value = d.edad_p;
-        document.getElementById('f-genero_p').value = d.genero_p;
-        document.getElementById('f-nombre_a').value = d.nombre_a;
-        document.getElementById('f-edad_a').value = d.edad_a;
-        document.getElementById('f-genero_a').value = d.genero_a;
-        document.getElementById('f-col_loc').value = d.col_loc;
-        document.getElementById('f-telefono').value = d.telefono;
-        document.getElementById('f-tema').value = d.tema;
-        document.getElementById('f-usuario').value = d.usuario;
-        document.getElementById('f-observaciones').value = d.observaciones;
+        document.getElementById('f-no').value = d.no || '';
+        document.getElementById('f-fecha').value = d.fecha || '';
+        document.getElementById('f-horario').value = d.horario || '';
+        document.getElementById('f-paciente').value = d.paciente || '';
+        document.getElementById('f-edad_p').value = d.edad_p || '';
+        document.getElementById('f-genero_p').value = d.genero_p || '';
+        document.getElementById('f-nombre_a').value = d.nombre_a || '';
+        document.getElementById('f-edad_a').value = d.edad_a || '';
+        document.getElementById('f-genero_a').value = d.genero_a || '';
+        document.getElementById('f-col_loc').value = d.col_loc || '';
+        document.getElementById('f-telefono').value = d.telefono || '';
+        document.getElementById('f-tema').value = d.tema || '';
+        document.getElementById('f-usuario').value = d.usuario || '';
+        document.getElementById('f-observaciones').value = d.observaciones || '';
         
         document.getElementById('btn-save').style.display = 'none';
         document.getElementById('btn-update').style.display = 'inline-block';
@@ -304,9 +431,14 @@
 
     window.updateData = async () => {
         const id = document.getElementById('f-id').value;
-        await updateDoc(doc(db, "psicologia", id), getFormData());
-        alert("Registro actualizado correctamente");
-        limpiarForm();
+        if(!id) return;
+        try {
+            await updateDoc(doc(db, "psicologia", id), getFormData());
+            alert("Registro actualizado correctamente");
+            limpiarForm();
+        } catch (error) {
+            alert("Error al actualizar: " + error.message);
+        }
     };
 
     window.limpiarForm = () => {
@@ -323,13 +455,74 @@
         document.getElementById('f-no').value = max + 1;
     };
 
-    window.delDoc = async (id) => { if(confirm("¿Seguro que desea eliminar este registro?")) await deleteDoc(doc(db, "psicologia", id)); };
+    window.delDoc = async (id) => { 
+        if(confirm("¿Seguro que desea eliminar este registro?")) {
+            await deleteDoc(doc(db, "psicologia", id)); 
+        }
+    };
     
     window.exportExcel = () => { 
+        if(dataList.length === 0) return alert("No hay datos para exportar");
         const ws = XLSX.utils.json_to_sheet(dataList.map(({id, t, ...rest}) => rest)); 
         const wb = XLSX.utils.book_new(); 
         XLSX.utils.book_append_sheet(wb, ws, "Registros"); 
         XLSX.writeFile(wb, "Psicologia_DIF_2026.xlsx"); 
+    };
+
+    window.importarDesdeExcel = (e) => {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            try {
+                const data = new Uint8Array(evt.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheetName = workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const json = XLSX.utils.sheet_to_json(sheet);
+                
+                if(json.length === 0) return alert("El archivo está vacío");
+                
+                let cont = 0;
+                for(let item of json) {
+                    await addDoc(mainRef, {
+                        no: Number(item.no) || 0,
+                        fecha: item.fecha || '',
+                        horario: item.horario || '',
+                        paciente: String(item.paciente || '').toUpperCase().trim(),
+                        edad_p: String(item.edad_p || ''),
+                        genero_p: String(item.genero_p || '').toUpperCase(),
+                        nombre_a: String(item.nombre_a || '').toUpperCase().trim(),
+                        edad_a: String(item.edad_a || ''),
+                        genero_a: String(item.genero_a || '').toUpperCase(),
+                        col_loc: String(item.col_loc || '').toUpperCase().trim(),
+                        telefono: String(item.telefono || ''),
+                        tema: String(item.tema || '').toUpperCase().trim(),
+                        usuario: String(item.usuario || '').toUpperCase().trim(),
+                        observaciones: String(item.observaciones || '').toUpperCase().trim(),
+                        t: new Date().getTime()
+                    });
+                    cont++;
+                }
+                alert(`Se importaron ${cont} registros con éxito.`);
+                document.getElementById('import-excel').value = '';
+            } catch (err) {
+                alert("Error al procesar el archivo Excel: " + err.message);
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
+    window.eliminarTodo = async () => {
+        if(confirm("⚠ ¡ATENCIÓN! Estás a punto de borrar TODOS los registros de la base de datos de psicología. Esta acción no se puede deshacer. ¿Deseas continuar?")) {
+            const batch = writeBatch(db);
+            dataList.forEach(d => {
+                const docRef = doc(db, "psicologia", d.id);
+                batch.delete(docRef);
+            });
+            await batch.commit();
+            alert("Todos los registros han sido eliminados.");
+        }
     };
 
     window.limpiarForm();
