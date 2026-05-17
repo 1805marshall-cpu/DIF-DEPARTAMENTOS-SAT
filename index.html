@@ -29,7 +29,7 @@
             box-sizing: border-box;
         }
 
-        /* --- NUEVO: ANIMACIÓN DE ENTRADA SUAVE --- */
+        /* Animación de entrada suave */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -41,10 +41,10 @@
             }
         }
 
-        /* Banner de logotipos institucionales (Superior) */
+        /* Banner de logotipos institucionales (Superior) - Optimizado para formato horizontal */
         .brand-header {
             width: 100%;
-            max-width: 430px;
+            max-width: 430px; /* Ampliado para evitar que los logos se compriman en PC */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -57,8 +57,9 @@
             backdrop-filter: blur(10px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.02);
             border: 1px solid rgba(226, 232, 240, 0.8);
+            box-sizing: border-box;
             
-            /* Aplicación de la transición a los logos */
+            /* Animación directa al cargar */
             animation: fadeInUp 0.8s ease-out forwards;
         }
 
@@ -80,10 +81,11 @@
             border: 1px solid #f1f5f9;
             position: relative;
             overflow: hidden;
+            box-sizing: border-box;
             
-            /* Aplicación de la transición a la tarjeta (con un sutil retraso para dinamismo) */
+            /* Animación con retraso para efecto escalonado */
             animation: fadeInUp 0.8s ease-out 0.2s forwards;
-            opacity: 0; /* Se mantiene oculto hasta que inicia la animación */
+            opacity: 0; 
         }
 
         /* Línea decorativa superior institucional */
@@ -224,8 +226,9 @@
         }
 
         @media (max-width: 600px) {
-            .brand-header { padding: 20px; }
-            .brand-logo { height: 50px; }
+            .brand-header { padding: 15px; margin-bottom: 20px; }
+            .brand-logo { height: 45px; }
+            .login-card { padding: 30px 20px; }
         }
     </style>
 </head>
@@ -236,7 +239,7 @@
 </div>
 
 <div class="login-card">
-    <img src="Captura de pantalla 2026-02-05 a la(s) 10.28.31 a.m..png" alt="Amor que protege" class="slogan-img">
+    <img src="Captura_de_pantalla_2026-02-05_a_la_s__10.28.31_a.m.-removebg-preview.png" alt="Amor que protege" class="slogan-img">
     
     <h2>SISTEMA INTEGRAL</h2>
     <p>Panel de Control 2026</p>
