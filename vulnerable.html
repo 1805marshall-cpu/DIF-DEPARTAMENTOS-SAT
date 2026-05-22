@@ -100,6 +100,9 @@
             <button class="btn" id="btn-upd" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
             <button class="btn" style="background:#1d6f42" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
             <button class="btn" style="background:#94a3b8" onclick="location.reload()"><i class="fas fa-eraser"></i> LIMPIAR</button>
+            <button class="btn" style="background:#475569" onclick="window.exportarResumenEstadistico()">
+    <i class="fas fa-chart-pie"></i> REPORTE TOTALES
+</button>
         </div>
     </div>
 
@@ -445,6 +448,62 @@
         await batch.commit();
         alert("Base de datos vaciada.");
     };
+// --- EXPORTAR REPORTE DE TOTALES POR LOCALIDAD Y APOYO ---
+window.exportarResumenEstadistico = () => {
+    if (DATA_FILTRADA.length === 0) return alert("No hay datos para generar el reporte estadístico.");
+
+    // Diccionario para agrupar por combinación única de Localidad + Apoyo
+    const matrizTotales = {};
+    let granTotalBeneficiarios = 0;
+
+    // 1. Recorrer y contabilizar la data filtrada actualmente
+    DATA_FILTRADA.forEach(registro => {
+        granTotalBeneficiarios++;
+
+        // Limpiar y estandarizar textos para evitar duplicados por errores de dedo o mayúsculas
+        const localidad = (registro.col_loc || "NO ESPECIFICADA").toUpperCase().trim();
+        const apoyo = (registro.tipo_apoyo || "SIN ESPECIFICAR").toUpperCase().trim();
+        
+        // Creamos una llave única combinando ambos campos
+        const llaveUnica = `${localidad} | ${apoyo}`;
+
+        if (!matrizTotales[llaveUnica]) {
+            matrizTotales[llaveUnica] = {
+                localidad: localidad,
+                apoyo: apoyo,
+                total: 0
+            };
+        }
+        
+        // Sumamos 1 al contador de esta combinación específica
+        matrizTotales[llaveUnica].total++;
+    });
+
+    // 2. Transformar el diccionario a un arreglo plano ordenado alfabéticamente por Localidad
+    const datosReporte = Object.values(matrizTotales).map(item => ({
+        "LOCALIDAD / COLONIA": item.localidad,
+        "TIPO DE APOYO": item.apoyo,
+        "CANTIDAD TOTAL": item.total
+    })).sort((a, b) => a["LOCALIDAD / COLONIA"].localeCompare(b["LOCALIDAD / COLONIA"]));
+
+    // 3. Agregar la fila del Gran Total al final de la tabla
+    datosReporte.push({
+        "LOCALIDAD / COLONIA": "---",
+        "TIPO DE APOYO": "TOTAL GENERAL DE EXPEDIENTES",
+        "CANTIDAD TOTAL": granTotalBeneficiarios
+    });
+
+    // 4. Crear la estructura del archivo Excel con SheetJS
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(datosReporte);
+    
+    // Adjuntamos la hoja al libro de trabajo
+    XLSX.utils.book_append_sheet(wb, ws, "Totales por Zona y Apoyo");
+
+    // 5. Lanzar la descarga automática
+    const fechaHoy = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `Resumen_Totales_DIF_${fechaHoy}.xlsx`);
+};
 </script>
 </body>
 </html>
