@@ -5,25 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SISTEMA DIF 2026 - 2029 | Admin Global</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         
-     :root { 
-    --sidebar-bg: #1e293b; /* Un azul pizarra más profesional */
-    --primary: #3b82f6; 
-    --success: #10b981; 
-    --warning: #f59e0b; 
-    --danger: #ef4444; 
-    --bg: #f1f5f9; /* Fondo un poco más grisáceo para que resalten las tarjetas blancas */
+   :root { 
+    /* Colores Institucionales DIF San Andrés Tuxtla */
+    --primary: #8a1538;       /* Guinda Institucional (Vino) */
+    --sidebar-bg: #2d1e22;    /* Fondo oscuro para sidebar (tono vino muy oscuro) */
+    --secondary: #c5a059;     /* Dorado/Arena Institucional */
     
-    /* Colores de departamentos con tonos "Pastel-Profesional" */
-    --vulnerable-color: #f97316; 
-    --psico-color: #ec4899; 
-    --procu-color: #2563eb; 
-    --med-color: #8b5cf6;
-    --social-color: #9333ea; 
+    /* Estados y alertas */
+    --success: #2e7d32; 
+    --warning: #c5a059; 
+    --danger: #b91c1c; 
+    --bg: #fdfbf7;            /* Fondo crema claro (tipo papel institucional) */
     
-    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    /* Colores de departamentos adaptados a la paleta */
+    --vulnerable-color: #8a1538; 
+    --psico-color: #a32a4d; 
+    --procu-color: #5d1a2c; 
+    --med-color: #4a6741;     /* Tono verde profesional */
+    --social-color: #8a1538;
+    --genloc-color: #c5a059;
+    --escolar-color: #2d1e22;
 }
         
         body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; color: #1e293b; }
@@ -77,7 +80,7 @@
 }
 
         /* Panels */
-        .panel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; }
+        .panel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .panel { background: white; border-radius: 15px; padding: 20px; border: 1px solid #e2e8f0; height: 480px; overflow-y: auto; }
         .panel b { display: block; margin-bottom: 15px; font-size: 10px; text-transform: uppercase; color: #94a3b8; border-bottom: 2px solid #f8fafc; padding-bottom: 10px; letter-spacing: 1px; }
         
@@ -156,13 +159,11 @@
         grid-column: span 2; /* El total de sesiones ocuparía el ancho completo en móvil */
     }
 }
+.access-card { 
+    background: var(--primary); 
+    border-bottom: 3px solid var(--secondary); /* Añade un borde dorado */
+}
     </style>
-    <script>
-        // ESCUDO DE SEGURIDAD INMEDIATO
-        if (sessionStorage.getItem('sesion_activa') !== 'true') {
-            window.location.replace("index.html");
-        }
-    </script>
 </head>
 <body>
     <div class="sidebar">
@@ -178,11 +179,19 @@
             <div id="nav-psicologia" class="nav-item" onclick="showView('psicologia', this)"><i class="fas fa-brain"></i> <span>Psicología</span></div>
             <div id="nav-jefatura-psicologia" class="nav-item" onclick="showView('jefatura-psicologia', this)"><i class="fas fa-user-shield"></i> <span>Jefatura Psicología</span></div>
             <div id="nav-general-localidades" class="nav-item" onclick="showView('general-localidades', this)"><i class="fas fa-map-marked-alt"></i> <span>General Localidades</span></div>
-           <div id="nav-escolar" class="nav-item" onclick="showView('escolar', this)"><i class="fa-solid fa-list-check"></i><span>Solicitudes Generales</span></div>
+            <div id="nav-escolar" class="nav-item" onclick="showView('escolar', this)"><i class="fas fa-school"></i> <span>Req. Escolares</span></div>
             <div id="nav-territorial" class="nav-item" onclick="showView('territorial', this)"><i class="fas fa-city"></i> <span>Resumen Territorial</span></div>
-            <div id="nav-estadisticas-global" class="nav-item" onclick="showView('estadisticas-global', this)"><i class="fa-solid fa-chart-area"></i> <span>Estadistica</span></div>
         </nav>
-        <div class="nav-exit" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> <span>CERRAR SESIÓN</span></div>
+        <!-- Agrega este bloque antes del nav-exit -->
+<div id="user-info-sidebar" style="padding: 15px 25px; border-top: 1px solid #1e293b; color: #cbd5e1; font-size: 11px; text-align: center;">
+    <i class="fas fa-user-circle" style="display: block; font-size: 24px; margin-bottom: 5px; color: var(--primary);"></i>
+    <div id="sidebar-username" style="font-weight: bold; text-transform: uppercase;">Cargando...</div>
+    <div id="sidebar-role" style="font-size: 9px; color: #64748b; margin-top: 2px;"></div>
+</div>
+
+<div class="nav-exit" onclick="cerrarSesion()">
+    <i class="fas fa-sign-out-alt"></i> <span>CERRAR SESIÓN</span>
+</div>
     </div>
 
     <div class="main-content">
@@ -225,9 +234,9 @@
             <div id="reloj"></div>
         </div>        
         
-<!-- AREA DE POBLACION VULNERABLE -->
+
         <div id="view-vulnerable" class="view-container">
-            <div class="access-card" style="background: var(--vulnerable-color);"><div><b>Población Vulnerable</b></div><a href="vulnerable.html" class="btn-open">Ir al Módulo de Captura</a></div>
+            <div class="access-card" style="background: var(--vulnerable-color);"><div><b>Población Vulnerable</b></div><a href="vulnerable.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
             <div class="stats-grid">
                 <div class="stat-box"><small>Registros</small><div id="v-total">0</div></div>
@@ -247,148 +256,50 @@
             </div>
         </div>
 
-        <!-- AREA DE TRABAJO SOCIAL -->
-   
-   <div id="view-social" class="view-container" style="font-size: 12px;"> <!-- Forzamos tamaño base -->
-    <div class="access-card" style="background: var(--social-color); margin-bottom: 15px; padding: 10px;"><div style="font-size: 14px;"><b>Trabajo Social</b></div><a href="social.html" class="btn-open" style="font-size: 11px;">Ir al Módulo de Captura</a></div>
-
-    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin-bottom: 10px;">
-        <div class="stat-box" style="padding: 10px;">
-            <small style="font-size: 9px; text-transform: uppercase;">Total Casos</small>
-            <div id="s-total" style="font-size: 1.2rem; font-weight: 800;">0</div>
-        </div>
-        <div class="stat-box" style="padding: 10px;">
-            <small style="font-size: 9px; text-transform: uppercase;">Finalizados</small>
-            <div id="s-ent" style="font-size: 1.2rem; font-weight: 800; color:var(--success)">0</div>
-        </div>
-    </div>
-
-    <div id="s-dynamic-programs" class="stats-grid" style="margin-bottom: 15px; gap: 10px;"></div>
-
-    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px;">
-        <div class="panel" style="padding:15px;">
-            <b style="font-size: 10px; color: var(--social-color); display: block; margin-bottom: 10px; text-transform: uppercase;">Resumen Asuntos</b>
-            <div id="s-list-asuntos-count" style="font-size: 11px;"></div>
-        </div>
-        <div class="panel" style="padding:15px;">
-            <b style="font-size: 10px; display: block; margin-bottom: 10px; text-transform: uppercase;">Listado Programa</b>
-            <div id="s-list-programas" style="font-size: 11px;"></div>
-        </div>
-        <div class="panel" style="padding:15px;">
-            <b style="font-size: 10px; color: var(--success); display: block; margin-bottom: 10px; text-transform: uppercase;">Zonas</b>
-            <div id="s-list-geo" style="font-size: 11px;"></div>
-        </div>
-    </div>
-</div>
-        <!-- AREA DE PROCURADURIA -->
-
-<div id="view-procuraduria" class="view-container" style="font-size: 12px;"> <!-- Forzamos tamaño base -->
-    <div class="access-card" style="background: var(--procu-color); margin-bottom: 15px; padding: 10px;"><div style="font-size: 14px;"><b>Procuraduría</b></div><a href="procuraduria.html" class="btn-open" style="font-size: 11px;">Ir al Módulo de Captura</a></div>
-
-    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap:10px; margin-bottom: 15px;">
-        <div class="stat-box" style="padding: 10px;">
-            <small style="font-size: 9px; text-transform: uppercase; color: #64748b;">Expedientes</small>
-            <div id="pr-total" style="font-size: 1.2rem; font-weight: 800;">0</div>
-        </div>
-        <div class="stat-box" style="padding: 10px;">
-            <small style="font-size: 9px; text-transform: uppercase; color: #64748b;">H. Mixtos</small>
-            <div id="pr-mixtos" style="font-size: 1.2rem; font-weight: 800; color:var(--warning)">0</div>
-        </div>
-    </div>
-
-    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px;">
-        <div class="panel" style="padding:15px;">
-            <b style="font-size: 10px; color: var(--procu-color); display: block; margin-bottom: 10px; text-transform: uppercase;">Asuntos</b>
-            <div id="pr-conteo-tabla" style="font-size: 11px;"></div>
-        </div>
-        <div class="panel" style="padding:15px;">
-            <b style="font-size: 10px; display: block; margin-bottom: 10px; text-transform: uppercase;">Listado</b>
-            <div id="pr-list-casos" style="font-size: 11px;"></div>
-        </div>
-        <div class="panel" style="padding:15px;">
-            <b style="font-size: 10px; color: var(--success); display: block; margin-bottom: 10px; text-transform: uppercase;">Zonas</b>
-            <div id="pr-list-geo" style="font-size: 11px;"></div>
-        </div>
-    </div>
-</div>
-
-        <!-- AREA DE MEDICINA -->
-<div id="view-medica" class="view-container">
-<!-- ACCESO DIRECTO -->
-<div class="access-card" style="background: var(--med-color); margin-bottom: 20px;"><div><b>Área Médica</b></div><a href="medica2.html" class="btn-open">Ir al Módulo de Captura</a></div> 
-
-    <!-- NIVEL 1: INDICADORES PRINCIPALES (3 COLUMNAS) -->
-    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap:15px; margin-bottom: 20px;">
-        <div class="stat-box" style="border-bottom: 4px solid var(--med-color); background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <small style="color: #64748b; font-weight: bold;"><i class="fas fa-wallet"></i> TOTAL HISTÓRICO</small>
-            <div id="m-money" style="font-size: 1.5rem; font-weight: 800; margin-top: 5px;">$0.00</div>
-        </div>
-        <div class="stat-box" style="border-bottom: 4px solid var(--success); background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <small style="color: #64748b; font-weight: bold;"><i class="fas fa-calendar-check"></i> CORTE MENSUAL</small>
-            <div id="m-mensual" style="color:var(--success); font-size: 1.5rem; font-weight: 800; margin-top: 5px;">$0.00</div>
-        </div>
-        <div class="stat-box" style="border-bottom: 4px solid #64748b; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-            <small style="color: #64748b; font-weight: bold;"><i class="fas fa-users"></i> PACIENTES TOTALES</small>
-            <div id="m-total" style="font-size: 1.5rem; font-weight: 800; margin-top: 5px;">0</div>
-        </div>
-    </div>
-
-    <!-- NIVEL 2: REGISTRO DETALLADO (VISTA HORIZONTAL SUPERIOR) -->
-    <div class="panel" style="background:#fff; padding:20px; border-radius:12px; height: 400px; overflow-y: auto; border: 1px solid var(--border); margin-bottom: 20px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <b style="font-size: 14px;"><i class="fas fa-file-medical"></i> Registro Detallado de Consultas</b>
-            <span class="badge" style="background:var(--med-color); color:white; padding:4px 10px; border-radius:12px; font-size:10px; font-weight: bold;">DATOS FILTRADOS</span>
-        </div>
-        <table style="width:100%; border-collapse: collapse; font-size: 11px;">
-            <thead style="background:#f8fafc; position: sticky; top:0; z-index:10; border-bottom:2px solid #eee;">
-                <tr>
-                    <th style="padding:12px; text-align:left;">FECHA</th>
-                    <th style="padding:12px; text-align:left;">PACIENTE</th>
-                    <th style="padding:12px; text-align:left;">EDAD</th>
-                    <th style="padding:12px; text-align:left;">SERVICIO</th>
-                    <th style="padding:12px; text-align:left;">LOCALIDAD</th>
-                    <th style="padding:12px; text-align:right;">MONTO</th>
-                </tr>
-            </thead>
-            <tbody id="m-body-historial"></tbody>
-        </table>
-    </div>
-
-    <!-- NIVEL 3: ANÁLISIS ESTADÍSTICO (VISTA HORIZONTAL INFERIOR - 3 COLUMNAS) -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1.5fr; gap: 20px;">
-        
-        <!-- Edades -->
-        <div class="panel" style="background:#fff; padding:20px; border-radius:12px; border: 1px solid var(--border);">
-            <b style="color:var(--primary); font-size:12px; display: block; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-                <i class="fas fa-chart-pie"></i> DISTRIBUCIÓN POR EDADES
-            </b>
-            <div id="m-list-edades" style="margin-top:12px;"></div>
+        <div id="view-social" class="view-container">
+            <div class="access-card" style="background: var(--social-color);"><div><b>Trabajo Social</b></div><a href="social.html" class="btn-open">Módulo</a></div>
+            <div class="filter-bar"></div>
+            <div class="stats-grid"><div class="stat-box"><small>Total Casos</small><div id="s-total">0</div></div><div class="stat-box"><small>Finalizados</small><div id="s-ent" style="color:var(--success)">0</div></div></div>
+            <div id="s-dynamic-programs" class="stats-grid"></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
+                <div class="panel"><b>RESUMEN DE ASUNTOS</b><div id="s-list-asuntos-count"></div></div>
+                <div class="panel"><b>LISTADO POR PROGRAMA</b><div id="s-list-programas"></div></div>
+                <div class="panel"><b>ZONAS</b><div id="s-list-geo"></div></div>
+            </div>
         </div>
 
-        <!-- Servicios -->
-        <div class="panel" style="background:#fff; padding:20px; border-radius:12px; border: 1px solid var(--border);">
-            <b style="color:var(--med-color); font-size:12px; display: block; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-                <i class="fas fa-hand-holding-medical"></i> SERVICIOS TOP
-            </b>
-            <div id="m-list-servicios" style="margin-top:12px;"></div>
+        <div id="view-procuraduria" class="view-container">
+            <div class="access-card" style="background: var(--procu-color);"><div><b>Procuraduría</b></div><a href="procuraduria.html" class="btn-open">Módulo</a></div>
+            <div class="filter-bar"></div>
+            <div class="stats-grid"><div class="stat-box"><small>Expedientes</small><div id="pr-total">0</div></div><div class="stat-box"><small>H. Mixtos</small><div id="pr-mixtos">0</div></div></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
+                <div class="panel"><b>Asuntos</b><div id="pr-conteo-tabla"></div></div>
+                <div class="panel"><b>Listado</b><div id="pr-list-casos"></div></div>
+                <div class="panel"><b>Zonas</b><div id="pr-list-geo"></div></div>
+            </div>
         </div>
 
-        <!-- Localidades (Más ancha para nombres largos) -->
-        <div class="panel" style="background:#fff; padding:20px; border-radius:12px; border: 1px solid var(--border);">
-            <b style="color:var(--success); font-size:12px; display: block; border-bottom: 1px solid #eee; padding-bottom: 8px;">
-                <i class="fas fa-map-marked-alt"></i> IMPACTO TERRITORIAL ($)
-            </b>
-            <div id="m-list-geo" style="margin-top:12px; max-height: 200px; overflow-y: auto;"></div>
+        <div id="view-medica" class="view-container">
+            <div class="access-card" style="background: var(--med-color);"><div><b>Área Médica</b></div><a href="medica.html" class="btn-open">Módulo</a></div>
+            <div class="filter-bar"></div>
+            <div class="stats-grid"><div class="stat-box"><small>Atenciones</small><div id="m-total">0</div></div><div class="stat-box"><small>Medicamentos</small><div id="m-med">0</div></div></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
+                <div class="panel"><b>Servicios</b><div id="m-list-servicios"></div></div>
+                <div class="panel"><b>Diagnósticos</b><div id="m-list-diagnosticos"></div></div>
+                <div class="panel"><b>Zonas</b><div id="m-list-geo"></div></div>
+            </div>
         </div>
 
-    </div>
-</div>
-
-<!-- AREA DE PSICOLOGIA -->
 <div id="view-psicologia" class="view-container">
-    <div class="access-card" style="background: var(--psico-color);"><div><b>Psicología</b></div><a href="psicologia.html" class="btn-open">Ir al Módulo de Captura</a> </div>
+    <div class="access-card" style="background: var(--psico-color);">
+        <div><b>Psicología</b></div>
+        <a href="psicologia.html" class="btn-open">Módulo</a>
+    </div>
+
     <div class="filter-bar"></div>
+
   <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+    
     <div class="stat-box" style="border-top:4px solid var(--psico-color); background: #fff;">
         <small style="font-weight:bold; color:#64748b;">TOTAL PACIENTES</small>
         <div id="p-total" style="font-weight:800; font-size:1.8rem; color:#1e293b;">0</div>
@@ -437,9 +348,9 @@
         </div>
     </div>
 </div>
-<!-- AREA DE JEFATURA DE PSICOLOGIA -->
+
 <div id="view-jefatura-psicologia" class="view-container">
-    <div class="access-card" style="background: #701a27;"><div><b>Jefatura de Psicología</b></div><a href="jefatura_psicologia.html" class="btn-open">Ir al Módulo de Captura</a></div>
+    <div class="access-card" style="background: #701a27;"><div><b>Jefatura de Psicología</b></div><a href="jefatura_psicologia.html" class="btn-open">Módulo</a></div>
     <div class="filter-bar"></div>
     <div class="stats-grid">
         <div class="stat-box" style="border-top:3px solid #701a27"><small>Total de Actividades</small><div id="jp-total">0</div></div>
@@ -452,9 +363,8 @@
     </div>
 </div>
 
-<!-- AREA DE GENERAL LOCALIDADES -->
         <div id="view-general-localidades" class="view-container">
-            <div class="access-card" style="background: #1e3a8a;"><div><b>General Localidades</b></div><a href="general_localidades.html" class="btn-open">Ir al Módulo de Captura</a></div>
+            <div class="access-card" style="background: var(--genloc-color);"><div><b>General Localidades</b></div><a href="general_localidades.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
             <div class="stats-grid">
                 <div class="stat-box" style="border-top:3px solid var(--genloc-color)"><small>Total Registros</small><div id="gl-total">0</div></div>
@@ -467,7 +377,7 @@
             </div>
         </div>
 
-        <div id="view-escolar" class="view-container"><div class="access-card" style="background: #1e3a8a;"><div><b>Solicitudes Generales</b></div><a href="solicitudes.html" class="btn-open">Ir al Módulo de Captura</a></div>
+    <div id="view-escolar" class="view-container"><div class="access-card" style="background: #1e3a8a;"><div><b>Solicitudes Generales</b></div><a href="solicitudes.html" class="btn-open">Módulo</a></div>
     <div class="stats-grid">
         <div class="stat-box"><small>Solicitudes</small><div id="re-total">0</div></div>
         <div class="stat-box"><small>Atendidos</small><div id="re-ate" style="color:var(--success)">0</div></div>
@@ -482,7 +392,7 @@
     </div>
 
    <div id="view-territorial" class="view-container">
-    <div class="access-card" style="background: #1e3a8a;">
+    <div class="access-card" style="background: var(--genloc-color);">
         <b><i class="fas fa-map-marked-alt"></i> Concentrado Territorial Multidepartamental</b>
     </div>
     
@@ -499,45 +409,13 @@
     </div>
     
 </div>
-
-<!-- NUEVA SECCIÓN: GRÁFICOS DE ANÁLISIS GLOBAL -->
-<div id="view-estadisticas-global" class="view-container">
-    <div class="panel" style="margin-top: 20px; background: #fff; padding: 20px; border-radius: 12px; border: 1px solid var(--border);">
-        
-        <div style="margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
-            <b style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">
-                <i class="fas fa-chart-pie"></i> Rendimiento por Departamento (Global)
-            </b>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; align-items: start;">
-            <!-- Gráfico de Barras (Atenciones) -->
-            <div style="height: 250px; position: relative;">
-                <canvas id="chartComparativo"></canvas>
-            </div>
-
-            <!-- Gráfico de Dona (Porcentajes) -->
-            <div style="height: 250px; position: relative;">
-                <canvas id="chartDona"></canvas>
-            </div>
-        </div>
-
-        
-    </div>
-</div>
-
-<!-- IMPORTANTE: Pon este script al final de tu BODY, antes de cerrar la etiqueta </body> -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </div>
 </div>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = { 
-        apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", 
-        projectId: "poblacion-vulnerable---dif" 
-    };
+    const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
@@ -633,32 +511,26 @@ document.addEventListener('DOMContentLoaded', () => {
             } 
         };
     });
-    // --- BASES DE DATOS GLOBALES ---
-    let DB_V = [], DB_S = [], DB_P = [], DB_M = [], DB_PS = [], DB_JP = [], DB_GL = [], DB_RE = [];
+   // --- BASES DE DATOS GLOBALES ---
 
-    // --- ESCUCHA DE FIREBASE ---
-    onSnapshot(collection(db, "apoyos"), s => { DB_V = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
-    onSnapshot(collection(db, "trabajo_social"), s => { DB_S = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
-    onSnapshot(collection(db, "procuraduria"), s => { DB_P = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
-    onSnapshot(collection(db, "area_medica_v2"), s => { DB_M = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
-    onSnapshot(collection(db, "psicologia"), s => { DB_PS = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
-    onSnapshot(collection(db, "jefatura_psicologia"), s => { DB_JP = s.docs.map(d => d.data()); window.reprocesarTodo(); });
-    onSnapshot(collection(db, "general_localidades"), s => { DB_GL = s.docs.map(d => d.data()); window.reprocesarTodo(); });
-    onSnapshot(collection(db, "requerimientos_escuelas"), s => { DB_RE = s.docs.map(d => d.data()); window.reprocesarTodo(); });
+let DB_V = [], DB_S = [], DB_P = [], DB_M = [], DB_PS = [], DB_JP = [], DB_GL = [], DB_RE = [], DB_CRISAT = [];
 
-    // --- FUNCIONES DE UTILIDAD ---
-  const cumpleFiltros = (d, s, m) => {
-    // --- NUEVO: FILTRO DE SEGURIDAD POR DEPARTAMENTO ---
-    const deptoUsuario = sessionStorage.getItem('departamento');
-    const esAdmin = (deptoUsuario === "GLOBAL");
-    
-    // Si NO es admin, y el registro tiene un campo 'departamento' que no coincide, lo bloqueamos
-    // Nota: Si tus registros no tienen el campo 'departamento', el filtro fallará. 
-    // Por ahora, permitimos ver si es de su propia base de datos (ver paso 2).
-    
+// --- ESCUCHA DE FIREBASE UNIFICADA ---
+onSnapshot(collection(db, "apoyos"), s => { DB_V = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
+onSnapshot(collection(db, "trabajo_social"), s => { DB_S = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
+onSnapshot(collection(db, "procuraduria"), s => { DB_P = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
+onSnapshot(collection(db, "area_medica_v2"), s => { DB_M = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
+onSnapshot(collection(db, "psicologia"), s => { DB_PS = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
+onSnapshot(collection(db, "general_localidades"), s => { DB_GL = s.docs.map(d => d.data()); window.reprocesarTodo(); });
+onSnapshot(collection(db, "requerimientos_escuelas"), s => { DB_RE = s.docs.map(d => d.data()); window.reprocesarTodo(); });
+onSnapshot(collection(db, "registros_generales"), s => { DB_CRISAT = s.docs.map(d => d.data()); window.reprocesarTodo(); });
+onSnapshot(collection(db, "jefatura_psicologia"), s => { DB_JP = s.docs.map(d=>d.data()); window.reprocesarTodo(); });
+
+// --- FUNCIONES DE UTILIDAD CONSTANTES ---
+const cumpleFiltros = (d, s, m) => {
     const term = s.toLowerCase().trim();
     const zonaBusqueda = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
-    const mesSeleccionado = document.getElementById('global-month-filter')?.value || "all";
+    const mesSeleccionado = m || document.getElementById('global-month-filter')?.value || "all";
     
     const fechaRaw = d.fecha || d.fecha_registro || d.fecha_apoyo || d.fecha_atencion || d.fecha_ingreso || d.fecha_cap || "";
     let mesRegistro = fechaRaw.includes("-") ? fechaRaw.split("-")[1] : (fechaRaw.includes("/") ? fechaRaw.split("/")[1] : "");
@@ -673,512 +545,545 @@ document.addEventListener('DOMContentLoaded', () => {
     return dataString.includes(term);
 };
 
-    const renderM = (id, gs, c) => {
-        let h = "";
-        const esModuloEstatus = (id.startsWith('v-') || id.startsWith('s-') || id.startsWith('gl-'));
-        Object.keys(gs).sort().forEach(k => {
-            h += `<div class="group-container" style="border-left-color:${c}">
-                <div class="group-header"><span>${k}</span><b>${gs[k].length}</b></div>
-                ${gs[k].map(i => {
-                    let badge = "";
-                    if(esModuloEstatus && i.s) {
-                        const isE = ['entregado','realizado','finalizado','atendido'].includes(i.s.toLowerCase());
-                        badge = `<span style="margin-left:6px; padding:2px 5px; border-radius:4px; font-size:7px; text-transform:uppercase; background:${isE ? 'var(--success)':'var(--danger)'}; color:white; font-weight:bold;">${isE ? 'OK':'PEND'}</span>`;
-                    }
-                    return `<div class="member-line">
-                        <div style="display:flex; align-items:center;"><span>${i.n}</span>${badge}</div>
-                        <div style="text-align:right;">
-                            <small style="color:#64748b; font-style:italic; font-size:8px;">(${i.l})</small><br>
-                            <span style="font-weight:bold; color:${c}">${i.x}</span>
-                        </div>
-                    </div>`;
-                }).join('')}
-            </div>`;
-        });
-        const el = document.getElementById(id); if(el) el.innerHTML = h || "Sin registros.";
-    };
-    
-    
-   window.reprocesarTodo = () => {
-  const s = document.getElementById('global-search-input')?.value || "";
-  
-    const z = document.getElementById('global-zone-search').value.toLowerCase().trim();
- const m = document.getElementById('global-month-filter')?.value || "all";
-    
-    const filtroTerritorial = z || s;
-    const isFiltered = m !== "all";
-
-    // --- LÓGICA DE COLORES DINÁMICOS ---
-    const allStats = document.querySelectorAll('.stat-box div, .stat-box b');
-    
-    allStats.forEach(el => {
-        const parent = el.closest('.stat-box');
-        const isSuccess = el.id.includes('ent') || el.id.includes('ate') || el.style.color.includes('success') || el.parentElement.innerHTML.includes('E:');
-        const isDanger = el.id.includes('pen') || el.id.includes('nop') || el.style.color.includes('danger') || el.parentElement.innerHTML.includes('P:');
-
-        if (isFiltered) {
-            // Colores especiales cuando hay filtro (Modo Azul Informativo)
-            if (isSuccess) el.style.color = "#0ea5e9"; // Azul turquesa (Éxito filtrado)
-            else if (isDanger) el.style.color = "#6366f1"; // Azul violeta (Pendiente filtrado)
-            else el.style.color = "#2563eb"; // Azul puro (Totales filtrados)
-            
-            // Opcional: poner el texto en negrita extra para resaltar
-            el.style.fontWeight = "900";
-        } else {
-            // Restaurar colores originales del sistema
-            if (isSuccess) el.style.color = "var(--success)";
-            else if (isDanger) el.style.color = "var(--danger)";
-            else el.style.color = "#0f172a";
-            
-            el.style.fontWeight = "800";
-        }
+const renderM = (id, gs, c) => {
+    let h = "";
+    const esModuloEstatus = (id.startsWith('v-') || id.startsWith('s-') || id.startsWith('gl-'));
+    Object.keys(gs).sort().forEach(k => {
+        h += `<div class="group-container" style="border-left-color:${c}">
+            <div class="group-header"><span>${k}</span><b>${gs[k].length}</b></div>
+            ${gs[k].map(i => {
+                let badge = "";
+                if(esModuloEstatus && i.s) {
+                    const isE = ['entregado','realizado','finalizado','atendido'].includes(i.s.toLowerCase());
+                    badge = `<span style="margin-left:6px; padding:2px 5px; border-radius:4px; font-size:7px; text-transform:uppercase; background:${isE ? 'var(--success)':'var(--danger)'}; color:white; font-weight:bold;">${isE ? 'OK':'PEND'}</span>`;
+                }
+                return `<div class="member-line">
+                    <div style="display:flex; align-items:center;"><span>${i.n}</span>${badge}</div>
+                    <div style="text-align:right;">
+                        <small style="color:#64748b; font-style:italic; font-size:8px;">(${i.l})</small><br>
+                        <span style="font-weight:bold; color:${c}">${i.x}</span>
+                    </div>
+                </div>`;
+            }).join('')}
+        </div>`;
     });
-// Añade esto al final de tu función reprocesarTodo
-const selector = document.getElementById('global-month-filter');
-if (isFiltered) {
-    selector.style.background = "#dbeafe";
-    selector.style.borderColor = "#2563eb";
-    selector.style.color = "#1e40af";
-} else {
-    selector.style.background = "white";
-    selector.style.borderColor = "#cbd5e1";
-    selector.style.color = "black";
-}
-        // --- EJECUCIÓN DE PROCESADORES ---
-   if (typeof window.procVul === "function") window.procVul(s, m);
-    if (typeof window.procSoc === "function") window.procSoc(s, m);
-    if (typeof window.procPro === "function") window.procPro(s, m);
-    if (typeof window.procMed === "function") window.procMed(s, m); // Esta es la que ahora funciona
-    if (typeof window.procPsi === "function") window.procPsi(s, m);
-    if (typeof window.procJefPsic === "function") window.procJefPsic(s, m);
-    if (typeof window.procGenLoc === "function") window.procGenLoc(s, m);
-    if (typeof window.procEscolar === "function") window.procEscolar(s, m);
-
-    if (typeof window.procTerritorial === "function") {
-        window.procTerritorial(filtroTerritorial, m);
-    }
-// ... (esto va después de procTerritorial)
-
-    setTimeout(() => {
-        // Recolectamos los números que ya están en las tarjetas del dashboard
-        const conteos = {
-            social: parseInt(document.getElementById('s-total')?.innerText) || 0,
-            procu: parseInt(document.getElementById('pr-total')?.innerText) || 0,
-            vulnerable: parseInt(document.getElementById('v-total')?.innerText) || 0, 
-            medica: parseInt(document.getElementById('m-total')?.innerText) || 0,
-            psico: parseInt(document.getElementById('psi-total')?.innerText) || 0 
-        };
-
-        // Verificamos que la función de dibujo exista y le pasamos los datos
-        if (typeof window.renderGlobalCharts === "function") {
-            window.renderGlobalCharts(conteos);
-        } else {
-            console.warn("La función renderGlobalCharts aún no está lista.");
-        }
-    }, 500); // Subí a 500ms para dar más tiempo a que Firebase responda
+    const el = document.getElementById(id); if(el) el.innerHTML = h || "Sin registros.";
 };
-    // --- PROCESADORES ---
-    window.procVul = (s, m) => {
-        let ent = 0, tal = {}, apo = {}, geo = {}, grpStatus = {};
-        let sCarp = new Set(), sPana = new Set(), sCoci = new Set(), sOtr = new Set();
-        let fil = DB_V.filter(d => cumpleFiltros(d, s, m));
-        fil.forEach(d => {
-            const est = (d.estatus || "").toUpperCase();
-            if (est === 'ENTREGADO' || est === 'REALIZADO') ent++;
-            const n = `${d.nombre || ''} ${d.apellido_paterno || ''} ${d.apellido_materno || ''}`.toUpperCase(), c = (d.codigo || 'S/C').toUpperCase(), t = (d.tipo_apoyo || "").toUpperCase(), l = (d.col_loc || "S/L").toUpperCase();
-            if (c.startsWith('CARP') || c.startsWith('PANAD') || c.startsWith('COC') || c.startsWith('COST') || t.includes("TALLER")) {
-                if (!tal[c]) tal[c] = []; tal[c].push({ n, x: c, l, s: est });
-                if (!grpStatus[c]) grpStatus[c] = { p: 0 }; if (est !== 'ENTREGADO' && est !== 'REALIZADO') grpStatus[c].p++;
-                if (c.startsWith('CARP')) sCarp.add(c); else if (c.startsWith('PANAD')) sPana.add(c); else if (c.startsWith('COC')) sCoci.add(c); else sOtr.add(c);
-            } else { if (!apo[t || "OTROS"]) apo[t || "OTROS"] = []; apo[t || "OTROS"].push({ n, x: c, l, s: est }); }
-            if (!geo[l]) geo[l] = []; geo[l].push({ n, x: c, l, s: est });
-        });
-        const countEP = (set) => { let e = 0, p = 0; set.forEach(id => { if (grpStatus[id]?.p > 0) p++; else e++; }); return { e, p }; };
-        if (document.getElementById('v-total')) {
-            document.getElementById('v-total').innerText = fil.length; document.getElementById('v-ent').innerText = ent; document.getElementById('v-pen').innerText = fil.length - ent;
-            const cC = countEP(sCarp); document.getElementById('v-g-carp-e').innerText = cC.e; document.getElementById('v-g-carp-p').innerText = cC.p; document.getElementById('v-g-carp').innerText = sCarp.size;
-            const cP = countEP(sPana); document.getElementById('v-g-pana-e').innerText = cP.e; document.getElementById('v-g-pana-p').innerText = cP.p; document.getElementById('v-g-pana').innerText = sPana.size;
-            const cCo = countEP(sCoci); document.getElementById('v-g-coci-e').innerText = cCo.e; document.getElementById('v-g-coci-p').innerText = cCo.p; document.getElementById('v-g-coci').innerText = sCoci.size;
-            const cO = countEP(sOtr); document.getElementById('v-g-otr-e').innerText = cO.e; document.getElementById('v-g-otr-p').innerText = cO.p; document.getElementById('v-g-otros').innerText = sOtr.size;
-            renderM('v-list-talleres', tal, 'var(--vulnerable-color)'); renderM('v-list-apoyos', apo, 'var(--primary)'); renderM('v-list-geo', geo, '#64748b');
-        }
-    };
-
-    window.procSoc = (s, m) => {
-        let fin = 0, prg = {}, geo = {}, asuCounts = {}, progCounts = {};
-        let fil = DB_S.filter(d => cumpleFiltros(d,s,m));
-        fil.forEach(d => {
-            const est = (d.estatus||"").toLowerCase(); if(['entregado','realizado'].includes(est)) fin++;
-            const p = (d.programa||"S/P").toUpperCase(), asu = (d.asunto||"S/A").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.col_loc||"S/L").toUpperCase();
-            progCounts[p] = (progCounts[p] || 0) + 1; asuCounts[asu] = (asuCounts[asu] || 0) + 1;
-            if(!prg[p]) prg[p]=[]; prg[p].push({n, x: d.folio_expediente||'S/F', l: asu, s: est});
-            if(!geo[l]) geo[l]=[]; geo[l].push({n, x: p, l: asu, s: est});
-        });
-        if(document.getElementById('s-total')){
-            document.getElementById('s-total').innerText = fil.length; document.getElementById('s-ent').innerText = fin;
-            const container = document.getElementById('s-dynamic-programs');
-            if(container) { container.innerHTML = ""; Object.keys(progCounts).forEach(pr => {
-                const card = document.createElement('div'); card.className="stat-box"; card.style.borderTop="3px solid var(--social-color)";
-                card.innerHTML = `<small>${pr}</small><div>${progCounts[pr]}</div>`; container.appendChild(card);
-            }); }
-            renderM('s-list-programas', prg, 'var(--social-color)'); renderM('s-list-geo', geo, '#64748b');
-            let t = `<table>`; Object.keys(asuCounts).sort().forEach(k => t += `<tr><td>${k}</td><td align="right"><b>${asuCounts[k]}</b></td></tr>`);
-            document.getElementById('s-list-asuntos-count').innerHTML = t + "</table>";
-        }
-    };
-
-    window.procPro = (s, m) => {
-        let mix = 0, cA = {}, lD = {}, geo = {};
-        let fil = DB_P.filter(d => cumpleFiltros(d,s,m));
-        fil.forEach(d => {
-            if(d.horarios_mixtos === 'Si') mix++;
-            const asu = (d.asuntos||"GENERAL").toUpperCase(), n = (d.nombre||'S/N').toUpperCase(), l = (d.col_loc || d.localidad || d.colonia || d.lugar || "S/L").toUpperCase();
-            cA[asu] = (cA[asu]||0)+1; if(!lD[asu]) lD[asu]=[]; lD[asu].push({n, x: d.no||'S/E', l});
-            if(!geo[l]) geo[l]=[]; geo[l].push({n, x: asu, l});
-        });
-        if(document.getElementById('pr-total')){
-            document.getElementById('pr-total').innerText = fil.length; document.getElementById('pr-mixtos').innerText = mix;
-            renderM('pr-list-casos', lD, 'var(--procu-color)'); renderM('pr-list-geo', geo, '#64748b');
-            let t = `<table>`; Object.keys(cA).forEach(k => t += `<tr><td>${k}</td><td align="right"><b>${cA[k]}</b></td></tr>`);
-            document.getElementById('pr-conteo-tabla').innerHTML = t + "</table>";
-        }
-    };
-
-   window.procMed = (s, m) => {
-    // 1. CAPTURA DE TIEMPO
-    const ahora = new Date();
-    const mesActual = ahora.getMonth(); 
-    const anioActual = ahora.getFullYear();
     
-    const haceSieteDias = new Date();
-    haceSieteDias.setDate(ahora.getDate() - 7);
-    haceSieteDias.setHours(0, 0, 0, 0);
+    
+  window.reprocesarTodo = function() {
+    // 1. OBTENER VALORES DE FILTROS DE LA BARRA SUPERIOR
+    const searchVal = (document.getElementById('global-search-input')?.value || "").toLowerCase().trim();
+    const zoneVal = (document.getElementById('global-zone-search')?.value || "").toLowerCase().trim();
+    const monthVal = document.getElementById('global-month-filter')?.value || "all";
 
-    // 2. ACUMULADORES (Dinero y Conteos)
-    let sumaTotalHistorial = 0; 
-    let sumaCorteMensual = 0;   
-    let sumaCorteSemanal = 0;   
-    let conteoPacientes = 0;
+    // --- FUNCIÓN AUXILIAR DE FILTRADO UNIVERSAL ---
+    const filtrarColeccion = (lista, camposBusqueda, campoZona, campoFecha) => {
+        return lista.filter(item => {
+            if (!item) return false;
 
-    // 3. ESTRUCTURAS PARA ESTADÍSTICAS
-    let servicios = {};
-    let localidades = {}; 
-    let tablaHTML = "";
-    let edades = { "Infantil": 0, "Adulto": 0, "60+": 0 };
-
-    // 4. PROCESAMIENTO DE LA BASE DE DATOS
-    DB_M.forEach(d => {
-        const fStr = d.fecha_cap || d.fecha || "";
-        if (!fStr) return;
-
-        const partes = fStr.split('-'); 
-        const fechaReg = new Date(partes[0], partes[1] - 1, partes[2]);
-        const costo = parseFloat(d.costo || 0);
-
-        // --- CÁLCULOS DE CORTES GENERALES (Siempre fijos arriba) ---
-        sumaTotalHistorial += costo;
-
-        if (fechaReg.getMonth() === mesActual && fechaReg.getFullYear() === anioActual) {
-            sumaCorteMensual += costo;
-        }
-        if (fechaReg >= haceSieteDias && fechaReg <= ahora) {
-            sumaCorteSemanal += costo;
-        }
-
-        // --- FILTRO PARA LA VISTA DINÁMICA ---
-        const cumpleMes = (m === "all" || parseInt(m) === (fechaReg.getMonth() + 1));
-        const cumpleNombre = (d.nombre || "").toLowerCase().includes(s.toLowerCase());
-
-        // TODO LO QUE ESTÉ AQUÍ ADENTRO SE VERÁ AFECTADO POR EL SELECTOR DE MES
-        if (cumpleMes && cumpleNombre) {
-            conteoPacientes++;
-
-            // Lógica de Impacto por Localidad (DENTRO DEL FILTRO)
-            const locNombre = (d.col_loc || d.localidad || d.colonia || d.lugar || "DESCONOCIDA").toUpperCase();
-            if (!localidades[locNombre]) localidades[locNombre] = 0;
-            localidades[locNombre] += costo;
-            
-            // Construcción de Fila
-            tablaHTML += `
-                <tr style="border-bottom: 1px solid #eee;">
-                    <td style="padding:10px;">${fStr}</td>
-                    <td><b>${(d.nombre || '').toUpperCase()}</b></td>
-                    <td><span style="background:#f1f5f9; padding:2px 6px; border-radius:4px;">${d.edad || '0'}</span></td>
-                    <td style="color:var(--med-color); font-weight:bold;">${(d.tipo_estudio || 'General').toUpperCase()}</td>
-                    <td style="color:#64748b; font-size:11px;">${locNombre}</td>
-                    <td style="text-align:right; font-weight:bold;">$${costo.toFixed(2)}</td>
-                </tr>`;
-
-            // Conteo de Servicios
-            const sv = (d.tipo_estudio || "Consulta").toUpperCase();
-            servicios[sv] = (servicios[sv] || 0) + 1;
-
-            // Conteo de Edades
-            const edadNum = parseInt(d.edad || 0);
-            if(edadNum <= 12) edades["Infantil"]++;
-            else if(edadNum >= 60) edades["60+"]++;
-            else edades["Adulto"]++;
-        }
-    });
-
-    // 5. RENDERIZADO FINAL
-    const fmt = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' });
-    const setVal = (id, val) => { if(document.getElementById(id)) document.getElementById(id).innerText = val; };
-
-    // Inyectar Totales en Tarjetas
-    setVal('m-money', fmt.format(sumaTotalHistorial));
-    setVal('m-mensual', fmt.format(sumaCorteMensual));
-    setVal('m-semanal', fmt.format(sumaCorteSemanal));
-    setVal('m-total', conteoPacientes);
-
-    // Inyectar Tabla
-    const tbody = document.getElementById('m-body-historial');
-    if(tbody) tbody.innerHTML = tablaHTML || '<tr><td colspan="6" align="center">Sin registros</td></tr>';
-
-    // Inyectar Impacto por Localidad (AHORA ES DINÁMICO)
-    let hLoc = "";
-    const locOrdenadas = Object.keys(localidades).sort((a,b) => localidades[b] - localidades[a]);
-    locOrdenadas.forEach(l => {
-        hLoc += `
-            <div class="member-line" style="border-left:3px solid #27ae60;">
-                <span>${l}</span>
-                <b style="color:#27ae60;">${fmt.format(localidades[l])}</b>
-            </div>`;
-    });
-    const geoCont = document.getElementById('m-list-geo');
-    if(geoCont) geoCont.innerHTML = hLoc || '<div style="text-align:center; color:#94a3b8; font-size:10px; padding:10px;">Sin datos en este periodo</div>';
-
-    // Inyectar Servicios y Edades
-    let hEdades = "";
-    for(let r in edades) { hEdades += `<div class="member-line"><span>${r}</span><b>${edades[r]}</b></div>`; }
-    document.getElementById('m-list-edades').innerHTML = hEdades;
-
-    let hServ = "";
-    Object.keys(servicios).forEach(key => {
-        hServ += `<div class="member-line" style="border-left:3px solid var(--med-color)"><span>${key}</span><b>${servicios[key]}</b></div>`;
-    });
-    document.getElementById('m-list-servicios').innerHTML = hServ;
-};
-
-// ==========================================
-// 1. PSICOLOGÍA (ACTUALIZADO CON MENORES)
-// ==========================================
-window.procPsi = (s, m) => {
-    let hP = 0, mP = 0, menoresP = 0; // Contadores Pacientes
-    let hA = 0, mA = 0, menoresA = 0; // Contadores Acompañantes
-    let visitasTotales = 0;           // Sustituye la suma de número_sesion
-    let motivos = {}, zonas = {};
-
-    let fil = DB_PS.filter(d => cumpleFiltros(d, s, m));
-
-    fil.forEach(d => {
-        // --- CONTADOR DE VISITAS (OPCIÓN A) ---
-        visitasTotales += 1; // Cada registro cuenta como una asistencia/sesión
-
-        // --- LÓGICA PACIENTES ---
-        const edadP = parseInt(d.edad || d.edad_p || 0);
-        const genP = (d.genero || d.genero_p || "").trim().toUpperCase();
-
-        if (edadP > 0 && edadP < 18) {
-            menoresP++; // Segmento Menores
-        } else {
-            // Segmento Adultos
-            if (genP.startsWith('MASC')) hP++;
-            else if (genP.startsWith('FEME')) mP++;
-        }
-
-        // --- LÓGICA ACOMPAÑANTES ---
-        if (d.nombre_a && d.nombre_a.trim().length > 0) {
-            const edadA = parseInt(d.edad_a || 0);
-            const genA = (d.genero_a || "").trim().toUpperCase();
-
-            if (edadA > 0 && edadA < 18) {
-                menoresA++; 
-            } else {
-                if (genA.startsWith('MASC')) hA++;
-                else if (genA.startsWith('FEME')) mA++;
+            // Filtro de Búsqueda General (Nombre, Folio, etc.)
+            if (searchVal !== "") {
+                const cumpleBusqueda = camposBusqueda.some(campo => 
+                    String(item[campo] || "").toLowerCase().includes(searchVal)
+                );
+                if (!cumpleBusqueda) return false;
             }
+
+            // Filtro de Zona / Localidad
+            if (zoneVal !== "" && campoZona) {
+                const cumpleZona = String(item[campoZona] || "").toLowerCase().includes(zoneVal);
+                if (!cumpleZona) return false;
+            }
+
+            // Filtro de Mes
+            if (monthVal !== "all" && campoFecha && item[campoFecha]) {
+                const fechaStr = String(item[campoFecha]); 
+                const mesExtraido = fechaStr.split('-')[1]; 
+                if (mesExtraido !== monthVal) return false;
+            }
+
+            return true;
+        });
+    };
+
+    // --- FUNCIÓN AUXILIAR PARA GENERAR LISTADOS EN PANELES ---
+    const renderizarListaPanel = (idContenedor, objetoContador, totalReferencia = 1, esDinero = false) => {
+        const contenedor = document.getElementById(idContenedor);
+        if (!contenedor) return;
+
+        // Ordenar de mayor a menor frecuencia / monto
+        const elementosOrdenados = Object.entries(objetoContador).sort((a, b) => b[1] - a[1]);
+
+        if (elementosOrdenados.length === 0) {
+            contenedor.innerHTML = `<div style="text-align:center; color:#94a3b8; padding:15px; font-size:11px;">Sin datos que mostrar</div>`;
+            return;
         }
 
-        // --- PREPARACIÓN DE PANELES ---
-        const nom = (d.paciente || d.nombre || "SIN NOMBRE").toUpperCase();
-        const mot = (d.motivo_consulta || d.tema || "OTROS").toUpperCase();
-        const loc = (d.localidad || d.col_loc || "S/L").toUpperCase();
+        contenedor.innerHTML = elementosOrdenados.map(([clave, valor]) => {
+            const displayValor = esDinero ? `$${valor.toFixed(2)}` : valor;
+            return `
+                <div class="member-line">
+                    <span style="text-transform: uppercase; font-weight: 600;">${clave}</span>
+                    <span class="badge" style="background:#f1f5f9; color:#1e293b; padding:2px 8px; border-radius:6px; font-weight:700;">${displayValor}</span>
+                </div>
+            `;
+        }).join('');
 
-        if(!motivos[mot]) motivos[mot] = [];
-        motivos[mot].push({ n: nom, x: `Sesión ${d.numero_sesion || 1}`, l: loc });
-
-        if(!zonas[loc]) zonas[loc] = [];
-        zonas[loc].push({ n: nom, x: mot, l: loc });
-    });
-
-    // --- CÁLCULO DE TOTALES ---
-    const totalPacientes = hP + mP + menoresP;
-    const totalAcompanantes = hA + mA + menoresA;
-
-    // --- RENDERIZADO EN DASHBOARD ---
-    const actTxt = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
-
-    // Bloque Pacientes
-    actTxt('p-total', totalPacientes);
-    actTxt('p-hombres', hP);
-    actTxt('p-mujeres', mP);
-    actTxt('p-menores', menoresP);
+    };
+    // --- 2. JEFATURA DE PSICOLOGÍA ---
+    const jpFiltrados = filtrarColeccion(DB_JP, ['paciente', 'dependencia', 'oficio'], 'colonia', 'fecha');
     
-    // Bloque Acompañantes
-    actTxt('p-total-a', totalAcompanantes);
-    actTxt('p-hombres-a', hA);
-    actTxt('p-mujeres-a', mA);
-    actTxt('p-menores-a', menoresA);
+    // Totales
+    const jpTotalElement = document.getElementById('jp-total');
+    if (jpTotalElement) jpTotalElement.textContent = jpFiltrados.length;
     
-    // Total Sesiones (ahora basado en registros totales)
-    actTxt('p-ses', visitasTotales);
+    const jpEntElement = document.getElementById('jp-ent');
+    if (jpEntElement) {
+        const totalPersonas = jpFiltrados.reduce((acc, d) => acc + (Number(d.personas) || 0), 0);
+        jpEntElement.textContent = totalPersonas;
+    }
 
-    renderM('p-list-motivos', motivos, 'var(--psico-color)');
-    renderM('p-list-seguimiento', zonas, 'var(--psico-color)');
-};
-
-// 2. JEFATURA DE PSICOLOGÍA
-window.procJefPsic = (s, m) => {
-    let totalAct = 0, personasAtendidas = 0;
+    // Agrupación para los paneles (usando tu motor de renderizado 'renderM')
     let dependencias = {}, zonas = {};
-
-    let fil = DB_JP.filter(d => cumpleFiltros(d, s, m));
-    fil.forEach(d => {
-        totalAct++;
-        personasAtendidas += parseInt(d.cantidad_personas || 0);
-
+    jpFiltrados.forEach(d => {
         const dep = (d.dependencia || "OTRA").toUpperCase();
         if(!dependencias[dep]) dependencias[dep] = [];
-        dependencias[dep].push({ n: d.actividad, x: `Pax: ${d.cantidad_personas}`, l: d.lugar });
+        dependencias[dep].push({ n: d.actividad, x: `Pax: ${d.personas || 0}`, l: d.colonia });
 
-        const loc = (d.lugar || "S/L").toUpperCase();
+        const loc = (d.colonia || "SIN LOCALIDAD").toUpperCase();
         if(!zonas[loc]) zonas[loc] = [];
         zonas[loc].push({ n: d.actividad, x: dep, l: loc });
     });
 
-    document.getElementById('jp-total').innerText = totalAct;
-    document.getElementById('jp-ent').innerText = personasAtendidas;
+    renderM('jp-list-actividades', dependencias, '#701a27');
+    renderM('jp-list-geo', zonas, '#701a27');
+    // ==========================================================================
+    // PROCESAMIENTO MÓDULO : PSICOLOGIA (DB_PS)
+    // ==========================================================================
+    const psData = filtrarColeccion(DB_PS, ["paciente", "tema", "usuario"], "col_loc", "fecha");
+    
+    // 1. Inicializamos las nuevas variables para conteos específicos
+let statsPS = { 
+    total: psData.length, acomp: 0, 
+    p_h: 0, p_m: 0, p_menor: 0, 
+    a_h: 0, a_m: 0, a_menor: 0, 
+    temas: {}, zonas: {} 
+};
+
+psData.forEach(d => {
+    // Conteo de Acompañantes
+    if (d.nombre_a && d.nombre_a.trim() !== "") {
+        statsPS.acomp++;
+        if (d.genero_a === 'MASCULINO') statsPS.a_h++;
+        if (d.genero_a === 'FEMENINO') statsPS.a_m++;
+        if (parseInt(d.edad_a) < 18) statsPS.a_menor++;
+    }
+
+    // Conteo de Pacientes
+    if (d.genero_p === 'MASCULINO') statsPS.p_h++;
+    if (d.genero_p === 'FEMENINO') statsPS.p_m++;
+    if (parseInt(d.edad_p) < 18) statsPS.p_menor++;
+
+    // Agrupaciones
+    statsPS.temas[d.tema || "SIN TEMA"] = (statsPS.temas[d.tema || "SIN TEMA"] || 0) + 1;
+    statsPS.zonas[d.col_loc || "SIN ZONA"] = (statsPS.zonas[d.col_loc || "SIN ZONA"] || 0) + 1;
+});
+
+// 2. Actualización de los IDs en el DOM
+document.getElementById('p-total').innerText = statsPS.total;
+document.getElementById('p-total-a').innerText = statsPS.acomp;
+document.getElementById('p-ses').innerText = statsPS.total;
+
+// Pacientes
+document.getElementById('p-hombres').innerText = statsPS.p_h;
+document.getElementById('p-mujeres').innerText = statsPS.p_m;
+document.getElementById('p-menores').innerText = statsPS.p_menor;
+
+// Acompañantes
+document.getElementById('p-hombres-a').innerText = statsPS.a_h;
+document.getElementById('p-mujeres-a').innerText = statsPS.a_m;
+document.getElementById('p-menores-a').innerText = statsPS.a_menor;
+
+// Paneles
+renderizarListaPanel('p-list-motivos', statsPS.temas);
+renderizarListaPanel('p-list-seguimiento', statsPS.zonas);
+
+    // ==========================================================================
+    // PROCESAMIENTO MÓDULO 1: POBLACIÓN VULNERABLE (DB_V)
+    // ==========================================================================
+    const vFiltrados = filtrarColeccion(DB_V, ['nombre', 'folio'], 'localidad', 'fecha');
+    
+    document.getElementById('v-total').textContent = vFiltrados.length;
+    const vEntregados = vFiltrados.filter(i => i.estado === 'ENTREGADO').length;
+    document.getElementById('v-ent').textContent = vEntregados;
+    document.getElementById('v-pen').textContent = vFiltrados.length - vEntregados;
+
+    const talleres = { carpinteria: {t:0, e:0}, panaderia: {t:0, e:0}, cocina: {t:0, e:0}, otros: {t:0, e:0} };
+    const vContadorTalleresCompleto = {};
+    const vContadorApoyos = {};
+    const vContadorGeo = {};
+
+    vFiltrados.forEach(i => {
+        const tllRaw = String(i.taller || "Sin Taller Assigned").toUpperCase();
+        const tll = tllRaw.toLowerCase();
+        let cat = 'otros';
+        
+        if (tll.includes('carp')) cat = 'carpinteria';
+        else if (tll.includes('pan')) cat = 'panaderia';
+        else if (tll.includes('coc')) cat = 'cocina';
+
+        talleres[cat].t++;
+        if (i.estado === 'ENTREGADO') talleres[cat].e++;
+
+        // Contadores detallados para listados
+        vContadorTalleresCompleto[tllRaw] = (vContadorTalleresCompleto[tllRaw] || 0) + 1;
+        
+        const apoyo = String(i.apoyo || i.tipo_apoyo || "General").toUpperCase();
+        vContadorApoyos[apoyo] = (vContadorApoyos[apoyo] || 0) + 1;
+
+        const loc = String(i.localidad || "Desconocida").toUpperCase();
+        vContadorGeo[loc] = (vContadorGeo[loc] || 0) + 1;
+    });
+
+    document.getElementById('v-g-carp').textContent = talleres.carpinteria.t;
+    document.getElementById('v-g-carp-e').textContent = talleres.carpinteria.e;
+    document.getElementById('v-g-carp-p').textContent = talleres.carpinteria.t - talleres.carpinteria.e;
+    document.getElementById('v-g-pana').textContent = talleres.panaderia.t;
+    document.getElementById('v-g-pana-e').textContent = talleres.panaderia.e;
+    document.getElementById('v-g-pana-p').textContent = talleres.panaderia.t - talleres.panaderia.e;
+    document.getElementById('v-g-coci').textContent = talleres.cocina.t;
+    document.getElementById('v-g-coci-e').textContent = talleres.cocina.e;
+    document.getElementById('v-g-coci-p').textContent = talleres.cocina.t - talleres.cocina.e;
+    document.getElementById('v-g-otros').textContent = talleres.otros.t;
+    document.getElementById('v-g-otr-e').textContent = talleres.otros.e;
+    document.getElementById('v-g-otr-p').textContent = talleres.otros.t - talleres.otros.e;
+
+    renderizarListaPanel('v-list-talleres', vContadorTalleresCompleto);
+    renderizarListaPanel('v-list-apoyos', vContadorApoyos);
+    renderizarListaPanel('v-list-geo', vContadorGeo);
+
+
+    // ==========================================================================
+    // PROCESAMIENTO MÓDULO 2: TRABAJO SOCIAL (DB_S)
+    // ==========================================================================
+    const sFiltrados = filtrarColeccion(DB_S, ['nombre', 'expediente'], 'localidad', 'fecha_registro');
+    document.getElementById('s-total').textContent = sFiltrados.length;
+    document.getElementById('s-ent').textContent = sFiltrados.filter(i => i.estado === 'FINALIZADO').length;
+
+    const sContadorAsuntos = {};
+    const sContadorProgramas = {};
+    const sContadorGeo = {};
+
+    sFiltrados.forEach(i => {
+        const asunto = String(i.asunto || "General").toUpperCase();
+        sContadorAsuntos[asunto] = (sContadorAsuntos[asunto] || 0) + 1;
+
+        const programa = String(i.programa || "Sin Programa").toUpperCase();
+        sContadorProgramas[programa] = (sContadorProgramas[programa] || 0) + 1;
+
+        const loc = String(i.col_loc || "Desconocida").toUpperCase();
+        sContadorGeo[loc] = (sContadorGeo[loc] || 0) + 1;
+    });
+
+    renderizarListaPanel('s-list-asuntos-count', sContadorAsuntos);
+    renderizarListaPanel('s-list-programas', sContadorProgramas);
+    renderizarListaPanel('s-list-geo', sContadorGeo);
+
+    // Inyección en bloques estadísticos dinámicos para Trabajo Social
+    const sContenedorBloques = document.getElementById('s-dynamic-programs');
+    if (sContenedorBloques) {
+        sContenedorBloques.innerHTML = Object.entries(sContadorProgramas).slice(0, 4).map(([prog, total]) => `
+            <div class="stat-box" style="padding: 10px; border-top: 3px solid var(--social-color);">
+                <small style="font-size: 8px;">P: ${prog}</small>
+                <div style="font-size: 1.1rem; font-weight:800;">${total}</div>
+            </div>
+        `).join('');
+    }
+
+
+ // ==========================================================================
+    // PROCESAMIENTO MÓDULO 3: PROCURADURÍA (DB_P)
+    // ==========================================================================
+    const pFiltrados = filtrarColeccion(DB_P, ['nombre', 'expediente'], 'lugar', 'fecha');
+    
+    if(document.getElementById('pr-total')) {
+        document.getElementById('pr-total').textContent = pFiltrados.length;
+        document.getElementById('pr-mixtos').textContent = pFiltrados.filter(i => i.tipo === 'MIXTO').length;
+
+        const prContadorAsuntosYDetalles = {};
+        const prContadorLugarYDomicilio = {};
+        const prContadorZonas = {};
+
+        pFiltrados.forEach(i => {
+            // 1. Primera lista: ASUNTOS y DETALLES (o tipología/observaciones si aplica)
+            const asunto = String(i.asuntos || "Orientación").toUpperCase();
+            const detalle = String(i.detalles || i.observaciones || i.tipologia || "SIN DETALLE").toUpperCase();
+            const llaveAsuntoDetalle = `${asunto} — <small style="color:#64748b; font-weight:normal;">${detalle}</small>`;
+            prContadorAsuntosYDetalles[llaveAsuntoDetalle] = (prContadorAsuntosYDetalles[llaveAsuntoDetalle] || 0) + 1;
+
+            // 2. Segunda lista: LUGAR y DOMICILIO
+            const dom = String(i.domicilio || "SIN DOMICILIO REGISTRADO").toUpperCase();
+            const loc = String(i.lugar || "Desconocida").toUpperCase();
+            const llaveLugarDomicilio = `${loc} <br><small style="color:#64748b; font-weight:normal; font-style:italic;">Dom: ${dom}</small>`;
+            prContadorLugarYDomicilio[llaveLugarDomicilio] = (prContadorLugarYDomicilio[llaveLugarDomicilio] || 0) + 1;
+
+            // 3. Tercera lista: ZONA (O sea, el Lugar de procedencia/frecuencia)
+            prContadorZonas[loc] = (prContadorZonas[loc] || 0) + 1;
+        });
+
+        // Renderizado en tus 3 paneles del Dashboard de Procuraduría
+        renderizarListaPanel('pr-conteo-tabla', prContadorAsuntosYDetalles);
+        renderizarListaPanel('pr-list-casos', prContadorLugarYDomicilio);
+        renderizarListaPanel('pr-list-geo', prContadorZonas);
+    }
+
+
+    // ==========================================================================
+    // PROCESAMIENTO MÓDULO 4: ÁREA MÉDICA (DB_M) - CORREGIDO
+    // ==========================================================================
+    // NOTA: Se actualizan las claves de búsqueda en 'filtrarColeccion' para coincidir con el Historial Maestro
+    const mFiltrados = filtrarColeccion(DB_M, ['nombre', 'estudio_servicio'], 'procedencia', 'fecha_cap', 'edad');
+    document.getElementById('m-total').textContent = mFiltrados.length;
+
+    let totalHistorico = 0;
+    let totalMensual = 0;
+    
+    // El año actual te ayudará a evitar que se sumen meses de años anteriores
+    const anioActualString = String(new Date().getFullYear());
+    const mesActualString = String(new Date().getMonth() + 1).padStart(2, '0');
+
+    const mContadorEdades = { "Infante (0-12)": 0, "Adolescente (13-17)": 0, "Adulto (18-59)": 0, "Adulto Mayor (60+)": 0, "No Especificado": 0 };
+    const mContadorServicios = {};
+    const mContadorGeoMoney = {};
+
+    mFiltrados.forEach(i => {
+        // CORRECCIÓN: 'costo' en lugar de 'monto'
+        const monto = parseFloat(i.costo) || 0; 
+        totalHistorico += monto;
+
+        // CORRECCIÓN: 'fecha_cap' en lugar de 'fecha' e inclusión de validación de año
+        if (i.fecha_cap && String(i.fecha_cap).split('-')[0] === anioActualString && String(i.fecha_cap).split('-')[1] === mesActualString) {
+            totalMensual += monto;
+        }
+
+        // Clasificación por rangos de edad (Se mantiene igual ya que coincide)
+        const edad = parseInt(i.edad);
+        if (isNaN(edad)) mContadorEdades["No Especificado"]++;
+        else if (edad <= 12) mContadorEdades["Infante (0-12)"]++;
+        else if (edad <= 17) mContadorEdades["Adolescente (13-17)"]++;
+        else if (edad <= 59) mContadorEdades["Adulto (18-59)"]++;
+        else mContadorEdades["Adulto Mayor (60+)"]++;
+
+        // CORRECCIÓN: 'estudio_servicio' en lugar de 'servicio'
+        const serv = String(i.estudio_servicio || "Consulta General").toUpperCase();
+        mContadorServicios[serv] = (mContadorServicios[serv] || 0) + 1;
+
+        // CORRECCIÓN: 'procedencia' en lugar de 'localidad'
+        const loc = String(i.procedencia || "Desconocida").toUpperCase();
+        mContadorGeoMoney[loc] = (mContadorGeoMoney[loc] || 0) + monto;
+    });
+
+    document.getElementById('m-money').textContent = `$${totalHistorico.toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    document.getElementById('m-mensual').textContent = `$${totalMensual.toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+    renderizarListaPanel('m-list-edades', mContadorEdades);
+    renderizarListaPanel('m-list-servicios', mContadorServicios);
+    renderizarListaPanel('m-list-geo', mContadorGeoMoney, totalHistorico, true);
+
+    const tbodyMedica = document.getElementById('m-body-historial');
+    if (tbodyMedica) {
+        tbodyMedica.innerHTML = mFiltrados.slice(0, 50).map(i => `
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 10px;">${i.fecha_cap || '---'}</td>
+                <td style="padding: 10px; font-weight:bold; text-transform: uppercase;">${i.nombre || 'ANÓNIMO'}</td>
+                <td style="padding: 10px;">${i.edad || '---'}</td>
+                <td style="padding: 10px;"><span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-size: 11px; font-weight: bold;">${i.estudio_servicio || 'CONSULTA'}</span></td>
+                <td style="padding: 10px; text-transform: uppercase;">${i.procedencia || '---'}</td>
+                <td style="padding: 10px; text-align: right; font-weight:bold;">$${(parseFloat(i.costo) || 0).toFixed(2)}</td>
+            </tr>
+        `).join('');
+    }
+
+
+    // ==========================================================================
+    // PROCESAMIENTO MÓDULO 5: CRISAT - REHABILITACIÓN (DB_CRISAT)
+    // ==========================================================================
+    const cFiltrados = filtrarColeccion(DB_CRISAT, ['paciente', 'diagnostico'], 'localidad', 'fecha');
+    document.getElementById('c-total').textContent = cFiltrados.length;
+    document.getElementById('c-ent').textContent = cFiltrados.filter(i => i.asistencia === true || i.estado === 'ASISTIÓ').length;
+    document.getElementById('c-pen').textContent = cFiltrados.filter(i => i.asistencia === false || i.estado === 'INASISTENCIA').length;
+
+    let dineroCrisat = cFiltrados.reduce((acc, curr) => acc + (parseFloat(curr.cuota) || 0), 0);
+    document.getElementById('c-money').textContent = `$${dineroCrisat.toFixed(2)}`;
+
+    const cContadorTerapias = {};
+    const cContadorGeo = {};
+    const cContadorGeneros = { "Masculino": 0, "Femenino": 0, "Sin Especificar": 0 };
+    const cContadorRangosEdad = { "Pediatría (0-15)": 0, "Adulto Joven (16-45)": 0, "Adulto Maduro (46-64)": 0, "Geriatría (65+)": 0 };
+
+    cFiltrados.forEach(i => {
+        const terapia = String(i.tipo_terapia || "Mecanoterapia").toUpperCase();
+        cContadorTerapias[terapia] = (cContadorTerapias[terapia] || 0) + 1;
+
+        const loc = String(i.localidad || "Desconocida").toUpperCase();
+        cContadorGeo[loc] = (cContadorGeo[loc] || 0) + 1;
+
+        const gen = String(i.sexo || i.genero || "").toLowerCase();
+        if (gen.startsWith('m') || gen.includes('masc')) cContadorGeneros["Masculino"]++;
+        else if (gen.startsWith('f') || gen.includes('fem')) cContadorGeneros["Femenino"]++;
+        else cContadorGeneros["Sin Especificar"]++;
+
+        const edad = parseInt(i.edad);
+        if (!isNaN(edad)) {
+            if (edad <= 15) cContadorRangosEdad["Pediatría (0-15)"]++;
+            else if (edad <= 45) cContadorRangosEdad["Adulto Joven (16-45)"]++;
+            else if (edad <= 64) cContadorRangosEdad["Adulto Maduro (46-64)"]++;
+            else cContadorRangosEdad["Geriatría (65+)"]++;
+        }
+    });
+
+    renderizarListaPanel('c-list-terapias', cContadorTerapias);
+    renderizarListaPanel('c-list-geo', cContadorGeo);
+
+    // Inyectar métricas de análisis clínico en CRISAT
+    const cContenedorGenero = document.getElementById('c-analisis-genero');
+    if (cContenedorGenero) {
+        cContenedorGenero.innerHTML = Object.entries(cContadorGeneros).map(([g, t]) => `
+            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px;">
+                <span>${g}</span><strong>${t} pac.</strong>
+            </div>
+        `).join('');
+    }
+
+    const cContenedorEdad = document.getElementById('c-analisis-edad');
+    if (cContenedorEdad) {
+        cContenedorEdad.innerHTML = Object.entries(cContadorRangosEdad).map(([r, t]) => `
+            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px;">
+                <span>${r}</span><strong>${t} pac.</strong>
+            </div>
+        `).join('');
+    }
+
+    const tbodyCrisat = document.getElementById('c-body-historial');
+    if (tbodyCrisat) {
+        tbodyCrisat.innerHTML = cFiltrados.slice(0, 30).map(i => `
+            <tr style="border-bottom: 1px solid #f1f5f9; font-size:11px;">
+                <td style="padding: 12px;"><b>${i.fecha || '---'}</b><br><small style="color:#64748b">${i.tipo_terapia || 'Terapia'}</small></td>
+                <td style="padding: 12px; color:#0891b2; font-weight:bold;">${i.expediente || '---'}</td>
+                <td style="padding: 12px;">
+                    <b>${i.paciente || 'No especificado'}</b> (${i.edad || '--'} años)<br>
+                    <small style="color:#e11d48; font-weight:500;"><i class="fas fa-wheelchair"></i> Diag: ${i.diagnostico || 'En valoración'}</small><br>
+                    <small style="color:#64748b"><i class="fas fa-map-marker-alt"></i> Loc: ${i.localidad || 'S/D'}</small>
+                </td>
+                <td style="padding: 12px; color:#334155; max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${i.plan_tratamiento || 'Sin plan'}">
+                    ${i.plan_tratamiento || 'Pendiente de asignación'}
+                </td>
+                <td style="padding: 12px; text-align: right; font-weight:bold;">$${(parseFloat(i.cuota) || 0).toFixed(2)}</td>
+                <td style="padding: 12px; text-align: center;">
+                    <span style="padding: 3px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; background: ${i.estado === 'CONCLUIDO' || i.asistencia === true ? '#d1fae5; color:#065f46;' : '#fee2e2; color:#991b1b;'}">
+                        ${i.estado || (i.asistencia ? 'ASISTIÓ' : 'PENDIENTE')}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+
+    // ==========================================================================
+    // PROCESAMIENTO MÓDULO 6: PSICOLOGÍA (DB_PS)
+    // ==========================================================================
+    const psFiltrados = filtrarColeccion(DB_PS, ['paciente', 'folio'], 'localidad', 'fecha');
+    const psyTotalElement = document.getElementById('psy-total');
+    if (psyTotalElement) psyTotalElement.textContent = psFiltrados.length;
+    
+    const psyMesElement = document.getElementById('psy-mes');
+    if (psyMesElement) {
+        psyMesElement.textContent = psFiltrados.filter(i => i.fecha && String(i.fecha).split('-')[1] === mesActualString).length;
+    }
+};
+
+
+window.procJefPsic = (s, m) => {
+    let totalAct = 0, personasAtendidas = 0;
+    let dependencias = {}, zonas = {};
+
+    // Filtramos usando la base de datos global de Psicología
+    let fil = DB_JP.filter(d => cumpleFiltros(d, s, m));
+    
+    fil.forEach(d => {
+        totalAct++;
+        // CORRECCIÓN: Usamos 'personas' porque así se guarda en tu formulario
+        personasAtendidas += Number(d.personas || 0);
+
+        const dep = (d.dependencia || "OTRA").toUpperCase();
+        if(!dependencias[dep]) dependencias[dep] = [];
+        dependencias[dep].push({ n: d.actividad, x: `Pax: ${d.personas || 0}`, l: d.colonia });
+
+        const loc = (d.colonia || "S/L").toUpperCase();
+        if(!zonas[loc]) zonas[loc] = [];
+        zonas[loc].push({ n: d.actividad, x: dep, l: loc });
+    });
+
+    // Actualización de elementos
+    if(document.getElementById('jp-total')) document.getElementById('jp-total').innerText = totalAct;
+    if(document.getElementById('jp-ent')) document.getElementById('jp-ent').innerText = personasAtendidas;
+    
+    // Renderizado usando tu motor global
     renderM('jp-list-actividades', dependencias, '#701a27');
     renderM('jp-list-geo', zonas, '#701a27');
 };
 
+
 // 3. GENERAL LOCALIDADES
 window.procGenLoc = (s, m) => {
-    let ent = 0, pen = 0, responsables = {}, zonas = {};
+    let ent = 0, pen = 0;
+    let responsables = {};
+    let zonas = {};
 
     let fil = DB_GL.filter(d => cumpleFiltros(d, s, m));
+    
     fil.forEach(d => {
         const est = (d.estatus || "").toUpperCase();
-        if (est === 'FINALIZADO' || est === 'REALIZADO') ent++; else pen++;
+        if (est === 'FINALIZADO' || est === 'REALIZADO') ent++; 
+        else pen++;
 
+        // Agrupación por Responsable
         const resp = (d.responsable || "SIN ASIGNAR").toUpperCase();
         if(!responsables[resp]) responsables[resp] = [];
-        responsables[resp].push({ n: d.actividad || d.asunto, x: est, l: d.localidad, s: est });
+        responsables[resp].push({ 
+            n: d.actividad || d.asunto || "Sin actividad", 
+            x: est, 
+            l: d.localidad || "S/L", 
+            s: est 
+        });
 
+        // Agrupación por Zona/Localidad
         const loc = (d.localidad || "S/L").toUpperCase();
         if(!zonas[loc]) zonas[loc] = [];
-        zonas[loc].push({ n: d.actividad, x: resp, l: loc });
+        zonas[loc].push({ 
+            n: d.actividad || d.asunto || "Sin actividad", 
+            x: resp, 
+            l: loc 
+        });
     });
 
-    document.getElementById('gl-total').innerText = fil.length;
-    document.getElementById('gl-ent').innerText = ent;
-    document.getElementById('gl-pen').innerText = pen;
+    // Actualización de elementos en el DOM
+    const totalEl = document.getElementById('gl-total');
+    if(totalEl) totalEl.innerText = fil.length;
+    
+    const entEl = document.getElementById('gl-ent');
+    if(entEl) entEl.innerText = ent;
+    
+    const penEl = document.getElementById('gl-pen');
+    if(penEl) penEl.innerText = pen;
+
+    // Renderizado en paneles
     renderM('gl-list-actividades', responsables, 'var(--genloc-color)');
     renderM('gl-list-geo', zonas, 'var(--genloc-color)');
 };
 
 // 4. REQUERIMIENTOS ESCOLARES / SOLICITUDES
-window.procEscolar = (s, m) => {
-    let ate = 0, pen = 0, nop = 0, areas = {}, resps = {}, zonas = {};
-
-    let fil = DB_RE.filter(d => cumpleFiltros(d, s, m));
-    fil.forEach(d => {
-        const est = (d.estatus || "").toUpperCase();
-        if (est.includes('ATENDIDO')) ate++; 
-        else if (est.includes('NO PROCEDE')) nop++; 
-        else pen++;
-
-        const area = (d.area_dirigida || "GENERAL").toUpperCase();
-        if(!areas[area]) areas[area] = [];
-        areas[area].push({ n: d.nombre_solicitante, x: d.requerimiento, l: d.localidad });
-
-        const resp = (d.responsable || "PENDIENTE").toUpperCase();
-        if(!resps[resp]) resps[resp] = [];
-        resps[resp].push({ n: d.nombre_solicitante, x: est, l: d.localidad });
-
-        const loc = (d.localidad || "S/L").toUpperCase();
-        if(!zonas[loc]) zonas[loc] = [];
-        zonas[loc].push({ n: d.requerimiento, x: area, l: loc });
-    });
-
-    document.getElementById('re-total').innerText = fil.length;
-    document.getElementById('re-ate').innerText = ate;
-    document.getElementById('re-pen').innerText = pen;
-    document.getElementById('re-nop').innerText = nop;
-    renderM('re-list-areas', areas, '#1e3a8a');
-    renderM('re-list-responsables', resps, '#1e3a8a');
-    renderM('re-list-geo', zonas, '#1e3a8a');
-};
-window.procJefPsic = (s, m) => {
-    let personasAtendidas = 0, acts = {}, geo = {};
-    let fil = DB_JP.filter(d => cumpleFiltros(d, s, m));
-    
-    fil.forEach(d => {
-        // Sumamos el valor del campo personas (asegurando que sea número)
-        // Si el campo en tu DB tiene otro nombre (ej. 'cantidad_personas'), cámbialo aquí:
-        personasAtendidas += Number(d.personas || 0); 
-        
-        const n = (d.paciente || d.nombre || "S/N").toUpperCase(), 
-              dep = (d.dependencia || "OTRA").toUpperCase(), 
-              l = (d.colonia || d.localidad || "S/L").toUpperCase(), 
-              act = (d.actividad || "ACTIVIDAD").toUpperCase();
-        
-        if (!acts[dep]) acts[dep] = []; 
-        acts[dep].push({ n, x: act, l });
-        
-        if (!geo[l]) geo[l] = []; 
-        geo[l].push({ n, x: act, l });
-    });
-
-    if (document.getElementById('jp-total')) {
-        // Total de actividades es el conteo de registros filtrados
-        document.getElementById('jp-total').innerText = fil.length;
-        // El ID 'jp-ent' ahora muestra el acumulado de personas
-        document.getElementById('jp-ent').innerText = personasAtendidas;
-        
-        renderM('jp-list-actividades', acts, '#701a27');
-        renderM('jp-list-geo', geo, '#701a27');
-    }
-};
-
-
-    window.procGenLoc = (s, m) => {
-        let fin = 0, respGrp = {}, geo = {};
-        let fil = DB_GL.filter(d => cumpleFiltros(d, s, m));
-        fil.forEach(d => {
-            const est = (d.estatus || "").toUpperCase(); 
-            if(est === 'FINALIZADO' || est === 'REALIZADO') fin++;
-            
-            const res = (d.responsable || "S/R").toUpperCase(), 
-                  det = (d.detalles || "S/D").toUpperCase(), 
-                  l = (d.col_loc || "S/L").toUpperCase();
-
-            if(!respGrp[res]) respGrp[res] = []; 
-            respGrp[res].push({ n: det, x: d.no || 'S/N', l, s: est });
-            
-            if(!geo[l]) geo[l] = []; 
-            geo[l].push({ n: det, x: res, l, s: est });
-        });
-
-        if(document.getElementById('gl-total')){
-            document.getElementById('gl-total').innerText = fil.length;
-            document.getElementById('gl-ent').innerText = fin;
-            document.getElementById('gl-pen').innerText = fil.length - fin;
-            renderM('gl-list-actividades', respGrp, 'var(--genloc-color)');
-            renderM('gl-list-geo', geo, '#64748b');
-        }
-    };
 
 window.procEscolar = (s, m) => {
     let ate = 0, nop = 0, areas = {}, resps = {}, geo = {};
@@ -1307,47 +1212,103 @@ window.procTerritorial = (term) => {
     document.getElementById('t-total-loc').innerText = Object.keys(master).length;
     document.getElementById('t-total-ok').innerText = totalOk;
 };
-    // --- SEGURIDAD Y VISTAS ---
-    const PERMISOS = {
-        "admin": "TODOS", "lorena.gonzalez": "TODOS",
-        "vulnerable": ["vulnerable"], "ramon.guapillo": ["vulnerable"],
-        "social": ["social"], "juanita.campechano": ["social"], "monse.plata": ["social"],
-        "procuraduria": ["procuraduria"], "edmundo.pechi": ["procuraduria"],
-        "medica": ["medica"], "psicologia": ["psicologia"], "samuel.pucheta": ["psicologia"],
-        "veronica.velasco": ["jefatura-psicologia", "psicologia"], "jefatura.psico": ["jefatura-psicologia"],
-        "ariana.reyes": ["general-localidades", "escolar"],
-        "escolar": ["escolar"], "apoyo.escolar": ["escolar"]
-    };
 
+   // Objeto de permisos unificado (Casos especiales de usuarios + Departamentos)
+const PERMISOS = {
+    "GLOBAL": "TODOS",
+    "ADMIN": "TODOS",
+    "MEDICA": ["medica"],
+    "SOCIAL": ["social"],
+    "PROCURADURIA": ["procuraduria"],
+    "SAMUEL.PUCHETA": ["psicologia"],
+    "VERONICA.VELASCO": ["psicologia", "jefatura-psicologia"],
+     "ARIANA.REYES": ["general-localidades", "escolar"]
+};
 
-    window.showView = (id, el) => {
-        document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
-        const target = document.getElementById('view-' + id);
-        if(target) target.classList.add('active');
-        if(el) el.classList.add('active');
-        document.getElementById('view-title').innerText = el ? el.innerText : "Panel";
-        window.reprocesarTodo();
-    };
-
-    function aplicarSeguridad() {
-        const misPermisos = PERMISOS[sesion];
-        if (!misPermisos) return window.location.href = "index.html";
-        if (misPermisos === "TODOS") {
-            document.getElementById('role-tag').innerText = "ADMINISTRADOR GLOBAL";
-            showView('vulnerable', document.getElementById('nav-vulnerable'));
-            return;
+// 1. CONTROL DE VISTAS (Optimizado contra nulos e iconos en texto)
+window.showView = (id, el) => {
+    // Quitar clases activas previas
+    document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(v => v.classList.remove('active'));
+    
+    // Activar contenedor destino
+    const target = document.getElementById('view-' + id);
+    if (target) target.classList.add('active');
+    
+    // Activar elemento del menú lateral si existe
+    if (el) el.classList.add('active');
+    
+    // Modificar el título de la barra superior de forma segura
+    const viewTitleElement = document.getElementById('view-title');
+    if (viewTitleElement) {
+        if (el) {
+            // Buscamos el texto dentro del <span> para ignorar el icono de FontAwesome
+            const spanText = el.querySelector('span');
+            viewTitleElement.innerText = spanText ? spanText.innerText : el.innerText.trim();
+        } else {
+            viewTitleElement.innerText = "Panel";
         }
-        document.querySelectorAll('.nav-item').forEach(i => i.style.display = 'none');
-        misPermisos.forEach((id, index) => {
-            const nav = document.getElementById('nav-' + id);
-            if (nav) {
-                nav.style.display = 'flex';
-                if (index === 0) showView(id, nav);
-            }
-        });
-        document.getElementById('role-tag').innerText = "DPTO: " + sesion.toUpperCase();
     }
+    
+    // Ejecutar reprocesamiento de filtros/gráficas si la función global existe
+    if (typeof window.reprocesarTodo === 'function') {
+        window.reprocesarTodo();
+    }
+    
+};
+
+// 2. SISTEMA DE CONTROL DE ACCESOS (Robusto)
+function aplicarSeguridad() {
+    // Recuperar credenciales desde el almacenamiento del navegador
+    const activeUser = localStorage.getItem("activeUser") || sessionStorage.getItem("nombre_usuario") || "";
+    const userDep = localStorage.getItem("userDep") || sessionStorage.getItem("userDep") || "";
+    
+    const cuentaActiva = activeUser.toUpperCase();
+    const deptoActivo = userDep.toUpperCase();
+
+    // Determinar la llave correcta (Primero evalúa usuario específico, luego departamento)
+    const sesionKey = PERMISOS[cuentaActiva] ? cuentaActiva : deptoActivo;
+    const misPermisos = PERMISOS[sesionKey];
+
+    // Redirección si la sesión no es válida
+    if (!misPermisos) {
+        sessionStorage.clear();
+        localStorage.removeItem("activeUser");
+        return window.location.href = "index.html";
+    }
+
+    // Caso: Acceso Total
+    if (misPermisos === "TODOS") {
+        document.getElementById('role-tag').innerText = "ADMINISTRADOR GLOBAL";
+        // Aseguramos que toda la barra lateral esté visible
+        document.querySelectorAll('.nav-item').forEach(i => i.style.display = 'flex');
+        
+        const navDefecto = document.getElementById('nav-vulnerable');
+        showView('vulnerable', navDefecto);
+        return;
+    }
+
+    // Caso: Acceso Segmentado
+    // Ocultar todos los elementos primero
+    document.querySelectorAll('.nav-item').forEach(i => i.style.display = 'none');
+    
+    // Activar solo los módulos asignados en el array
+    misPermisos.forEach((id, index) => {
+        const nav = document.getElementById('nav-' + id);
+        if (nav) {
+            nav.style.display = 'flex';
+            // Abre automáticamente el primer módulo disponible del arreglo
+            if (index === 0) showView(id, nav);
+        }
+    });
+
+    // Colocar etiqueta informativa en el menú lateral
+    const tagTexto = PERMISOS[cuentaActiva] ? activeUser : userDep;
+    document.getElementById('role-tag').innerText = "ACCESO: " + tagTexto.toUpperCase();
+}
+
+// Ejecutar el filtro de seguridad cuando el árbol DOM esté completamente listo
+document.addEventListener("DOMContentLoaded", aplicarSeguridad);
 
     // Reloj
     setInterval(() => {
@@ -1390,6 +1351,8 @@ window.procTerritorial = (term) => {
         options: { responsive: true }
     });
 };
+
+
 </script>  
 </body>
 </html>
