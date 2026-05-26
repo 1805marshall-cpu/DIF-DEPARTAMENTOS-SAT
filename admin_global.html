@@ -163,6 +163,22 @@
     background: var(--primary); 
     border-bottom: 3px solid var(--secondary); /* Añade un borde dorado */
 }
+/* Ejemplo para asegurar que los paneles se ajusten bien */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.view-container {
+    display: none; /* Ocultar todas por defecto */
+    padding: 20px;
+}
+
+.view-container.active {
+    display: block; /* Mostrar solo la activa */
+}
     </style>
 </head>
 <body>
@@ -1221,7 +1237,7 @@ const PERMISOS = {
     "SOCIAL": ["social"],
     "PROCURADURIA": ["procuraduria"],
     "SAMUEL.PUCHETA": ["psicologia"],
-    "VERONICA.VELASCO": ["psicologia", "jefatura-psicologia"],
+    "VERONICA.VELASCO": ["jefatura-psicologia","psicologia"],
      "ARIANA.REYES": ["general-localidades", "escolar"]
 };
 
@@ -1351,8 +1367,29 @@ document.addEventListener("DOMContentLoaded", aplicarSeguridad);
         options: { responsive: true }
     });
 };
+window.aplicarPermisosVisuales = () => {
+    const usuario = (localStorage.getItem("activeUser") || sessionStorage.getItem("activeUser") || "").toUpperCase();
+    
+    // 1. Identificar permisos del usuario
+    const misPermisos = PERMISOS[usuario] || [];
+    const esAdminTotal = (misPermisos === "TODOS" || PERMISOS[usuario] === "TODOS");
 
+    // 2. Ocultar todos los contenedores por defecto
+    document.querySelectorAll('.view-container').forEach(v => v.style.display = 'none');
 
+    // 3. Si es Admin/Global, mostrar todo
+    if (esAdminTotal) {
+        document.querySelectorAll('.view-container').forEach(v => v.style.display = 'block');
+        return;
+    }
+
+    // 4. Mostrar solo lo que el usuario tiene permitido
+    misPermisos.forEach(modulo => {
+        const id = `view-${modulo}`; // Busca IDs como 'view-psicologia', 'view-jefatura-psicologia', etc.
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'block';
+    });
+};
 </script>  
 </body>
 </html>
