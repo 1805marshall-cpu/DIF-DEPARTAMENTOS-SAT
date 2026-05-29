@@ -272,7 +272,7 @@
         </div>        
         
 
-        <div id="view-vulnerable" class="view-container">
+        <div id="view-vulnerable" class="view-container" style="display:none;">
             <div class="access-card" style="background: var(--vulnerable-color);"><div><b>Población Vulnerable</b></div><a href="vulnerable.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
             <div class="stats-grid">
@@ -293,7 +293,7 @@
             </div>
         </div>
 
-<div id="view-social" class="view-container">
+<div id="view-social" class="view-container" style="display:none;">
     <div class="access-card" style="background: var(--social-color);">
         <div><b>Trabajo Social</b></div>
         <a href="social.html" class="btn-open">Ir al Módulo</a>
@@ -332,7 +332,7 @@
     </div>
 </div>
 
-        <div id="view-procuraduria" class="view-container">
+        <div id="view-procuraduria" class="view-container" style="display:none;">
             <div class="access-card" style="background: var(--procu-color);"><div><b>Procuraduría</b></div><a href="procuraduria.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
             <div class="stats-grid"><div class="stat-box"><small>Expedientes</small><div id="pr-total">0</div></div><div class="stat-box"><small>H. Mixtos</small><div id="pr-mixtos">0</div></div></div>
@@ -343,7 +343,7 @@
             </div>
         </div>
 
-        <div id="view-medica" class="view-container">
+        <div id="view-medica" class="view-container" style="display:none;">
             <div class="access-card" style="background: var(--med-color);"><div><b>Área Médica</b></div><a href="medica.html" class="btn-open">Módulo</a></div>
             <div class="filter-bar"></div>
             <div class="stats-grid"><div class="stat-box"><small>Atenciones</small><div id="m-total">0</div></div><div class="stat-box"><small>Medicamentos</small><div id="m-med">0</div></div></div>
@@ -354,7 +354,7 @@
             </div>
         </div>
 
-<div id="view-psicologia" class="view-container">
+<div id="view-psicologia" class="view-container" style="display:none;">
     <div class="access-card" style="background: var(--psico-color);">
         <div><b>Psicología</b></div>
         <a href="psicologia.html" class="btn-open">Módulo</a>
@@ -413,7 +413,7 @@
     </div>
 </div>
 
-<div id="view-jefatura-psicologia" class="view-container">
+<div id="view-jefatura-psicologia" class="view-container" style="display:none;">
     <div class="access-card" style="background: #701a27;"><div><b>Jefatura de Psicología</b></div><a href="jefatura_psicologia.html" class="btn-open">Módulo</a></div>
     <div class="filter-bar"></div>
     <div class="stats-grid">
@@ -427,7 +427,7 @@
     </div>
 </div>
 
-        <div id="view-general-localidades" class="view-container">
+        <div id="view-general-localidades" class="view-container" style="display:none;">
 
         </div>
 
@@ -445,48 +445,53 @@
     </div>
     </div>
 
-   <div id="view-territorial" class="view-container">
-    <div class="access-card" style="background: var(--genloc-color);">
-        <b><i class="fas fa-map-marked-alt"></i> Concentrado Territorial Multidepartamental</b>
-    </div>
-    
-    <div class="stats-grid">
-        <div class="stat-box"><small>Total Atenciones</small><div id="t-total-atn">0</div></div>
-        <div class="stat-box"><small>Localidades Activas</small><div id="t-total-loc">0</div></div>
-        <div class="stat-box"><small>Apoyos Entregados</small><div id="t-total-ok" style="color:var(--success)">0</div></div>
+<!-- ... (resto de tus vistas anteriores) ... -->
+
+    <!-- VISTA TERRITORIAL (limpia) -->
+    <div id="view-territorial" class="view-container" style="display:none;">
+        <div class="access-card" style="background: var(--genloc-color);">
+            <b><i class="fas fa-map-marked-alt"></i> Concentrado Territorial Multidepartamental</b>
+        </div>
+        <!-- ... resto de tu contenido territorial ... -->
     </div>
 
-    <div class="panel" style="height: auto; min-height: 500px;">
-        <b>Desglose por Zona y Departamento</b>
-        <div id="territorial-master-list">
-            </div>
+    <!-- NUEVA UBICACIÓN: La bienvenida debe estar fuera de cualquier otra vista -->
+    <div id="view-bienvenida" class="view-container" style="display:none; flex-direction:column; align-items:center; justify-content:center; height:80vh; text-align:center;">
+        <img src="logo_dif.png" alt="Logo DIF" style="width:250px; margin-bottom: 20px;">
+        <h2 style="color:#1e293b;">Bienvenido al Sistema Institucional</h2>
+        <p style="color:#64748b;">Selecciona un módulo del menú lateral para comenzar.</p>
     </div>
-    
-</div>
+
+</div> <!-- Cierre del main-content -->
 </div>
 </div>
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    // 1. PRIMERO: Recuperamos el usuario del localStorage (debe ir aquí)
+    
 document.addEventListener("DOMContentLoaded", () => {
     const usuario = localStorage.getItem('activeUser');
     const departamento = localStorage.getItem('userDep');
     
     if (usuario) {
-        // Asignar nombres al sidebar
         document.getElementById("user-name-display").innerText = usuario.toUpperCase();
         document.getElementById("user-role-display").innerText = departamento || "SISTEMA DIF";
         
-        // --- AQUÍ LLAMAS A LA RESTRICCIÓN ---
+        // 1. Ocultar los botones que no debe ver
         aplicarRestriccionesDeDepartamento();
         
-        // Opcional: Auto-abrir la vista del departamento
-        const navId = `nav-${departamento.toLowerCase()}`;
-        if(document.getElementById(navId)) {
-            document.getElementById(navId).click();
+        // 2. NUEVA LÓGICA: En lugar de hacer .click(), mostramos una bienvenida
+        // Primero ocultamos todas las vistas activas
+        document.querySelectorAll('.view-container').forEach(view => {
+            view.style.display = 'none';
+        });
+
+        // Mostramos la carátula institucional (asegúrate de tener este ID en tu HTML)
+        const vistaBienvenida = document.getElementById('view-bienvenida');
+        if (vistaBienvenida) {
+            vistaBienvenida.style.display = 'flex';
         }
+
     } else {
         window.location.href = "index.html";
     }
@@ -875,11 +880,14 @@ onSnapshot(collection(db, "procuraduria"), (snap) => {store.procuraduria = snap.
                 window.location.href = "index.html";
             }
         };
+        // --- CORRECCIÓN FINAL ---
+// Eliminamos el clic forzado en 'nav-social'
+window.onload = () => {
+    // Ya no hacemos nada aquí, porque el DOMContentLoaded 
+    // ya se encargó de ocultar todo y mostrar la bienvenida.
+    console.log("Sistema cargado y listo.");
+};
 
-        // Inicialización por defecto
-        window.onload = () => {
-            document.getElementById('nav-social').click(); // Carga la vista de Trabajo Social por defecto
-        };
     </script>
 </body>
 </html>
