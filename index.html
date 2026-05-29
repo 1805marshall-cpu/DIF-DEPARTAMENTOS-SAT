@@ -301,7 +301,7 @@
         "responsable.farma": { p: "farma.dif", url: "farmacia.html", dep: "FARMACIA" },
         "psicologia": { p: "psi123", url: "psicologia.html", dep: "PSICOLOGIA" },
         "samuel.pucheta": { p: "Samuel123..", url: "psicologia.html", dep: "PSICOLOGIA" },
-        "veronica.velasco": { p: "Veronica123..", url: "admin_global.html", dep: "PSICOLOGIA" },
+        "veronica.velasco": { p: "Veronica123..", url: "jefatura_psicologia.html", dep: "PSICOLOGIA" }, // Cambiado url a jefatura_psicologia.html
         "jefatura.psico": { p: "jefe.psi.2026", url: "jefatura_psicologia.html", dep: "PSICOLOGIA" },
         "localidades": { p: "DIF.gen.loc", url: "general_localidades.html", dep: "LOCALIDADES" },
         "ariana.reyes": { p: "Ariana123..", url: "general_localidades.html", dep: "LOCALIDADES" },
@@ -326,9 +326,14 @@
         if (cuentas[user] && cuentas[user].p === pass) {
             error.style.display = 'none';
             
+            // --- PERSISTENCIA DE SESIÓN COMPATIBLE CON JEFATURA DE PSICOLOGÍA ---
             sessionStorage.setItem('sesion_activa', 'true'); 
             sessionStorage.setItem('nombre_usuario', user);
             sessionStorage.setItem('departamento', cuentas[user].dep);
+            
+            // Guardado alternativo en localStorage para cumplir con las reglas del panel de psicología
+            localStorage.setItem('activeUser', user);
+            localStorage.setItem('userDep', cuentas[user].dep);
 
             if (nombresMedicos[user]) {
                 sessionStorage.setItem('nombre_medico', nombresMedicos[user]);
@@ -338,7 +343,7 @@
 
             const datosTrabajoSocial = {
                 "juanita.campechano": { nombre: "JUANITA C. CAMPECHANO QUEZADA", titulo: "LICDA." },
-                "monse.plata": { nombre: "MONSERRAT PLATA FLORES", titulo: "L.T.S." }
+                "monse.plata": { nombre: "MONSERRAT PLATA FLORES", titulo: "L.S.C." }
             };
 
             if (datosTrabajoSocial[user]) {
@@ -377,6 +382,7 @@
             eyeIcon.classList.add('fa-eye');
         }
     }
+</script>
 </script>
 </body>
 </html>
