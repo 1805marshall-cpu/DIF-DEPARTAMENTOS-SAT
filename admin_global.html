@@ -696,33 +696,38 @@ window.reprocesarProcuraduria = function() {
     document.getElementById('pr-total').innerText = filtrados.length;
     document.getElementById('pr-mixtos').innerText = filtrados.filter(d => d.horarios_mixtos === 'Si').length;
 
-    // 1. Panel: ASUNTOS (Agrupación y conteo)
+    // 1. Panel: ASESORÍA (Agrupación y conteo)
     const conteoAsuntos = {};
     filtrados.forEach(d => { const a = d.asuntos || "S/ASUNTO"; conteoAsuntos[a] = (conteoAsuntos[a] || 0) + 1; });
     
     document.getElementById('pr-conteo-tabla').innerHTML = Object.entries(conteoAsuntos)
         .sort((a,b) => b[1] - a[1])
         .map(([asunto, count]) => `
-            <div class="member-line" style="border-bottom:1px solid #f1f5f9; padding:4px 0;">
-                <div style="font-weight:800; font-size:11px;">${asunto}</div>
-                <div style="font-size:10px; color:#64748b;">Conteo: ${count}</div>
-            </div>`).join('');
-
-    // 2. Panel: LISTADO (Nombre + Asuntos)
-    document.getElementById('pr-list-casos').innerHTML = filtrados.slice(-15).reverse().map(d => `
-        <div class="member-line" style="border-bottom:1px solid #f1f5f9; padding:4px 0;">
-            <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.nombre || 'SIN NOMBRE'}</div>
-            <div style="font-size:10px; color:var(--procu); font-weight:700;">${d.asuntos || 'S/A'}</div>
+        <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+            <div style="flex:1;">
+                <div style="font-weight:800; font-size:11px; color:#1e293b; text-transform: uppercase;">${asunto}</div>
+                <div style="font-size:10px; color:var(--primary); font-weight:700;">TOTAL: ${count}</div>
+            </div>
         </div>`).join('');
 
-    // 3. Panel: ZONAS (Lugar + Domicilio)
+    // 2. Panel: NOMBRE (Nombre + Asuntos)
+    document.getElementById('pr-list-casos').innerHTML = filtrados.slice(-15).reverse().map(d => `
+      <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+            <div style="flex:1;">
+                <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.nombre || 'SIN NOMBRE'}</div>
+                <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.asuntos || 'S/A'}</div>
+            </div>
+        </div>`).join('');
+
+    // 3. Panel: LUGAR (Lugar + Domicilio)
     document.getElementById('pr-list-geo').innerHTML = filtrados.slice(-15).reverse().map(d => `
-        <div class="member-line" style="border-bottom:1px solid #f1f5f9; padding:4px 0;">
-            <div style="font-weight:800; font-size:11px; color:#0f172a;">${d.lugar || 'SIN LUGAR'}</div>
-            <div style="font-size:10px; color:#64748b;">${d.domicilio || 'SIN DOMICILIO'}</div>
+          <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+            <div style="flex:1;">
+                <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.lugar || 'SIN LUGAR'}</div>
+                <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.domicilio || 'SIN DOMICILIO'}</div>
+            </div>
         </div>`).join('');
 };
-
         ///////////////////////////////////////////////
         // --- PROCESAMIENTO TRABAJO SOCIAL ---
 window.reprocesarTrabSoc = function() {
@@ -730,20 +735,20 @@ window.reprocesarTrabSoc = function() {
     const zona = document.getElementById('global-zone-search').value.toLowerCase();
     const mes = document.getElementById('global-month-filter').value;
 
-    // 1. Filtrado con lógica robusta para la fecha
     const filtrados = store.social.filter(item => {
         const nombre = (item.nombre || "").toLowerCase();
+        const programa = (item.programa || "").toLowerCase();
+        const asunto = (item.asunto || "").toLowerCase();
         const z = (item.col_loc || "").toLowerCase();
         const fecha = (item.fecha_registro || "").trim();
         const partes = fecha.split('-');
         const mesRegistro = partes.length >= 2 ? partes[1] : "";
         
-        return nombre.includes(busqueda) && 
-               z.includes(zona) && 
-               (mes === 'all' || mesRegistro === mes);
+        const coincideBusqueda = nombre.includes(busqueda) || programa.includes(busqueda) || asunto.includes(busqueda);
+        return coincideBusqueda && z.includes(zona) && (mes === 'all' || mesRegistro === mes);
     });
 
-    // 2. Cálculo de conteos
+    // Cálculo de conteos
     const contPrograma = {}, contAsunto = {}, contDetalle = {};
     filtrados.forEach(i => {
         const p = i.programa || "SIN PROG.";
@@ -754,12 +759,21 @@ window.reprocesarTrabSoc = function() {
         contDetalle[d] = (contDetalle[d] || 0) + 1;
     });
 
-    // 3. Actualizar Stats principales
+    // Actualizar Stats principales
     document.getElementById('s-total').innerText = filtrados.length;
     document.getElementById('s-atendidos').innerText = filtrados.filter(d => ['ATENDIDO', 'ENTREGADO', 'REALIZADO', 'VALIDADO'].includes(d.estatus)).length;
     document.getElementById('s-pendientes').innerText = filtrados.filter(d => ['PENDIENTE', 'EN PROCESO'].includes(d.estatus)).length;
     
-    // 4. Renderizado de Stats completos (Lista total)
+    // Función de color para estatus
+    const getColor = (e) => {
+        const colores = {
+            'ATENDIDO': '#16a34a', 'ENTREGADO': '#16a34a', 'REALIZADO': '#16a34a', 'VALIDADO': '#16a34a',
+            'PENDIENTE': '#ea580c', 'EN PROCESO': '#2563eb', 'CANCELADO': '#dc2626'
+        };
+        return colores[e] || '#64748b';
+    };
+
+    // Renderizado Stats (se mantiene igual)
     const renderStatCompleto = (id, titulo, objetoConteo) => {
         const container = document.getElementById(id);
         if (!container) return;
@@ -778,12 +792,11 @@ window.reprocesarTrabSoc = function() {
             </div>
         `;
     };
-
     renderStatCompleto('stat-programa', 'PROGRAMAS', contPrograma);
     renderStatCompleto('stat-asunto', 'ASUNTOS', contAsunto);
     renderStatCompleto('stat-detalle', 'DETALLES', contDetalle);
 
-    // 5. Agrupación para Columna 2
+    // Agrupación para Columna 2
     const cont = {};
     filtrados.forEach(i => {
         const key = `${i.asunto || "SIN ASUNTO"}|${i.programa || "SIN PROG."}|${i.detalle_asunto || "SIN DETALLE"}`;
@@ -791,12 +804,19 @@ window.reprocesarTrabSoc = function() {
     });
     const ordenado = Object.entries(cont).sort((a, b) => b[1] - a[1]);
 
-    // 6. Renderizado de columnas
+// 1. Renderizado Columna 1
     document.getElementById('col-1').innerHTML = filtrados.slice(-15).reverse().map(i => `
-        <div class="member-line"><b>${i.nombre||'N/A'}</b><br><small>${i.fecha_registro||''}</small></div>
-        <br><small>${i.asunto||''}</small></div>
+        <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
+        <div style="flex-grow:1; overflow:hidden;">
+            <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.nombre||'N/A'}</div>
+            <div style="font-size:9px; color:#64748b;">${i.fecha_registro||''}</div>
+            <div style="font-size:9px; color:var(--primary); font-weight:700;">${i.asunto||''}</div>
+            <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus||'SIN ESTADO'}</div>
+            </div>
+        </div>
     `).join('');
     
+    // 2. Renderizado Columna 2 (Ya tiene tu diseño original)
     document.getElementById('col-2').innerHTML = ordenado.map(([key, count]) => {
         const [asunto, programa, detalle] = key.split('|');
         return `
@@ -810,14 +830,20 @@ window.reprocesarTrabSoc = function() {
             </div>`;
     }).join('');
 
+    // 3. Renderizado Columna 3
     document.getElementById('col-3').innerHTML = filtrados.slice(-15).reverse().map(i => `
-        <div class="member-line"><b>${i.col_loc||'N/A'}</b><br><small>${i.direccion||''}</small></div>
+        <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
+        <div style="flex-grow:1; overflow:hidden;">
+            <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.col_loc||'N/A'}</div>
+            <div style="font-size:9px; color:#64748b;">${i.direccion||''}</div>
+            <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus||'SIN ESTADO'}</div>
+            </div>
+        </div>
     `).join('');
 };
 
         ///////////////////////////////////////////////
         // --- PROCESAMIENTO TODAS LAS COLONIAS Y LOCALIDADES ---
-
 
 
 // --- LISTENERS (Asegúrate de tener esta parte al final) ---
