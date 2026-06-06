@@ -195,7 +195,22 @@
     font-size: 12px;
     font-weight: 800;
 }
-
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+}
+.tabla-box table tbody tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+.card { background: white; padding: 20px; border-radius: 15px; border-top: 5px solid #991b1b; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.card.money { border-top-color: #059669; }
+.card.valid { border-top-color: #0369a1; }
+.monto { font-size: 20px; font-weight: 800; display: block; margin-top: 5px; }
+.resumen-list { list-style: none; padding: 0; font-size: 12px; }
+.resumen-list li { display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding: 2px 0; }
     </style>
 </head>
 <body>
@@ -211,7 +226,6 @@
             <div id="nav-jefatura-psicologia" class="nav-item" onclick="showView('jefatura-psicologia', this)"><i class="fas fa-user-shield"></i> <span>Jefatura Psicología</span></div>
             <div id="nav-vulnerable" class="nav-item" onclick="showView('vulnerable', this)"><i class="fas fa-hand-holding-heart"></i> <span>Pob. Vulnerable</span></div>
             <div id="nav-procuraduria" class="nav-item" onclick="showView('procuraduria', this)"><i class="fas fa-balance-scale"></i> <span>Procuraduría</span></div>
-            <div id="nav-general-localidades" class="nav-item" onclick="showView('general-localidades', this)"><i class="fas fa-map-marked-alt"></i> <span>General Localidades</span></div>
             <div id="nav-escolar" class="nav-item" onclick="showView('escolar', this)"><i class="fas fa-school"></i> <span>Req. Escolares</span></div>
             <div id="nav-territorial" class="nav-item" onclick="showView('territorial', this)"><i class="fas fa-city"></i> <span>Resumen Territorial</span></div>
         </nav>
@@ -343,16 +357,61 @@
             </div>
         </div>
 
-        <div id="view-medica" class="view-container" style="display:none;">
-            <div class="access-card" style="background: var(--med-color);"><div><b>Área Médica</b></div><a href="medica.html" class="btn-open">Módulo</a></div>
-            <div class="filter-bar"></div>
-            <div class="stats-grid"><div class="stat-box"><small>Atenciones</small><div id="m-total">0</div></div><div class="stat-box"><small>Medicamentos</small><div id="m-med">0</div></div></div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
-                <div class="panel"><b>Servicios</b><div id="m-list-servicios"></div></div>
-                <div class="panel"><b>Diagnósticos</b><div id="m-list-diagnosticos"></div></div>
-                <div class="panel"><b>Zonas</b><div id="m-list-geo"></div></div>
-            </div>
-        </div>
+<div id="view-historial" class="view-container" style="display:none;">
+    <div class="dash">
+        <div class="card money"><h3>Ingreso Periodo</h3><span class="monto" id="t-caja">$0.00</span></div>
+        <div class="card valid"><h3>Ingreso Validado</h3><span class="monto" id="t-validado">$0.00</span></div>
+        <div class="card"><h3>Atenciones</h3><span class="monto" id="t-pacientes">0</span></div>
+    </div>
+    <div class="tabla-box">
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha / Folio</th>
+                    <th>Paciente</th>
+                    <th>Servicio</th>
+                    <th>Estado</th>
+                    <th>Costo</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-historial"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="view-medica" class="view-container" style="display:none;">
+    <!-- Tarjetas de Dashboard -->
+    <div class="dash" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px;">
+        <div class="card money"><h3>Ingreso en Periodo</h3><span class="monto" id="t-caja">$0.00</span></div>
+        <div class="card valid"><h3>Ingreso Validado</h3><span class="monto" id="t-validado">$0.00</span></div>
+        <div class="card"><h3>Total Atenciones</h3><span class="monto" id="t-pacientes">0</span></div>
+    </div>
+
+    <!-- Panel de Resumen -->
+    <div class="resumen-detallado" style="background: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+        <div class="resumen-item"><h4>Tipo de Población</h4><ul class="resumen-list" id="res-poblacion"></ul></div>
+        <div class="resumen-item"><h4>Categoría</h4><ul class="resumen-list" id="res-categorias"></ul></div>
+        <div class="resumen-item"><h4>Servicio</h4><ul class="resumen-list" id="res-servicios"></ul></div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-box" style="background: white; border-radius: 15px; border: 1px solid #e2e8f0; overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8fafc;">
+                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">FECHA / FOLIO</th>
+                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">PACIENTE</th>
+                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">SERVICIO</th>
+                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">ESTADO</th>
+                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">COSTO</th>
+                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">ACCIÓN</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-medica"></tbody>
+        </table>
+    </div>
+</div>
 
 <div id="view-psicologia" class="view-container" style="display:none;">
     <div class="access-card" style="background: var(--psico-color);">
@@ -401,16 +460,23 @@
     </div>
 </div>
 
-    <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:20px;">
-        <div class="panel">
-            <b><i class="fas fa-notes-medical"></i> Motivos / Sesiones</b>
-            <div id="p-list-motivos" style="margin-top:10px;"></div>
-        </div>
-        <div class="panel">
-            <b><i class="fas fa-map-marker-alt"></i> Zonas / Localidades</b>
-            <div id="p-list-seguimiento" style="margin-top:10px;"></div>
-        </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px;">
+    <!-- Lista 1 -->
+    <div class="panel">
+        <b><i class="fas fa-user"></i> Pacientes Recientes</b>
+        <div id="p-list-pacientes" style="margin-top:10px;"></div>
     </div>
+    <!-- Lista 2: Rangos de Edad -->
+    <div class="panel">
+        <b><i class="fas fa-list-ul"></i> ZONAS / Temas Frecuentes</b>
+        <div id="p-list-asuntos" style="margin-top:10px;"></div>
+    </div>
+    <!-- Lista 3: Asuntos (Motivos) y conteo -->
+    <div class="panel">
+        <b><i class="fas fa-child"></i> Rangos de Edad</b>
+        <div id="p-list-edades" style="margin-top:10px;"></div>
+    </div>
+    </div>  
 </div>
 
 <div id="view-jefatura-psicologia" class="view-container" style="display:none;">
@@ -427,10 +493,6 @@
     </div>
 </div>
 
-        <div id="view-general-localidades" class="view-container" style="display:none;">
-
-        </div>
-
     <div id="view-escolar" class="view-container"><div class="access-card" style="background: #1e3a8a;"><div><b>Solicitudes Generales</b></div><a href="solicitudes.html" class="btn-open">Módulo</a></div>
     <div class="stats-grid">
         <div class="stat-box"><small>Solicitudes</small><div id="re-total">0</div></div>
@@ -445,15 +507,15 @@
     </div>
     </div>
 
-<!-- ... (resto de tus vistas anteriores) ... -->
-
-    <!-- VISTA TERRITORIAL (limpia) -->
-    <div id="view-territorial" class="view-container" style="display:none;">
-        <div class="access-card" style="background: var(--genloc-color);">
-            <b><i class="fas fa-map-marked-alt"></i> Concentrado Territorial Multidepartamental</b>
-        </div>
-        <!-- ... resto de tu contenido territorial ... -->
+    <!-- Vista Territorial -->
+<div id="view-territorial" class="view-container">
+    <div class="access-card" style="background: var(--genloc-color);">
+        <div><b>RESUMEN TERRITORIAL INTEGRAL</b></div>
     </div>
+    
+    <div id="territorial-master-list" style="padding: 20px;">
+        </div>
+</div>
 
     <!-- NUEVA UBICACIÓN: La bienvenida debe estar fuera de cualquier otra vista -->
     <div id="view-bienvenida" class="view-container" style="display:none; flex-direction:column; align-items:center; justify-content:center; height:80vh; text-align:center;">
@@ -535,7 +597,7 @@ function aplicarRestriccionesDeDepartamento() {
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const store = { social: [], psicologia: [], jefatura: [], procuraduria: [], general_localidades: [] };
+    const store = { medica: [], social: [], psicologia: [], jefatura: [], procuraduria: [], general_localidades: [] };
 
 // Función Maestra que disparan tus inputs
 // Función Maestra unificada (reemplaza la anterior)
@@ -544,13 +606,75 @@ window.reprocesarTodo = function() {
     if (typeof window.reprocesarProcuraduria === 'function') window.reprocesarProcuraduria();
     if (typeof window.reprocesarJefatura === 'function') window.reprocesarJefatura();
     if (typeof window.reprocesarTrabSoc === 'function') window.reprocesarTrabSoc();
-    // Agregado para que se actualice cada vez que cambias un filtro
+    if (typeof window.reprocesarMedica === 'function') window.reprocesarMedica();
     if (typeof window.renderReporteJerarquico === 'function') window.renderReporteJerarquico();
-    
-    console.log("Dashboard unificado actualizado a las " + new Date().toLocaleTimeString());
 };
 
-// Función de visualización jerárquica unificada
+// Función UNIFICADA para eliminar (Solo necesitas esta)
+window.borrarRegistro = async (coleccion, id) => {
+    if (confirm("¿Eliminar este registro?")) {
+        await deleteDoc(doc(db, coleccion, id));
+        // No hace falta llamar a nada, el onSnapshot abajo detectará el cambio y refrescará todo
+    }
+};
+
+// --- LISTENERS (Aquí ocurre la magia de la unificación) ---
+onSnapshot(collection(db, "trabajo_social"), (s) => { store.social = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarTrabSoc(); });
+onSnapshot(collection(db, "psicologia"), (s) => { store.psicologia = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarPsico(); });
+onSnapshot(collection(db, "jefatura_psicologia"), (s) => { store.jefatura = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarJefatura(); });
+onSnapshot(collection(db, "procuraduria"), (s) => { store.procuraduria = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarProcuraduria(); });
+onSnapshot(collection(db, "area_medica_v2"), (s) => { 
+    store.medica = s.docs.map(d => ({id: d.id, ...d.data()})); 
+    window.reprocesarMedica(); 
+    window.renderReporteJerarquico(); // Opcional si el reporte depende de médica
+});
+
+/////////////////////////////////////////////
+// Función específica de Area Medica
+
+window.reprocesarMedica = function() {
+    const tbody = document.getElementById('tbody-medica');
+    if (!tbody) return;
+
+    // 1. FILTRADO DE SEGURIDAD
+    // Ignoramos registros donde el nombre sea undefined o vacío
+    const registrosValidos = store.medica.filter(p => p.nombre && p.nombre !== "undefined");
+
+    // Calcular estadísticas usando SOLO los registros válidos
+    let totalCaja = 0;
+    let totalValidado = 0;
+    
+    tbody.innerHTML = registrosValidos.map(p => {
+        const esValido = p.validado_dir === 'SI';
+        const costo = parseFloat(p.costo || 0);
+        totalCaja += costo;
+        if(esValido) totalValidado += costo;
+
+        return `
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 15px;"><b>${p.fecha_cap}</b><br><small>${p.folio || ''}</small></td>
+                <td style="padding: 15px;"><b>${p.nombre}</b></td>
+                <td style="padding: 15px;">${p.estudio_servicio || 'N/A'}</td>
+                <td style="padding: 15px;">
+                    <span class="badge" style="background:${esValido ? '#16a34a' : '#ea580c'}; color:white; padding:4px 8px; border-radius:5px; font-size:10px;">
+                        ${esValido ? 'VALIDADO' : 'PENDIENTE'}
+                    </span>
+                </td>
+                <td style="padding: 15px; font-weight:bold;">$${costo.toFixed(2)}</td>
+                <td style="padding: 15px;">
+                    <button onclick="borrarRegistro('area_medica_v2', '${p.id}')" style="border:none; background:none; cursor:pointer; color:#dc2626;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    // Actualizar Dashboards con los datos limpios
+    document.getElementById('t-caja').innerText = '$' + totalCaja.toFixed(2);
+    document.getElementById('t-validado').innerText = '$' + totalValidado.toFixed(2);
+    document.getElementById('t-pacientes').innerText = registrosValidos.length; // Usa registrosValidos
+};
 
 /////////////////////////////////////////////
 // Función específica de Psicología
@@ -570,65 +694,75 @@ window.reprocesarPsico = function() {
                (mes === 'all' || mesRegistro === mes);
     });
 
-    // 1. Estadísticas Superiores (Totales)
+    // 1. Estadísticas Superiores
     document.getElementById('p-total').innerText = filtrados.length;
     document.getElementById('p-total-a').innerText = filtrados.filter(d => d.nombre_a && d.nombre_a !== "").length;
     document.getElementById('p-ses').innerText = filtrados.length;
 
-    // 2. Estadísticas de Pacientes (P)
+    // 2. Estadísticas de Pacientes/Acompañantes
     document.getElementById('p-hombres').innerText = filtrados.filter(d => d.genero_p === 'MASCULINO').length;
     document.getElementById('p-mujeres').innerText = filtrados.filter(d => d.genero_p === 'FEMENINO').length;
     document.getElementById('p-menores').innerText = filtrados.filter(d => parseInt(d.edad_p) < 18).length;
-    
-    // 3. Estadísticas de Acompañantes (A)
     document.getElementById('p-hombres-a').innerText = filtrados.filter(d => d.genero_a === 'MASCULINO').length;
     document.getElementById('p-mujeres-a').innerText = filtrados.filter(d => d.genero_a === 'FEMENINO').length;
     document.getElementById('p-menores-a').innerText = filtrados.filter(d => parseInt(d.edad_a) < 18).length;
 
-    // 4. Listas de abajo (Motivos y Zonas)
-    const motivos = {}, zonas = {};
+    // --- LÓGICA DE PROCESAMIENTO ---
+
+    // Agrupación para Lista 2 (Edades + Temas)
+    const edadTemas = { "0-17": {}, "18-35": {}, "36-55": {}, "56+": {} };
     filtrados.forEach(d => {
-        const m = d.tema || "SIN MOTIVO";
-        const z = d.col_loc || "SIN ZONA";
-        motivos[m] = (motivos[m] || 0) + 1;
-        zonas[z] = (zonas[z] || 0) + 1;
+        const edad = parseInt(d.edad_p);
+        const tema = d.tema || "SIN MOTIVO";
+        if (!isNaN(edad)) {
+            let r = edad < 18 ? "0-17" : edad <= 35 ? "18-35" : edad <= 55 ? "36-55" : "56+";
+            edadTemas[r][tema] = (edadTemas[r][tema] || 0) + 1;
+        }
     });
 
-    // Lista 1: Nombre del Paciente y Motivo (Mostrando los últimos 15 registros filtrados)
-    document.getElementById('p-list-motivos').innerHTML = filtrados.slice(-15).reverse().map(d => `
-        <div class="member-line" style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="flex:1; overflow:hidden;">
-                <div style="font-weight:800; font-size:11px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                    ${d.paciente || 'SIN NOMBRE'}
-                </div>
-                <div style="font-size:9px; color:var(--primary); font-weight:700;">
-                    ${d.tema || 'SIN MOTIVO'}
-                </div>
-            </div>
-            <div style="font-size:9px; color:#94a3b8; font-weight:bold; margin-left:10px;">
-                ${d.fecha || ''}
-            </div>
-        </div>
-    `).join('');       
-    
-    // Lista 2: Localidad (col_loc) y el Motivo
-    document.getElementById('p-list-seguimiento').innerHTML = filtrados.slice(-15).reverse().map(d => `
-        <div class="member-line" style="display:flex; justify-content:space-between; align-items:center;">
-            <div style="flex:1; overflow:hidden;">
-                <div style="font-weight:800; font-size:11px; color:#0f172a;">
-                    ${d.col_loc || 'SIN ZONA'}
-                </div>
-                <div style="font-size:9px; color:#64748b; font-weight:700;">
-                    ${d.tema || 'SIN MOTIVO'}
-                </div>
-            </div>
-            <div style="font-size:9px; color:#94a3b8; font-weight:bold; margin-left:10px;">
-                ${d.fecha ? d.fecha.split('-')[2] : ''}
-            </div>
-        </div>
-    `).join('');
-    };
+    // Agrupación para Lista 3: Localidades -> Asuntos
+    const localTemas = {};
+    filtrados.forEach(d => {
+        const loc = d.col_loc || "SIN LOCALIDAD";
+        const tema = d.tema || "SIN MOTIVO";
+        if (!localTemas[loc]) localTemas[loc] = {};
+        localTemas[loc][tema] = (localTemas[loc][tema] || 0) + 1;
+    });
 
+    // --- RENDERIZADO ---
+
+    // Lista 1: Pacientes Recientes
+    document.getElementById('p-list-pacientes').innerHTML = filtrados.slice(-15).reverse().map(d => `
+        <div style="border-bottom:1px solid #f1f5f9; padding:6px 0;">
+            <div style="font-weight:800; font-size:11px; color:#0f172a;">${d.paciente || 'S/N'}</div>
+            <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.tema || 'SIN MOTIVO'}</div>
+            <div style="font-size:9px; color:#94a3b8; font-weight:bold;">Sesión: ${d.n_sesion || '1'} | ${d.fecha || ''}</div>
+        </div>`).join('');
+
+    // Lista 2: Edades con Temas abajo
+    document.getElementById('p-list-edades').innerHTML = Object.entries(edadTemas).map(([rango, temas]) => `
+        <div style="margin-bottom:10px;">
+            <div style="font-weight:800; font-size:11px; background:#f1f5f9; padding:2px 5px; border-radius:3px;">${rango} años</div>
+            ${Object.entries(temas).map(([tema, count]) => `
+                <div style="display:flex; justify-content:space-between; font-size:9px; padding-left:8px; margin-top:1px;">
+                    <span style="color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${tema}</span>
+                    <b style="color:#0f172a;">${count}</b>
+                </div>
+            `).join('')}
+        </div>`).join('');
+
+    // Lista 3: Localidades y sus Asuntos
+    document.getElementById('p-list-asuntos').innerHTML = Object.entries(localTemas).map(([loc, temas]) => `
+        <div style="margin-bottom:12px;">
+            <div style="font-weight:800; font-size:11px; background:#e2e8f0; padding:3px 6px; border-radius:3px;">${loc}</div>
+            ${Object.entries(temas).map(([tema, count]) => `
+                <div style="display:flex; justify-content:space-between; font-size:9px; padding-left:8px; margin-top:2px;">
+                    <span style="color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${tema}</span>
+                    <b style="color:#0f172a;">${count}</b>
+                </div>
+            `).join('')}
+        </div>`).join('');
+};
 /////////////////////////////////////////////
 // Función específica de JefaturaPsicología
     window.reprocesarJefatura = function() {
@@ -849,13 +983,87 @@ window.reprocesarTrabSoc = function() {
 
         ///////////////////////////////////////////////
         // --- PROCESAMIENTO TODAS LAS COLONIAS Y LOCALIDADES ---
+window.renderReporteJerarquico = function() {
+    const container = document.getElementById('territorial-master-list');
+    if (!container) return;
 
+    // 1. Captura de valores de los filtros globales
+    const busquedaTexto = document.getElementById('global-search-input').value.toLowerCase();
+    const busquedaZona = document.getElementById('global-zone-search').value.toLowerCase();
+    const mesFiltro = document.getElementById('global-month-filter').value; // '01', '02', etc. o 'all'
+
+    // 2. Consolidación de datos con fecha (asumiendo que tus objetos tienen 'fecha' en formato YYYY-MM-DD o similar)
+    const data = [
+        ...store.social.map(i => ({ dep: 'SOCIAL', zona: i.col_loc || 'N/A', estatus: i.estatus || 'N/A', info: i.asunto, nombre: i.nombre || '', folio: i.folio || '', fecha: i.fecha || '' })),
+        ...store.psicologia.map(i => ({ dep: 'PSICO', zona: i.col_loc || 'N/A', estatus: 'ATENDIDO', info: i.tema, nombre: i.paciente || '', folio: '', fecha: i.fecha || '' })),
+        ...store.procuraduria.map(i => ({ dep: 'PROCU', zona: i.lugar || 'N/A', estatus: 'ACTIVO', info: i.asuntos, nombre: i.nombre || '', folio: '', fecha: i.fecha || '' })),
+        ...store.jefatura.map(i => ({ dep: 'JEFATURA', zona: i.colonia || 'N/A', estatus: 'REALIZADO', info: i.actividad, nombre: '', folio: i.oficio || '', fecha: i.fecha || '' }))
+    ];
+
+    // 3. Lógica de Filtrado Multicriterio
+    const filtrados = data.filter(i => {
+        // Filtro por Mes (Extrae el mes de la fecha si existe)
+        const mesItem = i.fecha ? i.fecha.split('-')[1] : null; 
+        const coincideMes = (mesFiltro === 'all' || mesItem === mesFiltro);
+        
+        // Filtros de texto (Zona, Nombre, Folio, Dep)
+        const coincideZona = i.zona.toLowerCase().includes(busquedaZona);
+        const coincideBusqueda = (
+            i.nombre.toLowerCase().includes(busquedaTexto) || 
+            i.folio.toLowerCase().includes(busquedaTexto) || 
+            i.dep.toLowerCase().includes(busquedaTexto) ||
+            i.info.toLowerCase().includes(busquedaTexto)
+        );
+        
+        return coincideMes && coincideZona && coincideBusqueda;
+    });
+
+    // 4. Agrupamiento
+    const agrupado = filtrados.reduce((acc, item) => {
+        if (!acc[item.zona]) acc[item.zona] = [];
+        acc[item.zona].push(item);
+        return acc;
+    }, {});
+
+    // 5. Renderizado
+    container.innerHTML = Object.entries(agrupado)
+        .sort((a, b) => b[1].length - a[1].length)
+        .map(([zona, items]) => {
+            const pendientesCount = items.filter(i => i.estatus === 'PENDIENTE').length;
+            const esPrioridad = pendientesCount >= 3;
+            
+            return `
+        <div style="margin-bottom: 20px; background: #fff; border-radius: 10px; border: 2px solid ${esPrioridad ? '#ef4444' : '#e2e8f0'}; overflow:hidden;">
+            <div style="background: ${esPrioridad ? '#fef2f2' : '#f8fafc'}; padding: 10px 15px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight: 900; color: #1e293b; font-size: 13px;">
+                    <i class="fas fa-map-marker-alt" style="color:${esPrioridad ? '#ef4444' : 'var(--primary)'}; margin-right:5px;"></i> 
+                    ${zona.toUpperCase()}
+                </span>
+                <span style="background:${esPrioridad ? '#ef4444' : 'var(--primary)'}; color:white; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:bold;">
+                    ${items.length} REGISTROS
+                </span>
+            </div>
+            ${items.map(i => `
+                <div style="padding:8px 15px; font-size:11px; border-bottom:1px solid #f8fafc;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <b style="color:var(--primary)">${i.dep}</b>
+                        <span style="font-weight:bold; color:${i.estatus === 'PENDIENTE' ? '#ea580c' : '#16a34a'};">${i.estatus}</span>
+                    </div>
+                    <div style="color:#334155; margin-top:3px;">${i.nombre ? `<b>${i.nombre}</b> - ` : ''}${i.info}</div>
+                </div>
+            `).join('')}
+        </div>
+    `}).join('');
+};
 
 // --- LISTENERS (Asegúrate de tener esta parte al final) ---
 onSnapshot(collection(db, "trabajo_social"), (snapshot) => {store.social = snapshot.docs.map(doc => doc.data()); window.reprocesarTrabSoc();});
 onSnapshot(collection(db, "psicologia"), (snapshot) => {store.psicologia = snapshot.docs.map(doc => doc.data()); window.reprocesarPsico();});
 onSnapshot(collection(db, "jefatura_psicologia"), (snapshot) => {store.jefatura = snapshot.docs.map(doc => doc.data()); window.reprocesarJefatura();});
 onSnapshot(collection(db, "procuraduria"), (snap) => {store.procuraduria = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); window.reprocesarProcuraduria();});
+onSnapshot(collection(db, "area_medica_v2"), (snap) => {store.medica = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));if (typeof window.reprocesarMedica === 'function') window.reprocesarMedica();
+    // También actualizamos el reporte jerárquico si es necesario
+    if (typeof window.renderReporteJerarquico === 'function') window.renderReporteJerarquico();});
 
         window.showView = function(viewId, element) {
             // Desactivar todos los items y ocultar todas las vistas
@@ -887,10 +1095,6 @@ window.onload = () => {
     // ya se encargó de ocultar todo y mostrar la bienvenida.
     console.log("Sistema cargado y listo.");
 };
-
-    </script>
-</body>
-</html>
-    </script>
+</script>
 </body>
 </html>
