@@ -56,7 +56,16 @@
         <input type="hidden" id="edit-id">
         <div class="form-grid" id="main-form">
             <div class="form-group"><label>Código</label><input type="text" id="codigo" placeholder="ID-2026"></div>
-            <div class="form-group"><label>Tipo de Apoyo</label><input type="text" id="tipo_apoyo"></div>
+            <div class="form-group">
+                <label>Tipo de Apoyo</label>
+                <select id="tipo_apoyo">
+                    <option value="">SELECCIONE...</option>
+                    <option value="LACTANTE">LACTANTE</option>
+                    <option value="EMBARAZADA">EMBARAZADA</option>
+                    <option value="ESCOLAR">ESCOLAR</option>
+                    <option value="DISCAPACIDAD">DISCAPACIDAD</option>
+                </select>
+            </div>
             <div class="form-group"><label>Fecha Ingreso</label><input type="date" id="fecha_ingreso"></div>
             <div class="form-group"><label>Paterno</label><input type="text" id="apellido_paterno"></div>
             <div class="form-group"><label>Materno</label><input type="text" id="apellido_materno"></div>
@@ -101,51 +110,51 @@
             <button class="btn" style="background:#1d6f42" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
             <button class="btn" style="background:#94a3b8" onclick="location.reload()"><i class="fas fa-eraser"></i> LIMPIAR</button>
             <button class="btn" style="background:#475569" onclick="window.exportarResumenEstadistico()">
-    <i class="fas fa-chart-pie"></i> REPORTE TOTALES
-</button>
+                <i class="fas fa-chart-pie"></i> REPORTE TOTALES
+            </button>
         </div>
     </div>
 
-<div class="search-box no-print" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
-    <div class="form-group"><label>🔍 Código</label><input type="text" id="f-cod" onkeyup="filtrarAvanzado()" placeholder="ID..."></div>
-    <div class="form-group"><label>👤 Nombre/Apellido</label><input type="text" id="f-nom" onkeyup="filtrarAvanzado()" placeholder="Nombre..."></div>
-    <div class="form-group"><label>📍 Localidad</label><input type="text" id="f-loc" onkeyup="filtrarAvanzado()" placeholder="Colonia..."></div>
-    <div class="form-group">
-        <label>🎁 Apoyo</label>
-        <select id="f-apo" onchange="filtrarAvanzado()">
-            <option value="">TODOS</option>
-            <option value="LACTANTE">LACTANTE</option>
-            <option value="EMBARAZADA">EMBARAZADA</option>
-            <option value="ESCOLAR">ESCOLAR</option>
-            <option value="DISCAPACIDAD">DISCAPACIDAD</option>
-        </select>
+    <div class="search-box no-print" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
+        <div class="form-group"><label>🔍 Código</label><input type="text" id="f-cod" onkeyup="filtrarAvanzado()" placeholder="ID..."></div>
+        <div class="form-group"><label>👤 Nombre/Apellido</label><input type="text" id="f-nom" onkeyup="filtrarAvanzado()" placeholder="Nombre..."></div>
+        <div class="form-group"><label>📍 Localidad</label><input type="text" id="f-loc" onkeyup="filtrarAvanzado()" placeholder="Colonia..."></div>
+        <div class="form-group">
+            <label>🎁 Apoyo</label>
+            <select id="f-apo" onchange="filtrarAvanzado()">
+                <option value="">TODOS</option>
+                <option value="LACTANTE">LACTANTE</option>
+                <option value="EMBARAZADA">EMBARAZADA</option>
+                <option value="ESCOLAR">ESCOLAR</option>
+                <option value="DISCAPACIDAD">DISCAPACIDAD</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>🚩 Estatus</label>
+            <select id="f-est" onchange="filtrarAvanzado()">
+                <option value="">TODOS</option>
+                <option value="Pendiente">PENDIENTE</option>
+                <option value="Entregado">ENTREGADO</option>
+            </select>
+        </div>
+        <div class="form-group" style="justify-content: flex-end;">
+            <button class="btn" style="background:#64748b; width:100%" onclick="limpiarFiltros()"><i class="fas fa-filter-circle-xmark"></i> LIMPIAR</button>
+        </div>
     </div>
-    <div class="form-group">
-        <label>🚩 Estatus</label>
-        <select id="f-est" onchange="filtrarAvanzado()">
-            <option value="">TODOS</option>
-            <option value="Pendiente">PENDIENTE</option>
-            <option value="Entregado">ENTREGADO</option>
-        </select>
-    </div>
-    <div class="form-group" style="justify-content: flex-end;">
-        <button class="btn" style="background:#64748b; width:100%" onclick="limpiarFiltros()"><i class="fas fa-filter-circle-xmark"></i> LIMPIAR</button>
-    </div>
-</div>
 
-   <div class="paginacion-bar no-print">
-    <div style="display: flex; align-items: center; gap: 8px;">
-        <label style="font-size: 10px; color: #64748b;">MOSTRAR:</label>
-        <select id="selector-filas" onchange="cambiarFilas(this.value)" style="padding: 2px 5px; font-size: 11px;">
-            <option value="10">10</option>
-            <option value="50" selected>50</option>
-            <option value="100">100</option>
-            <option value="500">500</option>
-        </select>
+    <div class="paginacion-bar no-print">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <label style="font-size: 10px; color: #64748b;">MOSTRAR:</label>
+            <select id="selector-filas" onchange="cambiarFilas(this.value)" style="padding: 2px 5px; font-size: 11px;">
+                <option value="10">10</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+                <option value="500">500</option>
+            </select>
+        </div>
+        <div id="info-total" style="font-size: 11px; font-weight: bold; color: var(--primary);"></div>
+        <div id="pag-container"></div>
     </div>
-    <div id="info-total" style="font-size: 11px; font-weight: bold; color: var(--primary);"></div>
-    <div id="pag-container"></div>
-</div>
 
     <div class="table-wrap">
         <table>
@@ -183,12 +192,6 @@
     let DATA_FILTRADA = [];
     let PAGINA_ACTUAL = 1;
     let FILAS_POR_PAGINA = 50;
-
-    // Escucha en tiempo real
-    onSnapshot(query(apoyosRef, orderBy("codigo", "asc")), (snap) => {
-        DATA_ACTUAL = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        window.filtrarAvanzado(); 
-    });
 
     // --- UTILIDADES DE FORMULARIO ---
     window.limpiarFormulario = () => {
@@ -244,7 +247,7 @@
     };
 
     document.getElementById('fecha_nac').addEventListener('input', window.calcularEdadActual);
-    document.getElementById('tipo_apoyo').addEventListener('input', window.calcularEdadActual);
+    document.getElementById('tipo_apoyo').addEventListener('change', window.calcularEdadActual);
 
     // --- FILTRADO AVANZADO ---
     window.filtrarAvanzado = () => {
@@ -255,11 +258,15 @@
         const fEst = document.getElementById('f-est').value;
 
         DATA_FILTRADA = DATA_ACTUAL.filter(r => {
-            const full = `${r.nombre} ${r.apellido_paterno} ${r.apellido_materno}`.toLowerCase();
+            const nom = r.nombre || "";
+            const pat = r.apellido_paterno || "";
+            const mat = r.apellido_materno || "";
+            const full = `${nom} ${pat} ${mat}`.toLowerCase();
+            
             return (r.codigo || "").toLowerCase().includes(fCod) &&
                    full.includes(fNom) &&
                    (r.col_loc || "").toLowerCase().includes(fLoc) &&
-                   (fApo === "" || r.tipo_apoyo === fApo) &&
+                   (fApo === "" || (r.tipo_apoyo || "").toUpperCase() === fApo) &&
                    (fEst === "" || r.estatus === fEst);
         });
         PAGINA_ACTUAL = 1;
@@ -280,13 +287,13 @@
         document.getElementById('tabla-beneficiarios').innerHTML = lista.map((r, i) => `
             <tr>
                 <td><b>${DATA_FILTRADA.length - (inicio + i)}</b></td>
-                <td>${r.ine_img ? `<img src="${r.ine_img}" onclick="abrirVisor('${r.ine_img}', '${r.nombre}')" style="width:35px;height:35px;object-fit:cover;cursor:pointer;border-radius:4px;">` : '-'}</td>
+                <td>${r.ine_img ? `<img src="${r.ine_img}" onclick="abrirVisor('${r.ine_img}', '${r.nombre || ''}')" style="width:35px;height:35px;object-fit:cover;cursor:pointer;border-radius:4px;">` : '-'}</td>
                 <td style="color:var(--primary); font-weight:bold;">${r.codigo || ''}</td>
                 <td><b>${r.apellido_paterno || ''} ${r.apellido_materno || ''} ${r.nombre || ''}</b><span class="sub-text">${r.curp || ''}</span></td>
                 <td>${r.fecha_nac || ''} <br> <small style="color:var(--primary); font-weight:bold;">${r.edad_calculada || ''}</small></td>
                 <td><b>${r.col_loc || ''}</b><span class="sub-text">${r.direccion || ''}</span></td>
                 <td>${r.tipo_apoyo || ''}</td>
-                <td><span class="badge-status" style="background:${r.estatus==='Entregado'?'#dcfce7':'#fef3c7'}; color:${r.estatus==='Entregado'?'#15803d':'#b45309'}">${r.estatus}</span></td>
+                <td><span class="badge-status" style="background:${r.estatus==='Entregado'?'#dcfce7':'#fef3c7'}; color:${r.estatus==='Entregado'?'#15803d':'#b45309'}">${r.estatus || 'Pendiente'}</span></td>
                 <td class="no-print">
                     <button onclick="editar('${r.id}')" title="Editar">✏️</button>
                     <button onclick="eliminar('${r.id}')" title="Eliminar">🗑️</button>
@@ -348,78 +355,41 @@
     window.eliminar = async (id) => { if(confirm("¿Seguro que desea eliminar este registro?")) await deleteDoc(doc(db, "apoyos", id)); };
 
     // --- EXPORTAR ---
- window.exportarExcel = () => {
-    if (DATA_FILTRADA.length === 0) return alert("No hay datos para exportar.");
+    window.exportarExcel = () => {
+        if (DATA_FILTRADA.length === 0) return alert("No hay datos para exportar.");
 
-    // 1. Definimos el orden exacto y el nombre de la cabecera
-    // El orden en este objeto será el orden de las columnas en Excel
-    const estructuraColumnas = {
-        codigo: "CÓDIGO",
-        tipo_apoyo: "TIPO DE APOYO",
-        fecha_ingreso: "FECHA INGRESO",
-        nombre: "NOMBRE(S)",
-        apellido_paterno: "APELLIDO PATERNO",
-        apellido_materno: "APELLIDO MATERNO",
-        fecha_nac: "F. NACIMIENTO",
-        edad_calculada: "EDAD",
-        curp: "CURP",
-        estatus: "ESTATUS",
-        col_loc: "COLONIA/LOCALIDAD",
-        direccion: "DIRECCIÓN",
-        telefono: "TELÉFONO",
-        observaciones: "OBSERVACIONES"
-    };
-
-    // 2. Transformamos la data filtrada al nuevo formato ordenado
-    const dataOrdenada = DATA_FILTRADA.map((registro, index) => {
-        let fila = { "NO.": index + 1 }; // Agregamos contador
-        
-        // Iteramos sobre nuestra estructura para asegurar el orden
-        Object.keys(estructuraColumnas).forEach(llave => {
-            const nombreColumna = estructuraColumnas[llave];
-            fila[nombreColumna] = registro[llave] || ""; // Asignamos valor o vacío
-        });
-        
-        return fila;
-    });
-
-    // 3. Creamos el libro y la hoja
-    const ws = XLSX.utils.json_to_sheet(dataOrdenada);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Beneficiarios");
-
-    // 4. Descarga
-    const fechaPersonalizada = new Date().toISOString().slice(0,10);
-    XLSX.writeFile(wb, `Reporte_Poblacion_${fechaPersonalizada}.xlsx`);
-};
-
-    // --- IMPORTAR ---
-    window.importarSincronizado = (e) => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-        reader.onload = async (evt) => {
-            const workbook = XLSX.read(evt.target.result, { type: 'binary' });
-            const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-            if(!confirm(`¿Importar ${json.length} registros?`)) return;
-            const batch = writeBatch(db);
-            json.forEach(f => {
-                const newRef = doc(apoyosRef);
-                batch.set(newRef, {
-                    codigo: String(f.CÓDIGO || f.codigo || ""),
-                    nombre: String(f.NOMBRE || f.nombre || ""),
-                    apellido_paterno: String(f.PATERNO || f.apellido_paterno || ""),
-                    apellido_materno: String(f.MATERNO || f.apellido_materno || ""),
-                    tipo_apoyo: String(f.APOYO || f.tipo_apoyo || ""),
-                    estatus: f.ESTATUS || f.estatus || "Pendiente",
-                    curp: String(f.CURP || f.curp || ""),
-                    col_loc: String(f["COLONIA/LOC"] || f.col_loc || ""),
-                    direccion: String(f.DIRECCION || f.direccion || "")
-                });
-            });
-            await batch.commit();
-            alert("Importación exitosa");
+        const estructuraColumnas = {
+            codigo: "CÓDIGO",
+            tipo_apoyo: "TIPO DE APOYO",
+            fecha_ingreso: "FECHA INGRESO",
+            nombre: "NOMBRE(S)",
+            apellido_paterno: "APELLIDO PATERNO",
+            apellido_materno: "APELLIDO MATERNO",
+            fecha_nac: "F. NACIMIENTO",
+            edad_calculada: "EDAD",
+            curp: "CURP",
+            estatus: "ESTATUS",
+            col_loc: "COLONIA/LOCALIDAD",
+            direccion: "DIRECCIÓN",
+            telefono: "TELÉFONO",
+            observaciones: "OBSERVACIONES"
         };
-        reader.readAsBinaryString(file);
+
+        const dataOrdenada = DATA_FILTRADA.map((registro, index) => {
+            let fila = { "NO.": index + 1 };
+            Object.keys(estructuraColumnas).forEach(llave => {
+                const nombreColumna = estructuraColumnas[llave];
+                fila[nombreColumna] = registro[llave] || ""; 
+            });
+            return fila;
+        });
+
+        const ws = XLSX.utils.json_to_sheet(dataOrdenada);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Beneficiarios");
+
+        const fechaPersonalizada = new Date().toISOString().slice(0,10);
+        XLSX.writeFile(wb, `Reporte_Poblacion_${fechaPersonalizada}.xlsx`);
     };
 
     // --- UI UTILIDADES ---
@@ -448,62 +418,50 @@
         await batch.commit();
         alert("Base de datos vaciada.");
     };
-// --- EXPORTAR REPORTE DE TOTALES POR LOCALIDAD Y APOYO ---
-window.exportarResumenEstadistico = () => {
-    if (DATA_FILTRADA.length === 0) return alert("No hay datos para generar el reporte estadístico.");
 
-    // Diccionario para agrupar por combinación única de Localidad + Apoyo
-    const matrizTotales = {};
-    let granTotalBeneficiarios = 0;
+    window.exportarResumenEstadistico = () => {
+        if (DATA_FILTRADA.length === 0) return alert("No hay datos para generar el reporte estadístico.");
 
-    // 1. Recorrer y contabilizar la data filtrada actualmente
-    DATA_FILTRADA.forEach(registro => {
-        granTotalBeneficiarios++;
+        const matrizTotales = {};
+        let granTotalBeneficiarios = 0;
 
-        // Limpiar y estandarizar textos para evitar duplicados por errores de dedo o mayúsculas
-        const localidad = (registro.col_loc || "NO ESPECIFICADA").toUpperCase().trim();
-        const apoyo = (registro.tipo_apoyo || "SIN ESPECIFICAR").toUpperCase().trim();
-        
-        // Creamos una llave única combinando ambos campos
-        const llaveUnica = `${localidad} | ${apoyo}`;
+        DATA_FILTRADA.forEach(registro => {
+            granTotalBeneficiarios++;
+            const localidad = (registro.col_loc || "NO ESPECIFICADA").toUpperCase().trim();
+            const apoyo = (registro.tipo_apoyo || "SIN ESPECIFICAR").toUpperCase().trim();
+            const llaveUnica = `${localid} | ${apoyo}`;
 
-        if (!matrizTotales[llaveUnica]) {
-            matrizTotales[llaveUnica] = {
-                localidad: localidad,
-                apoyo: apoyo,
-                total: 0
-            };
-        }
-        
-        // Sumamos 1 al contador de esta combinación específica
-        matrizTotales[llaveUnica].total++;
+            if (!matrizTotales[llaveUnica]) {
+                matrizTotales[llaveUnica] = { localidad: localidad, apoyo: apoyo, total: 0 };
+            }
+            matrizTotales[llaveUnica].total++;
+        });
+
+        const datosReporte = Object.values(matrizTotales).map(item => ({
+            "LOCALIDAD / COLONIA": item.localidad,
+            "TIPO DE APOYO": item.apoyo,
+            "CANTIDAD TOTAL": item.total
+        })).sort((a, b) => a["LOCALIDAD / COLONIA"].localeCompare(b["LOCALIDAD / COLONIA"]));
+
+        datosReporte.push({
+            "LOCALIDAD / COLONIA": "---",
+            "TIPO DE APOYO": "TOTAL GENERAL DE EXPEDIENTES",
+            "CANTIDAD TOTAL": granTotalBeneficiarios
+        });
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(datosReporte);
+        XLSX.utils.book_append_sheet(wb, ws, "Totales por Zona y Apoyo");
+
+        const fechaHoy = new Date().toISOString().slice(0, 10);
+        XLSX.writeFile(wb, `Resumen_Totales_DIF_${fechaHoy}.xlsx`);
+    };
+
+    // CRÍTICO: Escucha en tiempo real movida al final para asegurar la previa lectura de funciones globales
+    onSnapshot(query(apoyosRef, orderBy("codigo", "asc")), (snap) => {
+        DATA_ACTUAL = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.filtrarAvanzado(); 
     });
-
-    // 2. Transformar el diccionario a un arreglo plano ordenado alfabéticamente por Localidad
-    const datosReporte = Object.values(matrizTotales).map(item => ({
-        "LOCALIDAD / COLONIA": item.localidad,
-        "TIPO DE APOYO": item.apoyo,
-        "CANTIDAD TOTAL": item.total
-    })).sort((a, b) => a["LOCALIDAD / COLONIA"].localeCompare(b["LOCALIDAD / COLONIA"]));
-
-    // 3. Agregar la fila del Gran Total al final de la tabla
-    datosReporte.push({
-        "LOCALIDAD / COLONIA": "---",
-        "TIPO DE APOYO": "TOTAL GENERAL DE EXPEDIENTES",
-        "CANTIDAD TOTAL": granTotalBeneficiarios
-    });
-
-    // 4. Crear la estructura del archivo Excel con SheetJS
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.json_to_sheet(datosReporte);
-    
-    // Adjuntamos la hoja al libro de trabajo
-    XLSX.utils.book_append_sheet(wb, ws, "Totales por Zona y Apoyo");
-
-    // 5. Lanzar la descarga automática
-    const fechaHoy = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(wb, `Resumen_Totales_DIF_${fechaHoy}.xlsx`);
-};
 </script>
 </body>
 </html>
