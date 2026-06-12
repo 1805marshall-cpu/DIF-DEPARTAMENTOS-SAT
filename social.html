@@ -37,6 +37,7 @@
         .bg-cancelado { background: #f77979; color: #b40909; }
         .paginacion-bar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 20px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
         .btn-pag { padding: 6px 12px; border: 1px solid #cbd5e1; background: white; border-radius: 4px; cursor: pointer; font-size: 11px; }
+        .btn-pag:disabled { background: #e2e8f0; cursor: not-allowed; color: #94a3b8; }
         @media print { .no-print { display: none !important; } }
     </style>
 </head>
@@ -125,7 +126,7 @@
                         <input type="file" id="input_file" accept="image/*">
                         <small id="txt-compresion" style="color:var(--success); font-weight:bold; margin-top:4px; display:none;">⚡ Foto optimizada con éxito.</small>
                         <button type="button" id="btn-delete-photo" style="display:none; background:var(--danger); color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:10px; font-weight:bold; margin-top:8px; align-items:center; gap:5px; width:fit-content;" onclick="quitarFotoForm()">
-                            <i class="fas fa-trash"></i> QUITART FOTO ACTUAL
+                            <i class="fas fa-trash"></i> QUITAR FOTO ACTUAL
                         </button>
                     </div>                
                 </div>
@@ -141,7 +142,7 @@
     </div>
 
     <div class="search-box no-print">
-        <div class="form-group" style="flex:2;"><label>🔍 Buscador Global</label><input type="text" id="buscador" placeholder="Buscar..." onkeyup="filtrar()"></div>
+        <div class="form-group" style="flex:2;"><label>🔍 Buscador Global</label><input type="text" id="buscador" placeholder="Buscar..." onkeyup="filtrar(true)"></div>
         <div class="form-group" style="flex:1;">
             <label>Filas</label>
             <select id="rows-per-page" onchange="actualizarFilasPorPagina()">
@@ -155,9 +156,9 @@
     <div class="paginacion-bar no-print">
         <div id="info-total" style="font-size: 11px; font-weight: bold; color: var(--social);"></div>
         <div>
-            <button class="btn-pag" onclick="cambiarPagina(-1)">Anterior</button>
+            <button class="btn-pag" id="btn-prev" onclick="cambiarPagina(-1)">Anterior</button>
             <span id="page-info" style="margin: 0 10px; font-size: 11px;">Página 1</span>
-            <button class="btn-pag" onclick="cambiarPagina(1)">Siguiente</button>
+            <button class="btn-pag" id="btn-get-next" onclick="cambiarPagina(1)">Siguiente</button>
         </div>
     </div>
 
@@ -247,10 +248,107 @@
         proximoNo = (numeros.length > 0) ? Math.max(...numeros) + 1 : 1;
         
         if(!document.getElementById('edit-id').value) document.getElementById('numero_consecutivo').value = proximoNo;
-        window.filtrar();
+        window.filtrar(false);
     });
 
-    window.subirYGuardar = async () => {
+// COMPROBACIÓN AVANZADA DE DUPLICADOS Y TEMPORALIDAD (1 AÑO)
+    window.verificarApoyoActivo = (nombreActual, idActual = null) => {
+        if (!nombreActual) return null;
+        const nombreLimpio = nombreActual.trim().toUpperCase();
+        
+        // 1. Buscar si tiene un trámite activo (En proceso o Pendiente)
+        const tramiteActivo = todosLosDatos.find(reg => 
+            reg.id !== idActual && 
+            reg.nombre && 
+            reg.nombre.trim().toUpperCase() === nombreLimpio && 
+            ["EN PROCESO", "PENDIENTE"].includes(reg.estatus?.toUpperCase())
+        );
+
+        if (tramiteActivo) {
+            return { tipo: 'ACTIVO', registro: tramiteActivo };
+        }
+
+        // 2. Buscar si ya se le otorgó un apoyo en el último año (365 días)
+        // Filtramos todos los registros históricos terminados de este beneficiario
+        const registrosPasados = todosLosDatos.filter(reg => 
+            reg.id !== idActual && 
+            reg.nombre && 
+            reg.nombre.trim().toUpperCase() === nombreLimpio && 
+            reg.fecha_registro &&
+            ["ATENDIDO", "ENTREGADO", "REALIZADO", "VALIDADO"].includes(reg.estatus?.toUpperCase())
+        );
+
+        if (registrosPasados.length > 0) {
+            const hoy = new Date();
+            
+            for (const reg of registrosPasados) {
+                // Se asume formato del input date: "YYYY-MM-DD"
+                const fechaTramite = new Date(reg.fecha_registro + "T00:00:00");
+                
+                // Calculamos la diferencia en milisegundos y la pasamos a días
+                const diferenciaTiempo = hoy - fechaTramite;
+                const diferenciaDias = Math.floor(diferenciaTiempo / (1000 * 60 * 60 * 24));
+
+                // Si está dentro del rango de 1 año (365 días) y no es una fecha futura errónea
+                if (diferenciaDias >= 0 && diferenciaDias <= 365) {
+                    const meses = Math.floor(diferenciaDias / 30);
+                    const diasRestantes = diferenciaDias % 30;
+                    
+                    let tiempoTranscurrido = "";
+                    if (meses > 0) {
+                        tiempoTranscurrido = `${meses} ${meses === 1 ? 'mes' : 'meses'}${diasRestantes > 0 ? ` y ${diasRestantes} días` : ''}`;
+                    } else {
+                        tiempoTranscurrido = `${diferenciaDias} días`;
+                    }
+
+                    return { 
+                        tipo: 'HISTORICO_RECIENTE', 
+                        registro: reg, 
+                        tiempoTexto: tiempoTranscurrido 
+                    };
+                }
+            }
+        }
+
+        return null; // Todo en orden, no hay duplicados ni bloqueos por tiempo
+    };
+
+    // ALERTA VISUAL AL SALIR DEL CAMPO "NOMBRE"
+    window.revisarNombreDuplicado = () => {
+        const nombreInput = document.getElementById('nombre');
+        if (!nombreInput) return;
+
+        const nombreActual = nombreInput.value;
+        const idActual = document.getElementById('edit-id').value || null;
+
+        const resultado = window.verificarApoyoActivo(nombreActual, idActual);
+
+        if (resultado) {
+            if (resultado.tipo === 'ACTIVO') {
+                const msgActivo = `⚠️ TRÁMITE EN CAMINO:\n\nEl beneficiario "${nombreActual.toUpperCase()}" ya cuenta con una solicitud activa [${resultado.registro.estatus}] para el programa:\n"${resultado.registro.programa} - ${resultado.registro.asunto}".\n\nPor favor, verifica el estado del caso antes de duplicarlo.`;
+                alert(msgActivo);
+            } 
+            else if (resultado.tipo === 'HISTORICO_RECIENTE') {
+                const msgHistorico = `🚨 ALERTA DE TEMPORALIDAD (MENOS DE 1 AÑO):\n\nA "${nombreActual.toUpperCase()}" ya se le otorgó un apoyo hace apenas [ ${resultado.tiempoTexto} ].\n\nDetalles del apoyo anterior:\n• Fecha: ${resultado.registro.fecha_registro}\n• Programa: ${resultado.registro.programa}\n• Asunto: ${resultado.registro.asunto}\n• Estatus: ${resultado.registro.estatus}\n\nRevisa las reglas del programa antes de capturar un nuevo apoyo.`;
+                alert(msgHistorico);
+            }
+        }
+    };
+
+window.subirYGuardar = async () => {
+        const data = obtenerValoresForm(); 
+        
+        const resultado = window.verificarApoyoActivo(data.nombre);
+        if (resultado) {
+            let mensaje = "";
+            if (resultado.tipo === 'ACTIVO') {
+                mensaje = `⚠️ TRÁMITE EN CAMINO: El beneficiario "${data.nombre}" tiene un trámite activo [${resultado.registro.estatus}] en: "${resultado.registro.programa}".`;
+            } else {
+                mensaje = `🚨 RESTRICCIÓN DE AÑO: A "${data.nombre}" se le otorgó un apoyo hace ${resultado.tiempoTexto} (${resultado.registro.asunto}).`;
+            }
+            if (!confirm(`${mensaje}\n\n¿Estás seguro de que deseas saltarte esta advertencia y GUARDAR de todos modos?`)) return;
+        }
+
         const fileInput = document.getElementById('input_file');
         const file = fileInput.files[0];
         let base64Data = ""; 
@@ -262,9 +360,7 @@
         }
 
         try {
-            const data = obtenerValoresForm(); 
             data.url_evidencia = base64Data;
-            
             await addDoc(apoyosRef, data);
             alert("✅ Registro guardado con éxito.");
             limpiarForm();
@@ -273,22 +369,31 @@
         }
     };
 
-    window.actualizar = async () => {
+window.actualizar = async () => {
         const id = document.getElementById('edit-id').value;
+        const data = obtenerValoresForm();
+
+        const resultado = window.verificarApoyoActivo(data.nombre, id);
+        if (resultado) {
+            let mensaje = "";
+            if (resultado.tipo === 'ACTIVO') {
+                mensaje = `⚠️ TRÁMITE EN CAMINO: El nombre coincide con un trámite activo [${resultado.registro.estatus}].`;
+            } else {
+                mensaje = `🚨 RESTRICCIÓN DE AÑO: El beneficiario ya recibió un apoyo hace ${resultado.tiempoTexto}.`;
+            }
+            if (!confirm(`${mensaje}\n\n¿Deseas continuar con la ACTUALIZACIÓN de todos modos?`)) return;
+        }
+
         const fileInput = document.getElementById('input_file');
         const file = fileInput.files[0];
-        const data = obtenerValoresForm();
         const borrarFotoFlag = document.getElementById('eliminar-foto-flag').value === "true";
 
         try {
             if (file) {
-                // Si eligen una nueva foto, se comprime y guarda
                 data.url_evidencia = await comprimirImagen(file);
             } else if (borrarFotoFlag) {
-                // Si presionaron el botón de eliminar, se limpia el campo
                 data.url_evidencia = "";
             } else {
-                // Si no se tocó nada de la foto, se mantiene la que ya existía
                 const regOriginal = todosLosDatos.find(r => r.id === id);
                 data.url_evidencia = (regOriginal && regOriginal.url_evidencia) ? regOriginal.url_evidencia : "";
             }
@@ -315,15 +420,13 @@
         window.actualizarAsuntos();
         document.getElementById('asunto').value = reg.asunto || "";
         
-        const asuntoSelect = document.getElementById('asunto');
-        if (typeof asuntoSelect.onchange === 'function') asuntoSelect.onchange(); 
+        window.actualizarEspecificaciones();
         
         if(reg.detalle_asunto) {
             const detalleSelect = document.getElementById('detalle_asunto');
             if (detalleSelect) detalleSelect.value = reg.detalle_asunto;
         }
 
-        // CONTROL VISUAL DEL BOTÓN DE ELIMINAR FOTO
         const btnDeletePhoto = document.getElementById('btn-delete-photo');
         if(reg.url_evidencia && reg.url_evidencia !== "") {
             btnDeletePhoto.style.display = 'flex';
@@ -336,16 +439,16 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    // ACCIÓN DEL NUEVO BOTÓN DE ELIMINAR FOTO
     window.quitarFotoForm = () => {
         if(confirm("¿Seguro que deseas quitar la foto de este registro? Para confirmar el cambio deberás dar clic en ACTUALIZAR.")) {
             document.getElementById('eliminar-foto-flag').value = "true";
             document.getElementById('btn-delete-photo').style.display = 'none';
             document.getElementById('input_file').value = "";
             
-            document.getElementById('txt-compresion').style.display = 'inline-block';
-            document.getElementById('txt-compresion').innerText = "🗑️ Foto marcada para eliminación.";
-            document.getElementById('txt-compresion').style.color = "var(--danger)";
+            const txtComp = document.getElementById('txt-compresion');
+            txtComp.style.display = 'inline-block';
+            txtComp.innerText = "🗑️ Foto marcada para eliminación.";
+            txtComp.style.color = "var(--danger)";
         }
     };
 
@@ -382,13 +485,14 @@
         document.getElementById('btn-save').style.display = 'inline-block';
         document.getElementById('btn-update').style.display = 'none';
         document.getElementById('container-detalle-especifico').style.display = 'none';
+        
+        establecerUsuarioPorDefecto();
     };
 
     window.actualizarAsuntos = () => {
         const prog = document.getElementById('programa').value;
         const asuSelect = document.getElementById('asunto');
         const contDet = document.getElementById('container-detalle-especifico');
-        const detSelect = document.getElementById('detalle_asunto');
         
         asuSelect.innerHTML = '<option value="">-- SELECCIONAR --</option>';
         contDet.style.display = 'none';
@@ -407,28 +511,32 @@
                 asuSelect.appendChild(opt);
             });
         }
+    };
 
-        asuSelect.onchange = () => {
-            const asu = asuSelect.value;
-            const subData = {
-                "APOYOS FUNCIONALES": ["SILLA DE RUEDAS ESTANDAR ADULTO", "SILLA DE RUEDAS SOBREPESO", "SILLA DE RUEDAS PCI", "SILLA DE RUEDAS PCA", "SILLA DE RUEDAS JUVENIL", "SILLA DE RUEDAS INFANTIL", "BASTÓN PUÑO ALEMÁN", "BASTÓN 4 PUNTOS", "MULETAS", "ANDADERA"],
-                "APOYO FUNCIONAL": ["SILLA DE RUEDAS ESTANDAR ADULTO", "SILLA DE RUEDAS SOBREPESO", "SILLA DE RUEDAS PCI", "SILLA DE RUEDAS PCA", "SILLA DE RUEDAS JUVENIL", "SILLA DE RUEDAS INFANTIL", "BASTÓN PUÑO ALEMÁN", "BASTÓN 4 PUNTOS", "MULETAS", "ANDADERA"],
-                "GESTION DE CITAS": ["TDH", "AUTISMO", "AUX. AUDITIVO", "PROTESIS", "CRISVER (DIVERSOS)", "SINDROME DE DOWN"]
-            };
+    window.actualizarEspecificaciones = () => {
+        const asuSelect = document.getElementById('asunto');
+        const detSelect = document.getElementById('detalle_asunto');
+        const contDet = document.getElementById('container-detalle-especifico');
+        const asu = asuSelect.value;
 
-            if(subData[asu]) {
-                detSelect.innerHTML = '<option value="">-- SELECCIONAR ESPECIFICACIÓN --</option>';
-                subData[asu].forEach(s => {
-                    const o = document.createElement('option');
-                    o.value = s; o.textContent = s;
-                    detSelect.appendChild(o);
-                });
-                contDet.style.display = 'block';
-                document.getElementById('label-detalle').innerText = (asu.includes("APOYO")) ? "Tipo de Apoyo" : "Diagnóstico";
-            } else {
-                contDet.style.display = 'none';
-            }
+        const subData = {
+            "APOYOS FUNCIONALES": ["SILLA DE RUEDAS ESTANDAR ADULTO", "SILLA DE RUEDAS SOBREPESO", "SILLA DE RUEDAS PCI", "SILLA DE RUEDAS PCA", "SILLA DE RUEDAS JUVENIL", "SILLA DE RUEDAS INFANTIL", "BASTÓN PUÑO ALEMÁN", "BASTÓN 4 PUNTOS", "MULETAS", "ANDADERA"],
+            "APOYO FUNCIONAL": ["SILLA DE RUEDAS ESTANDAR ADULTO", "SILLA DE RUEDAS SOBREPESO", "SILLA DE RUEDAS PCI", "SILLA DE RUEDAS PCA", "SILLA DE RUEDAS JUVENIL", "SILLA DE RUEDAS INFANTIL", "BASTÓN PUÑO ALEMÁN", "BASTÓN 4 PUNTOS", "MULETAS", "ANDADERA"],
+            "GESTION DE CITAS": ["TDH", "AUTISMO", "AUX. AUDITIVO", "PROTESIS", "CRISVER (DIVERSOS)", "SINDROME DE DOWN"]
         };
+
+        if(subData[asu]) {
+            detSelect.innerHTML = '<option value="">-- SELECCIONAR ESPECIFICACIÓN --</option>';
+            subData[asu].forEach(s => {
+                const o = document.createElement('option');
+                o.value = s; o.textContent = s;
+                detSelect.appendChild(o);
+            });
+            contDet.style.display = 'block';
+            document.getElementById('label-detalle').innerText = (asu.includes("APOYO")) ? "Tipo de Apoyo" : "Diagnóstico";
+        } else {
+            contDet.style.display = 'none';
+        }
     };
 
     window.abrirFoto = (url) => {
@@ -438,7 +546,8 @@
         modal.style.display = 'flex';
     };
 
-    window.filtrar = () => {
+    window.filtrar = (resetearPagina = false) => {
+        if(resetearPagina) paginaActual = 1;
         const term = document.getElementById('buscador').value.toLowerCase();
         datosFiltrados = todosLosDatos.filter(r => 
             Object.values(r).some(v => String(v).toLowerCase().includes(term))
@@ -447,6 +556,9 @@
     };
 
     function renderTabla() {
+        const totalPaginas = Math.ceil(datosFiltrados.length / filasPorPagina) || 1;
+        if(paginaActual > totalPaginas) paginaActual = totalPaginas;
+
         const inicio = (paginaActual - 1) * filasPorPagina;
         const segmento = datosFiltrados.slice(inicio, inicio + filasPorPagina);
         const tbody = document.getElementById('cuerpoTabla');
@@ -469,10 +581,14 @@
                 </td>
             </tr>
         `).join('');
-        document.getElementById('page-info').innerText = `Página ${paginaActual} de ${Math.ceil(datosFiltrados.length / filasPorPagina) || 1}`;
+
+        document.getElementById('page-info').innerText = `Página ${paginaActual} de ${totalPaginas}`;
+        document.getElementById('btn-prev').disabled = paginaActual === 1;
+        document.getElementById('btn-get-next').disabled = paginaActual === totalPaginas;
     }
 
     window.eliminarDoc = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "trabajo_social", id)); };
+    
     window.exportarExcel = () => {
         const ws = XLSX.utils.json_to_sheet(datosFiltrados);
         const wb = XLSX.utils.book_new();
@@ -480,27 +596,50 @@
         XLSX.writeFile(wb, "Reporte_Trabajo_Social.xlsx");
     };
     
-    window.cambiarPagina = (d) => { paginaActual += d; renderTabla(); };
-    window.actualizarFilasPorPagina = () => { filasPorPagina = parseInt(document.getElementById('rows-per-page').value); paginaActual = 1; renderTabla(); };
+    window.cambiarPagina = (d) => { 
+        paginaActual += d; 
+        renderTabla(); 
+    };
+    
+    window.actualizarFilasPorPagina = () => { 
+        filasPorPagina = parseInt(document.getElementById('rows-per-page').value); 
+        paginaActual = 1; 
+        renderTabla(); 
+    };
+
+    function establecerUsuarioPorDefecto() {
+        const nombreSocial = sessionStorage.getItem('social_nombre');
+        const selectUsuario = document.getElementById('usuario');
+        if (nombreSocial && selectUsuario) {
+            for (let i = 0; i < selectUsuario.options.length; i++) {
+                if (selectUsuario.options[i].value === nombreSocial) {
+                    selectUsuario.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
         const nombreSocial = sessionStorage.getItem('social_nombre');
         const tituloSocial = sessionStorage.getItem('social_titulo');
         const saludoContenedor = document.getElementById('bienvenida-usuario');
-        const selectUsuario = document.getElementById('usuario');
+
+        const asuntoSelect = document.getElementById('asunto');
+        if (asuntoSelect) {
+            asuntoSelect.addEventListener('change', window.actualizarEspecificaciones);
+        }
+
+        const nombreInput = document.getElementById('nombre');
+        if (nombreInput) {
+            nombreInput.addEventListener('blur', window.revisarNombreDuplicado);
+        }
 
         if (nombreSocial && tituloSocial) {
             saludoContenedor.innerText = `¡BIENVENIDA, ${tituloSocial} ${nombreSocial}!`;
             saludoContenedor.style.display = 'inline-block';
-            if (selectUsuario) {
-                for (let i = 0; i < selectUsuario.options.length; i++) {
-                    if (selectUsuario.options[i].value === nombreSocial) {
-                        selectUsuario.selectedIndex = i;
-                        break;
-                    }
-                }
-            }
         }
+        establecerUsuarioPorDefecto();
     });
 
     window.cerrarSesion = () => {
