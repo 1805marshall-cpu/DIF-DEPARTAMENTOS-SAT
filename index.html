@@ -16,58 +16,18 @@
             --danger: #dc2626;
         }
 
-        body { 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            background: var(--bg-gradient); 
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            justify-content: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            padding: 20px;
-            box-sizing: border-box;
-        }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg-gradient); display: flex; flex-direction: column;align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px;box-sizing: border-box;}
 
         /* Animación de entrada suave */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        @keyframes fadeInUp {from {opacity: 0; transform: translateY(15px); }to { opacity: 1;transform: translateY(0);}}
 
         /* Banner de logotipos institucionales (Superior) - Optimizado para formato horizontal */
-        .brand-header {
-            width: 100%;
-            max-width: 430px; /* Ampliado para evitar que los logos se compriman en PC */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-bottom: 30px;
-            padding: 15px 30px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-            box-sizing: border-box;
-            
-            /* Animación directa al cargar */
-            animation: fadeInUp 0.8s ease-out forwards;
-        }
-
-        .brand-logo {
-            height: 65px;
-            object-fit: contain;
-            max-width: 100%;
-        }
+        .brand-header {width: 100%;max-width: 430px; /* Ampliado para evitar que los logos se compriman en PC */ 
+        display: flex;justify-content: center;align-items: center;flex-wrap: wrap;gap: 20px;margin-bottom: 30px;padding: 15px 30px;background: rgba(255, 255, 255, 0.8);border-radius: 16px;
+        backdrop-filter: blur(10px);box-shadow: 0 4px 15px rgba(0,0,0,0.02);border: 1px solid rgba(226, 232, 240, 0.8);box-sizing: border-box;
+        /* Animación directa al cargar */
+            animation: fadeInUp 0.8s ease-out forwards;}
+        .brand-logo {height: 65px; object-fit: contain;max-width: 100%; }
 
         /* Contenedor principal de Login */
         .login-card {
@@ -304,9 +264,10 @@
         "veronica.velasco": { p: "Veronica123..", url: "jefatura_psicologia.html", dep: "PSICOLOGIA" }, // Cambiado url a jefatura_psicologia.html
         "jefatura.psico": { p: "jefe.psi.2026", url: "jefatura_psicologia.html", dep: "PSICOLOGIA" },
         "localidades": { p: "DIF.gen.loc", url: "general_localidades.html", dep: "LOCALIDADES" },
-        "ariana.reyes": { p: "Ariana123..", url: "general_localidades.html", dep: "LOCALIDADES" },
+        "ariana.reyes": { p: "Ariana123..", url: "reporte_civis.html", dep: "CIVIS" },
         "escolar": { p: "esc123", url: "solicitudes.html", dep: "ESCOLAR" },
         "apoyo.escolar": { p: "DIF.esc.2026", url: "solicitudes.html", dep: "ESCOLAR" }
+        
     };
 
     const nombresMedicos = {
