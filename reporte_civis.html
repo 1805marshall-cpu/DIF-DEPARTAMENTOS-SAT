@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes CIVIS - Sistema Avanzado de Gestión DIF</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+</head>
+<body class="bg-slate-100 min-h-screen font-sans">
+
+    <div class="max-w-6xl mx-auto py-8 px-4">
+        <div class="bg-slate-800 p-6 rounded-t-xl shadow-md border-b-4 border-blue-500 flex justify-between items-center text-white">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight">REPORTES <span class="text-blue-400">CIVIS</span></h1>
+                <p class="text-xs text-slate-300 font-medium mt-1">Plataforma de Intervención Social, Gestión de Casos y Expedientes — DIF</p>
+            </div>
+
+<div class="flex gap-3 flex-wrap">
+    <button id="btnExportarExcel" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg shadow uppercase tracking-wider transition flex items-center gap-1.5">
+        🟢 Exportar a Excel
+    </button>
+    
+    <label for="btnImportarExcel" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg shadow uppercase tracking-wider transition cursor-pointer text-center flex items-center gap-1.5">
+        📊 Importar desde Excel
+    </label>
+    <input type="file" id="btnImportarExcel" accept=".xlsx, .xls" class="hidden">
+</div>
+<button type="button" id="btnPurgarBD" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded shadow transition flex items-center gap-2">
+    🗑️ Eliminar Base de Datos
+</button>
+        </div>
+
+        <form id="formExpediente" class="bg-white p-8 rounded-b-xl shadow-md space-y-8">
+            <input type="hidden" id="edit_doc_id" value="">
+
+            <div id="alertaEdicion" class="hidden bg-amber-50 border border-amber-300 text-amber-800 p-4 rounded-lg flex justify-between items-center animate-pulse">
+                <span class="text-sm font-semibold">⚠️ Modo Edición Activo: Se encuentra modificando un expediente existente en la nube.</span>
+                <button type="button" id="btnCancelarEdicion" class="text-xs bg-amber-200 hover:bg-amber-300 text-amber-900 px-3 py-1.5 rounded-lg font-bold transition">Cancelar Edición</button>
+            </div>
+            
+            <div>
+                <h2 class="text-base font-bold text-slate-700 border-b border-slate-200 pb-2 mb-4 flex items-center gap-2">
+                    <span class="bg-blue-600 text-white w-5 h-5 rounded-full inline-flex items-center justify-center text-xs">1</span>
+                    Datos de Control e Institución
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">No. Progresivo</label>
+                        <input type="number" id="no_progresivo" readonly class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-100 font-mono text-sm text-slate-500 cursor-not-allowed focus:outline-none">                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Folio CIVIS</label>
+                        <input type="text" id="folio" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-slate-50 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej: CIVIS-2026-001">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Área Asignada</label>
+                        <select id="area" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="DIF - PRESIDENCIA & DIRECCION">DIF - PRESIDENCIA & DIRECCION</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Unidad / Módulo</label>
+                        <input type="text" id="unidad" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej: Procuraduría Zona Norte">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-base font-bold text-slate-700 border-b border-slate-200 pb-2 mb-4 flex items-center gap-2">
+                    <span class="bg-blue-600 text-white w-5 h-5 rounded-full inline-flex items-center justify-center text-xs">2</span>
+                    Datos del Ciudadano / Beneficiario
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre del Ciudadano afectado</label>
+                        <input type="text" id="ciudadano" required class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Nombre(s) Apellidos">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Teléfono de Contacto</label>
+                        <input type="tel" id="telefono" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="10 dígitos">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-base font-bold text-slate-700 border-b border-slate-200 pb-2 mb-4 flex items-center gap-2">
+                    <span class="bg-blue-600 text-white w-5 h-5 rounded-full inline-flex items-center justify-center text-xs">3</span>
+                    Ubicación y Geolocalización (CIVIS-Map)
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Calle</label>
+                        <input type="text" id="calle" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm input-direccion focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">No. Exterior</label>
+                        <input type="text" id="no_exterior" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm input-direccion focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">No. Interior</label>
+                        <input type="text" id="no_interior" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm input-direccion focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Opcional">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Entre Calles</label>
+                        <input type="text" id="entre_calles" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Colonia</label>
+                        <input type="text" id="colonia" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm input-direccion focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Localidad</label>
+                        <input type="text" id="localidad" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm input-direccion focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Municipio</label>
+                        <input type="text" id="municipio" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm input-direccion focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Ciudad</label>
+                        <input type="text" id="ciudad" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Estado</label>
+                        <input type="text" id="estado" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm input-direccion focus:ring-2 focus:ring-blue-500 focus:outline-none" value="Veracruz">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Código Postal</label>
+                        <input type="text" id="codigo_postal" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Domicilio Completo (Procesado por CIVIS)</label>
+                    <textarea id="domicilio_completo" readonly class="w-full p-2.5 border border-slate-200 rounded-lg bg-slate-50 text-slate-500 font-medium text-sm resize-none h-16 focus:outline-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Referencias Visuales del Inmueble</label>
+                        <input type="text" id="referencias" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Coordenadas (Lat, Lng)</label>
+                        <input type="text" id="coordenadas" class="w-full p-2.5 border border-slate-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej: 19.1738, -96.1342">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-base font-bold text-slate-700 border-b border-slate-200 pb-2 mb-4 flex items-center gap-2">
+                    <span class="bg-blue-600 text-white w-5 h-5 rounded-full inline-flex items-center justify-center text-xs">4</span>
+                    Naturaleza y Seguimiento del Reporte
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tipo de Incidencia / Caso</label>
+                        <input type="text" id="tipo" required class="w-full p-2.5 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="Ej: Omisión de Cuidados">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Prioridad del Reporte</label>
+                        <select id="prioridad" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="Baja">Baja</option>
+                            <option value="Media">Media</option>
+                            <option value="Alta">Alta</option>
+                            <option value="Inmediata">Inmediata (Atención de Crisis)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Estatus Operativo</label>
+                        <select id="estatus" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="Abierto">Abierto (Fase de Recepción)</option>
+                            <option value="En Proceso">En Investigación / Campo</option>
+                            <option value="Canalizado">Turnado a otra área</option>
+                            <option value="Cerrado">Resuelto / Concluido</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Estado de Ejecución</label>
+                        <select id="ejecucion" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-sm font-bold focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="PENDIENTE" class="text-amber-600 font-bold">⚠️ PENDIENTE</option>
+                            <option value="REALIZADO" class="text-emerald-600 font-bold">✅ REALIZADO</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Descripción de la Problemática</label>
+                        <textarea id="problema" required class="w-full p-2.5 border border-slate-300 rounded-lg text-sm h-24 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Referencia Histórica del Evento</label>
+                        <textarea id="referencia_evento" class="w-full p-2.5 border border-slate-300 rounded-lg text-sm h-20 focus:ring-2 focus:ring-blue-500 focus:outline-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="mt-4 flex items-center bg-rose-50 p-3 rounded-lg border border-rose-200/60">
+                    <input type="checkbox" id="fuera_de_jurisdiccion" class="w-4 h-4 text-rose-600 border-slate-300 rounded focus:ring-rose-500">
+                    <label for="fuera_de_jurisdiccion" class="ml-2 text-xs font-bold text-rose-700 uppercase tracking-wide cursor-pointer select-none">
+                        Marcar reporte como FUERA DE JURISDICCIÓN MUNICIPAL
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-base font-bold text-slate-700 border-b border-slate-200 pb-2 mb-4 flex items-center gap-2">
+                    <span class="bg-blue-600 text-white w-5 h-5 rounded-full inline-flex items-center justify-center text-xs">5</span>
+                    Evidencia Fotográfica de Alta Capacidad (Hasta 64MB)
+                </h2>
+                <div class="bg-slate-50 p-4 rounded-xl border border-dashed border-slate-300">
+                    <div class="flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1">Cargar Archivos de Imagen</label>
+                            <p class="text-xs text-slate-500">Soporta múltiples fotografías pesadas del caso. Procesado en bloques seguros.</p>
+                        </div>
+                        <input type="file" id="inputFotos" accept="image/*" multiple class="text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 file:cursor-pointer hover:file:bg-blue-100">
+                    </div>
+                    <div id="progresoCarga" class="hidden mt-4">
+                        <div class="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                            <span>Sincronizando y empaquetando bytes multimedia...</span>
+                            <span id="porcentajeCarga">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-2">
+                            <div id="barraProgreso" class="bg-blue-600 h-2 rounded-full transition-all duration-150" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div id="contenedorPrevisualizacion" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4 mt-6"></div>
+                </div>
+            </div>
+
+            <div class="pt-4 flex justify-end gap-3">
+                <button type="submit" id="btnGuardar" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg shadow-blue-600/20 transition duration-200 tracking-wide text-sm">
+                    Guardar en Sistema CIVIS
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-12 bg-white rounded-xl shadow-md p-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                📂 Monitor de Expedientes Recientes (Haga clic en Editar para cargar)
+            </h2>
+
+            <div class="flex flex-wrap items-center gap-3">
+            <div class="flex items-center gap-1.5">
+                <label for="civisMostrarFilas" class="text-xs font-bold text-slate-500 uppercase">Mostrar:</label>
+                <select id="civisMostrarFilas" class="p-2 border border-slate-300 rounded-lg text-xs font-semibold bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <option value="20">20 filas</option>
+                    <option value="50">50 filas</option>
+                    <option value="100">100 filas</option>
+                    <option value="all">Todos</option>
+                </select>
+            </div>
+            <div class="relative min-w-[240px]">
+                <input type="text" id="civisBuscador" placeholder="🔍 Buscar por Folio, Ciudadano o Área..." class="w-full p-2 pl-8 border border-slate-300 rounded-lg text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </div>
+        </div>
+    </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-slate-600 border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 text-xs uppercase font-bold border-b border-slate-200">
+                            <th class="p-3 w-12 text-center">N°</th>
+                            <th class="p-3">Folio CIVIS</th>
+                            <th class="p-3">Ciudadano</th>
+                            <th class="p-3">Área</th>
+                            <th class="p-3">Ejecución</th>
+                            <th class="p-3">Estatus</th>
+                            <th class="p-3">Imágenes</th>
+                            <th class="p-3 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaExpedientes">
+                        </tbody>
+                </table>
+            </div>
+            <div class="flex items-center justify-between gap-4 mt-4 p-3 bg-slate-100 rounded-lg">
+    <div class="text-xs text-slate-600 font-medium">
+        Mostrando registros del <span id="pagInicio" class="font-bold">0</span> al <span id="pagFin" class="font-bold">0</span> de un total de <span id="pagTotal" class="font-bold">0</span>
+    </div>
+    <div class="flex items-center gap-2">
+        <button type="button" id="btnPagAnterior" class="bg-white hover:bg-slate-50 text-slate-700 font-bold px-3 py-1.5 text-xs rounded border border-slate-300 disabled:opacity-50 transition">
+            ◀ Anterior
+        </button>
+        <span id="txtNumPagina" class="text-xs font-bold text-slate-700 px-2">Página 1</span>
+        <button type="button" id="btnPagSiguiente" class="bg-white hover:bg-slate-50 text-slate-700 font-bold px-3 py-1.5 text-xs rounded border border-slate-300 disabled:opacity-50 transition">
+            Siguiente ▶
+        </button>
+    </div>
+</div>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, setDoc, query, orderBy, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Tu Configuración Institucional del DIF
+    const firebaseConfig = {
+        apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E",
+        projectId: "poblacion-vulnerable---dif"
+    };
+
+    // Inicialización de Entorno CIVIS
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const apoyosRef = collection(db, "reporte_civis");
+
+    // Variables de Almacenamiento Temporal (Buffer) y Control de Paginación
+    let fotosBase64Cargadas = [];
+    let expedientesLocalesCache = [];
+    let paginaActualCivis = 1;
+
+    // Elementos de la Interfaz Gráfica (DOM)
+    const form = document.getElementById('formExpediente');
+    const editDocIdInput = document.getElementById('edit_doc_id');
+    const alertaEdicion = document.getElementById('alertaEdicion');
+    const btnCancelarEdicion = document.getElementById('btnCancelarEdicion');
+    const inputsDireccion = document.querySelectorAll('.input-direccion');
+    const txtDomicilioCompleto = document.getElementById('domicilio_completo');
+    const inputFotos = document.getElementById('inputFotos');
+    const contenedorPrevisualizacion = document.getElementById('contenedorPrevisualizacion');
+    const progresoCarga = document.getElementById('progresoCarga');
+    const barraProgreso = document.getElementById('barraProgreso');
+    const porcentajeCarga = document.getElementById('porcentajeCarga');
+    const tablaExpedientes = document.getElementById('tablaExpedientes');
+    
+    // Controles exclusivos para módulos adicionales (Excel y Purga)
+    const btnExportarExcel = document.getElementById('btnExportarExcel');
+    const btnImportarExcel = document.getElementById('btnImportarExcel');
+    const btnPurgarBD = document.getElementById('btnPurgarBD');
+
+    // Controles de Paginación y Filtrado del Monitor
+    const selectorFilas = document.getElementById('civisMostrarFilas');
+    const buscadorInput = document.getElementById('civisBuscador');
+
+    // --- 1. PROCESADOR DE DIRECCIÓN EN TIEMPO REAL ---
+    function procesarDireccionCivis() {
+        const calle = document.getElementById('calle').value.trim();
+        const noExt = document.getElementById('no_exterior').value.trim();
+        const noInt = document.getElementById('no_interior').value.trim();
+        const colonia = document.getElementById('colonia').value.trim();
+        const localidad = document.getElementById('localidad').value.trim();
+        const municipio = document.getElementById('municipio').value.trim();
+        const estado = document.getElementById('estado').value.trim();
+
+        let segmentos = [];
+        if (calle) segmentos.push(`Calle ${calle}`);
+        if (noExt) segmentos.push(`No. ${noExt}`);
+        if (noInt) segmentos.push(`Int. ${noInt}`);
+        if (colonia) segmentos.push(`Col. ${colonia}`);
+        if (localidad) segmentos.push(`Loc. ${localidad}`);
+        if (municipio) segmentos.push(`Mpio. ${municipio}`);
+        if (estado) segmentos.push(estado);
+
+        txtDomicilioCompleto.value = segmentos.join(', ');
+    }
+    inputsDireccion.forEach(inpt => inpt.addEventListener('input', procesarDireccionCivis));
+
+    // --- 2. MOTOR DE PROCESAMIENTO FOTOGRÁFICO (CHUNKS HASTA 64MB) ---
+    if (inputFotos) {
+        inputFotos.addEventListener('change', async (e) => {
+            const archivos = Array.from(e.target.files);
+            if (archivos.length === 0) return;
+
+            progresoCarga.classList.remove('hidden');
+            barraProgreso.style.width = "0%";
+            porcentajeCarga.innerText = "0%";
+
+            for (let i = 0; i < archivos.length; i++) {
+                const file = archivos[i];
+                const base64Str = await convertirArchivoABase64(file);
+                fotosBase64Cargadas.push(base64Str);
+                
+                const div = document.createElement('div');
+                div.className = "relative group border border-slate-200 rounded-lg overflow-hidden h-20 bg-slate-100";
+                div.innerHTML = `
+                    <img src="${base64Str}" class="w-full h-full object-cover">
+                    <button type="button" class="absolute inset-0 bg-red-600/80 text-white font-bold opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-xs text-center" data-index="${fotosBase64Cargadas.length - 1}">
+                        Eliminar
+                    </button>
+                `;
+                contenedorPrevisualizacion.appendChild(div);
+
+                let pct = Math.round(((i + 1) / archivos.length) * 100);
+                barraProgreso.style.width = `${pct}%`;
+                porcentajeCarga.innerText = `${pct}%`;
+            }
+
+            setTimeout(() => progresoCarga.classList.add('hidden'), 1000);
+            
+            contenedorPrevisualizacion.querySelectorAll('button').forEach(btn => {
+                btn.onclick = (e) => {
+                    const idx = parseInt(e.target.getAttribute('data-index'));
+                    fotosBase64Cargadas.splice(idx, 1);
+                    e.target.parentElement.remove();
+                };
+            });
+        });
+    }
+
+    function convertirArchivoABase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    async function guardarFotosEnChunks(documentId, fotosArray) {
+        const stringUnificado = JSON.stringify(fotosArray);
+        const tamañoChunk = 800000; 
+        let posicion = 0;
+        let indexChunk = 0;
+
+        while (posicion < stringUnificado.length) {
+            const chunkContent = stringUnificado.substring(posicion, posicion + tamañoChunk);
+            const chunkRef = doc(db, "reporte_civis", documentId, "fotos_chunks", `chunk_${indexChunk}`);
+            await setDoc(chunkRef, { index: indexChunk, data: chunkContent });
+            posicion += tamañoChunk;
+            indexChunk++;
+        }
+    }
+
+    async function recuperarFotosDeChunks(documentId) {
+        try {
+            const snapshotChunks = await getDocs(collection(db, "reporte_civis", documentId, "fotos_chunks"));
+            let chunks = [];
+            snapshotChunks.forEach(d => chunks.push(d.data()));
+            chunks.sort((a, b) => a.index - b.index);
+            const stringUnificado = chunks.map(c => c.data).join('');
+            return stringUnificado ? JSON.parse(stringUnificado) : [];
+        } catch {
+            return [];
+        }
+    }
+
+    // --- 3. GUARDADO Y EDICIÓN CON INCREMENTO AUTOMÁTICO ---
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const docIdExistente = editDocIdInput.value;
+        const marcaTiempo = new Date().toISOString();
+
+        let numeroProgresivoFinal;
+        if (docIdExistente) {
+            numeroProgresivoFinal = parseInt(document.getElementById('no_progresivo').value) || 1;
+        } else {
+            const numerosExistentes = expedientesLocalesCache.map(exp => parseInt(exp.no_progresivo) || 0);
+            const numeroMaximo = numerosExistentes.length > 0 ? Math.max(...numerosExistentes) : 0;
+            numeroProgresivoFinal = numeroMaximo + 1;
+        }
+
+        const dataCivis = {
+            no_progresivo: numeroProgresivoFinal,
+            folio: document.getElementById('folio').value,
+            tipo: document.getElementById('tipo').value,
+            problema: document.getElementById('problema').value,
+            prioridad: document.getElementById('prioridad').value,
+            area: document.getElementById('area').value,
+            unidad: document.getElementById('unidad').value,
+            estatus: document.getElementById('estatus').value,
+            ejecucion: document.getElementById('ejecucion').value,
+            actualizado: marcaTiempo,
+            fuera_de_jurisdiccion: document.getElementById('fuera_de_jurisdiccion').checked,
+            referencia_evento: document.getElementById('referencia_evento').value,
+            ciudadano: {
+                nombre: document.getElementById('ciudadano').value,
+                telefono: document.getElementById('telefono').value
+            },
+            ubicacion: {
+                domicilio_completo: txtDomicilioCompleto.value,
+                calle: document.getElementById('calle').value,
+                no_exterior: document.getElementById('no_exterior').value,
+                no_interior: document.getElementById('no_interior').value,
+                entre_calles: document.getElementById('entre_calles').value,
+                colonia: document.getElementById('colonia').value,
+                localidad: document.getElementById('localidad').value,
+                municipio: document.getElementById('municipio').value,
+                ciudad: document.getElementById('ciudad').value,
+                estado: document.getElementById('estado').value,
+                codigo_postal: document.getElementById('codigo_postal').value,
+                referencias: document.getElementById('referencias').value,
+                coordenadas: document.getElementById('coordenadas').value
+            }
+        };
+
+        try {
+            let finalDocId = docIdExistente;
+            if (docIdExistente) {
+                const docRef = doc(db, "reporte_civis", docIdExistente);
+                await updateDoc(docRef, dataCivis);
+            } else {
+                dataCivis.creado = marcaTiempo;
+                // Para mantener la consistencia con Excel, los nuevos formularios usan el ID compuesto
+                finalDocId = `${numeroProgresivoFinal}_${dataCivis.folio.replace(/\s+/g, "_")}`;
+                await setDoc(doc(db, "reporte_civis", finalDocId), dataCivis);
+            }
+
+            if (fotosBase64Cargadas.length > 0) {
+                await guardarFotosEnChunks(finalDocId, fotosBase64Cargadas);
+            }
+
+            alert("¡Éxito! Base de datos sincronizada correctamente en Reportes CIVIS.");
+            cancelarModoEdicion();
+        } catch (err) {
+            console.error(err);
+            alert("Fallo de comunicación con Firestore Cloud.");
+        }
+    });
+
+    // --- 4. MOTOR DE FILTRADO Y PAGINACIÓN DINÁMICA ---
+    function renderizarTablaCivis() {
+        if (!tablaExpedientes) return;
+        
+        tablaExpedientes.innerHTML = "";
+        const busqueda = buscadorInput ? buscadorInput.value.toLowerCase().trim() : "";
+        const limiteFilas = selectorFilas ? selectorFilas.value : "20";
+
+        let expedientesFiltrados = expedientesLocalesCache.filter(item => {
+            const folio = (item.folio || "").toLowerCase();
+            const nombre = (item.ciudadano?.nombre || "").toLowerCase();
+            const area = (item.area || "").toLowerCase();
+            const estatus = (item.estatus || "").toLowerCase();
+            const noProg = String(item.no_progresivo || "");
+            
+            return folio.includes(busqueda) || 
+                   nombre.includes(busqueda) || 
+                   area.includes(busqueda) || 
+                   estatus.includes(busqueda) ||
+                   noProg.includes(busqueda);
+        });
+
+        const totalRegistros = expedientesFiltrados.length;
+
+        if (totalRegistros === 0) {
+            tablaExpedientes.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400 italic">No se encontraron registros coincidentes.</td></tr>`;
+            actualizarControlesPaginacion(0, 0, 0, 1, 1);
+            return;
+        }
+
+        let filasPorPagina = limiteFilas === "all" ? totalRegistros : parseInt(limiteFilas);
+        const totalPaginas = Math.ceil(totalRegistros / filasPorPagina) || 1;
+
+        if (paginaActualCivis > totalPaginas) paginaActualCivis = totalPaginas;
+
+        const indiceInicio = (paginaActualCivis - 1) * filasPorPagina;
+        const indiceFin = Math.min(indiceInicio + filasPorPagina, totalRegistros);
+        const expedientesVisibles = expedientesFiltrados.slice(indiceInicio, indiceFin);
+
+        expedientesVisibles.forEach(item => {
+            const badgeEjecucion = item.ejecucion === "REALIZADO" 
+                ? `<span class="bg-emerald-100 text-emerald-800 font-bold text-xs px-2 py-1 rounded">✅ REALIZADO</span>`
+                : `<span class="bg-amber-100 text-amber-800 font-bold text-xs px-2 py-1 rounded">⚠️ PENDIENTE</span>`;
+
+            const tr = document.createElement('tr');
+            tr.className = "border-b border-slate-200 hover:bg-slate-50 text-xs";
+            tr.innerHTML = `
+                <td class="p-3 text-center font-bold text-slate-500 bg-slate-50/50">${item.no_progresivo || '-'}</td>
+                <td class="p-3 font-mono font-bold text-slate-700">${item.folio}</td>
+                <td class="p-3 font-medium">${item.ciudadano?.nombre || 'Anónimo'}</td>
+                <td class="p-3 text-slate-500 font-semibold">${item.area}</td>
+                <td class="p-3">${badgeEjecucion}</td>
+                <td class="p-3"><span class="bg-slate-200 px-2 py-0.5 rounded text-slate-700 font-medium">${item.estatus}</span></td>
+                <td class="p-3 font-bold text-blue-600">${item.fotos ? item.fotos.length : 0} img.</td>
+                <td class="p-3 text-center flex justify-center gap-2">
+                    <button type="button" class="btn-editar bg-blue-100 text-blue-700 hover:bg-blue-200 font-bold px-2.5 py-1 rounded transition" data-id="${item.id}">Editar</button>
+                    <button type="button" class="btn-eliminar bg-red-100 text-red-700 hover:bg-red-200 font-bold px-2.5 py-1 rounded transition" data-id="${item.id}">Eliminar</button>
+                </td>
+            `;
+            tablaExpedientes.appendChild(tr);
+        });
+
+        actualizarControlesPaginacion(indiceInicio + 1, indiceFin, totalRegistros, paginaActualCivis, totalPaginas);
+
+        tablaExpedientes.querySelectorAll('.btn-editar').forEach(btn => {
+            btn.onclick = (e) => cargarExpedienteParaEditar(e.target.getAttribute('data-id'));
+        });
+        tablaExpedientes.querySelectorAll('.btn-eliminar').forEach(btn => {
+            btn.onclick = (e) => eliminarExpedienteFirestore(e.target.getAttribute('data-id'));
+        });
+    }
+
+    function actualizarControlesPaginacion(inicio, fin, total, pagActual, totalPags) {
+        const pagInicioEl = document.getElementById("pagInicio");
+        const pagFinEl = document.getElementById("pagFin");
+        const pagTotalEl = document.getElementById("pagTotal");
+        const txtNumPaginaEl = document.getElementById("txtNumPagina");
+        const btnAnterior = document.getElementById("btnPagAnterior");
+        const btnSiguiente = document.getElementById("btnPagSiguiente");
+
+        if (pagInicioEl) pagInicioEl.innerText = inicio;
+        if (pagFinEl) pagFinEl.innerText = fin;
+        if (pagTotalEl) pagTotalEl.innerText = total;
+        if (txtNumPaginaEl) txtNumPaginaEl.innerText = `Página ${pagActual} de ${totalPags}`;
+
+        if (btnAnterior) btnAnterior.disabled = (pagActual === 1);
+        if (btnSiguiente) btnSiguiente.disabled = (pagActual === totalPags);
+    }
+
+    // --- 5. ESCUCHA FIRESTORE EN TIEMPO REAL OPTIMIZADA (REFLEJO INMEDIATO DE MAYOR A MENOR) ---
+    const q = query(apoyosRef, orderBy("no_progresivo", "desc"));
+    onSnapshot(q, async (snapshot) => {
+        const mapaFotosPrevias = {};
+        expedientesLocalesCache.forEach(e => {
+            if (e.fotos) mapaFotosPrevias[e.id] = e.fotos;
+        });
+
+        expedientesLocalesCache = [];
+
+        if (snapshot.empty) {
+            if (tablaExpedientes) {
+                tablaExpedientes.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400 italic">No hay reportes activos en Cloud Firestore.</td></tr>`;
+            }
+            actualizarControlesPaginacion(0, 0, 0, 1, 1);
+            return;
+        }
+
+        snapshot.docs.forEach(documento => {
+            const item = documento.data();
+            item.id = documento.id;
+            item.fotos = mapaFotosPrevias[documento.id] || [];
+            expedientesLocalesCache.push(item);
+        });
+
+        renderizarTablaCivis();
+
+        Promise.all(snapshot.docs.map(async (documento) => {
+            if (!mapaFotosPrevias[documento.id]) {
+                const fotos = await recuperarFotosDeChunks(documento.id);
+                const index = expedientesLocalesCache.findIndex(e => e.id === documento.id);
+                if (index !== -1 && fotos.length > 0) {
+                    expedientesLocalesCache[index].fotos = fotos;
+                }
+            }
+        })).then(() => {
+            renderizarTablaCivis();
+        });
+    });
+
+    // --- 6. LISTENERS OPERATIVOS DE INTERFAZ Y NAVEGACIÓN ---
+    document.addEventListener("DOMContentLoaded", () => {
+        const btnAnterior = document.getElementById("btnPagAnterior");
+        const btnSiguiente = document.getElementById("btnPagSiguiente");
+
+        if (btnAnterior) {
+            btnAnterior.onclick = () => {
+                if (paginaActualCivis > 1) {
+                    paginaActualCivis--;
+                    renderizarTablaCivis();
+                }
+            };
+        }
+
+        if (btnSiguiente) {
+            btnSiguiente.onclick = () => {
+                paginaActualCivis++;
+                renderizarTablaCivis();
+            };
+        }
+
+        if (selectorFilas) {
+            selectorFilas.addEventListener('change', () => {
+                paginaActualCivis = 1;
+                renderizarTablaCivis();
+            });
+        }
+        if (buscadorInput) {
+            buscadorInput.addEventListener('input', () => {
+                paginaActualCivis = 1;
+                renderizarTablaCivis();
+            });
+        }
+    });
+
+    function cargarExpedienteParaEditar(id) {
+        const exp = expedientesLocalesCache.find(e => e.id === id);
+        if (!exp) return;
+
+        editDocIdInput.value = exp.id;
+        alertaEdicion.classList.remove('hidden');
+        document.getElementById('btnGuardar').innerText = "Actualizar Registro CIVIS";
+
+        document.getElementById('no_progresivo').value = exp.no_progresivo || "";
+        document.getElementById('folio').value = exp.folio || "";
+        document.getElementById('area').value = exp.area || "DIF - PRESIDENCIA & DIRECCION";
+        document.getElementById('unidad').value = exp.unidad || "";
+        document.getElementById('tipo').value = exp.tipo || "";
+        document.getElementById('prioridad').value = exp.prioridad || "Media";
+        document.getElementById('estatus').value = exp.estatus || "Abierto";
+        document.getElementById('ejecucion').value = exp.ejecucion || "PENDIENTE";
+        document.getElementById('problema').value = exp.problema || "";
+        document.getElementById('referencia_evento').value = exp.referencia_evento || "";
+        document.getElementById('fuera_de_jurisdiccion').checked = exp.fuera_de_jurisdiccion || false;
+        
+        document.getElementById('ciudadano').value = exp.ciudadano?.nombre || "";
+        document.getElementById('telefono').value = exp.ciudadano?.telefono || "";
+
+        document.getElementById('calle').value = exp.ubicacion?.calle || "";
+        document.getElementById('no_exterior').value = exp.ubicacion?.no_exterior || "";
+        document.getElementById('no_interior').value = exp.ubicacion?.no_interior || "";
+        document.getElementById('entre_calles').value = exp.ubicacion?.entre_calles || "";
+        document.getElementById('colonia').value = exp.ubicacion?.colonia || "";
+        document.getElementById('localidad').value = exp.ubicacion?.localidad || "";
+        document.getElementById('municipio').value = exp.ubicacion?.municipio || "";
+        document.getElementById('ciudad').value = exp.ubicacion?.ciudad || "";
+        document.getElementById('estado').value = exp.ubicacion?.estado || "Veracruz";
+        document.getElementById('codigo_postal').value = exp.ubicacion?.codigo_postal || "";
+        document.getElementById('referencias').value = exp.ubicacion?.referencias || "";
+        document.getElementById('coordenadas').value = exp.ubicacion?.coordenadas || "";
+        txtDomicilioCompleto.value = exp.ubicacion?.domicilio_completo || "";
+
+        fotosBase64Cargadas = [...exp.fotos];
+        contenedorPrevisualizacion.innerHTML = "";
+        fotosBase64Cargadas.forEach((img) => {
+            const div = document.createElement('div');
+            div.className = "relative group border border-slate-200 rounded-lg overflow-hidden h-20 bg-slate-100";
+            div.innerHTML = `<img src="${img}" class="w-full h-full object-cover">`;
+            contenedorPrevisualizacion.appendChild(div);
+        });
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelarModoEdicion() {
+        editDocIdInput.value = "";
+        alertaEdicion.classList.add('hidden');
+        document.getElementById('btnGuardar').innerText = "Guardar en Sistema CIVIS";
+        form.reset();
+        txtDomicilioCompleto.value = "";
+        fotosBase64Cargadas = [];
+        contenedorPrevisualizacion.innerHTML = "";
+    }
+    btnCancelarEdicion.onclick = cancelarModoEdicion;
+
+    async function eliminarExpedienteFirestore(id) {
+        if (!confirm("🚨 ¿Desea eliminar este expediente de manera irreversible de los servidores CIVIS?")) return;
+        try {
+            const chunksSnapshot = await getDocs(collection(db, "reporte_civis", id, "fotos_chunks"));
+            for (const chunkDoc of chunksSnapshot.docs) {
+                await deleteDoc(doc(db, "reporte_civis", id, "fotos_chunks", chunkDoc.id));
+            }
+            await deleteDoc(doc(db, "reporte_civis", id));
+        } catch (err) {
+            alert("No se pudo eliminar el archivo.");
+        }
+    }
+
+    // =========================================================================
+    // MÓDULO EXCLUSIVO DE CONTROL EXCEL (.XLSX)
+    // =========================================================================
+
+    // --- A) ACCIÓN: EXPORTAR A EXCEL ---
+    if (btnExportarExcel) {
+        btnExportarExcel.onclick = () => {
+            if (expedientesLocalesCache.length === 0) {
+                alert("No existen registros en el monitor de control para exportar.");
+                return;
+            }
+
+            const filasParaExcel = expedientesLocalesCache.map(reporte => {
+                return {
+                    "ID Registro": reporte.id || "",
+                    "No Progresivo": reporte.no_progresivo || "",
+                    "Folio CIVIS": reporte.folio || "",
+                    "Área Asignada": reporte.area || "",
+                    "Unidad / Módulo": reporte.unidad || "",
+                    "Tipo de Incidencia": reporte.tipo || "",
+                    "Prioridad": reporte.prioridad || "",
+                    "Estatus Operativo": reporte.estatus || "",
+                    "Estado de Ejecución": reporte.ejecucion || "PENDIENTE",
+                    "Ciudadano Afectado": reporte.ciudadano?.nombre || "Anónimo",
+                    "Teléfono de Contacto": reporte.ciudadano?.telefono || "",
+                    "Calle": reporte.ubicacion?.calle || "",
+                    "No. Exterior": reporte.ubicacion?.no_exterior || "",
+                    "No. Interior": reporte.ubicacion?.no_interior || "",
+                    "Entre Calles": reporte.ubicacion?.entre_calles || "",
+                    "Colonia": reporte.ubicacion?.colonia || "",
+                    "Localidad": reporte.ubicacion?.localidad || "",
+                    "Municipio": reporte.ubicacion?.municipio || "",
+                    "Ciudad": reporte.ubicacion?.ciudad || "",
+                    "Estado": reporte.ubicacion?.estado || "",
+                    "Código Postal": reporte.ubicacion?.codigo_postal || "",
+                    "Domicilio Completo": reporte.ubicacion?.domicilio_completo || "",
+                    "Referencias Visuales": reporte.ubicacion?.referencias || "",
+                    "Coordenadas GPS": reporte.ubicacion?.coordenadas || "",
+                    "Jurisdicción": reporte.fuera_de_jurisdiccion ? "FUERA DE JURISDICCIÓN" : "INTERNA",
+                    "Descripción de la Problemática": reporte.problema || "",
+                    "Antecedentes Históricos": reporte.referencia_evento || "",
+                    "Fecha de Captura": reporte.creado || "",
+                    "Última Sincronización": reporte.actualizado || ""
+                };
+            });
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(filasParaExcel);
+            XLSX.utils.book_append_sheet(wb, ws, "Base CIVIS");
+            
+            const tagFecha = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(wb, `CIVIS_DIF_EXPORT_${tagFecha}.xlsx`);
+        };
+    }
+
+    // --- B) ACCIÓN: IMPORTAR DESDE EXCEL (Mapeo de Flujo Inverso Corregido) ---
+    if (btnImportarExcel) {
+        btnImportarExcel.onclick = (e) => { e.target.value = null; };
+
+        btnImportarExcel.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            console.log("📂 Leyendo archivo:", file.name);
+            const lector = new FileReader();
+            lector.readAsArrayBuffer(file);
+            
+            lector.onload = async (evt) => {
+                try {
+                    const buffer = evt.target.result;
+                    const libro = XLSX.read(buffer, { type: 'buffer' });
+                    const nombreHoja = libro.SheetNames[0];
+                    const hoja = libro.Sheets[nombreHoja];
+                    
+                    const filasLeidas = XLSX.utils.sheet_to_json(hoja);
+                    
+                    if (filasLeidas.length === 0) {
+                        alert("El archivo de Excel no contiene filas procesables.");
+                        return;
+                    }
+
+                    let procesados = 0;
+                    const marcaTiempo = new Date().toISOString();
+
+                    if (progresoCarga) progresoCarga.classList.remove('hidden');
+                    if (porcentajeCarga) porcentajeCarga.innerText = "0%";
+
+                    // --- NUEVO MOTOR INVERTIDO: Lee desde la última fila del Excel hacia la primera ---
+                    for (let i = filasLeidas.length - 1; i >= 0; i--) {
+                        const filaOriginal = filasLeidas[i];
+                        
+                        const fila = {};
+                        Object.keys(filaOriginal).forEach(key => {
+                            const keyLimpia = key
+                                .toLowerCase()
+                                .normalize("NFD")
+                                .replace(/[\u0300-\u036f]/g, "") 
+                                .trim();
+                            fila[keyLimpia] = filaOriginal[key];
+                        });
+
+                        const encontrarValor = (palabrasClave, valorPorDefecto = "") => {
+                            const llaveEncontrada = Object.keys(fila).find(k => 
+                                palabrasClave.some(p => k.includes(p))
+                            );
+                            return llaveEncontrada ? String(fila[llaveEncontrada]).trim() : valorPorDefecto;
+                        };
+
+                        const noProgDetectado = parseInt(encontrarValor(["progresivo", "no", "num"]));
+                        const folioDetectado = encontrarValor(["folio", "codigo", "id"]);
+                        const noProgFinal = isNaN(noProgDetectado) ? (i + 1) : noProgDetectado;
+
+                        let targetId;
+                        if (folioDetectado) {
+                            const folioLimpio = folioDetectado.replace(/\s+/g, "_");
+                            targetId = `${noProgFinal}_${folioLimpio}`; 
+                        } else {
+                            targetId = `civis_excel_${Date.now()}_${i}`;
+                        }
+
+                        const ciudadanoDetectado = encontrarValor(["ciudadano", "nombre", "afectado", "paciente", "beneficiario"], "Anónimo");
+                        const telefonoDetectado = encontrarValor(["telefono", "celular", "contacto"]);
+                        const areaDetectada = encontrarValor(["area", "departamento", "asignada"], "DIF - PRESIDENCIA & DIRECCION");
+                        const problemaDetectado = encontrarValor(["descripcion", "problema", "problematica", "observaciones"], "Sin descripción en Excel");
+                        const estatusDetectado = encontrarValor(["estatus", "estado operativo"], "Abierto");
+                        const ejecucionDetectada = encontrarValor(["ejecucion", "estado de ejecucion"], "PENDIENTE");
+                        
+                        const esquemaFormateado = {
+                            no_progresivo: noProgFinal,
+                            folio: folioDetectado || `CIVIS-EXCEL-${noProgFinal}`,
+                            tipo: encontrarValor(["tipo", "incidencia"]) || "General",
+                            problema: problemaDetectado,
+                            prioridad: encontrarValor(["prioridad"]) || "Media",
+                            area: areaDetectada.toUpperCase(),
+                            unidad: encontrarValor(["unidad", "modulo"]) || "Módulo General",
+                            estatus: estatusDetectado,
+                            ejecucion: ejecucionDetectada.toUpperCase(),
+                            creado: encontrarValor(["fecha", "captura"]) || marcaTiempo,
+                            actualizado: marcaTiempo,
+                            fuera_de_jurisdiccion: encontrarValor(["jurisdiccion"]).toUpperCase() === "FUERA DE JURISDICCIÓN",
+                            referencia_evento: encontrarValor(["antecedentes", "historicos"]) || "",
+                            
+                            ciudadano: {
+                                nombre: ciudadanoDetectado,
+                                telefono: telefonoDetectado
+                            },
+                            
+                            ubicacion: {
+                                calle: encontrarValor(["calle"]) || "",
+                                no_exterior: encontrarValor(["exterior", "noext"]),
+                                no_interior: encontrarValor(["interior", "noint"]),
+                                entre_calles: encontrarValor(["entre calles", "entrecalles"]) || "",
+                                colonia: encontrarValor(["colonia"]) || "",
+                                localidad: encontrarValor(["localidad"]) || "",
+                                municipio: encontrarValor(["municipio"]) || "Veracruz",
+                                ciudad: encontrarValor(["ciudad"]) || "",
+                                estado: encontrarValor(["estado"]) || "Veracruz",
+                                codigo_postal: encontrarValor(["postal", "cp"]),
+                                referencias: encontrarValor(["referencias", "visuales"]) || "",
+                                coordenadas: encontrarValor(["coordenadas", "gps"]) || "",
+                                domicilio_completo: encontrarValor(["domicilio", "completo"]) || 
+                                    `${encontrarValor(["calle"])} ${encontrarValor(["exterior"])}, Col. ${encontrarValor(["colonia"])}`.trim()
+                            }
+                        };
+
+                        const docRef = doc(db, "reporte_civis", targetId);
+                        await setDoc(docRef, esquemaFormateado, { merge: true });
+                        
+                        procesados++;
+                        
+                        let filasProcesadas = filasLeidas.length - i;
+                        let pct = Math.round((filasProcesadas / filasLeidas.length) * 100);
+                        if (barraProgreso) barraProgreso.style.width = `${pct}%`;
+                        if (porcentajeCarga) porcentajeCarga.innerText = `${pct}%`;
+                    }
+
+                    if (progresoCarga) setTimeout(() => progresoCarga.classList.add('hidden'), 800);
+                    alert(`¡Importación Concluida! Se procesaron ${procesados} expedientes a Firestore manteniendo el orden exacto.`);
+                    
+                } catch (error) {
+                    console.error("Error al procesar celdas:", error);
+                    if (progresoCarga) progresoCarga.classList.add('hidden');
+                    alert("No se pudo leer el archivo de Excel.");
+                }
+            };
+        });
+    }
+
+    // --- C) MÓDULO DE PURGA TOTAL OPTIMIZADO CON BATCHES ---
+    if (btnPurgarBD) {
+        btnPurgarBD.onclick = async () => {
+            const primeraConfirmacion = confirm("🚨 ¡ADVERTENCIA CRÍTICA!\n\n¿Estás seguro de que deseas eliminar TODOS los expedientes del sistema CIVIS?\n\nEsta acción borrará de manera irreversible toda la base de datos.");
+            if (!primeraConfirmacion) return;
+
+            const segundaConfirmacion = confirm("⚠️ ¿DE VERDAD ESTÁS SEGURO?\n\nSe eliminarán los historiales y evidencias fotográficas. Presiona 'Aceptar' para proceder.");
+            if (!segundaConfirmacion) return;
+
+            try {
+                if (progresoCarga) {
+                    progresoCarga.classList.remove('hidden');
+                    porcentajeCarga.innerText = "0%";
+                }
+
+                const snapshot = await getDocs(collection(db, "reporte_civis"));
+                if (snapshot.empty) {
+                    if (progresoCarga) progresoCarga.classList.add('hidden');
+                    alert("La base de datos de Reportes CIVIS ya está vacía.");
+                    return;
+                }
+
+                const totalDocumentos = snapshot.size;
+                let documentosBorrados = 0;
+                let batch = writeBatch(db);
+                let contadorOperaciones = 0;
+
+                for (let i = 0; i < snapshot.docs.length; i++) {
+                    const documento = snapshot.docs[i];
+                    const docId = documento.id;
+
+                    const fotosChunksSnapshot = await getDocs(collection(db, "reporte_civis", docId, "fotos_chunks"));
+                    for (const chunkDoc of fotosChunksSnapshot.docs) {
+                        batch.delete(doc(db, "reporte_civis", docId, "fotos_chunks", chunkDoc.id));
+                        contadorOperaciones++;
+                        
+                        if (contadorOperaciones >= 400) {
+                            await batch.commit();
+                            batch = writeBatch(db);
+                            contadorOperaciones = 0;
+                        }
+                    }
+
+                    batch.delete(doc(db, "reporte_civis", docId));
+                    contadorOperaciones++;
+                    documentosBorrados++;
+
+                    let pct = Math.round((documentosBorrados / totalDocumentos) * 100);
+                    if (barraProgreso) barraProgreso.style.width = `${pct}%`;
+                    if (porcentajeCarga) porcentajeCarga.innerText = `${pct}%`;
+
+                    if (contadorOperaciones >= 400) {
+                        await batch.commit();
+                        batch = writeBatch(db);
+                        contadorOperaciones = 0;
+                    }
+                }
+
+                if (contadorOperaciones > 0) {
+                    await batch.commit();
+                }
+
+                if (progresoCarga) setTimeout(() => progresoCarga.classList.add('hidden'), 800);
+                alert(`🔥 ¡Limpieza Completada! Se han eliminado permanentemente ${documentosBorrados} expedientes de Cloud Firestore.`);
+                cancelarModoEdicion();
+
+            } catch (error) {
+                console.error(error);
+                if (progresoCarga) progresoCarga.classList.add('hidden');
+                alert("Error crítico al purgar la base de datos.");
+            }
+        };
+    }
+</script>
+</body>
+</html>
