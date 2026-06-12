@@ -227,7 +227,9 @@
             <div id="nav-vulnerable" class="nav-item" onclick="showView('vulnerable', this)"><i class="fas fa-hand-holding-heart"></i> <span>Pob. Vulnerable</span></div>
             <div id="nav-procuraduria" class="nav-item" onclick="showView('procuraduria', this)"><i class="fas fa-balance-scale"></i> <span>Procuraduría</span></div>
             <div id="nav-escolar" class="nav-item" onclick="showView('escolar', this)"><i class="fas fa-school"></i> <span>Req. Escolares</span></div>
+            <div id="nav-civis" class="nav-item" onclick="showView('civis', this)"><i class="fas fa-folder-open"></i> <span>Reportes CIVIS</span></div>
             <div id="nav-territorial" class="nav-item" onclick="showView('territorial', this)"><i class="fas fa-city"></i> <span>Resumen Territorial</span></div>
+
         </nav>
         <!-- Agrega este bloque antes del nav-exit -->
 <div class="user-profile-box">
@@ -405,7 +407,6 @@
                     <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">SERVICIO</th>
                     <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">ESTADO</th>
                     <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">COSTO</th>
-                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">ACCIÓN</th>
                 </tr>
             </thead>
             <tbody id="tbody-medica"></tbody>
@@ -493,6 +494,66 @@
     </div>
 </div>
 
+<!-- ========================================== -->
+<!-- PANEL DE PREVISUALIZACIÓN Y CONTROL: CIVIS -->
+<!-- ========================================== -->
+<div id="view-civis" class="view-container" style="display:none;">
+    
+    <!-- Tarjeta de Acceso Directo con Estilo Institucional -->
+    <div class="access-card" style="background: linear-gradient(135deg, #1e293b, #334155); color: white;">
+        <div><b>Control Institucional CIVIS</b></div>
+        <a href="reporte_civis.html" class="btn-open" style="background: white; color: #1e293b; font-weight: bold; padding: 6px 12px; rounded: 6px;">Ir al Módulo</a>
+    </div>
+    
+    <!-- Estadísticas Operativas Principales -->
+    <div class="stats-grid">
+        <div class="stat-box"><small>Total Reportes</small><div id="civis-total">0</div></div>
+        <div class="stat-box"><small>Ejecutados</small><div id="civis-realizados" style="color:var(--success)">0</div></div>
+        <div class="stat-box"><small>Pendientes</small><div id="civis-pendientes" style="color:var(--warning)">0</div></div>
+    </div>
+
+    <!-- Desglose Métrico de Clasificación -->
+    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-box">
+            <small>Áreas Asignadas</small>
+            <div id="civis-stat-areas" style="font-size:14px; font-weight:bold;">0</div>
+        </div>
+        <div class="stat-box">
+            <small>Evidencias Colectadas</small>
+            <div id="civis-stat-fotos" style="font-size:14px; font-weight:bold; color: #2563eb;">0</div>
+        </div>
+        <div class="stat-box">
+            <small>Fuera de Jurisdicción</small>
+            <div id="civis-stat-jurisdiccion" style="font-size:14px; font-weight:bold; color: #dc2626;">0</div>
+        </div>
+    </div>
+
+    <!-- Panel de Contabilidad de Estatus / Tipos Dinámicos -->
+    <div id="civis-reporte-contable" class="stats-grid" style="margin-bottom: 20px;"></div>
+
+    <!-- Paneles de Columnas de Monitoreo Rápido -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+        <div class="panel">
+            <b>Últimos Folios CIVIS</b>
+            <div id="civis-col-1" class="panel-lista-scroll" style="margin-top:10px; max-height:300px; overflow-y:auto;">
+                <!-- Carga dinámica de folios y nombres -->
+            </div>
+        </div>
+        <div class="panel">
+            <b>Distribución por Área</b>
+            <div id="civis-col-2" class="panel-lista-scroll" style="margin-top:10px; max-height:300px; overflow-y:auto;">
+                <!-- Carga dinámica de áreas y contadores -->
+            </div>
+        </div>
+        <div class="panel">
+            <b>Zonas de Incidencia</b>
+            <div id="civis-col-3" class="panel-lista-scroll" style="margin-top:10px; max-height:300px; overflow-y:auto;">
+                <!-- Carga dinámica de domicilios o localidades -->
+            </div>
+        </div>
+    </div>
+</div>
+
     <div id="view-escolar" class="view-container"><div class="access-card" style="background: #1e3a8a;"><div><b>Solicitudes Generales</b></div><a href="solicitudes.html" class="btn-open">Módulo</a></div>
     <div class="stats-grid">
         <div class="stat-box"><small>Solicitudes</small><div id="re-total">0</div></div>
@@ -528,9 +589,9 @@
 </div>
 </div>
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, doc, onSnapshot, query, orderBy, setDoc, deleteDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
 document.addEventListener("DOMContentLoaded", () => {
     const usuario = localStorage.getItem('activeUser');
     const departamento = localStorage.getItem('userDep');
@@ -597,7 +658,7 @@ function aplicarRestriccionesDeDepartamento() {
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const store = { medica: [], social: [], psicologia: [], jefatura: [], procuraduria: [], general_localidades: [] };
+    const store = { medica: [], social: [], psicologia: [], jefatura: [], procuraduria: [], general_localidades: [], civis: [] };
 
 // Función Maestra que disparan tus inputs
 // Función Maestra unificada (reemplaza la anterior)
@@ -607,6 +668,7 @@ window.reprocesarTodo = function() {
     if (typeof window.reprocesarJefatura === 'function') window.reprocesarJefatura();
     if (typeof window.reprocesarTrabSoc === 'function') window.reprocesarTrabSoc();
     if (typeof window.reprocesarMedica === 'function') window.reprocesarMedica();
+    if (typeof window.reprocesarCivis === 'function') window.reprocesarCivis(); // <-- Nueva línea CIVIS
     if (typeof window.renderReporteJerarquico === 'function') window.renderReporteJerarquico();
 };
 
@@ -662,9 +724,6 @@ window.reprocesarMedica = function() {
                 </td>
                 <td style="padding: 15px; font-weight:bold;">$${costo.toFixed(2)}</td>
                 <td style="padding: 15px;">
-                    <button onclick="borrarRegistro('area_medica_v2', '${p.id}')" style="border:none; background:none; cursor:pointer; color:#dc2626;">
-                        <i class="fas fa-trash"></i>
-                    </button>
                 </td>
             </tr>
         `;
@@ -1056,44 +1115,203 @@ window.renderReporteJerarquico = function() {
     `}).join('');
 };
 
-// --- LISTENERS (Asegúrate de tener esta parte al final) ---
-onSnapshot(collection(db, "trabajo_social"), (snapshot) => {store.social = snapshot.docs.map(doc => doc.data()); window.reprocesarTrabSoc();});
-onSnapshot(collection(db, "psicologia"), (snapshot) => {store.psicologia = snapshot.docs.map(doc => doc.data()); window.reprocesarPsico();});
-onSnapshot(collection(db, "jefatura_psicologia"), (snapshot) => {store.jefatura = snapshot.docs.map(doc => doc.data()); window.reprocesarJefatura();});
-onSnapshot(collection(db, "procuraduria"), (snap) => {store.procuraduria = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); window.reprocesarProcuraduria();});
-onSnapshot(collection(db, "area_medica_v2"), (snap) => {store.medica = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));if (typeof window.reprocesarMedica === 'function') window.reprocesarMedica();
-    // También actualizamos el reporte jerárquico si es necesario
-    if (typeof window.renderReporteJerarquico === 'function') window.renderReporteJerarquico();});
+window.reprocesarCivis = function() {
+    // Si la vista de CIVIS no existe en el HTML, detenemos la ejecución para evitar errores
+    const vistaContenedora = document.getElementById('view-civis');
+    if (!vistaContenedora) return;
 
-        window.showView = function(viewId, element) {
-            // Desactivar todos los items y ocultar todas las vistas
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.view-container').forEach(el => el.style.display = 'none');
-            
-            // Activar el seleccionado
-            element.classList.add('active');
-            document.getElementById(`view-${viewId}`).style.display = 'block';
-            document.getElementById('view-title').innerText = element.innerText.trim();
-        };
+    // 1. OBTENER DATOS DEL STORE Y CONTEOS BÁSICOS
+    const total = store.civis.length;
+    const realizados = store.civis.filter(e => e.ejecucion === "REALIZADO").length;
+    const pendientes = total - realizados;
+    const fueraJurisdiccion = store.civis.filter(e => e.fuera_de_jurisdiccion === true).length;
+    
+    let totalFotos = 0;
+    const conteoAreas = {};
+    const conteoEstatus = {};
+    const zonasMapa = {};
 
-        // Reloj en tiempo real
-        setInterval(() => {
-            const reloj = document.getElementById('reloj');
-            if(reloj) reloj.innerText = new Date().toLocaleTimeString('es-MX', {hour: '2-digit', minute:'2-digit'});
-        }, 1000);
+    let htmlCol1 = ""; // Aquí se acumulará la lista completa de folios con sus asuntos
 
-        // Función de cierre de sesión (Placeholder)
-        window.cerrarSesion = function() {
-            if(confirm("¿Deseas cerrar la sesión actual?")) {
-                window.location.href = "index.html";
-            }
-        };
-        // --- CORRECCIÓN FINAL ---
-// Eliminamos el clic forzado en 'nav-social'
+    // Ordenamos los registros por número progresivo de mayor a menor (más recientes primero)
+    const registrosOrdenados = [...store.civis].sort((a, b) => (b.no_progresivo || 0) - (a.no_progresivo || 0));
+
+    registrosOrdenados.forEach((item) => {
+        // Contar imágenes totales del módulo
+        if (item.fotos) totalFotos += item.fotos.length;
+
+        // Agrupar por Área Responsable (Columna 2)
+        if (item.area) {
+            conteoAreas[item.area] = (conteoAreas[item.area] || 0) + 1;
+        }
+
+        // Agrupar por Estatus (Bloque contable inferior)
+        if (item.estatus) {
+            conteoEstatus[item.estatus] = (conteoEstatus[item.estatus] || 0) + 1;
+        }
+
+        // Agrupar por Ubicación/Domicilio (Columna 3)
+        const zona = item.ubicacion?.domicilio_completo || "No Especificado";
+        zonasMapa[zona] = (zonasMapa[zona] || 0) + 1;
+
+        // 2. CONSTRUIR LA LISTA DE FOLIOS CON ASUNTOS (COLUMNA 1)
+        const icono = item.ejecucion === "REALIZADO" ? "🟢" : "🟡";
+        
+        // Extraemos el asunto/problema o descripción del reporte
+        const asuntoReporte = item.problema || item.descripcion || "Sin asunto especificado";
+
+        htmlCol1 += `
+            <div style="padding: 10px; border-b: 1px solid #f1f5f9; font-size: 11px; display: flex; flex-direction: column; gap: 3px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>${icono} <b style="color: #1e293b;">${item.folio}</b></span>
+                    <span style="color: #94a3b8; font-size: 10px; font-weight: bold;">#${item.no_progresivo || '-'}</span>
+                </div>
+                <div style="color: #0284c7; font-weight: bold; font-size: 11px; line-height: 1.2;">
+                    📝 ${asuntoReporte}
+                </div>
+                <div style="color: #475569; font-size: 10.5px;">
+                    👤 ${item.ciudadano?.nombre || 'Anónimo'}
+                </div>
+                <div style="color: #64748b; font-size: 10px; font-style: italic; margin-top: 1px;">
+                    🏢 ${item.area || 'Sin Área Asignada'}
+                </div>
+            </div>`;
+    });
+
+    // 3. INYECTAR DATOS EN LOS CUADRITOS DE MÉTRICAS (STAT BOXES)
+    if (document.getElementById("civis-total")) document.getElementById("civis-total").innerText = total;
+    if (document.getElementById("civis-realizados")) document.getElementById("civis-realizados").innerText = realizados;
+    if (document.getElementById("civis-pendientes")) document.getElementById("civis-pendientes").innerText = pendientes;
+    if (document.getElementById("civis-stat-areas")) document.getElementById("civis-stat-areas").innerText = Object.keys(conteoAreas).length;
+    if (document.getElementById("civis-stat-fotos")) document.getElementById("civis-stat-fotos").innerText = totalFotos;
+    if (document.getElementById("civis-stat-jurisdiccion")) document.getElementById("civis-stat-jurisdiccion").innerText = fueraJurisdiccion;
+
+    // 4. INYECTAR LA LISTA COMPLETA EN LA COLUMNA 1
+    const col1Container = document.getElementById("civis-col-1");
+    if (col1Container) {
+        col1Container.innerHTML = htmlCol1 || "<div style='padding:10px; color:#94a3b8; font-style:italic;'>Sin reportes registrados</div>";
+        col1Container.style.maxHeight = "400px";
+        col1Container.style.overflowY = "auto";
+    }
+
+    // 5. INYECTAR DISTRIBUCIÓN POR ÁREA (COLUMNA 2)
+    let htmlCol2 = "";
+    Object.keys(conteoAreas).sort((a,b) => conteoAreas[b] - conteoAreas[a]).forEach(area => {
+        htmlCol2 += `
+            <div style="display:flex; justify-content:space-between; padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 11px; align-items: center;">
+                <span>🏢 <b>${area}</b></span>
+                <span style="background:#e2e8f0; padding: 2px 8px; border-radius:4px; font-weight:bold; color:#334155;">${conteoAreas[area]}</span>
+            </div>`;
+    });
+    const col2Container = document.getElementById("civis-col-2");
+    if (col2Container) {
+        col2Container.innerHTML = htmlCol2 || "<div style='padding:10px; color:#94a3b8; font-style:italic;'>Sin áreas</div>";
+        col2Container.style.maxHeight = "400px";
+        col2Container.style.overflowY = "auto";
+    }
+
+    // 6. INYECTAR ZONAS DE INCIDENCIA (COLUMNA 3)
+    let htmlCol3 = "";
+    Object.keys(zonasMapa).sort((a,b) => zonasMapa[b] - zonasMapa[a]).forEach(zona => {
+        htmlCol3 += `
+            <div style="display:flex; justify-content:space-between; padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 11px; align-items: center;">
+                <span style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 170px;" title="${zona}">📍 ${zona}</span>
+                <span style="font-weight:bold; color:#64748b;">(${zonasMapa[zona]})</span>
+            </div>`;
+    });
+    const col3Container = document.getElementById("civis-col-3");
+    if (col3Container) {
+        col3Container.innerHTML = htmlCol3 || "<div style='padding:10px; color:#94a3b8; font-style:italic;'>Sin zonas</div>";
+        col3Container.style.maxHeight = "400px";
+        col3Container.style.overflowY = "auto";
+    }
+
+    // 7. INYECTAR EL REPORTE CONTABLE INFERIOR DE ESTATUS
+    let htmlContable = "";
+    Object.keys(conteoEstatus).forEach(estatus => {
+        htmlContable += `
+            <div class="stat-box" style="border-left: 4px solid #475569; background:#f8fafc;">
+                <small>${estatus.toUpperCase()}</small>
+                <div style="font-size:16px; font-weight:bold; color:#1e293b;">${conteoEstatus[estatus]}</div>
+            </div>`;
+    });
+    const reporteContableContainer = document.getElementById("civis-reporte-contable");
+    if (reporteContableContainer) {
+        reporteContableContainer.innerHTML = htmlContable;
+    }
+};
+
+// =============================================================================
+// --- LISTENERS REACTIVOS EN TIEMPO REAL (ESCUCHA ACTIVA DE FIRESTORE) ---
+// =============================================================================
+onSnapshot(collection(db, "trabajo_social"), (snapshot) => {
+    store.social = snapshot.docs.map(doc => doc.data()); 
+    window.reprocesarTrabSoc();
+});
+
+onSnapshot(collection(db, "psicologia"), (snapshot) => {
+    store.psicologia = snapshot.docs.map(doc => doc.data()); 
+    window.reprocesarPsico();
+});
+
+onSnapshot(collection(db, "jefatura_psicologia"), (snapshot) => {
+    store.jefatura = snapshot.docs.map(doc => doc.data()); 
+    window.reprocesarJefatura();
+});
+
+onSnapshot(collection(db, "procuraduria"), (snap) => {
+    store.procuraduria = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); 
+    window.reprocesarProcuraduria();
+});
+
+onSnapshot(collection(db, "area_medica_v2"), (snap) => {
+    store.medica = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    if (typeof window.reprocesarMedica === 'function') window.reprocesarMedica();
+    if (typeof window.renderReporteJerarquico === 'function') window.renderReporteJerarquico();
+});
+
+// 🔥 NUEVA ESCUCHA INTEGRADA PARA EL MONITOR CIVIS
+onSnapshot(collection(db, "reporte_civis"), (snap) => {
+    store.civis = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    if (typeof window.reprocesarCivis === 'function') window.reprocesarCivis();
+});
+
+
+// =============================================================================
+// --- NAVEGACIÓN Y CONTROL DINÁMICO DE LA INTERFAZ (CONTROL GLOBAL) ---
+// =============================================================================
+window.showView = function(viewId, element) {
+    // Desactivar todos los items y ocultar todas las vistas (.view-container)
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.view-container').forEach(el => el.style.display = 'none');
+    
+    // Activar el contenedor y botón seleccionado dinámicamente
+    element.classList.add('active');
+    document.getElementById(`view-${viewId}`).style.display = 'block';
+    document.getElementById('view-title').innerText = element.innerText.trim();
+};
+
+// Reloj en tiempo real institucional
+setInterval(() => {
+    const reloj = document.getElementById('reloj');
+    if(reloj) reloj.innerText = new Date().toLocaleTimeString('es-MX', {hour: '2-digit', minute:'2-digit'});
+}, 1000);
+
+// Función de cierre de sesión segura
+window.cerrarSesion = function() {
+    if(confirm("¿Deseas cerrar la sesión actual?")) {
+        window.location.href = "index.html";
+    }
+};
+
+
+// =============================================================================
+// --- CORRECCIÓN FINAL DE CARGA OPERATIVA ---
+// =============================================================================
 window.onload = () => {
-    // Ya no hacemos nada aquí, porque el DOMContentLoaded 
-    // ya se encargó de ocultar todo y mostrar la bienvenida.
-    console.log("Sistema cargado y listo.");
+    // Manteniendo tu lógica: El DOMContentLoaded se encarga de mostrar la bienvenida,
+    // garantizando que no haya clics forzados molestos en otras pestañas.
+    console.log("Sistema global y Monitor CIVIS cargados y listos.");
 };
 </script>
 </body>
