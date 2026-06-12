@@ -251,69 +251,28 @@
         window.filtrar(false);
     });
 
-// COMPROBACIÓN AVANZADA DE DUPLICADOS Y TEMPORALIDAD (1 AÑO)
+// 1. COMPROBACIÓN TOTAL CONTRA TODAS LAS FECHAS REGISTRADAS
     window.verificarApoyoActivo = (nombreActual, idActual = null) => {
         if (!nombreActual) return null;
         const nombreLimpio = nombreActual.trim().toUpperCase();
         
-        // 1. Buscar si tiene un trámite activo (En proceso o Pendiente)
-        const tramiteActivo = todosLosDatos.find(reg => 
+        // Buscamos TODOS los registros que coincidan con este nombre (excluyendo el que se está editando)
+        const coincidencias = todosLosDatos.filter(reg => 
             reg.id !== idActual && 
             reg.nombre && 
-            reg.nombre.trim().toUpperCase() === nombreLimpio && 
-            ["EN PROCESO", "PENDIENTE"].includes(reg.estatus?.toUpperCase())
+            reg.nombre.trim().toUpperCase() === nombreLimpio
         );
 
-        if (tramiteActivo) {
-            return { tipo: 'ACTIVO', registro: tramiteActivo };
+        if (coincidencias.length > 0) {
+            // Ordenamos el historial de la fecha más reciente a la más antigua
+            coincidencias.sort((a, b) => new Date(b.fecha_registro) - new Date(a.fecha_registro));
+            return coincidencias;
         }
 
-        // 2. Buscar si ya se le otorgó un apoyo en el último año (365 días)
-        // Filtramos todos los registros históricos terminados de este beneficiario
-        const registrosPasados = todosLosDatos.filter(reg => 
-            reg.id !== idActual && 
-            reg.nombre && 
-            reg.nombre.trim().toUpperCase() === nombreLimpio && 
-            reg.fecha_registro &&
-            ["ATENDIDO", "ENTREGADO", "REALIZADO", "VALIDADO"].includes(reg.estatus?.toUpperCase())
-        );
-
-        if (registrosPasados.length > 0) {
-            const hoy = new Date();
-            
-            for (const reg of registrosPasados) {
-                // Se asume formato del input date: "YYYY-MM-DD"
-                const fechaTramite = new Date(reg.fecha_registro + "T00:00:00");
-                
-                // Calculamos la diferencia en milisegundos y la pasamos a días
-                const diferenciaTiempo = hoy - fechaTramite;
-                const diferenciaDias = Math.floor(diferenciaTiempo / (1000 * 60 * 60 * 24));
-
-                // Si está dentro del rango de 1 año (365 días) y no es una fecha futura errónea
-                if (diferenciaDias >= 0 && diferenciaDias <= 365) {
-                    const meses = Math.floor(diferenciaDias / 30);
-                    const diasRestantes = diferenciaDias % 30;
-                    
-                    let tiempoTranscurrido = "";
-                    if (meses > 0) {
-                        tiempoTranscurrido = `${meses} ${meses === 1 ? 'mes' : 'meses'}${diasRestantes > 0 ? ` y ${diasRestantes} días` : ''}`;
-                    } else {
-                        tiempoTranscurrido = `${diferenciaDias} días`;
-                    }
-
-                    return { 
-                        tipo: 'HISTORICO_RECIENTE', 
-                        registro: reg, 
-                        tiempoTexto: tiempoTranscurrido 
-                    };
-                }
-            }
-        }
-
-        return null; // Todo en orden, no hay duplicados ni bloqueos por tiempo
+        return null; // Sin antecedentes
     };
 
-    // ALERTA VISUAL AL SALIR DEL CAMPO "NOMBRE"
+    // 2. LANZAR ALERTA EN TIEMPO REAL CON EL HISTORIAL COMPLETO DE FECHAS
     window.revisarNombreDuplicado = () => {
         const nombreInput = document.getElementById('nombre');
         if (!nombreInput) return;
@@ -321,32 +280,34 @@
         const nombreActual = nombreInput.value;
         const idActual = document.getElementById('edit-id').value || null;
 
-        const resultado = window.verificarApoyoActivo(nombreActual, idActual);
+        const historial = window.verificarApoyoActivo(nombreActual, idActual);
 
-        if (resultado) {
-            if (resultado.tipo === 'ACTIVO') {
-                const msgActivo = `⚠️ TRÁMITE EN CAMINO:\n\nEl beneficiario "${nombreActual.toUpperCase()}" ya cuenta con una solicitud activa [${resultado.registro.estatus}] para el programa:\n"${resultado.registro.programa} - ${resultado.registro.asunto}".\n\nPor favor, verifica el estado del caso antes de duplicarlo.`;
-                alert(msgActivo);
-            } 
-            else if (resultado.tipo === 'HISTORICO_RECIENTE') {
-                const msgHistorico = `🚨 ALERTA DE TEMPORALIDAD (MENOS DE 1 AÑO):\n\nA "${nombreActual.toUpperCase()}" ya se le otorgó un apoyo hace apenas [ ${resultado.tiempoTexto} ].\n\nDetalles del apoyo anterior:\n• Fecha: ${resultado.registro.fecha_registro}\n• Programa: ${resultado.registro.programa}\n• Asunto: ${resultado.registro.asunto}\n• Estatus: ${resultado.registro.estatus}\n\nRevisa las reglas del programa antes de capturar un nuevo apoyo.`;
-                alert(msgHistorico);
-            }
+        if (historial) {
+            let mensaje = `🚨 ANTECEDENTES ENCONTRADOS PARA:\n"${nombreActual.toUpperCase()}"\n\n`;
+            mensaje += `Este ciudadano ya cuenta con ${historial.length} registro(s) en el sistema:\n`;
+            mensaje += `--------------------------------------------------\n`;
+
+            historial.forEach((reg, index) => {
+                mensaje += `${index + 1}. FECHA: ${reg.fecha_registro || 'Sin fecha'}\n`;
+                mensaje += `   • Programa: ${reg.programa || 'NO ASIGNADO'}\n`;
+                mensaje += `   • Asunto: ${reg.asunto || 'NO ASIGNADO'}\n`;
+                mensaje += `   • Estatus: [${reg.estatus || 'PENDIENTE'}]\n`;
+                mensaje += `--------------------------------------------------\n`;
+            });
+
+            mensaje += `\nPor favor, revisa si procede otorgar un nuevo apoyo basándote en estas fechas.`;
+            alert(mensaje);
         }
     };
 
-window.subirYGuardar = async () => {
+    // 3. ADAPTACIÓN DE BOTÓN GUARDAR CON REVISIÓN GLOBAL
+    window.subirYGuardar = async () => {
         const data = obtenerValoresForm(); 
         
-        const resultado = window.verificarApoyoActivo(data.nombre);
-        if (resultado) {
-            let mensaje = "";
-            if (resultado.tipo === 'ACTIVO') {
-                mensaje = `⚠️ TRÁMITE EN CAMINO: El beneficiario "${data.nombre}" tiene un trámite activo [${resultado.registro.estatus}] en: "${resultado.registro.programa}".`;
-            } else {
-                mensaje = `🚨 RESTRICCIÓN DE AÑO: A "${data.nombre}" se le otorgó un apoyo hace ${resultado.tiempoTexto} (${resultado.registro.asunto}).`;
-            }
-            if (!confirm(`${mensaje}\n\n¿Estás seguro de que deseas saltarte esta advertencia y GUARDAR de todos modos?`)) return;
+        const historial = window.verificarApoyoActivo(data.nombre);
+        if (historial) {
+            const mensaje = `⚠️ ATENCIÓN: El beneficiario "${data.nombre}" ya tiene ${historial.length} antecedente(s) en diferentes fechas.\n\n¿Estás seguro de que deseas saltarte la advertencia y GUARDAR este NUEVO registro de todos modos?`;
+            if (!confirm(mensaje)) return;
         }
 
         const fileInput = document.getElementById('input_file');
@@ -369,19 +330,15 @@ window.subirYGuardar = async () => {
         }
     };
 
-window.actualizar = async () => {
+    // 4. ADAPTACIÓN DE BOTÓN ACTUALIZAR CON REVISIÓN GLOBAL
+    window.actualizar = async () => {
         const id = document.getElementById('edit-id').value;
         const data = obtenerValoresForm();
 
-        const resultado = window.verificarApoyoActivo(data.nombre, id);
-        if (resultado) {
-            let mensaje = "";
-            if (resultado.tipo === 'ACTIVO') {
-                mensaje = `⚠️ TRÁMITE EN CAMINO: El nombre coincide con un trámite activo [${resultado.registro.estatus}].`;
-            } else {
-                mensaje = `🚨 RESTRICCIÓN DE AÑO: El beneficiario ya recibió un apoyo hace ${resultado.tiempoTexto}.`;
-            }
-            if (!confirm(`${mensaje}\n\n¿Deseas continuar con la ACTUALIZACIÓN de todos modos?`)) return;
+        const historial = window.verificarApoyoActivo(data.nombre, id);
+        if (historial) {
+            const mensaje = `⚠️ ATENCIÓN: Estás modificando el nombre a "${data.nombre}", el cual ya cuenta con ${historial.length} registro(s) previo(s) en el sistema.\n\n¿Deseas continuar con la ACTUALIZACIÓN de todos modos?`;
+            if (!confirm(mensaje)) return;
         }
 
         const fileInput = document.getElementById('input_file');
