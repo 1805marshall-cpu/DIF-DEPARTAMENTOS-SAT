@@ -8,7 +8,34 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 </head>
+
 <body class="bg-slate-100 min-h-screen font-sans">
+<div class="flex flex-col md:flex-row items-stretch md:items-center justify-between mb-6 p-4 bg-slate-800 text-white rounded-xl shadow-md gap-4">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-slate-700 rounded-full flex items-center justify-center border border-slate-600 shadow-inner">
+            <i class="fas fa-user-shield text-lg text-slate-300"></i>
+        </div>
+        <div>
+            <div class="text-[10px] text-slate-400 font-bold font-mono uppercase tracking-wider">Usuario Autenticado</div>
+            <div class="text-sm font-extrabold text-white tracking-wide" id="civis-user-display">Cargando usuario...</div>
+        </div>
+    </div>
+    
+    <div class="flex flex-wrap items-center justify-end gap-3">
+        <div class="flex items-center bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+            <span id="civis-role-display" class="text-[11px] font-mono font-bold text-slate-300 uppercase tracking-wider">Verificando...</span>
+        </div>
+
+        <button type="button" id="btn-volver-global" onclick="volverAlPanelGlobal()" class="hidden bg-slate-700 hover:bg-slate-600 text-white text-xs font-bold px-3 py-2 rounded-lg transition flex items-center gap-1.5">
+            <i class="fas fa-arrow-left"></i> Panel Global
+        </button>
+
+        <button type="button" onclick="cerrarSesionCivis()" class="bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold px-3 py-2 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+            <i class="fas fa-sign-out-alt"></i> Salir del Sistema
+        </button>
+    </div>
+</div>
 
     <div class="max-w-6xl mx-auto py-8 px-4">
         <div class="bg-slate-800 p-6 rounded-t-xl shadow-md border-b-4 border-blue-500 flex justify-between items-center text-white">
@@ -16,6 +43,7 @@
                 <h1 class="text-3xl font-extrabold tracking-tight">REPORTES <span class="text-blue-400">CIVIS</span></h1>
                 <p class="text-xs text-slate-300 font-medium mt-1">Plataforma de Intervención Social, Gestión de Casos y Expedientes — DIF</p>
             </div>
+            
 
 <div class="flex gap-3 flex-wrap">
     <button id="btnExportarExcel" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg shadow uppercase tracking-wider transition flex items-center gap-1.5">
@@ -168,19 +196,22 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Prioridad del Reporte</label>
                         <select id="prioridad" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="Sin Prioridad">Sin Prioridad</option>
+                            <option value="Prioridad">Prioridad</option>
+                            <option value="Importante">Importante</option>
+                            <option value="Secundarías">Secundarías</option>
+                            <option value="Terciaria">Terciaria</option>
                             <option value="Baja">Baja</option>
                             <option value="Media">Media</option>
                             <option value="Alta">Alta</option>
                             <option value="Inmediata">Inmediata (Atención de Crisis)</option>
+
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Estatus Operativo</label>
                         <select id="estatus" required class="w-full p-2.5 border border-slate-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                            <option value="Abierto">Abierto (Fase de Recepción)</option>
-                            <option value="En Proceso">En Investigación / Campo</option>
-                            <option value="Canalizado">Turnado a otra área</option>
-                            <option value="Cerrado">Resuelto / Concluido</option>
+                            <option value="Asignado (Área)">Asignado (Área)</option>
                         </select>
                     </div>
                     <div>
@@ -1016,6 +1047,60 @@
             }
         };
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+    // 1. Extraer credenciales desde el almacenamiento local dejado por el index.html
+    const usuarioActivo = localStorage.getItem('activeUser');
+    const departamentoUsuario = localStorage.getItem('userDep');
+    
+    // 2. Control de Acceso y Bloqueo Perimetral
+    if (usuarioActivo) {
+        // Inyectar datos en la interfaz
+        if (document.getElementById("civis-user-display")) {
+            document.getElementById("civis-user-display").innerText = usuarioActivo.toUpperCase();
+        }
+        if (document.getElementById("civis-role-display")) {
+            document.getElementById("civis-role-display").innerText = "ÁREA: " + (departamentoUsuario || "SISTEMA DIF");
+        }
+        
+        // Mostrar el botón de regresar al panel global solo si tiene perfil "GLOBAL"
+        if (departamentoUsuario === "GLOBAL") {
+            const btnVolver = document.getElementById("btn-volver-global");
+            if (btnVolver) btnVolver.classList.remove("hidden");
+        }
+
+        // Restricción por departamento (Solo GLOBAL, SOCIAL o CIVIS pueden estar aquí)
+        if (departamentoUsuario !== "GLOBAL" && departamentoUsuario !== "SOCIAL" && departamentoUsuario !== "CIVIS") {
+            alert("⚠️ Acceso denegado: Tu cuenta no cuenta con los privilegios para gestionar el módulo CIVIS.");
+            window.location.href = "index.html"; 
+        }
+
+        console.log("🔒 Acceso autorizado para el módulo CIVIS: " + usuarioActivo);
+
+    } else {
+        // Si el usuario no tiene una sesión activa e intenta forzar la URL directa, es rechazado
+        window.location.href = "index.html";
+    }
+});
+
+// --- FUNCIONES DE NAVEGACIÓN Y CIERRE DE SESIÓN SEGURO ---
+
+// Elimina las credenciales por completo y redirige al index de login
+window.cerrarSesionCivis = function() {
+    if (confirm("¿Estás seguro de que deseas cerrar tu sesión en el sistema?")) {
+        // Limpieza absoluta de persistencias
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Redirección inmediata al login
+        window.location.href = "index.html";
+    }
+};
+
+// Permite regresar al panel institucional principal conservando la sesión
+window.volverAlPanelGlobal = function() {
+    window.location.href = "admin_global.html";
+};
 </script>
 </body>
 </html>
