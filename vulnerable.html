@@ -3,465 +3,1162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIF 2026 | Población Vulnerable</title>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <title>DIF 2026 - 2029 | Población Vulnerable</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <style>
-        :root { 
-            --primary: #0d9488; --primary-dark: #0f766e; --success: #059669; 
-            --warning: #f59e0b; --danger: #dc2626; --bg: #f8fafc; --border: #e2e8f0;
-        }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
-        header { background: #fff; padding: 15px 40px; border-bottom: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .header-title h2 { margin: 0; color: var(--primary); font-size: 18px; display: flex; align-items: center; gap: 10px; }
-        .container { max-width: 1850px; margin: 20px auto; padding: 0 20px; }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>   
+     <style>
+        :root { --primary: #0d9488; --bg: #f8fafc; --border: #e2e8f0; --accent: #0f766e; --warning: #d97706; --danger: #dc2626; --excel: #16a34a; --user-bg: #0f172a; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; font-size: 13px; color: #1e293b; }
+        
+        .session-bar { background: var(--user-bg); color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .session-info { display: flex; align-items: center; gap: 15px; }
+        .user-badge { background: var(--primary); padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 11px; letter-spacing: 0.5px; text-transform: uppercase; }
+        .status-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #22c55e; }
+        .btn-logout, .btn-dashboard { background: transparent; border: 1px solid rgba(255,255,255,0.3); color: white; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; transition: 0.2s; font-weight: bold; }
+        .btn-logout:hover { background: var(--danger); border-color: var(--danger); }
+        .btn-dashboard:hover { background: #61c184; border-color: #61c184; color: #e9edea; }
+
+        .container { max-width: 1200px; margin: 20px auto; padding: 20px; }
         .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid var(--border); margin-bottom: 20px; }
-        h3 { margin: 0 0 18px 0; font-size: 11px; color: var(--primary); text-transform: uppercase; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; letter-spacing: 1px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+        
+        fieldset { border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 20px; display: none; } 
+        legend { padding: 0 10px; color: var(--primary); font-weight: bold; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
         .form-group { display: flex; flex-direction: column; }
-        label { font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
-        input, select { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; transition: 0.2s; }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1); }
-        .foto-field { grid-column: 1 / -1; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px dashed #cbd5e1; display: flex; align-items: center; gap: 15px; }
-        .img-preview { width: 60px; height: 40px; background: #fff; border-radius: 4px; overflow: hidden; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; }
-        .img-preview img { width: 100%; height: 100%; object-fit: cover; }
-        .btn-box { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
-        .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 10px; color: white; display: flex; align-items: center; gap: 6px; text-transform: uppercase; transition: 0.3s; }
-        .search-box { background: #f1f5f9; padding: 15px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 15px; display: flex; gap: 15px; align-items: flex-end; }
-        .table-wrap { background: #fff; border-radius: 12px; border: 1px solid var(--border); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1700px; }
-        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 10px; color: #475569; border-bottom: 2px solid var(--border); text-transform: uppercase; }
-        td { padding: 10px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-        .sub-text { font-size: 10px; color: #64748b; display: block; margin-top: 2px; }
-        .badge-status { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        .paginacion-bar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 20px; border-radius: 10px; margin-bottom: 10px; border: 1px solid var(--border); }
-        .btn-pag { padding: 6px 12px; border: 1px solid #cbd5e1; background: white; border-radius: 4px; cursor: pointer; font-size: 11px; }
-        #modal-visor { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 20px; border-radius: 10px; text-align: center; max-width: 80%; position: relative;}
-        .close-x { position: absolute; top: 10px; right: 20px; font-size: 25px; cursor: pointer; color: #64748b; }
-        @media print { .no-print { display: none !important; } }
+        label { font-size: 10px; font-weight: bold; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+        input, select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; transition: 0.2s; font-size: 12px; }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.1); }
+        
+        .visible { display: block !important; }
+        .hidden-field { display: none !important; }
+        
+        .header-form { background: #f0fdfa; border: 1px solid var(--primary); display: block !important; }
+        .btn-save { background: var(--primary); color: white; padding: 15px; border: none; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; font-size: 14px; transition: 0.2s; }
+        .btn-save:hover { background: var(--accent); }
+
+        .admin-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px dashed var(--border); }
+        .btn-admin { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; color: white; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s; }
+        .btn-export { background: var(--excel); }
+        .btn-import { background: #4f46e5; }
+        .btn-clear-db { background: var(--danger); margin-left: auto; }
+
+        .bloque-integrante { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+        .titulo-integrante { font-size: 12px; font-weight: bold; color: var(--accent); margin-bottom: 10px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px; text-transform: uppercase; display: flex; align-items: center; gap: 6px;}
     </style>
 </head>
 <body>
 
-<header class="no-print">
-    <div class="header-title"><h2><i class="fas fa-hand-holding-heart"></i> Pob. Vulnerable</h2></div>
-    <button class="btn" style="background: var(--primary)" onclick="location.href='admin_global.html'"><i class="fa-solid fa-house"></i> DASHBOARD</button>
-</header>
-
-<div class="container">
-    <div class="card no-print">
-        <h3><i class="fas fa-folder-plus"></i> Registro de Expediente</h3>
-        <input type="hidden" id="edit-id">
-        <div class="form-grid" id="main-form">
-            <div class="form-group"><label>Código</label><input type="text" id="codigo" placeholder="ID-2026"></div>
-            <div class="form-group">
-                <label>Tipo de Apoyo</label>
-                <select id="tipo_apoyo">
-                    <option value="">SELECCIONE...</option>
-                    <option value="LACTANTE">LACTANTE</option>
-                    <option value="EMBARAZADA">EMBARAZADA</option>
-                    <option value="ESCOLAR">ESCOLAR</option>
-                    <option value="DISCAPACIDAD">DISCAPACIDAD</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Fecha Ingreso</label><input type="date" id="fecha_ingreso"></div>
-            <div class="form-group"><label>Paterno</label><input type="text" id="apellido_paterno"></div>
-            <div class="form-group"><label>Materno</label><input type="text" id="apellido_materno"></div>
-            <div class="form-group"><label>Nombre(s)</label><input type="text" id="nombre"></div>
-            <div class="form-group"><label>F. Nacimiento (Número o Formato)</label><input type="text" id="fecha_nac" placeholder="Ej: 15051990"></div>
-            <div class="form-group">
-                <label>Edad Calculada</label>
-                <input type="text" id="edad_calculada" readonly style="background: #f1f5f9; font-weight: bold; color: var(--primary);">
-                <span id="mensaje_programa" style="font-size: 9px; font-weight: bold; margin-top: 4px; padding: 2px 5px; border-radius: 4px; display: none;"></span>
-            </div>            
-            <div class="form-group"><label>CURP</label><input type="text" id="curp" maxlength="18"></div>
-            <div class="form-group">
-                <label>Estatus</label>
-                <select id="estatus">
-                    <option value="Pendiente">PENDIENTE</option>
-                    <option value="Entregado">ENTREGADO</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Clave Entidad</label><input type="text" id="clave_entidad"></div>
-            <div class="form-group"><label>Entidad</label><input type="text" id="entidad"></div>
-            <div class="form-group"><label>Cve Mpio</label><input type="text" id="cve_mpio"></div>
-            <div class="form-group"><label>Municipio</label><input type="text" id="municipio"></div>
-            <div class="form-group"><label>Clave Col/Loc</label><input type="text" id="clave_col_loc"></div>
-            <div class="form-group"><label>Colonia/Loc</label><input type="text" id="col_loc"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Dirección</label><input type="text" id="direccion"></div>
-            <div class="form-group"><label>Teléfono</label><input type="text" id="telefono"></div>
-            <div class="form-group" style="grid-column: span 2;"><label>Observaciones</label><input type="text" id="observaciones"></div>
-            
-            <div class="foto-field">
-                <div style="flex-grow: 1;">
-                    <label><i class="fas fa-camera"></i> Adjuntar INE / Evidencia</label>
-                    <input type="file" accept="image/*" onchange="handleFoto(event)" style="width: 100%; margin-top: 5px;">
-                </div>
-                <div class="img-preview" id="box-preview"><i class="fas fa-image" style="color:#cbd5e1; font-size: 20px;"></i></div>
-                <input type="hidden" id="ine_img">
-            </div>
-        </div>
-
-        <div class="btn-box">
-            <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
-            <button class="btn" id="btn-upd" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
-            <button class="btn" style="background:#1d6f42" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
-            <button class="btn" style="background:#94a3b8" onclick="location.reload()"><i class="fas fa-eraser"></i> LIMPIAR</button>
-            <button class="btn" style="background:#475569" onclick="window.exportarResumenEstadistico()">
-                <i class="fas fa-chart-pie"></i> REPORTE TOTALES
-            </button>
-        </div>
+<div class="session-bar">
+    <div class="session-info">
+        <span class="user-badge" id="display_role">DIF</span>
+        <span id="welcome_message">Identificando credenciales de acceso...</span>
     </div>
-
-    <div class="search-box no-print" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;">
-        <div class="form-group"><label>🔍 Código</label><input type="text" id="f-cod" onkeyup="filtrarAvanzado()" placeholder="ID..."></div>
-        <div class="form-group"><label>👤 Nombre/Apellido</label><input type="text" id="f-nom" onkeyup="filtrarAvanzado()" placeholder="Nombre..."></div>
-        <div class="form-group"><label>📍 Localidad</label><input type="text" id="f-loc" onkeyup="filtrarAvanzado()" placeholder="Colonia..."></div>
-        <div class="form-group">
-            <label>🎁 Apoyo</label>
-            <select id="f-apo" onchange="filtrarAvanzado()">
-                <option value="">TODOS</option>
-                <option value="LACTANTE">LACTANTE</option>
-                <option value="EMBARAZADA">EMBARAZADA</option>
-                <option value="ESCOLAR">ESCOLAR</option>
-                <option value="DISCAPACIDAD">DISCAPACIDAD</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>🚩 Estatus</label>
-            <select id="f-est" onchange="filtrarAvanzado()">
-                <option value="">TODOS</option>
-                <option value="Pendiente">PENDIENTE</option>
-                <option value="Entregado">ENTREGADO</option>
-            </select>
-        </div>
-        <div class="form-group" style="justify-content: flex-end;">
-            <button class="btn" style="background:#64748b; width:100%" onclick="limpiarFiltros()"><i class="fas fa-filter-circle-xmark"></i> LIMPIAR</button>
-        </div>
-    </div>
-
-    <div class="paginacion-bar no-print">
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <label style="font-size: 10px; color: #64748b;">MOSTRAR:</label>
-            <select id="selector-filas" onchange="cambiarFilas(this.value)" style="padding: 2px 5px; font-size: 11px;">
-                <option value="10">10</option>
-                <option value="50" selected>50</option>
-                <option value="100">100</option>
-                <option value="500">500</option>
-            </select>
-        </div>
-        <div id="info-total" style="font-size: 11px; font-weight: bold; color: var(--primary);"></div>
-        <div id="pag-container"></div>
-    </div>
-
-    <div class="table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>NO.</th><th>FOTO</th><th>CÓDIGO</th><th>BENEFICIARIO</th><th>F. NACIMIENTO</th><th>LOCALIDAD / DIRECCIÓN</th><th>APOYO</th><th>ESTATUS</th><th class="no-print">ACCIONES</th>
-                </tr>
-            </thead>
-            <tbody id="tabla-beneficiarios"></tbody>
-        </table>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <span style="font-size: 11px;"><span class="status-dot"></span> <span style="color:#22c55e; font-weight: bold;">ACTIVO</span></span>
+        <button class="btn-logout" onclick="cerrarSesion()">Cerrar Sesión</button>
+        <button class="btn-dashboard" onclick="location.href='admin_global.html'">
+            <i class="fa-solid fa-chart-pie"></i> DASHBOARD
+        </button>
     </div>
 </div>
 
-<div id="modal-visor" onclick="cerrarVisor()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <span class="close-x" onclick="cerrarVisor()">&times;</span>
-        <h4 id="visor-titulo" style="margin:0 0 10px 0; color:var(--primary);"></h4>
-        <img id="img-grande" style="max-width:100%; max-height:70vh; border-radius:5px;">
-        <div class="btn-box" style="justify-content:center;">
-            <a id="link-descarga" download="evidencia.jpg" href="#"><button class="btn" style="background:var(--primary)">📥 DESCARGAR</button></a>
+<div class="container">
+    <div class="card">
+        <h2 style="color: var(--primary); margin-top: 0;"><i class="fas fa-file-signature"></i> Sistema de Padrón Alimentario y de Capacitación 2026</h2>
+        
+        <fieldset class="header-form">
+            <legend>Configuración del Registro</legend>
+            <div class="form-grid">
+            <div class="form-group">
+                    <label>No. Consecutivo de Captura</label>
+                    <input type="text" id="reg_consecutivo_sig" readonly style="background: #f1f5f9; font-weight: bold; color: var(--primary);" placeholder="Calculando...">
+                </div>
+                <div class="form-group">
+                    <label>Programa Institucional</label>
+                    <select id="programa_principal" onchange="actualizarSubgrupos()">
+                        <option value="">-- SELECCIONE PROGRAMA --</option>
+                        <option value="PAE_CALIENTE">Prog. Alimentación Escolar (Caliente)</option>
+                        <option value="PAE_FRIA">Prog. Alimentación Escolar (Fría)</option>
+                        <option value="VULNERABILIDAD">Prog. Atención Alimentaria a Personas en Situación de Vulnerabilidad</option>
+                        <option value="1000_DIAS">Prog. Atención Alimentaria en los Primeros 1000 Días</option>
+                        <option value="EMERGENCIA">Prog. Atención Alimentaria en Situación de Emergencia o Desastre</option>
+                        <option value="CARPINTERIA">Taller de Carpintería</option>
+                        <option value="PANADERIA">Taller de Panadería</option>
+                        <option value="COCINA">Taller de Cocina</option>
+                        <option value="LAMINA">Apoyo para Láminas</option>
+                        <option value="TINACO">Apoyo para Tinacos</option>
+                        <option value="REFRIGERADOR">Apoyo para Refrigeradores</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Subgrupo / Modalidad</label>
+                    <select id="subgrupo_programa" onchange="configurarFormulario()">
+                        <option value="">-- SELECCIONE PROGRAMA PRIMERO --</option>
+                    </select>
+                </div>
+            </div>
+        </fieldset>
+
+        <form id="form_unificado">
+            <!-- 1. IDENTIFICACIÓN GEOGRÁFICA -->
+            <fieldset id="sec_lugar">
+                <legend id="leg_lugar">1. Identificación Geográfica / Institucional</legend>
+                <div class="form-grid">
+                    <div class="form-group"><label>Municipio</label><input type="text" value="141 SAN ANDRÉS TUXTLA" readonly style="background:#f1f5f9"></div>
+                    <div class="form-group">
+<label>Colonia / Localidad (Catálogo Completo)</label>
+    <select id="col_loc" style="font-size: 11px;">
+        <option value="">-- SELECCIONE LOCALIDAD --</option>
+        <option value="SAN ANDRES TUXTLA">1 - SAN ANDRES TUXTLA</option>
+        <option value="ABREVADERO">2 - ABREVADERO</option>
+        <option value="ADOLFO RUIZ CORTINES">3 - ADOLFO RUIZ CORTINES (LA FLOREÑA)</option>
+        <option value="AHUACAPAN">5 - AHUACAPAN</option>
+        <option value="APIXITA">6 - APIXITA</option>
+        <option value="ARROYO DE LIZA">7 - ARROYO DE LIZA</option>
+        <option value="AXOCHIO">8 - AXOCHIO</option>
+        <option value="BALZAPOTE">9 - BALZAPOTE</option>
+        <option value="EL BEBEDERO">10 - EL BEBEDERO</option>
+        <option value="BENITO JUAREZ">11 - BENITO JUAREZ</option>
+        <option value="BEZUAPAN">12 - BEZUAPAN</option>
+        <option value="LA BOCA">13 - LA BOCA</option>
+        <option value="BUENOS AIRES TEXALPAN">14 - BUENOS AIRES TEXALPAN</option>
+        <option value="BUENOS AIRES XOTEAPAN">15 - BUENOS AIRES XOTEAPAN</option>
+        <option value="CALERIA">16 - CALERIA</option>
+        <option value="CEBADILLA CHICA">18 - CEBADILLA CHICA</option>
+        <option value="CEBADILLA GRANDE">19 - CEBADILLA GRANDE</option>
+        <option value="EL CEBOLLAL">20 - EL CEBOLLAL</option>
+        <option value="CERRO AMARILLO DE ARRIBA">22 - CERRO AMARILLO DE ARRIBA</option>
+        <option value="CERRO AMARILLO DE ABAJO">23 - CERRO AMARILLO DE ABAJO</option>
+        <option value="CERRO DE LAS IGUANAS">24 - CERRO DE LAS IGUANAS</option>
+        <option value="COBALTEPEC">25 - COBALTEPEC</option>
+        <option value="COMOAPAN">26 - COMOAPAN</option>
+        <option value="COSTA DE ORO">27 - COSTA DE ORO</option>
+        <option value="COYOLTEPEC">28 - COYOLTEPEC</option>
+        <option value="CUESTA AMARILLA">29 - CUESTA AMARILLA</option>
+        <option value="CUESTA DE LAJA">30 - CUESTA DE LAJA</option>
+        <option value="CHUNIAPAN DE ABAJO">31 - CHUNIAPAN DE ABAJO</option>
+        <option value="CHUNIAPAN DE ARRIBA">32 - CHUNIAPAN DE ARRIBA</option>
+        <option value="DOS AGUAJES">33 - DOS AGUAJES</option>
+        <option value="FRANCISCO I. MADERO">36 - FRANCISCO I. MADERO</option>
+        <option value="FRANCISO J. MORENO">37 - FRANCISO J. MORENO</option>
+        <option value="LAS GALERAS">38 - LAS GALERAS</option>
+        <option value="SALVADOR DIAZ MIRON">39 - SALVADOR DIAZ MIRON</option>
+        <option value="EL HUIDERO">40 - EL HUIDERO</option>
+        <option value="JOSE MARIA MORELOS Y PAVON">41 - JOSE MARIA MORELOS Y PAVON</option>
+        <option value="JUAN JACOBO TORRES">42 - JUAN JACOBO TORRES</option>
+        <option value="LAGUNA ESCONDIDA">43 - LAGUNA ESCONDIDA</option>
+        <option value="LAGUNETA">44 - LAGUNETA</option>
+        <option value="LAUCHAPAN">45 - LAUCHAPAN</option>
+        <option value="LAZARO CARDENAS">47 - LAZARO CARDENAS</option>
+        <option value="LOS MANANTIALES">48 - LOS MANANTIALES</option>
+        <option value="MAZUMIAPAN">49 - MAZUMIAPAN</option>
+        <option value="MATACAPANA">50 - MATACAPANA</option>
+
+        <option value="LOS MERIDA">51 - LOS MERIDA</option>
+        <option value="MIGUEL HIDALGO Y COSTILLA">52 - MIGUEL HIDALGO Y COSTILLA</option>
+        <option value="MILTEPEC">53 - MILTEPEC</option>
+        <option value="MONTEPIO">54 - MONTEPIO</option>
+        <option value="EL NACAXTLE">55 - EL NACAXTLE</option>
+        <option value="NACIMIENTOS DE XOGAPAN">56 - NACIMIENTOS DE XOGAPAN</option>
+        <option value="LOS NARANJOS">57 - LOS NARANJOS</option>
+        <option value="LA NUEVA VICTORIA">58 - LA NUEVA VICTORIA</option>
+        <option value="OCELOTA">59 - OCELOTA</option>
+        <option value="OHUILAPAN">60 - OHUILAPAN</option>
+        <option value="LOS ORGANOS">61 - LOS ORGANOS</option>
+        <option value="PASO DE LA VIA">62 - PASO DE LA VIA</option>
+        <option value="PIZAPAN">63 - PIZAPAN</option>
+        <option value="PLAYA HERMOSA">64 - PLAYA HERMOSA</option>
+        <option value="EL POPOTAL">65 - EL POPOTAL</option>
+        <option value="PRIMERO DE MAYO">66 - PRIMERO DE MAYO</option>
+        <option value="PUERTA NUEVA">67 - PUERTA NUEVA</option>
+        <option value="LA REDONDA">69 - LA REDONDA</option>
+        <option value="EL REMOLINO">70 - EL REMOLINO</option>
+        <option value="REVOLUCION">71 - REVOLUCION</option>
+        <option value="RICARDO FLORES MAGON">72 - RICARDO FLORES MAGON</option>
+        <option value="RIO TUXTLA">73 - RIO TUXTLA</option>
+        <option value="SALINAS ROCA PARTIDA">74 - SALINAS ROCA PARTIDA</option>
+        <option value="SALTO DE EYIPANTLA">75 - SALTO DE EYIPANTLA</option>
+        <option value="SAN ISIDRO XOTEPANA">76 - SAN ISIDRO XOTEPANA</option>
+        <option value="SAN JUAN DE LA GLORIA">77 - SAN JUAN DE LA GLORIA</option>
+        <option value="SAN LEOPOLDO">78 - SAN LEOPOLDO</option>
+        <option value="SANTA ROSA ABATA">79 - SANTA ROSA ABATA</option>
+        <option value="LEY SEIS DE ENERO DE 1915">80 - LEY SEIS DE ENERO DE 1915</option>
+        <option value="SIHUAPAN">81 - SIHUAPAN</option>
+        <option value="SOYATA">82 - SOYATA</option>
+        <option value="TEXALPAN DE ABAJO">84 - TEXALPAN DE ABAJO</option>
+        <option value="TEXCALTITAN XOTEAPAN">85 - TEXCALTITAN XOTEAPAN</option>
+        <option value="TILAPAN">86 - TILAPAN</option>
+        <option value="TONALAPANA">87 - TONALAPANA</option>
+        <option value="TULAPANA">90 - TULAPANA</option>
+        <option value="VISTA HERMOSA">91 - VISTA HERMOSA</option>
+        <option value="XOTEAPAN">92 - XOTEAPAN</option>
+        <option value="ARROYO DE LIMON">93 - ARROYO DE LIMON</option>
+        <option value="EL DIAMANTE">94 - EL DIAMANTE</option>
+        <option value="URSULO GALVAN">95 - URSULO GALVAN</option>
+        <option value="EL NOPAL">96 - EL NOPAL</option>
+        <option value="LOS PINOS">97 - LOS PINOS</option>
+        <option value="LOS MONIGOTES">99 - LOS MONIGOTES</option>
+        <option value="CUAUHTEMOC">100 - CUAUHTEMOC</option>
+
+        <option value="LA AURORA">101 - LA AURORA</option>
+        <option value="DOS DE ABRIL">103 - DOS DE ABRIL</option>
+        <option value="RANCHO NUEVO">104 - RANCHO NUEVO</option>
+        <option value="LAS DELICIAS">105 - LAS DELICIAS</option>
+        <option value="ABESCOMA">107 - ABESCOMA</option>
+        <option value="BELEN CHICO">108 - BELEN CHICO</option>
+        <option value="BELEN GRANDE">109 - BELEN GRANDE</option>
+        <option value="LA CANELA">111 - LA CANELA</option>
+        <option value="CASA BLANCA">112 - CASA BLANCA</option>
+        <option value="LOS CERRITOS">113 - LOS CERRITOS</option>
+        <option value="EL COCAL">114 - EL COCAL</option>
+        <option value="CHILAPAN">115 - CHILAPAN</option>
+        <option value="CHINACAL">116 - CHINACAL</option>
+        <option value="LA CHIPUJA">117 - LA CHIPUJA</option>
+        <option value="LOS TUXTLAS UNAM">118 - LOS TUXTLAS (UNAM)</option>
+        <option value="LA FLOR DEL CACAO">119 - LA FLOR DEL CACAO</option>
+        <option value="MIGUEL HIDALGO Y COSTILLA 120">120 - MIGUEL HIDALGO Y COSTILLA</option>
+        <option value="HERMANAS AGUIRRE">122 - HERMANAS AGUIRRE</option>
+        <option value="EL LAUREL VIEJO">123 - EL LAUREL VIEJO</option>
+        <option value="LAS LIMAS">124 - LAS LIMAS</option>
+        <option value="LA LOMA">125 - LA LOMA</option>
+        <option value="EL LLANO">126 - EL LLANO</option>
+        <option value="LLANO SAN PEDRO">127 - LLANO SAN PEDRO</option>
+        <option value="MATALAPAN DE ABAJO">128 - MATALAPAN DE ABAJO</option>
+        <option value="MATALAPAN DE ARRIBA">129 - MATALAPAN DE ARRIBA</option>
+        <option value="NUEVO PROGRESO">130 - NUEVO PROGRESO</option>
+        <option value="PALZOQUIAPAN">131 - PALZOQUIAPAN</option>
+        <option value="PASO DE TEHUANTEPEC">132 - PASO DE TEHUANTEPEC</option>
+        <option value="EL PERICONAL">133 - EL PERICONAL</option>
+        <option value="EL PITAL">134 - EL PITAL</option>
+        <option value="EL POLVORIN">135 - EL POLVORIN</option>
+        <option value="REVOLUCION DE ARRIBA">136 - REVOLUCION DE ARRIBA</option>
+        <option value="CRISTO REY">137 - CRISTO REY</option>
+        <option value="RODAS">138 - RODAS</option>
+        <option value="LAS SALINAS">139 - LAS SALINAS</option>
+        <option value="SAN CARLOS">140 - SAN CARLOS</option>
+        <option value="SAN JOAQUIN">141 - SAN JOAQUIN</option>
+        <option value="SAN JUAN">142 - SAN JUAN</option>
+        <option value="SAN SIMON">143 - SAN SIMON</option>
+        <option value="SESECAPAN">144 - SESECAPAN</option>
+        <option value="TEXALPAN DE ARRIBA">145 - TEXALPAN DE ARRIBA</option>
+        <option value="TIERRA COLORADA">146 - TIERRA COLORADA</option>
+        <option value="TILZAPOTE">147 - TILZAPOTE</option>
+        <option value="TORO PRIETO">148 - TORO PRIETO</option>
+        <option value="EL TURAL">149 - EL TURAL</option>
+        <option value="TRES ZAPOTES">150 - TRES ZAPOTES</option>
+        <option value="ZANASCA">151 - ZANASCA</option>
+        <option value="ZAPOTITAN">152 - ZAPOTITAN</option>
+        <option value="IXBIAPAN">158 - IXBIAPAN</option>
+        <option value="TEOTEPEC">159 - TEOTEPEC</option>
+        <option value="COLONIA SANTA ELENA">160 - COLONIA SANTA ELENA</option>
+        <option value="CARAVACA VIEJO">161 - CARAVACA VIEJO</option>
+        <option value="MONTEPIO LOS PALACIOS">164 - MONTEPIO (LOS PALACIOS)</option>
+        <option value="QUINTANA">165 - QUINTANA</option>
+        <option value="MARIA JOSE">166 - MARIA JOSE</option>
+        <option value="ADOLFO RUIZ">167 - ADOLFO RUIZ</option>
+        <option value="CHACALAPAN">169 - CHACALAPAN</option>
+        <option value="PLAN DE XOXONATA">170 - PLAN DE XOXONATA</option>
+        <option value="TOTLALLI">171 - TOTLALLI</option>
+        <option value="MIXTE ALTA">173 - MIXTE A ALTA</option>
+        <option value="VISTA HERMOSA II">174 - VISTA HERMOSA II</option>
+        <option value="AGUA AGRIA">175 - AGUA AGRIA</option>
+        <option value="PREDIO SAN MARTINE">176 - PREDIO SAN MARTINE</option>
+        <option value="EL COMEJEN">177 - EL COMEJEN</option>
+        <option value="LOS VAZQUEZ">178 - LOS VAZQUEZ</option>
+        <option value="LA JOYA">179 - LA JOYA</option>
+        <option value="BELLA VISTA">180 - BELLA VISTA</option>
+        <option value="ZINTEPEC">182 - ZINTEPEC</option>
+        <option value="EL CAFETAL">183 - EL CAFETAL</option>
+        <option value="EL SALADO">184 - EL SALADO</option>
+        <option value="COMOAPAN MONTE">185 - COMOAPAN MONTE</option>
+        <option value="CARACAS">189 - CARACAS</option>
+        <option value="RAMON PUCHETA">194 - RAMON PUCHETA</option>
+        <option value="EL RETIRO">195 - EL RETIRO</option>
+        <option value="DOS ARROYOS">196 - DOS ARROYOS</option>
+        <option value="LA ESCONDIDA">197 - LA ESCONDIDA</option>
+        <option value="FERNANDO TEPAS PONCE">198 - FERNANDO TEPAS PONCE</option>
+        <option value="LAS TERESAS">199 - LAS TERESAS</option>
+        <option value="LOS CHONTAL">200 - LOS CHONTAL</option>
+
+        <option value="LOS PUCHETAS">201 - LOS PUCHETAS</option>
+        <option value="SEMINARIO MAYOR">210 - SAN ANDRES APOSTOL (SEMINARIO)</option>
+        <option value="COLONIA LOS COCUITES">212 - COLONIA LOS COCUITES</option>
+        <option value="EL NANCHE">214 - EL NANCHE</option>
+        <option value="ADOLFO RUIZ CORTINES DOS">215 - ADOLFO RUIZ CORTINES DOS</option>
+        <option value="EL MONET">216 - EL MONET</option>
+        <option value="CALERIA ALTA">217 - CALERIA ALTA</option>
+        <option value="ADOLFO UIZ CORTINES">218 - ADOLFO UIZ CORTINES</option>
+        <option value="CARRILLO">219 - CARRILLO</option>
+        <option value="CONCHA ESCALERA">220 - CONCHA ESCALERA</option>
+        <option value="CONSTANTINO">221 - CONSTANTINO</option>
+        <option value="LOS GUILLEN">222 - LOS GUILLEN</option>
+        <option value="DON RUBEN">223 - DON RUBEN</option>
+        <option value="DOS ARROYOS II">224 - DOS ARROYOS</option>
+        <option value="ENRIQUE LOPEZ HUITRON">225 - ENRIQUE LOPEZ HUITRON</option>
+        <option value="FARO ROCA PARTIDA">226 - FARO ROCA PARTIDA</option>
+        <option value="FINCA LA GUADALUPE">227 - FINCA LA GUADALUPE</option>
+        <option value="LA GARZA">229 - LA GARZA</option>
+        <option value="LA GRAVERA">230 - LA GRAVERA</option>
+        <option value="IOMARA">231 - IOMARA</option>
+        <option value="KAIME ORTIZ">232 - KAIME ORTIZ</option>
+        <option value="LOS LAGUNES">233 - LOS LAGUNES</option>
+        <option value="EL MIRADOR">234 - EL MIRADOR</option>
+        <option value="EL NACIMIENTO">235 - EL NACIMIENTO</option>
+        <option value="OJO DE AGUA">236 - OJO DE AGUA</option>
+        <option value="PASO DEL TORO AHOGADO">237 - PASO DEL TORO AHOGADO</option>
+        <option value="LA PIEDAD">238 - LA PIEDAD</option>
+        <option value="EL PLAN DE LOS ARTIGAS">239 - EL PLAN DE LOS ARTIGAS</option>
+        <option value="VEINTIDOS DE FEBRERO">240 - VEINTIDOS DE FEBRERO</option>
+        <option value="RAFAEL Y CARMEN">241 - RAFAEL Y CARMEN</option>
+        <option value="LAS ROSITAS">243 - LAS ROSITAS</option>
+        <option value="SAN ANTONIO">244 - SAN ANTONIO</option>
+        <option value="SOLIS">245 - SOLIS</option>
+        <option value="TECHALBASTA">246 - TECHALBASTA</option>
+        <option value="TORRES">248 - TORRES</option>
+        <option value="EL TRIUNFO">250 - EL TRIUNFO</option>
+        <option value="XOTEAPAN II">252 - XOTEAPAN</option>
+        <option value="ZAPATA">253 - ZAPATA</option>
+        <option value="EL ZAPOTAL">254 - EL ZAPOTAL</option>
+        <option value="MATALAPAN MONTEREY">255 - MATALAPAN MONTEREY</option>
+        <option value="COLONIA BENITO JUAREZ">256 - COLONIA BENITO JUAREZ</option>
+        <option value="PROGRESO TEPANCA">261 - PROGRESO TEPANCA</option>
+        <option value="PRIMITIVO R VALENCIA">263 - PROLONGACION PRIMITIVO R. VALENCIA</option>
+        <option value="PROLONGACION 6 DE ENERO">264 - PROLONGACION 6 DE ENERO</option>
+        <option value="RANCHOAPAN">266 - RANCHOAPAN</option>
+        <option value="RANCHOAPAN DOS">267 - RANCHOAPAN DOS</option>
+        <option value="SANTA CLARA">268 - SANTA CLARA</option>
+        <option value="TEPANCAN">269 - TEPANCAN</option>
+        <option value="LA LOMA II">270 - LA LOMA</option>
+        <option value="TEPANCAN II">271 - TEPANCAN</option>
+        <option value="CARAVACA">272 - CARAVACA</option>
+        <option value="CALERIA II">273 - CALERIA</option>
+        <option value="DEL PUENTE">274 - DEL PUENTE</option>
+        <option value="FINCA DE PABLO RODRIGUEZ">275 - FINCA DE PABLO RODRIGUEZ</option>
+        <option value="EL LAUREL">276 - EL LAUREL</option>
+        <option value="SIHUAPAN II">278 - SIHUAPAN</option>
+        <option value="COLONIA FRANCISCO LOPEZ LARA">279 - COLONIA FRANCISCO LOPEZ LARA</option>
+        <option value="AMPLIACION CARAVACA">281 - AMPLIACION CARAVACA</option>
+        <option value="ARROYO SECO">282 - ARROYO SECO</option>
+        <option value="COLONIA EL PARAISO">283 - COLONIA EL PARAISO</option>
+        <option value="EJIDO SALTO EYIPANTLA">286 - EJIDO EL SALTO DE EYIPANTLA</option>
+        <option value="LA ESPERANZA">287 - LA ESPERANZA</option>
+        <option value="ESTACION OHUILAPAN">288 - ESTACION OHUILAPAN</option>
+        <option value="FINCA DE LOS CHANG">289 - FINCA DE LOS CHANG</option>
+        <option value="ROSITA GRANJA">291 - ROSITA (GRANJA)</option>
+        <option value="KILOMETRO TRES">292 - KILOMETRO TRES</option>
+        <option value="EL NOGAL II">293 - EL NOGAL</option>
+        <option value="LA PALMA">294 - LA PALMA</option>
+        <option value="RANCHO VIEJO">295 - RANCHO VIEJO</option>
+        <option value="SAN FRANCISCO">296 - SAN FRANCISCO</option>
+        <option value="SANTA MARIA">297 - SANTA MARIA</option>
+        <option value="SUENA LA TIERRA">298 - SUENA LA TIERRA</option>
+        <option value="TIERRA DURA">299 - TIERRA DURA</option>
+        <option value="EL ZAPOTE">300 - EL ZAPOTE</option>
+        <option value="SELVA VERDE">302 - SELVA VERDE</option>
+        <option value="EL PALMAR">303 - EL PALMAR</option>
+        <option value="CONCHA LAGUNES">304 - CONCHA LAGUNES</option>
+        <option value="DANIEL LAGUNES">305 - DANIEL LAGUNES</option>
+        <option value="LOS LAURELES">306 - LOS LAURELES</option>
+        <option value="EL CRUCERO">307 - EL CRUCERO</option>
+        <option value="LAGUNA ENCANTADA">308 - CERRO VENADO LAGUNA ENCANTADA</option>
+        <option value="COLONIA EL ZACATAL">309 - COLONIA EL ZACATAL</option>
+        <option value="COLONIA LA DOCE">310 - COLONIA LA DOCE</option>
+        <option value="COLONIA EMILIANO ZAPATA">311 - COLONIA EMILIANO ZAPATA</option>
+        <option value="LAGUNA DE PIZATAL">312 - LAGUNA DE PIZATAL</option>
+        <option value="ROBERTO ENRIQUEZ RUIZ">313 - ROBERTO ENRIQUEZ RUIZ</option>
+        <option value="LOS AGUILERA">314 - LOS AGUILERA</option>
+        <option value="AMADO IXBA">315 - AMADO IXBA</option>
+        <option value="AMEYALPAN">316 - AMEYALPAN</option>
+        <option value="IZCALLI">317 - BIOGRANJA INTEGRAL IZCALLI</option>
+        <option value="CECILIO">318 - CECILIO</option>
+        <option value="CERRO DEL AGUA">319 - CERRO DEL AGUA</option>
+        <option value="EL CHILAR">320 - EL CHILAR</option>
+        <option value="LA FINCA">321 - LA FINCA</option>
+        <option value="LA HERENCIA">322 - LA HERENCIA</option>
+        <option value="NOMPITA">323 - NOMPITA</option>
+        <option value="LA ESPERANZA II">324 - LA ESPERANZA</option>
+        <option value="EL JICARO">325 - EL JICARO</option>
+        <option value="GLORIA DE LOS ANGELES">326 - GLORIA DE LOS ANGELES</option>
+        <option value="RANCHO GODELVA">327 - RANCHO GODELVA</option>
+        <option value="SANTA CATALINA">328 - SANTA CATALINA</option>
+        <option value="EL TESORO">329 - EL TESORO</option>
+        <option value="TIOPAN">330 - TIOPAN</option>
+        <option value="PREDIO SAN JUAN">331 - PREDIO SAN JUAN</option>
+        <option value="EL CASCAJAL">332 - EL CASCAJAL</option>
+        <option value="EL CHININAL">333 - EL CHININAL</option>
+        <option value="DON FAUSTO">334 - DON FAUSTO</option>
+        <option value="EL JONATE">335 - EL JONATE</option>
+        <option value="EDEN MAYA">356 - EDEN MAYA</option>
+        <option value="ARROYO SECO II">357 - ARROYO SECO</option>
+        <option value="COLONIA PROVIVA">358 - COLONIA PROVIVA</option>
+        <option value="EL PARAISO II">359 - EL PARAISO</option>
+        <option value="LA PALMA II">360 - LA PALMA</option>
+        <option value="LA TECNICA">361 - LA TECNICA</option>
+        <option value="LAS PALMAS">362 - LAS PALMAS</option>
+        <option value="REAL DE SAN ANDRES">363 - REAL DE SAN ANDRES</option>
+        <option value="SAN MARCOS">364 - SAN MARCOS</option>
+        <option value="VILLAS DE SANTA MARIA">365 - VILLAS DE SANTA MARIA</option>
+        <option value="YAMBIGAPAN">366 - YAMBIGAPAN</option>
+        <option value="FINCA VILLA CARIÑO">367 - FINCA VILLA CARIÑO</option>
+        <option value="VEINTIDOS DE FEBRERO II">368 - VEINTIDOS DE FEBRERO</option>
+        <option value="ANTONIO XOLO">369 - ANTONIO XOLO</option>
+        <option value="CASCADA LAS GEMELAS">370 - CASCADA LAS GEMELAS</option>
+        <option value="LAS PONDEROSAS">371 - RANCHO LAS PONDEROSAS</option>
+        <option value="LAS YAGUAS">372 - RANCHO LAS YAGUAS</option>
+        <option value="SAN MARCOS II">373 - SAN MARCOS</option>
+        <option value="SAN GABRIEL">375 - SAN GABRIEL</option>
+        <option value="LA CASA AZUL">376 - LA CASA AZUL</option>
+        <option value="LOS POTRILLOS">377 - LOS POTRILLOS</option>
+        <option value="MICHAPAN">378 - MICHAPAN</option>
+        <option value="LAS LIMAS II">379 - LAS LIMAS</option>
+        <option value="LOS TUXTLAS II">380 - LOS TUXTLAS</option>
+        <option value="MOVIMIENTO CARDENISTA">381 - MOVIMIENTO CARDENISTA</option>
+    </select>
+                    </div>
+                    
+                    <!-- CAMPOS DINÁMICOS TRADICIONALES -->
+                    <div class="form-group pae-field hidden-field"><label>Clave Escuela</label><input type="text" id="pae_clave"></div>
+                    <div class="form-group pae-field hidden-field"><label>Nombre de Escuela</label><input type="text" id="pae_escuela"></div>
+                    <div class="form-group pae-field hidden-field"><label>Escolaridad</label><input type="text" id="pae_escolaridad"></div>
+                    <div class="form-group pae-field hidden-field"><label>Turno</label><input type="text" id="pae_turno"></div>
+                    <div class="form-group pae-field hidden-field"><label>Nivel</label><input type="text" id="pae_nivel"></div>
+                    <div class="form-group pae-field hidden-field"><label>Domicilio Escuela</label><input type="text" id="pae_domicilio"></div>
+
+                    <div class="form-group vul-field hidden-field"><label>Calle</label><input type="text" id="vul_calle"></div>
+                    <div class="form-group vul-field hidden-field"><label>Número</label><input type="text" id="vul_numero"></div>
+                    <div class="form-group vul-field hidden-field"><label>Colonia</label><input type="text" id="vul_colonia"></div>
+                    <div class="form-group vul-field hidden-field"><label>Código Postal</label><input type="text" id="vul_cp"></div>
+                    <div class="form-group vul-field hidden-field"><label>Entre Calle</label><input type="text" id="vul_entre_calle"></div>
+                    <div class="form-group vul-field hidden-field"><label>Y Calle</label><input type="text" id="vul_y_calle"></div>
+                    <div class="form-group vul-field hidden-field"><label>Referencia</label><input type="text" id="vul_referencia"></div>
+
+                    <div class="form-group eme-field hidden-field"><label>Fecha de Beneficio</label><input type="date" id="eme_fecha"></div>
+
+                    <!-- NUEVOS CAMPOS ESPECÍFICOS PARA TALLERES Y APOYOS -->
+                    <div class="form-group tal-apo-field hidden-field"><label>Dirección / Calle</label><input type="text" id="ta_direccion"></div>
+                    <div class="form-group tal-apo-field hidden-field"><label>Número</label><input type="text" id="ta_numero"></div>
+                    <div class="form-group tal-apo-field hidden-field"><label>Código Postal</label><input type="text" id="ta_cp"></div>
+                    <div class="form-group tal-apo-field hidden-field"><label>Teléfono de Contacto</label><input type="text" id="ta_telefono"></div>
+                </div>
+            </fieldset>
+
+            <!-- 2. DATOS DEL BENEFICIARIO INDIVIDUAL -->
+            <fieldset id="sec_beneficiario">
+                <legend>2. Datos del Beneficiario Principal / Alumno</legend>
+                <div class="form-grid">
+                    <div class="form-group"><label>CURP</label><input type="text" id="ben_curp" maxlength="18" style="text-transform: uppercase;"></div>
+                    <div class="form-group"><label>Nombre(s)</label><input type="text" id="ben_nombre"></div>
+                    <div class="form-group"><label>Apellido Paterno</label><input type="text" id="ben_paterno"></div>
+                    <div class="form-group"><label>Apellido Materno</label><input type="text" id="ben_materno"></div>
+                    <div class="form-group"><label>Fecha de Nacimiento</label><input type="date" id="ben_fecha_nacimiento" onchange="analizarBeneficiario()"></div>
+                    <div class="form-group"><label>Edad Calculada</label><input type="text" id="edad_exacta" readonly style="background: #f1f5f9; font-weight: bold;"></div>
+                    <div class="form-group"><label>Sexo</label><select id="ben_sexo"><option value="MUJER">MUJER</option><option value="HOMBRE">HOMBRE</option></select></div>
+                    <div class="form-group civil-field hidden-field"><label>Estado Civil</label><input type="text" id="ben_civil"></div>
+                    <div class="form-group"><label>Indígena</label><select id="ben_indigena"><option value="NO">NO</option><option value="SI">SI</option></select></div>
+                    <div class="form-group"><label>Discapacidad</label><select id="ben_discapacidad"><option value="NO">NO</option><option value="SI">SI</option></select></div>
+                </div>
+            </fieldset>
+
+            <!-- SECCIÓN DE TALLERES GRUPALES -->
+            <fieldset id="sec_taller_grupal">
+                <legend id="leg_taller_grupal">2. Estructura de Integrantes del Grupo de Capacitación</legend>
+                <div id="contenedor_integrantes"></div>
+            </fieldset>
+
+            <!-- 3. REPRESENTANTE -->
+            <fieldset id="sec_marcha">
+                <legend id="leg_marcha">3. Beneficiario de Apoyo en Marcha / Representante</legend>
+                <div class="form-grid">
+                    <div class="form-group"><label>CURP Representante</label><input type="text" id="mar_curp" maxlength="18" style="text-transform: uppercase;"></div>
+                    <div class="form-group"><label>Nombre</label><input type="text" id="mar_nombre"></div>
+                    <div class="form-group"><label>Apellido Paterno</label><input type="text" id="mar_paterno"></div>
+                    <div class="form-group"><label>Apellido Materno</label><input type="text" id="mar_materno"></div>
+                    <div class="form-group"><label>Fecha de Nacimiento</label><input type="date" id="mar_fecha_nacimiento"></div>
+                    <div class="form-group"><label>Sexo</label><select id="mar_sexo"><option value="MUJER">MUJER</option><option value="HOMBRE">HOMBRE</option></select></div>
+                    <div class="form-group"><label id="lbl_parentesco">Parentesco / Vínculo</label><input type="text" id="mar_parentesco"></div>
+                </div>
+            </fieldset>
+
+<fieldset id="sec_control_interno" style="margin-top: 15px; display: block !important;">
+    <legend>4. Control Operativo e Interno (DIF Estatal / Contacto)</legend>
+    <div class="form-grid">
+        <div class="form-group">
+            <label>Teléfono de Contacto Principal</label>
+            <input type="text" id="reg_telefono" maxlength="10" placeholder="10 dígitos">
+        </div>
+        <div class="form-group">
+            <label>Estatus del Registro Local</label>
+            <select id="reg_estatus">
+                <option value="PENDIENTE">PENDIENTE</option>
+                <option value="VALIDADO">VALIDADO</option>
+                <option value="ENTREGADO">ENTREGADO</option>
+                <option value="EN REVISIÓN">EN REVISIÓN</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>¿Capturado en Sistema DIF Estatal?</label>
+            <select id="reg_dif_estatal">
+                <option value="NO">NO</option>
+                <option value="SI">SÍ</option>
+            </select>
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+            <label>Observaciones o Notas Aclaratorias</label>
+            <input type="text" id="reg_observaciones" placeholder="Ej. Documentación incompleta, pendiente firma, etc.">
+        </div>
+    </div>
+</fieldset>
+
+            <button type="button" class="btn-save" id="btn_guardar" style="display: none;" onclick="guardarRegistro()">
+                <i class="fas fa-cloud-upload-alt"></i> GUARDAR REGISTRO LOCAL
+            </button>
+        </form>
+    </div>
+
+    <!-- CONTROL UNIFICADO -->
+    <div class="card">
+        <h3 style="color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 5px; margin-top: 0;">
+            <i class="fas fa-database"></i> Padrón de Beneficiarios (Control Unificado)
+        </h3>
+        
+<div class="admin-actions">
+    <button id="btnExportar" class="btn-admin btn-export"><i class="fas fa-file-excel"></i> Exportar a Excel</button>
+    
+    <label class="btn-admin btn-import" style="margin: 0; cursor: pointer;">
+        <i class="fas fa-file-import"></i> Importar CSV
+        <input type="file" id="csv_file" accept=".csv" style="display: none;">
+    </label>
+    
+    <button id="btnVaciar" class="btn-admin btn-clear-db"><i class="fas fa-trash-alt"></i> Vaciar Base de Datos</button>
+</div>
+        
+
+        <div style="overflow-x: auto;">
+            <table id="tabla_beneficiarios" style="width: 100%; border-collapse: collapse; background: white; font-size: 12px;">
+                <thead>
+                    <tr style="background: #f1f5f9; color: #475569; text-align: left;">
+                        <th style="padding: 10px; border: 1px solid var(--border); text-align: center;">NO.</th>
+                        <th style="padding: 10px; border: 1px solid var(--border);">MODALIDAD</th>
+                        <th style="padding: 10px; border: 1px solid var(--border);">LOCALIDAD / COLONIA</th>
+                        <th style="padding: 10px; border: 1px solid var(--border);">CURP / CLAVE</th>
+                        <th style="padding: 10px; border: 1px solid var(--border);">IDENTIFICACIÓN CAPTURA (ESCUELA / PERSONA / DETALLE)</th>
+                        <th style="padding: 10px; border: 1px solid var(--border); text-align: center;">ESTATUS / DIF</th>
+                        <th style="padding: 10px; border: 1px solid var(--border);">FECHA DE REGISTRO</th>
+                        <th style="padding: 10px; border: 1px solid var(--border); text-align: center;">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo_tabla">
+                    <tr><td colspan="8" style="text-align:center; padding:15px; color:#64748b;">No hay registros cargados en el padrón local.</td></tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, orderBy, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+    // --- CONFIGURACIÓN E INICIALIZACIÓN DE FIREBASE ---
     const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const apoyosRef = collection(db, "apoyos");
+    const apoyosRef = collection(db, "proyetos_pv");
 
-    let DATA_ACTUAL = [];
-    let DATA_FILTRADA = [];
-    let PAGINA_ACTUAL = 1;
-    let FILAS_POR_PAGINA = 50;
+    let listadoLive = [];
 
-    // --- UTILIDADES DE FORMULARIO ---
-    window.limpiarFormulario = () => {
-        document.getElementById('edit-id').value = "";
-        document.querySelectorAll('#main-form input, #main-form select').forEach(i => i.value = "");
-        document.getElementById('box-preview').innerHTML = '<i class="fas fa-image" style="color:#cbd5e1; font-size: 20px;"></i>';
-        document.getElementById('btn-save').style.display = 'inline-block';
-        document.getElementById('btn-upd').style.display = 'none';
-        document.getElementById('edad_calculada').style.color = "#1e293b";
+    const subgrupos = {
+        "PAE_CALIENTE": ["CALIENTE"],
+        "PAE_FRIA": ["FRÍO"],
+        "VULNERABILIDAD": ["VULNERABLE", "CENTRO DE ASISTENCIA SOCIAL (0-16 AÑOS 11 MESES)", "CENTRO DE ASISTENCIA SOCIAL (18 AÑOS EN ADELANTE)"],
+        "1000_DIAS": ["EMBARAZADAS", "LACTANTES (6-24 MESES)", "NIÑOS 2-5 AÑOS 11 MESES (NO PAE)", "NIÑOS 2-5 AÑOS 11 MESES (CAI-CONAFE)"],
+        "EMERGENCIA": ["ATENCIÓN A DESASTRES / EMERGENCIA"],
+        "CARPINTERIA":["GRUPO DE CARPINTERÍA"],
+        "PANADERIA":["GRUPO DE PANADERÍA"],
+        "COCINA":["GRUPO DE COCINA"],
+        "LAMINA":["APOYO DE LÁMINA"],
+        "TINACO":["APOYO DE TINACO"],
+        "REFRIGERADOR":["APOYO DE REFRIGERADOR"]
     };
 
-    // --- CÁLCULO DE EDAD ---
-    window.calcularEdadActual = () => {
-        const inputFecha = document.getElementById('fecha_nac').value.trim();
-        const apoyo = document.getElementById('tipo_apoyo').value.toUpperCase();
-        const codigo = document.getElementById('codigo').value.toUpperCase();
-        const output = document.getElementById('edad_calculada');
-        
-        if (!inputFecha) { output.value = ""; return; }
-
-        let clean = inputFecha.replace(/\D/g, ''); 
-        let d, m, a;
-        if (clean.length === 8) {
-            if (parseInt(clean.substring(0, 4)) > 1900) { a = clean.substring(0, 4); m = clean.substring(4, 6); d = clean.substring(6, 8); }
-            else { d = clean.substring(0, 2); m = clean.substring(2, 4); a = clean.substring(4, 8); }
-        } else {
-            const p = inputFecha.split(/[-./ ]/);
-            if(p.length === 3) {
-                if(p[0].length === 4) { a=p[0]; m=p[1]; d=p[2]; }
-                else { d=p[0]; m=p[1]; a=p[2]; }
-            }
-        }
-
-        const fNac = new Date(a, m - 1, d);
-        const hoy = new Date();
-        if (isNaN(fNac.getTime()) || fNac > hoy) { output.value = "Fecha Inválida"; return; }
-
-        let diffAnios = hoy.getFullYear() - fNac.getFullYear();
-        let diffMeses = hoy.getMonth() - fNac.getMonth();
-        if (hoy.getDate() < fNac.getDate()) diffMeses--;
-        if (diffMeses < 0) { diffAnios--; diffMeses += 12; }
-
-        output.value = `${diffAnios} AÑOS, ${diffMeses} MESES`;
-
-        // Validación Programa 1000 Días
-        const esLactante = codigo.includes("1000DIAS") && apoyo.includes("LACTANTE");
-        if (esLactante) {
-            const limite2Anios = 2 * 365.25 * 24 * 60 * 60 * 1000;
-            output.style.color = (hoy - fNac < limite2Anios) ? "var(--success)" : "var(--danger)";
-        } else {
-            output.style.color = "var(--primary)";
-        }
-    };
-
-    document.getElementById('fecha_nac').addEventListener('input', window.calcularEdadActual);
-    document.getElementById('tipo_apoyo').addEventListener('change', window.calcularEdadActual);
-
-    // --- FILTRADO AVANZADO ---
-    window.filtrarAvanzado = () => {
-        const fCod = document.getElementById('f-cod').value.toLowerCase();
-        const fNom = document.getElementById('f-nom').value.toLowerCase();
-        const fLoc = document.getElementById('f-loc').value.toLowerCase();
-        const fApo = document.getElementById('f-apo').value;
-        const fEst = document.getElementById('f-est').value;
-
-        DATA_FILTRADA = DATA_ACTUAL.filter(r => {
-            const nom = r.nombre || "";
-            const pat = r.apellido_paterno || "";
-            const mat = r.apellido_materno || "";
-            const full = `${nom} ${pat} ${mat}`.toLowerCase();
-            
-            return (r.codigo || "").toLowerCase().includes(fCod) &&
-                   full.includes(fNom) &&
-                   (r.col_loc || "").toLowerCase().includes(fLoc) &&
-                   (fApo === "" || (r.tipo_apoyo || "").toUpperCase() === fApo) &&
-                   (fEst === "" || r.estatus === fEst);
+    // --- ESCUCHA EN TIEMPO REAL (ON SNAPSHOT) ---
+    onSnapshot(query(apoyosRef, orderBy("fecha_registro", "desc")), (snapshot) => {
+        listadoLive = [];
+        snapshot.forEach(docSnap => {
+            listadoLive.push({ id_firestore: docSnap.id, ...docSnap.data() });
         });
-        PAGINA_ACTUAL = 1;
-        render();
-    };
 
-    window.limpiarFiltros = () => {
-        ['f-cod', 'f-nom', 'f-loc', 'f-apo', 'f-est'].forEach(id => document.getElementById(id).value = "");
-        window.filtrarAvanzado();
-    };
+        // Calcular y mostrar el Siguiente Consecutivo en el formulario de captura
+        const maxProgresivo = listadoLive.reduce((max, item) => Math.max(max, item.num_progresivo || 0), 0);
+        const siguienteProgresivo = maxProgresivo + 1;
+        const inputConsecutivo = document.getElementById('reg_consecutivo_sig');
+        if (inputConsecutivo) inputConsecutivo.value = siguienteProgresivo;
 
-    // --- RENDERIZADO ---
-    function render() {
-        const inicio = (PAGINA_ACTUAL - 1) * FILAS_POR_PAGINA;
-        const lista = DATA_FILTRADA.slice(inicio, inicio + FILAS_POR_PAGINA);
-        document.getElementById('info-total').innerText = `TOTAL: ${DATA_FILTRADA.length}`;
-        
-        document.getElementById('tabla-beneficiarios').innerHTML = lista.map((r, i) => `
-            <tr>
-                <td><b>${DATA_FILTRADA.length - (inicio + i)}</b></td>
-                <td>${r.ine_img ? `<img src="${r.ine_img}" onclick="abrirVisor('${r.ine_img}', '${r.nombre || ''}')" style="width:35px;height:35px;object-fit:cover;cursor:pointer;border-radius:4px;">` : '-'}</td>
-                <td style="color:var(--primary); font-weight:bold;">${r.codigo || ''}</td>
-                <td><b>${r.apellido_paterno || ''} ${r.apellido_materno || ''} ${r.nombre || ''}</b><span class="sub-text">${r.curp || ''}</span></td>
-                <td>${r.fecha_nac || ''} <br> <small style="color:var(--primary); font-weight:bold;">${r.edad_calculada || ''}</small></td>
-                <td><b>${r.col_loc || ''}</b><span class="sub-text">${r.direccion || ''}</span></td>
-                <td>${r.tipo_apoyo || ''}</td>
-                <td><span class="badge-status" style="background:${r.estatus==='Entregado'?'#dcfce7':'#fef3c7'}; color:${r.estatus==='Entregado'?'#15803d':'#b45309'}">${r.estatus || 'Pendiente'}</span></td>
-                <td class="no-print">
-                    <button onclick="editar('${r.id}')" title="Editar">✏️</button>
-                    <button onclick="eliminar('${r.id}')" title="Eliminar">🗑️</button>
-                </td>
-            </tr>
-        `).join('');
+        renderizarTablasSincronizadas();
+    });
 
-        const tPag = Math.ceil(DATA_FILTRADA.length / FILAS_POR_PAGINA);
-        document.getElementById('pag-container').innerHTML = `
-            <button class="btn-pag" onclick="irPagina(${PAGINA_ACTUAL-1})" ${PAGINA_ACTUAL===1?'disabled':''}>Anterior</button>
-            <span style="margin:0 10px">Pág ${PAGINA_ACTUAL} de ${tPag||1}</span>
-            <button class="btn-pag" onclick="irPagina(${PAGINA_ACTUAL+1})" ${PAGINA_ACTUAL>=tPag?'disabled':''}>Siguiente</button>
-        `;
+    // --- RENDERIZADO SIMULTÁNEO CON COLUMNA DE CONTROL INTERNO (ESCUELAS DETALLADAS) ---
+    function renderizarTablasSincronizadas() {
+        const tbodyResumen = document.getElementById('cuerpo_tabla');
+        const tbodyCompleto = document.getElementById('lista_beneficiarios');
+
+        if (tbodyResumen) tbodyResumen.innerHTML = '';
+        if (tbodyCompleto) tbodyCompleto.innerHTML = '';
+
+        if (listadoLive.length === 0) {
+            if (tbodyResumen) tbodyResumen.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px; color:#64748b;">No hay registros cargados en el padrón local.</td></tr>`;
+            return;
+        }
+
+        listadoLive.forEach((d) => {
+            const fecha = d.fecha_registro ? new Date(d.fecha_registro).toLocaleDateString('es-MX') : '';
+            const lugar = d.localidad || d.col_loc || 'N/A';
+            const nProgresivo = d.num_progresivo || '-';
+            
+            // Renderizado de Badge dinámico para el Estatus
+            let colorBadge = "#64748b"; 
+            if (d.estatus === "PENDIENTE") colorBadge = "#f59e0b";
+            if (d.estatus === "VALIDADO") colorBadge = "#3b82f6";
+            if (d.estatus === "ENTREGADO") colorBadge = "#10b981";
+            if (d.estatus === "EN REVISIÓN") colorBadge = "#ef4444";
+
+            const badgeEstatusHtml = `<span style="background:${colorBadge}; color:white; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">${d.estatus || 'PENDIENTE'}</span>`;
+            const badgeDifHtml = d.capturado_dif_estatal === "SI" 
+                ? `<br><span style="color:#10b981; font-size:10px;"><i class="fas fa-check-circle"></i> SÍ (DIF ESTATAL)</span>` 
+                : `<br><span style="color:#64748b; font-size:10px;"><i class="fas fa-times-circle"></i> NO (DIF ESTATAL)</span>`;
+
+            const celdaControlInterno = `${badgeEstatusHtml}${badgeDifHtml}`;
+
+            // CASO A: TALLER GRUPAL CON INTEGRANTES
+            if (d.integrantes && Array.isArray(d.integrantes) && d.integrantes.length > 0) {
+                d.integrantes.forEach((int, index) => {
+                    const nombreInt = `${int.nombre || ''} ${int.paterno || ''} ${int.materno || ''}`.trim().toUpperCase();
+                    const telefonoMostrar = d.telefono_general || d.ta_telefono || 'S/N';
+                    const obsMostrar = d.observaciones || 'SIN OBSERVACIONES';
+
+                    if (tbodyResumen) {
+                        const filaR = tbodyResumen.insertRow();
+                        filaR.innerHTML = `
+                            <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; text-align: center; color: #64748b;">${nProgresivo}</td>
+                            <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; color: var(--primary);">${d.programa || ''}</td>
+                            <td style="padding: 10px; border: 1px solid var(--border);">${lugar}</td>
+                            <td style="padding: 10px; border: 1px solid var(--border); font-family: monospace;">${int.curp || 'N/A'}</td>
+                            <td style="padding: 10px; border: 1px solid var(--border); font-size:11px;">
+                                <i class="fas fa-tools"></i> <strong>Grp:</strong> ${d.subgrupo || ''}<br><small>Integrante: ${nombreInt}</small>
+                                <br><small style="color:#475569;">📞 Tel: ${telefonoMostrar} | 📝 Obs: ${obsMostrar}</small>
+                            </td>
+                            <td style="padding: 10px; border: 1px solid var(--border); text-align:center; line-height:1.3;">${celdaControlInterno}</td>
+                            <td style="padding: 10px; border: 1px solid var(--border);">${fecha}</td>
+                            <td style="padding: 10px; border: 1px solid var(--border); text-align:center;">
+                                ${index === 0 ? `<button class="btn-admin" style="background:var(--danger); padding:4px 8px;" onclick="window.borrarRegistro('${d.id_firestore}')">🗑️</button>` : ''}
+                            </td>
+                        `;
+                    }
+                });
+            } 
+            // CASO B: INDIVIDUAL O ESCUELA (NUEVO FORMATO DE VISUALIZACIÓN DETALLADA)
+            else {
+                let infoIdentificacion = "";
+                let infoCurpClave = "";
+
+                if (d.pae_escuela) {
+                    infoIdentificacion = `
+                        <span style="color: var(--primary); font-weight: bold;"><i class="fas fa-school"></i> ESCUELA: ${d.pae_escuela}</span>
+                        <br><small style="color: #334155; font-weight: 600;">🔑 CCT: ${d.pae_clave_escuela || 'SIN CLAVE'}</small>
+                    `;
+                    infoCurpClave = d.pae_clave_escuela || 'SIN CLAVE';
+                } else {
+                    infoIdentificacion = `<i class="fas fa-user"></i> ${d.beneficiario?.nombre || ''} ${d.beneficiario?.paterno || ''} ${d.beneficiario?.materno || ''}`.toUpperCase();
+                    infoCurpClave = d.beneficiario?.curp || 'N/A';
+                }
+
+                const telefonoMostrar = d.telefono_general || 'S/N';
+                const obsMostrar = d.observaciones || 'SIN OBSERVACIONES';
+
+                if (tbodyResumen) {
+                    const filaR = tbodyResumen.insertRow();
+                    filaR.innerHTML = `
+                        <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; text-align: center; color: #64748b;">${nProgresivo}</td>
+                        <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; color: var(--primary);">${d.programa || ''}</td>
+                        <td style="padding: 10px; border: 1px solid var(--border);">${lugar}</td>
+                        <td style="padding: 10px; border: 1px solid var(--border); font-family: monospace; font-weight: bold;">${infoCurpClave}</td>
+                        <td style="padding: 10px; border: 1px solid var(--border); font-size:11px; line-height:1.4;">
+                            ${infoIdentificacion}
+                            <br><small style="color:#475569;">📞 Tel: ${telefonoMostrar} | 📝 Obs: ${obsMostrar}</small>
+                        </td>
+                        <td style="padding: 10px; border: 1px solid var(--border); text-align:center; line-height:1.3;">${celdaControlInterno}</td>
+                        <td style="padding: 10px; border: 1px solid var(--border);">${fecha}</td>
+                        <td style="padding: 10px; border: 1px solid var(--border); text-align:center;">
+                            <button class="btn-admin" style="background:var(--danger); padding:4px 8px;" onclick="window.borrarRegistro('${d.id_firestore}')">🗑️</button>
+                            <button class="btn-admin" style="background:#64748b; padding:4px 8px;" onclick="window.editarRegistro('${d.id_firestore}')">✏️</button>
+                        </td>
+                    `;
+                }
+            }
+        });
+        window.verificarTablaVacia();
     }
 
-    window.irPagina = (p) => { PAGINA_ACTUAL = p; render(); };
-    window.cambiarFilas = (v) => { FILAS_POR_PAGINA = parseInt(v); render(); };
-
-    // --- CRUD ---
-    window.guardar = async () => {
-        const d = {};
-        document.querySelectorAll('#main-form input, #main-form select').forEach(i => { if(i.id) d[i.id] = i.value; });
-        if(!d.codigo) return alert("Código requerido");
-        try {
-            await addDoc(apoyosRef, d);
-            alert("¡Registro guardado con éxito!");
-            window.limpiarFormulario();
-        } catch (e) { alert("Error al guardar"); }
-    };
-
-    window.actualizar = async () => {
-        const id = document.getElementById('edit-id').value;
-        const d = {};
-        document.querySelectorAll('#main-form input, #main-form select').forEach(i => { if(i.id) d[i.id] = i.value; });
-        try {
-            await updateDoc(doc(db, "apoyos", id), d);
-            alert("¡Actualizado!");
-            window.limpiarFormulario();
-        } catch (e) { alert("Error al actualizar"); }
-    };
-
-    window.editar = (id) => {
-        const r = DATA_ACTUAL.find(x => x.id === id);
-        if (!r) return;
-        Object.keys(r).forEach(key => {
-            const el = document.getElementById(key);
-            if (el) el.value = r[key] || "";
-        });
-        if (r.ine_img) {
-            document.getElementById('box-preview').innerHTML = `<img src="${r.ine_img}" style="width:100%">`;
-            document.getElementById('ine_img').value = r.ine_img;
+    // --- MATRIZ EXHAUSTIVA DE EXPORTACIÓN A EXCEL ---
+    async function exportarExcel() {
+        if (listadoLive.length === 0) { 
+            alert("⚠️ No hay registros en el padrón para exportar."); 
+            return; 
         }
-        document.getElementById('edit-id').value = id;
-        document.getElementById('btn-save').style.display = 'none'; 
-        document.getElementById('btn-upd').style.display = 'inline-block';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    window.eliminar = async (id) => { if(confirm("¿Seguro que desea eliminar este registro?")) await deleteDoc(doc(db, "apoyos", id)); };
-
-    // --- EXPORTAR ---
-    window.exportarExcel = () => {
-        if (DATA_FILTRADA.length === 0) return alert("No hay datos para exportar.");
-
-        const estructuraColumnas = {
-            codigo: "CÓDIGO",
-            tipo_apoyo: "TIPO DE APOYO",
-            fecha_ingreso: "FECHA INGRESO",
-            nombre: "NOMBRE(S)",
-            apellido_paterno: "APELLIDO PATERNO",
-            apellido_materno: "APELLIDO MATERNO",
-            fecha_nac: "F. NACIMIENTO",
-            edad_calculada: "EDAD",
-            curp: "CURP",
-            estatus: "ESTATUS",
-            col_loc: "COLONIA/LOCALIDAD",
-            direccion: "DIRECCIÓN",
-            telefono: "TELÉFONO",
-            observaciones: "OBSERVACIONES"
-        };
-
-        const dataOrdenada = DATA_FILTRADA.map((registro, index) => {
-            let fila = { "NO.": index + 1 };
-            Object.keys(estructuraColumnas).forEach(llave => {
-                const nombreColumna = estructuraColumnas[llave];
-                fila[nombreColumna] = registro[llave] || ""; 
-            });
-            return fila;
-        });
-
-        const ws = XLSX.utils.json_to_sheet(dataOrdenada);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Beneficiarios");
-
-        const fechaPersonalizada = new Date().toISOString().slice(0,10);
-        XLSX.writeFile(wb, `Reporte_Poblacion_${fechaPersonalizada}.xlsx`);
-    };
-
-    // --- UI UTILIDADES ---
-    window.handleFoto = (e) => {
-        const fr = new FileReader();
-        fr.onload = (ev) => { 
-            document.getElementById('ine_img').value = ev.target.result; 
-            document.getElementById('box-preview').innerHTML = `<img src="${ev.target.result}" style="width:100%">`; 
-        };
-        fr.readAsDataURL(e.target.files[0]);
-    };
-
-    window.abrirVisor = (src, n) => {
-        document.getElementById('modal-visor').style.display='flex'; 
-        document.getElementById('img-grande').src = src; 
-        document.getElementById('visor-titulo').innerText = n;
-        document.getElementById('link-descarga').href = src;
-    };
-    window.cerrarVisor = () => document.getElementById('modal-visor').style.display='none';
-    
-    window.vaciarBaseDeDatos = async () => {
-        if(!confirm("⚠️ ADVERTENCIA: Se borrarán TODOS los datos permanentemente. ¿Continuar?")) return;
-        const snap = await getDocs(apoyosRef);
-        const batch = writeBatch(db);
-        snap.forEach(d => batch.delete(d.ref));
-        await batch.commit();
-        alert("Base de datos vaciada.");
-    };
-
-    window.exportarResumenEstadistico = () => {
-        if (DATA_FILTRADA.length === 0) return alert("No hay datos para generar el reporte estadístico.");
-
-        const matrizTotales = {};
-        let granTotalBeneficiarios = 0;
-
-        DATA_FILTRADA.forEach(registro => {
-            granTotalBeneficiarios++;
-            const localidad = (registro.col_loc || "NO ESPECIFICADA").toUpperCase().trim();
-            const apoyo = (registro.tipo_apoyo || "SIN ESPECIFICAR").toUpperCase().trim();
-            const llaveUnica = `${localid} | ${apoyo}`;
-
-            if (!matrizTotales[llaveUnica]) {
-                matrizTotales[llaveUnica] = { localidad: localidad, apoyo: apoyo, total: 0 };
+        let matrizPlana = [];
+        listadoLive.forEach(d => {
+            const fechaFormateada = d.fecha_registro ? new Date(d.fecha_registro).toLocaleDateString('es-MX') : '';
+            
+            if (d.integrantes && Array.isArray(d.integrantes) && d.integrantes.length > 0) {
+                d.integrantes.forEach(int => {
+                    matrizPlana.push({
+                        "NO. CONSECUTIVO": d.num_progresivo || '',
+                        "ESTATUS LOCAL": d.estatus || 'PENDIENTE',
+                        "CAPTURADO DIF ESTATAL": d.capturado_dif_estatal || 'NO',
+                        "TELÉFONO DE CONTACTO": d.telefono_general || d.ta_telefono || '',
+                        "OBSERVACIONES": d.observaciones || '',
+                        "PROGRAMA INSTITUCIONAL": d.programa || '',
+                        "SUBGRUPO MODALIDAD": d.subgrupo || '',
+                        "LOCALIDAD / COLONIA": d.localidad || d.col_loc || '',
+                        "CURP BENEFICIARIO": (int.curp || '').toUpperCase(),
+                        "NOMBRE(S)": (int.nombre || '').toUpperCase(),
+                        "APELLIDO PATERNO": (int.paterno || '').toUpperCase(),
+                        "APELLIDO MATERNO": (int.materno || '').toUpperCase(),
+                        "FECHA NACIMIENTO": int.fecha_nac || '',
+                        "EDAD": int.edad || '', "SEXO": int.sexo || '', "ESTADO CIVIL": (int.civil || '').toUpperCase(),
+                        "INDÍGENA": int.indigena || 'NO', "DISCAPACIDAD": int.discapacidad || 'NO',
+                        "DIRECCIÓN UBICACIÓN": (d.ta_direccion || '').toUpperCase(), "NÚMERO COBRO": d.ta_numero || '', "CÓDIGO POSTAL": d.ta_cp || '',
+                        "CLAVE ESCUELA": '', "NOMBRE ESCUELA": '', "ESCOLARIDAD": '', "TURNO": '', "DOMICILIO ESCUELA": '', "REFERENCIAS DOMICILIO": '',
+                        "FECHA CAPTURA SISTEMA": fechaFormateada
+                    });
+                });
+            } else {
+                matrizPlana.push({
+                    "NO. CONSECUTIVO": d.num_progresivo || '',
+                    "ESTATUS LOCAL": d.estatus || 'PENDIENTE',
+                    "CAPTURADO DIF ESTATAL": d.capturado_dif_estatal || 'NO',
+                    "TELÉFONO DE CONTACTO": d.telefono_general || '',
+                    "OBSERVACIONES": d.observaciones || '',
+                    "PROGRAMA INSTITUCIONAL": d.programa || '',
+                    "SUBGRUPO MODALIDAD": d.subgrupo || '',
+                    "LOCALIDAD / COLONIA": d.localidad || d.col_loc || '',
+                    "CURP BENEFICIARIO": d.pae_clave_escuela ? d.pae_clave_escuela : (d.beneficiario?.curp || '').toUpperCase(),
+                    "NOMBRE(S)": d.pae_escuela ? d.pae_escuela : (d.beneficiario?.nombre || '').toUpperCase(),
+                    "APELLIDO PATERNO": d.beneficiario?.paterno ? d.beneficiario.paterno.toUpperCase() : '',
+                    "APELLIDO MATERNO": d.beneficiario?.materno ? d.beneficiario.materno.toUpperCase() : '',
+                    "FECHA NACIMIENTO": d.beneficiario?.fecha_nacimiento || '',
+                    "EDAD": d.beneficiario?.edad || '', "SEXO": d.beneficiario?.sexo || '', "ESTADO CIVIL": (d.beneficiario?.civil || '').toUpperCase(),
+                    "INDÍGENA": d.beneficiario?.indigena || 'NO', "DISCAPACIDAD": d.beneficiario?.discapacidad || 'NO',
+                    "DIRECCIÓN UBICACIÓN": (d.vul_calle || d.ta_direccion || '').toUpperCase(), "NÚMERO COBRO": d.vul_numero || d.ta_numero || '', "CÓDIGO POSTAL": d.vul_cp || d.ta_cp || '',
+                    "CLAVE ESCUELA": d.pae_clave_escuela || '', "NOMBRE ESCUELA": d.pae_escuela || '', "ESCOLARIDAD": d.pae_escolaridad || '', "TURNO": d.pae_turno || '', "DOMICILIO ESCUELA": d.pae_domicilio_esc || '',
+                    "REFERENCIAS DOMICILIO": `Entre ${d.vul_entre_calle || '-'} y ${d.vul_y_calle || '-'} Ref: ${d.vul_referencia || '-'}`,
+                    "FECHA CAPTURA SISTEMA": fechaFormateada
+                });
             }
-            matrizTotales[llaveUnica].total++;
         });
-
-        const datosReporte = Object.values(matrizTotales).map(item => ({
-            "LOCALIDAD / COLONIA": item.localidad,
-            "TIPO DE APOYO": item.apoyo,
-            "CANTIDAD TOTAL": item.total
-        })).sort((a, b) => a["LOCALIDAD / COLONIA"].localeCompare(b["LOCALIDAD / COLONIA"]));
-
-        datosReporte.push({
-            "LOCALIDAD / COLONIA": "---",
-            "TIPO DE APOYO": "TOTAL GENERAL DE EXPEDIENTES",
-            "CANTIDAD TOTAL": granTotalBeneficiarios
-        });
-
+        const ws = XLSX.utils.json_to_sheet(matrizPlana);
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(datosReporte);
-        XLSX.utils.book_append_sheet(wb, ws, "Totales por Zona y Apoyo");
+        XLSX.utils.book_append_sheet(wb, ws, "Padrón Completo 2026");
+        XLSX.writeFile(wb, `PADRON_DIF_ESTATUS_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
 
-        const fechaHoy = new Date().toISOString().slice(0, 10);
-        XLSX.writeFile(wb, `Resumen_Totales_DIF_${fechaHoy}.xlsx`);
+    // --- BOTÓN VACIAR BASE DE DATOS ---
+    async function vaciarBaseDatos() {
+        if (!confirm("⚠️ ALERTA CRÍTICA: ¿Estás completamente seguro de borrar TODO el padrón de forma irreversible?")) return;
+        try {
+            const snapshot = await getDocs(apoyosRef);
+            const promesasBorrado = snapshot.docs.map(d => deleteDoc(doc(db, "proyetos_pv", d.id)));
+            await Promise.all(promesasBorrado);
+            alert("🗑️ Base de datos Firebase vaciada correctamente.");
+        } catch (e) { alert("❌ Error: " + e.message); }
+    }
+
+    // --- GUARDADO MANUAL INTEGRAL ---
+    window.guardarRegistro = async function() {
+        const prog = document.getElementById('programa_principal').value;
+        const sub = document.getElementById('subgrupo_programa').value;
+        const loc = document.getElementById('col_loc').value;
+
+        if (!loc || !prog || !sub) { 
+            alert("❌ Error: Seleccione obligatoriamente Programa, Subgrupo y Localidad."); 
+            return; 
+        }
+
+        const maxProgresivo = listadoLive.reduce((max, item) => Math.max(max, item.num_progresivo || 0), 0);
+        const siguienteProgresivo = maxProgresivo + 1;
+
+        let datosDocumento = { 
+            num_progresivo: siguienteProgresivo,
+            programa: prog, 
+            subgrupo: sub, 
+            localidad: loc, 
+            fecha_registro: new Date().toISOString(),
+            
+            telefono_general: document.getElementById('reg_telefono')?.value.trim() || '',
+            estatus: document.getElementById('reg_estatus')?.value || 'PENDIENTE',
+            capturado_dif_estatal: document.getElementById('reg_dif_estatal')?.value || 'NO',
+            observaciones: document.getElementById('reg_observaciones')?.value.trim().toUpperCase() || 'SIN OBSERVACIONES',
+            
+            pae_clave_escuela: document.getElementById('pae_clave')?.value.trim().toUpperCase() || '',
+            pae_escuela: document.getElementById('pae_escuela')?.value.trim().toUpperCase() || '',
+            pae_escolaridad: document.getElementById('pae_escolaridad')?.value.trim().toUpperCase() || '',
+            pae_turno: document.getElementById('pae_turno')?.value.trim().toUpperCase() || '',
+            pae_nivel: document.getElementById('pae_nivel')?.value.trim().toUpperCase() || '',
+            pae_domicilio_esc: document.getElementById('pae_domicilio')?.value.trim().toUpperCase() || '',
+
+            vul_calle: document.getElementById('vul_calle')?.value.trim().toUpperCase() || '',
+            vul_numero: document.getElementById('vul_numero')?.value.trim() || '',
+            vul_colonia: document.getElementById('vul_colonia')?.value.trim().toUpperCase() || '',
+            vul_cp: document.getElementById('vul_cp')?.value.trim() || '',
+            vul_entre_calle: document.getElementById('vul_entre_calle')?.value.trim().toUpperCase() || '',
+            vul_y_calle: document.getElementById('vul_y_calle')?.value.trim().toUpperCase() || '',
+            vul_referencia: document.getElementById('vul_referencia')?.value.trim().toUpperCase() || '',
+
+            eme_fecha_beneficio: document.getElementById('eme_fecha')?.value || '',
+
+            ta_direccion: document.getElementById('ta_direccion')?.value.trim().toUpperCase() || '',
+            ta_numero: document.getElementById('ta_numero')?.value.trim() || '',
+            ta_cp: document.getElementById('ta_cp')?.value.trim() || '',
+            ta_telefono: document.getElementById('ta_telefono')?.value.trim() || ''
+        };
+
+        if (["CARPINTERIA", "PANADERIA", "COCINA"].includes(prog)) {
+            datosDocumento.integrantes = [];
+            for (let i = 1; i <= 6; i++) {
+                let curpTaller = document.getElementById(`tal_curp_${i}`)?.value;
+                if (curpTaller && curpTaller.trim() !== "") {
+                    datosDocumento.integrantes.push({
+                        curp: curpTaller.toUpperCase().trim(),
+                        nombre: document.getElementById(`tal_nombre_${i}`)?.value.trim().toUpperCase() || '',
+                        paterno: document.getElementById(`tal_paterno_${i}`)?.value.trim().toUpperCase() || '',
+                        materno: document.getElementById(`tal_materno_${i}`)?.value.trim().toUpperCase() || '',
+                        fecha_nac: document.getElementById(`tal_fecha_nac_${i}`)?.value || '',
+                        edad: document.getElementById(`tal_edad_exacta_${i}`)?.value || '',
+                        sexo: document.getElementById(`tal_sexo_${i}`)?.value || 'MUJER',
+                        civil: document.getElementById(`tal_civil_${i}`)?.value.trim().toUpperCase() || '',
+                        indigena: document.getElementById(`tal_indigena_${i}`)?.value || 'NO',
+                        discapacidad: document.getElementById(`tal_discapacidad_${i}`)?.value || 'NO'
+                    });
+                }
+            }
+            if (datosDocumento.integrantes.length === 0) {
+                alert("⚠️ Por favor, registre al menos un integrante con CURP para procesar el grupo.");
+                return;
+            }
+            try {
+                const q = query(apoyosRef, where("programa", "==", prog));
+                const querySnapshot = await getDocs(q);
+                const numeroGrupo = querySnapshot.size + 1; 
+                const sufijoGrupo = `grupo${String(numeroGrupo).padStart(2, '0')}`;
+                datosDocumento.subgrupo = `${sub} - ${sufijoGrupo}`; 
+            } catch (error) { datosDocumento.subgrupo = `${sub} - grupo_generico`; }
+        } else {
+            datosDocumento.beneficiario = { 
+                curp: document.getElementById('ben_curp')?.value.trim().toUpperCase() || '', 
+                nombre: document.getElementById('ben_nombre')?.value.trim().toUpperCase() || '',
+                paterno: document.getElementById('ben_paterno')?.value.trim().toUpperCase() || '',
+                materno: document.getElementById('ben_materno')?.value.trim().toUpperCase() || '',
+                fecha_nacimiento: document.getElementById('ben_fecha_nacimiento')?.value || '',
+                edad: document.getElementById('edad_exacta')?.value || '',
+                sexo: document.getElementById('ben_sexo')?.value || 'MUJER',
+                civil: document.getElementById('ben_civil')?.value.trim().toUpperCase() || '',
+                indigena: document.getElementById('ben_indigena')?.value || 'NO',
+                discapacidad: document.getElementById('ben_discapacidad')?.value || 'NO'
+            };
+            datosDocumento.representante = {
+                curp: document.getElementById('mar_curp')?.value.trim().toUpperCase() || '',
+                nombre: document.getElementById('mar_nombre')?.value.trim().toUpperCase() || '',
+                paterno: document.getElementById('mar_paterno')?.value.trim().toUpperCase() || '',
+                materno: document.getElementById('mar_materno')?.value.trim().toUpperCase() || '',
+                fecha_nacimiento: document.getElementById('mar_fecha_nacimiento')?.value || '',
+                sexo: document.getElementById('mar_sexo')?.value || 'MUJER',
+                parentesco: document.getElementById('mar_parentesco')?.value.trim().toUpperCase() || ''
+            };
+        }
+
+        try {
+            await addDoc(apoyosRef, datosDocumento);
+            alert("✅ Registro guardado con éxito.");
+            document.getElementById('form_unificado').reset();
+            if(document.getElementById('edad_exacta')) document.getElementById('edad_exacta').value = '';
+            limpiarCamposTaller();
+            configurarFormulario(); 
+        } catch (e) { alert("❌ Error al subir: " + e.message); }
     };
 
-    // CRÍTICO: Escucha en tiempo real movida al final para asegurar la previa lectura de funciones globales
-    onSnapshot(query(apoyosRef, orderBy("codigo", "asc")), (snap) => {
-        DATA_ACTUAL = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        window.filtrarAvanzado(); 
+    // --- ACCIONES DE EDICIÓN Y BORRADO ---
+    window.borrarRegistro = async function(id) {
+        if (confirm("¿Estás completamente seguro de eliminar este registro del padrón institucional?")) {
+            try { await deleteDoc(doc(db, "proyetos_pv", id)); alert("✅ Registro eliminado."); } 
+            catch (e) { alert("❌ Error: " + e.message); }
+        }
+    };
+
+    window.editarRegistro = async function(id) {
+        const nuevoEstatus = prompt("Modificar Estatus (PENDIENTE, VALIDADO, ENTREGADO, EN REVISIÓN):");
+        if (nuevoEstatus) {
+            try { await updateDoc(doc(db, "proyetos_pv", id), { estatus: nuevoEstatus.toUpperCase().trim() }); alert("✅ Estatus actualizado con éxito."); } 
+            catch (e) { alert("❌ Error: " + e.message); }
+        }
+    };
+
+    // --- CONTROL DE COMPORTAMIENTO DINÁMICO DE INTERFAZ ---
+    window.actualizarSubgrupos = function() {
+        const programa = document.getElementById('programa_principal').value;
+        const subSelect = document.getElementById('subgrupo_programa');
+        subSelect.innerHTML = '<option value="">-- SELECCIONE SUBGRUPO --</option>';
+        
+        if (subgrupos[programa]) {
+            subgrupos[programa].forEach(s => {
+                let opt = document.createElement('option');
+                opt.value = s; opt.textContent = s; subSelect.appendChild(opt);
+            });
+            if (subgrupos[programa].length === 1) {
+                subSelect.value = subgrupos[programa][0];
+            }
+        }
+        configurarFormulario();
+    }
+
+    window.configurarFormulario = function() {
+        const programa = document.getElementById('programa_principal').value;
+        const subgrupo = document.getElementById('subgrupo_programa').value;
+        
+        document.getElementById('sec_lugar').classList.remove('visible');
+        document.getElementById('sec_beneficiario').classList.remove('visible');
+        document.getElementById('sec_taller_grupal').classList.remove('visible');
+        document.getElementById('sec_marcha').classList.remove('visible');
+        
+        const allSpecificFields = document.querySelectorAll('.pae-field, .vul-field, .eme-field, .civil-field, .tal-apo-field');
+        allSpecificFields.forEach(f => f.classList.add('hidden-field'));
+
+        if (!subgrupo) {
+            if(document.getElementById('btn_guardar')) document.getElementById('btn_guardar').style.display = 'none';
+            return;
+        }
+
+        document.getElementById('sec_lugar').classList.add('visible');
+        if(document.getElementById('btn_guardar')) document.getElementById('btn_guardar').style.display = 'block';
+
+        const esTallerOApoyo = ["CARPINTERIA", "PANADERIA", "COCINA", "LAMINA", "TINACO", "REFRIGERADOR"].includes(programa);
+
+        if (esTallerOApoyo) {
+            document.getElementById('leg_lugar').innerText = "1. UBICACIÓN DEL TALLER COMUNITARIO O ENTREGA";
+            document.querySelectorAll('.tal-apo-field').forEach(f => f.classList.remove('hidden-field'));
+            
+            if (["CARPINTERIA", "PANADERIA", "COCINA"].includes(programa)) {
+                document.getElementById('sec_taller_grupal').classList.add('visible');
+                document.getElementById('leg_taller_grupal').innerText = `2. REGISTRO DE INTEGRANTES - ${subgrupo}`;
+                inyectarCampos6Integrantes(); 
+            } else {
+                document.getElementById('sec_beneficiario').classList.add('visible');
+                document.getElementById('sec_marcha').classList.add('visible');
+            }
+        } else {
+            document.getElementById('sec_beneficiario').classList.add('visible');
+
+            if (programa === "VULNERABILIDAD") {
+                document.querySelectorAll('.civil-field').forEach(f => f.classList.remove('hidden-field'));
+            }
+
+            if (programa.startsWith("PAE")) {
+                document.getElementById('leg_lugar').innerText = "1. IDENTIFICACIÓN DEL PLANTEL EDUCATIVO";
+                document.querySelectorAll('.pae-field').forEach(f => f.classList.remove('hidden-field'));
+                document.getElementById('sec_marcha').classList.add('visible');
+            } 
+            else if (programa === "VULNERABILIDAD" || programa === "1000_DIAS") {
+                document.getElementById('leg_lugar').innerText = "1. IDENTIFICACIÓN DEL LUGAR DEL BENEFICIARIO";
+                if(programa === "VULNERABILIDAD") document.querySelectorAll('.vul-field').forEach(f => f.classList.remove('hidden-field'));
+                document.getElementById('sec_marcha').classList.add('visible');
+            }
+            else if (programa === "EMERGENCIA") {
+                document.getElementById('leg_lugar').innerText = "1. IDENTIFICACIÓN DEL LUGAR DEL BENEFICIO";
+                document.querySelectorAll('.eme-field').forEach(f => f.classList.remove('hidden-field'));
+            }
+        }
+
+        // CANDADO INVIOLABLE: Asegura visibilidad del Control Operativo en cualquier modulo
+        const secControlInterno = document.getElementById('sec_control_interno');
+        if (secControlInterno) {
+            secControlInterno.style.setProperty('display', 'block', 'important');
+        }
+    }
+
+    function inyectarCampos6Integrantes() {
+        const contenedor = document.getElementById('contenedor_integrantes');
+        if (!contenedor) return;
+        contenedor.innerHTML = ""; 
+
+        for (let i = 1; i <= 6; i++) {
+            const divIntegrante = document.createElement('div');
+            divIntegrante.style.cssText = "border: 1px solid var(--border); padding: 15px; border-radius: 6px; margin-bottom: 15px; background: #f8fafc;";
+            divIntegrante.innerHTML = `
+                <h4 style="margin-top:0; color:var(--primary); border-bottom:1px solid #e2e8f0; padding-bottom:4px;"><i class="fas fa-user-cog"></i> Integrante #${i}</h4>
+                <div class="form-grid">
+                    <div class="form-group"><label>CURP</label><input type="text" id="tal_curp_${i}" maxlength="18" style="text-transform: uppercase;"></div>
+                    <div class="form-group"><label>Nombre(s)</label><input type="text" id="tal_nombre_${i}"></div>
+                    <div class="form-group"><label>Apellido Paterno</label><input type="text" id="tal_paterno_${i}"></div>
+                    <div class="form-group"><label>Apellido Materno</label><input type="text" id="tal_materno_${i}"></div>
+                    <div class="form-group"><label>Fecha Nacimiento</label><input type="date" id="tal_fecha_nac_${i}"></div>
+                    <div class="form-group"><label>Edad</label><input type="text" id="tal_edad_exacta_${i}" readonly style="background:#f1f5f9; font-weight:bold;"></div>
+                    <div class="form-group"><label>Sexo</label><select id="tal_sexo_${i}"><option value="MUJER">MUJER</option><option value="HOMBRE">HOMBRE</option></select></div>
+                    <div class="form-grid-item"><label>Estado Civil</label><input type="text" id="tal_civil_${i}"></div>
+                    <div class="form-group"><label>Indígena</label><select id="tal_indigena_${i}"><option value="NO">NO</option><option value="SI">SI</option></select></div>
+                    <div class="form-group"><label>Discapacidad</label><select id="tal_discapacidad_${i}"><option value="NO">NO</option><option value="SI">SI</option></select></div>
+                </div>
+            `;
+            contenedor.appendChild(divIntegrante);
+            document.getElementById(`tal_fecha_nac_${i}`)?.addEventListener('change', () => window.calcularEdadTaller(i));
+        }
+    }
+
+    window.analizarBeneficiario = function() {
+        const fechaNac = document.getElementById('ben_fecha_nacimiento').value;
+        const campoEdad = document.getElementById('edad_exacta');
+        if (!fechaNac) { campoEdad.value = ""; return; }
+
+        const hoy = new Date(); const cumple = new Date(fechaNac);
+        let anios = hoy.getFullYear() - cumple.getFullYear();
+        let meses = hoy.getMonth() - cumple.getMonth();
+        if (meses < 0 || (meses === 0 && hoy.getDate() < cumple.getDate())) { anios--; }
+        campoEdad.value = `${anios} años`;
+    }
+
+    window.calcularEdadTaller = function(i) { 
+        const fechaNac = document.getElementById(`tal_fecha_nac_${i}`).value;
+        const campoEdad = document.getElementById(`tal_edad_exacta_${i}`);
+        if (!fechaNac) { campoEdad.value = ""; return; }
+        const hoy = new Date(); const cumple = new Date(fechaNac);
+        let anios = hoy.getFullYear() - cumple.getFullYear();
+        let meses = hoy.getMonth() - cumple.getMonth();
+        if (meses < 0 || (meses === 0 && hoy.getDate() < cumple.getDate())) { anios--; }
+        campoEdad.value = `${anios} años`;
+    };
+
+    function limpiarCamposTaller() {
+        const contenedor = document.getElementById('contenedor_integrantes');
+        if(contenedor) contenedor.innerHTML = "";
+    }
+
+    window.verificarTablaVacia = function() {
+        const tabla = document.getElementById('cuerpo_tabla');
+        if (tabla && tabla.rows.length === 0) {
+            tabla.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px; color:#64748b;">No hay registros cargados en el padrón local.</td></tr>`;
+        }
+    }
+
+    // --- IMPORTACIÓN MASIVA DESDE CSV (COMPLETADA TOTALMENTE) ---
+    window.importarCSV = function(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            const text = e.target.result;
+            const lines = text.split(/\r?\n/);
+            if (lines.length <= 1 || !lines[0].trim()) {
+                alert("⚠️ El archivo seleccionado está vacío o no contiene encabezados."); return;
+            }
+
+            const headers = lines[0].split(",").map(h => h.trim().toLowerCase().replace(/^"|"$/g, ''));
+            const filasFiltradas = lines.slice(1).filter(line => line.trim() !== "");
+
+            if (confirm(`¿Proceder con la importación masiva de ${filasFiltradas.length} filas al sistema?`)) {
+                alert("⏳ Procesando importación en Firebase... Por favor, espere.");
+                
+                let contadorProgresivo = listadoLive.reduce((max, item) => Math.max(max, item.num_progresivo || 0), 0);
+                
+                for (let i = 0; i < filasFiltradas.length; i++) {
+                    const values = filasFiltradas[i].split(",").map(v => v.trim().replace(/^"|"$/g, ''));
+                    let fila = {};
+                    headers.forEach((h, index) => { 
+                        fila[h] = values[index] !== undefined ? values[index] : ''; 
+                    });
+
+                    contadorProgresivo++;
+
+                    let prog = (fila["programa institucional"] || fila["programa"] || "").toUpperCase();
+                    let sub = (fila["subgrupo modalidad"] || fila["subgrupo"] || "").toUpperCase();
+                    let loc = fila["localidad / colonia"] || fila["localidad"] || "";
+
+                    let datosDocumento = {
+                        num_progresivo: contadorProgresivo,
+                        programa: prog,
+                        subgrupo: sub,
+                        localidad: loc,
+                        fecha_registro: new Date().toISOString(),
+                        
+                        telefono_general: fila["teléfono de contacto"] || fila["telefono_general"] || '',
+                        estatus: (fila["estatus local"] || fila["estatus"] || 'PENDIENTE').toUpperCase(),
+                        capturado_dif_estatal: (fila["capturado dif estatal"] || fila["capturado_dif_estatal"] || 'NO').toUpperCase(),
+                        observaciones: (fila["observaciones"] || 'SIN OBSERVACIONES').toUpperCase(),
+
+                        pae_clave_escuela: (fila["clave escuela"] || fila["pae_clave_escuela"] || '').toUpperCase(),
+                        pae_escuela: (fila["nombre escuela"] || fila["pae_escuela"] || '').toUpperCase(),
+                        pae_escolaridad: (fila["escolaridad"] || fila["pae_escolaridad"] || '').toUpperCase(),
+                        pae_turno: (fila["turno"] || fila["pae_turno"] || '').toUpperCase(),
+                        pae_domicilio_esc: (fila["domicilio escuela"] || fila["pae_domicilio_esc"] || '').toUpperCase(),
+
+                        vul_calle: (fila["dirección ubicación"] || fila["vul_calle"] || '').toUpperCase(),
+                        vul_numero: fila["número cobro"] || fila["vul_numero"] || '',
+                        vul_cp: fila["código postal"] || fila["vul_cp"] || ''
+                    };
+
+                    if (["CARPINTERIA", "PANADERIA", "COCINA"].includes(prog)) {
+                        datosDocumento.integrantes = [{
+                            curp: (fila["curp beneficiario"] || fila["curp"] || "").toUpperCase(),
+                            nombre: (fila["nombre(s)"] || fila["nombre"] || "").toUpperCase(),
+                            paterno: (fila["apellido paterno"] || fila["paterno"] || "").toUpperCase(),
+                            materno: (fila["apellido materno"] || fila["materno"] || "").toUpperCase(),
+                            fecha_nac: fila["fecha nacimiento"] || fila["fecha_nac"] || "",
+                            edad: fila["edad"] || "",
+                            sexo: (fila["sexo"] || "MUJER").toUpperCase(),
+                            civil: (fila["estado civil"] || "").toUpperCase(),
+                            indigena: (fila["indígena"] || "NO").toUpperCase(),
+                            discapacidad: (fila["discapacidad"] || "NO").toUpperCase()
+                        }];
+                    } else {
+                        datosDocumento.beneficiario = {
+                            curp: (fila["curp beneficiario"] || fila["curp"] || "").toUpperCase(),
+                            nombre: (fila["nombre(s)"] || fila["nombre"] || "").toUpperCase(),
+                            paterno: (fila["apellido paterno"] || fila["paterno"] || "").toUpperCase(),
+                            materno: (fila["apellido materno"] || fila["materno"] || "").toUpperCase(),
+                            fecha_nacimiento: fila["fecha nacimiento"] || fila["fecha_nacimiento"] || "",
+                            edad: fila["edad"] || "",
+                            sexo: (fila["sexo"] || "MUJER").toUpperCase(),
+                            civil: (fila["estado civil"] || "").toUpperCase(),
+                            indigena: (fila["indígena"] || "NO").toUpperCase(),
+                            discapacidad: (fila["discapacidad"] || "NO").toUpperCase()
+                        };
+                    }
+
+                    try {
+                        await addDoc(apoyosRef, datosDocumento);
+                    } catch (error) {
+                        console.error("❌ Error en fila " + (i + 1) + ": ", error);
+                    }
+                }
+                alert("✨ ¡Importación masiva completada con éxito!");
+                input.value = ""; 
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    // --- ASIGNACIÓN DE ENLACES DE EVENTOS DOM ---
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('programa_principal')?.addEventListener('change', window.actualizarSubgrupos);
+        document.getElementById('subgrupo_programa')?.addEventListener('change', window.configurarFormulario);
+        document.getElementById('ben_fecha_nacimiento')?.addEventListener('change', window.analizarBeneficiario);
+        
+        // Ejecución inicial preventiva
+        window.configurarFormulario();
     });
+
+    // --- EXPORTAR FUNCIONES AL CONTEXTO GLOBAL ---
+    window.exportarExcel = exportarExcel;
+    window.vaciarBaseDatos = vaciarBaseDatos;
 </script>
 </body>
 </html>
