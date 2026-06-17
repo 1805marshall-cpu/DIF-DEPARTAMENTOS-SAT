@@ -447,7 +447,7 @@
             <fieldset id="sec_beneficiario">
                 <legend>2. Datos del Beneficiario Principal / Alumno</legend>
                 <div class="form-grid">
-                    <div class="form-group"><label>CURP</label><input type="text" id="ben_curp" maxlength="18" style="text-transform: uppercase;"></div>
+                    <div class="form-group"><label>CURP</label><input type="text" id="ben_curp" onblur="window.validarDuplicado('curp', this.value)"></div>
                     <div class="form-group"><label>Nombre(s)</label><input type="text" id="ben_nombre"></div>
                     <div class="form-group"><label>Apellido Paterno</label><input type="text" id="ben_paterno"></div>
                     <div class="form-group"><label>Apellido Materno</label><input type="text" id="ben_materno"></div>
@@ -532,7 +532,31 @@
     
     <button id="btnVaciar" class="btn-admin btn-clear-db"><i class="fas fa-trash-alt"></i> Vaciar Base de Datos</button>
 </div>
-        
+        <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+    
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
+        <label style="font-size: 12px; font-weight: bold; color: #475569;">🔍 Buscador Global (Cualquier campo):</label>
+        <input type="text" 
+       placeholder="Escribe CURP, Nombre, Programa..." 
+       oninput="window.ejecutarFiltroGlobal(this.value)" 
+       style="width: 100%; padding: 6px; border-radius: 4px; border: 1px solid #cbd5e1;">
+    </div>
+
+<div style="display: flex; flex-direction: column; gap: 4px;">
+    <label style="font-size: 12px; font-weight: bold; color: #475569;">📄 Mostrar por página:</label>
+    <select id="limite_paginas" style="padding: 8px; border-radius: 4px; border: 1px solid var(--border);" 
+            onchange="window.cambiarFilasPorPagina(this.value)">
+        <option value="20">20 registros</option>
+        <option value="30">30 registros</option>
+        <option value="40">40 registros</option>
+        <option value="50">50 registros</option>
+        <option value="200">200 registros</option>
+    </select>
+</div>
+</div>
+
+<div id="controles_paginacion" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 15px; margin-bottom: 15px;">
+    </div>
 
         <div style="overflow-x: auto;">
             <table id="tabla_beneficiarios" style="width: 100%; border-collapse: collapse; background: white; font-size: 12px;">
@@ -566,7 +590,16 @@
     const db = getFirestore(app);
     const apoyosRef = collection(db, "proyetos_pv");
 
-    let listadoLive = [];
+// El array local de datos se queda igual
+let listadoLive = [];
+
+// --- VARIABLES DE CONTROL ASIGNADAS CORRECTAMENTE A WINDOW ---
+window.paginaActual = 1;
+window.filasPorPagina = 20; 
+window.terminoBusqueda = "";
+
+// Si ya no vas a usar la selección masiva de filas, puedes borrar esta línea por completo:
+let registrosSeleccionados = new Set();
 
     const subgrupos = {
         "PAE_CALIENTE": ["CALIENTE"],
@@ -598,82 +631,115 @@
         renderizarTablasSincronizadas();
     });
 
-    // --- RENDERIZADO SIMULTÁNEO CON COLUMNA DE CONTROL INTERNO (ESCUELAS DETALLADAS) ---
-    function renderizarTablasSincronizadas() {
-        const tbodyResumen = document.getElementById('cuerpo_tabla');
-        const tbodyCompleto = document.getElementById('lista_beneficiarios');
+/// 1. INICIALIZACIÓN DE VARIABLES GLOBALES DE CONTROL
+window.terminoBusqueda = window.terminoBusqueda || "";
+window.filasPorPagina = window.filasPorPagina || 20;
+window.paginaActual = window.paginaActual || 1;
 
-        if (tbodyResumen) tbodyResumen.innerHTML = '';
-        if (tbodyCompleto) tbodyCompleto.innerHTML = '';
+// 2. EXPOSICIÓN DE ACCIONES AL ENTORNO WINDOW (MANEJADORES DE EVENTOS)
+window.ejecutarFiltroGlobal = function(valor) {
+    window.terminoBusqueda = valor.trim(); 
+    window.paginaActual = 1;               // Reinicia a la primera página para evitar desbordes
+    renderizarTablasSincronizadas();       // Redibuja la tabla con el nuevo filtro
+};
 
-        if (listadoLive.length === 0) {
-            if (tbodyResumen) tbodyResumen.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px; color:#64748b;">No hay registros cargados en el padrón local.</td></tr>`;
-            return;
+window.cambiarFilasPorPagina = function(valor) {
+    window.filasPorPagina = parseInt(valor);
+    window.paginaActual = 1;
+    renderizarTablasSincronizadas();
+};
+
+window.cambiarPagina = function(direccion) {
+    if (direccion === -1 && window.paginaActual > 1) window.paginaActual--;
+    if (direccion === 1) window.paginaActual++;
+    renderizarTablasSincronizadas();
+};
+
+// 3. FUNCIÓN DE RENDERIZADO CORREGIDA (Lectura global estricta)
+function renderizarTablasSincronizadas() {
+    const tbodyResumen = document.getElementById('cuerpo_tabla');
+    if (tbodyResumen) tbodyResumen.innerHTML = '';
+
+    // 1. FILTRADO MULTICRITERIO GLOBAL utilizando window.terminoBusqueda
+    const registrosFiltrados = listadoLive.filter(d => {
+        if (!window.terminoBusqueda) return true;
+        
+        const busqueda = window.terminoBusqueda.toLowerCase();
+        const fecha = d.fecha_registro ? new Date(d.fecha_registro).toLocaleDateString('es-MX') : '';
+        const lugar = (d.localidad || d.col_loc || '').toLowerCase();
+        const programa = (d.programa || '').toLowerCase();
+        const subgrupo = (d.subgrupo || '').toLowerCase();
+        const consecutivo = String(d.num_progresivo || '');
+        const estatus = (d.estatus || '').toLowerCase();
+        const obs = (d.observaciones || '').toLowerCase();
+
+        let coincideRaiz = consecutivo.includes(busqueda) || 
+                           programa.includes(busqueda) || 
+                           subgrupo.includes(busqueda) || 
+                           lugar.includes(busqueda) || 
+                           fecha.includes(busqueda) || 
+                           estatus.includes(busqueda) ||
+                           obs.includes(busqueda);
+
+        if (d.integrantes && Array.isArray(d.integrantes)) {
+            return coincideRaiz || d.integrantes.some(int => 
+                `${int.nombre} ${int.paterno} ${int.materno}`.toLowerCase().includes(busqueda) || 
+                (int.curp || '').toLowerCase().includes(busqueda)
+            );
+        } else {
+            const nombreCompleto = `${d.beneficiario?.nombre || ''} ${d.beneficiario?.paterno || ''} ${d.beneficiario?.materno || ''}`.toLowerCase();
+            const curpInd = (d.beneficiario?.curp || '').toLowerCase();
+            const escuela = (d.pae_escuela || '').toLowerCase();
+            const cct = (d.pae_clave_escuela || '').toLowerCase();
+
+            return coincideRaiz || nombreCompleto.includes(busqueda) || curpInd.includes(busqueda) || escuela.includes(busqueda) || cct.includes(busqueda);
         }
+    });
 
-        listadoLive.forEach((d) => {
-            const fecha = d.fecha_registro ? new Date(d.fecha_registro).toLocaleDateString('es-MX') : '';
-            const lugar = d.localidad || d.col_loc || 'N/A';
-            const nProgresivo = d.num_progresivo || '-';
-            
-            // Renderizado de Badge dinámico para el Estatus
-            let colorBadge = "#64748b"; 
-            if (d.estatus === "PENDIENTE") colorBadge = "#f59e0b";
-            if (d.estatus === "VALIDADO") colorBadge = "#3b82f6";
-            if (d.estatus === "ENTREGADO") colorBadge = "#10b981";
-            if (d.estatus === "EN REVISIÓN") colorBadge = "#ef4444";
+    // 2. LOGÍSTICA DE PAGINACIÓN utilizando constantes globales de window
+    const totalRegistros = registrosFiltrados.length;
+    const totalPaginas = Math.ceil(totalRegistros / window.filasPorPagina) || 1;
+    
+    if (window.paginaActual > totalPaginas) window.paginaActual = totalPaginas;
 
-            const badgeEstatusHtml = `<span style="background:${colorBadge}; color:white; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">${d.estatus || 'PENDIENTE'}</span>`;
-            const badgeDifHtml = d.capturado_dif_estatal === "SI" 
-                ? `<br><span style="color:#10b981; font-size:10px;"><i class="fas fa-check-circle"></i> SÍ (DIF ESTATAL)</span>` 
-                : `<br><span style="color:#64748b; font-size:10px;"><i class="fas fa-times-circle"></i> NO (DIF ESTATAL)</span>`;
+    const indiceInicio = (window.paginaActual - 1) * window.filasPorPagina;
+    const indiceFin = indiceInicio + window.filasPorPagina;
+    const registrosPaginados = registrosFiltrados.slice(indiceInicio, indiceFin);
 
-            const celdaControlInterno = `${badgeEstatusHtml}${badgeDifHtml}`;
+    // Llama a tu función que actualiza los textos de los botones (Asegúrate que lea de window también)
+    if (typeof actualizarControlesPaginacion === 'function') {
+        actualizarControlesPaginacion(totalRegistros, totalPaginas);
+    }
 
-            // CASO A: TALLER GRUPAL CON INTEGRANTES
-            if (d.integrantes && Array.isArray(d.integrantes) && d.integrantes.length > 0) {
-                d.integrantes.forEach((int, index) => {
-                    const nombreInt = `${int.nombre || ''} ${int.paterno || ''} ${int.materno || ''}`.trim().toUpperCase();
-                    const telefonoMostrar = d.telefono_general || d.ta_telefono || 'S/N';
-                    const obsMostrar = d.observaciones || 'SIN OBSERVACIONES';
+    if (registrosPaginados.length === 0) {
+        if (tbodyResumen) tbodyResumen.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:15px; color:#64748b;">No se encontraron registros que coincidan con la búsqueda.</td></tr>`;
+        return;
+    }
 
-                    if (tbodyResumen) {
-                        const filaR = tbodyResumen.insertRow();
-                        filaR.innerHTML = `
-                            <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; text-align: center; color: #64748b;">${nProgresivo}</td>
-                            <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; color: var(--primary);">${d.programa || ''}</td>
-                            <td style="padding: 10px; border: 1px solid var(--border);">${lugar}</td>
-                            <td style="padding: 10px; border: 1px solid var(--border); font-family: monospace;">${int.curp || 'N/A'}</td>
-                            <td style="padding: 10px; border: 1px solid var(--border); font-size:11px;">
-                                <i class="fas fa-tools"></i> <strong>Grp:</strong> ${d.subgrupo || ''}<br><small>Integrante: ${nombreInt}</small>
-                                <br><small style="color:#475569;">📞 Tel: ${telefonoMostrar} | 📝 Obs: ${obsMostrar}</small>
-                            </td>
-                            <td style="padding: 10px; border: 1px solid var(--border); text-align:center; line-height:1.3;">${celdaControlInterno}</td>
-                            <td style="padding: 10px; border: 1px solid var(--border);">${fecha}</td>
-                            <td style="padding: 10px; border: 1px solid var(--border); text-align:center;">
-                                ${index === 0 ? `<button class="btn-admin" style="background:var(--danger); padding:4px 8px;" onclick="window.borrarRegistro('${d.id_firestore}')">🗑️</button>` : ''}
-                            </td>
-                        `;
-                    }
-                });
-            } 
-            // CASO B: INDIVIDUAL O ESCUELA (NUEVO FORMATO DE VISUALIZACIÓN DETALLADA)
-            else {
-                let infoIdentificacion = "";
-                let infoCurpClave = "";
+    // 3. INYECTAR FILAS AL DOM
+    registrosPaginados.forEach((d) => {
+        const fecha = d.fecha_registro ? new Date(d.fecha_registro).toLocaleDateString('es-MX') : '';
+        const lugar = d.localidad || d.col_loc || 'N/A';
+        const nProgresivo = d.num_progresivo || '-';
+        
+        let colorBadge = "#64748b"; 
+        if (d.estatus === "PENDIENTE") colorBadge = "#f59e0b";
+        if (d.estatus === "VALIDADO") colorBadge = "#3b82f6";
+        if (d.estatus === "ENTREGADO") colorBadge = "#10b981";
+        if (d.estatus === "EN REVISIÓN") colorBadge = "#ef4444";
 
-                if (d.pae_escuela) {
-                    infoIdentificacion = `
-                        <span style="color: var(--primary); font-weight: bold;"><i class="fas fa-school"></i> ESCUELA: ${d.pae_escuela}</span>
-                        <br><small style="color: #334155; font-weight: 600;">🔑 CCT: ${d.pae_clave_escuela || 'SIN CLAVE'}</small>
-                    `;
-                    infoCurpClave = d.pae_clave_escuela || 'SIN CLAVE';
-                } else {
-                    infoIdentificacion = `<i class="fas fa-user"></i> ${d.beneficiario?.nombre || ''} ${d.beneficiario?.paterno || ''} ${d.beneficiario?.materno || ''}`.toUpperCase();
-                    infoCurpClave = d.beneficiario?.curp || 'N/A';
-                }
+        const badgeEstatusHtml = `<span style="background:${colorBadge}; color:white; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:10px;">${d.estatus || 'PENDIENTE'}</span>`;
+        const badgeDifHtml = d.capturado_dif_estatal === "SI" 
+            ? `<br><span style="color:#10b981; font-size:10px;"><i class="fas fa-check-circle"></i> SÍ (DIF ESTATAL)</span>` 
+            : `<br><span style="color:#64748b; font-size:10px;"><i class="fas fa-times-circle"></i> NO (DIF ESTATAL)</span>`;
 
-                const telefonoMostrar = d.telefono_general || 'S/N';
+        const celdaControlInterno = `${badgeEstatusHtml}${badgeDifHtml}`;
+
+        // CASO A: TALLER GRUPAL CON INTEGRANTES
+        if (d.integrantes && Array.isArray(d.integrantes) && d.integrantes.length > 0) {
+            d.integrantes.forEach((int, index) => {
+                const nombreInt = `${int.nombre || ''} ${int.paterno || ''} ${int.materno || ''}`.trim().toUpperCase();
+                const telefonoMostrar = d.telefono_general || d.ta_telefono || 'S/N';
                 const obsMostrar = d.observaciones || 'SIN OBSERVACIONES';
 
                 if (tbodyResumen) {
@@ -682,25 +748,64 @@
                         <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; text-align: center; color: #64748b;">${nProgresivo}</td>
                         <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; color: var(--primary);">${d.programa || ''}</td>
                         <td style="padding: 10px; border: 1px solid var(--border);">${lugar}</td>
-                        <td style="padding: 10px; border: 1px solid var(--border); font-family: monospace; font-weight: bold;">${infoCurpClave}</td>
-                        <td style="padding: 10px; border: 1px solid var(--border); font-size:11px; line-height:1.4;">
-                            ${infoIdentificacion}
+                        <td style="padding: 10px; border: 1px solid var(--border); font-family: monospace;">${int.curp || 'N/A'}</td>
+                        <td style="padding: 10px; border: 1px solid var(--border); font-size:11px;">
+                            <i class="fas fa-tools"></i> <strong>Grp:</strong> ${d.subgrupo || ''}<br><small>Integrante: ${nombreInt}</small>
                             <br><small style="color:#475569;">📞 Tel: ${telefonoMostrar} | 📝 Obs: ${obsMostrar}</small>
                         </td>
                         <td style="padding: 10px; border: 1px solid var(--border); text-align:center; line-height:1.3;">${celdaControlInterno}</td>
                         <td style="padding: 10px; border: 1px solid var(--border);">${fecha}</td>
                         <td style="padding: 10px; border: 1px solid var(--border); text-align:center;">
-                            <button class="btn-admin" style="background:var(--danger); padding:4px 8px;" onclick="window.borrarRegistro('${d.id_firestore}')">🗑️</button>
-                            <button class="btn-admin" style="background:#64748b; padding:4px 8px;" onclick="window.editarRegistro('${d.id_firestore}')">✏️</button>
+                            ${index === 0 ? `<button class="btn-admin" style="background:var(--danger); padding:4px 8px;" onclick="window.borrarRegistro('${d.id_firestore}')">🗑️</button>` : ''}
                         </td>
                     `;
                 }
+            });
+        } 
+        // CASO B: INDIVIDUAL O ESCUELA
+        else {
+            let infoIdentificacion = "";
+            let infoCurpClave = "";
+
+            if (d.pae_escuela) {
+                infoIdentificacion = `<span style="color: var(--primary); font-weight: bold;"><i class="fas fa-school"></i> ESCUELA: ${d.pae_escuela}</span><br><small style="color: #334155; font-weight: 600;">🔑 CCT: ${d.pae_clave_escuela || 'SIN CLAVE'}</small>`;
+                infoCurpClave = d.pae_clave_escuela || 'SIN CLAVE';
+            } else {
+                const nombreCompleto = d.beneficiario?.nombre_completo_cache || `${d.beneficiario?.nombre || ''} ${d.beneficiario?.paterno || ''} ${d.beneficiario?.materno || ''}`.trim();
+                infoIdentificacion = `<i class="fas fa-user"></i> ${nombreCompleto}`.toUpperCase();
+                infoCurpClave = d.beneficiario?.curp || 'N/A';
             }
-        });
+
+            const telefonoMostrar = d.telefono_general || 'S/N';
+            const obsMostrar = d.observaciones || 'SIN OBSERVACIONES';
+
+            if (tbodyResumen) {
+                const filaR = tbodyResumen.insertRow();
+                filaR.innerHTML = `
+                    <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; text-align: center; color: #64748b;">${nProgresivo}</td>
+                    <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; color: var(--primary);">${d.programa || ''}</td>
+                    <td style="padding: 10px; border: 1px solid var(--border);">${lugar}</td>
+                    <td style="padding: 10px; border: 1px solid var(--border); font-family: monospace; font-weight: bold;">${infoCurpClave}</td>
+                    <td style="padding: 10px; border: 1px solid var(--border); font-size:11px; line-height:1.4;">
+                        ${infoIdentificacion}
+                        <br><small style="color:#475569;">📞 Tel: ${telefonoMostrar} | 📝 Obs: ${obsMostrar}</small>
+                    </td>
+                    <td style="padding: 10px; border: 1px solid var(--border); text-align:center; line-height:1.3;">${celdaControlInterno}</td>
+                    <td style="padding: 10px; border: 1px solid var(--border);">${fecha}</td>
+                    <td style="padding: 10px; border: 1px solid var(--border); text-align:center;">
+                        <button class="btn-admin" style="background:var(--danger); padding:4px 8px;" onclick="window.borrarRegistro('${d.id_firestore}')">🗑️</button>
+                        <button class="btn-admin" style="background:#64748b; padding:4px 8px;" onclick="window.editarRegistro('${d.id_firestore}')">✏️</button>
+                    </td>
+                `;
+            }
+        }
+    });
+    
+    if (typeof window.verificarTablaVacia === 'function') {
         window.verificarTablaVacia();
     }
-
-    // --- MATRIZ EXHAUSTIVA DE EXPORTACIÓN A EXCEL ---
+}
+        // --- MATRIZ EXHAUSTIVA DE EXPORTACIÓN A EXCEL ---
     async function exportarExcel() {
         if (listadoLive.length === 0) { 
             alert("⚠️ No hay registros en el padrón para exportar."); 
@@ -854,18 +959,23 @@
                 datosDocumento.subgrupo = `${sub} - ${sufijoGrupo}`; 
             } catch (error) { datosDocumento.subgrupo = `${sub} - grupo_generico`; }
         } else {
-            datosDocumento.beneficiario = { 
-                curp: document.getElementById('ben_curp')?.value.trim().toUpperCase() || '', 
-                nombre: document.getElementById('ben_nombre')?.value.trim().toUpperCase() || '',
-                paterno: document.getElementById('ben_paterno')?.value.trim().toUpperCase() || '',
-                materno: document.getElementById('ben_materno')?.value.trim().toUpperCase() || '',
-                fecha_nacimiento: document.getElementById('ben_fecha_nacimiento')?.value || '',
-                edad: document.getElementById('edad_exacta')?.value || '',
-                sexo: document.getElementById('ben_sexo')?.value || 'MUJER',
-                civil: document.getElementById('ben_civil')?.value.trim().toUpperCase() || '',
-                indigena: document.getElementById('ben_indigena')?.value || 'NO',
-                discapacidad: document.getElementById('ben_discapacidad')?.value || 'NO'
-            };
+// ... Dentro de tu funcion guardarRegistro() existente:
+datosDocumento.beneficiario = { 
+    curp: document.getElementById('ben_curp')?.value.trim().toUpperCase() || '', 
+    nombre: document.getElementById('ben_nombre')?.value.trim().toUpperCase() || '',
+    paterno: document.getElementById('ben_paterno')?.value.trim().toUpperCase() || '',
+    materno: document.getElementById('ben_materno')?.value.trim().toUpperCase() || '',
+    
+    // 🔥 AGREGA ESTA LÍNEA AQUÍ:
+    nombre_completo_cache: `${document.getElementById('ben_nombre')?.value || ''} ${document.getElementById('ben_paterno')?.value || ''} ${document.getElementById('ben_materno')?.value || ''}`.trim().toUpperCase(),
+    
+    fecha_nacimiento: document.getElementById('ben_fecha_nacimiento')?.value || '',
+    edad: document.getElementById('edad_exacta')?.value || '',
+    sexo: document.getElementById('ben_sexo')?.value || 'MUJER',
+    civil: document.getElementById('ben_civil')?.value.trim().toUpperCase() || '',
+    indigena: document.getElementById('ben_indigena')?.value || 'NO',
+    discapacidad: document.getElementById('ben_discapacidad')?.value || 'NO'
+};
             datosDocumento.representante = {
                 curp: document.getElementById('mar_curp')?.value.trim().toUpperCase() || '',
                 nombre: document.getElementById('mar_nombre')?.value.trim().toUpperCase() || '',
@@ -1159,6 +1269,100 @@
     // --- EXPORTAR FUNCIONES AL CONTEXTO GLOBAL ---
     window.exportarExcel = exportarExcel;
     window.vaciarBaseDatos = vaciarBaseDatos;
+
+    // --- VALIDACIÓN DE DUPLICADOS EN TIEMPO REAL ---
+window.validarDuplicado = async function(tipo, valor) {
+    if (!valor || valor.trim() === "") return;
+    
+    const valorBusqueda = valor.trim().toUpperCase();
+    let campoQuery = "";
+
+    // Determinamos qué campo mapear en la consulta base
+    if (tipo === 'curp') {
+        campoQuery = "beneficiario.curp";
+    } else if (tipo === 'nombre') {
+        campoQuery = "beneficiario.nombre_completo_cache"; // Nota sobre esto abajo *
+    }
+
+    try {
+        // 1. Busqueda en Beneficiarios Individuales
+        const qIndividual = query(apoyosRef, where(campoQuery, "==", valorBusqueda));
+        const snapIndividual = await getDocs(qIndividual);
+
+        if (!snapIndividual.empty) {
+            const docData = snapIndividual.docs[0].data();
+            alert(`⚠️ ATENCIÓN: El usuario con ${tipo.toUpperCase()} "${valorBusqueda}" YA se encuentra registrado en el programa: "${docData.programa}" (Subgrupo: ${docData.subgrupo || 'N/A'}).`);
+            return;
+        }
+
+        // 2. Búsqueda en Grupos (Como Firestore no busca objetos dentro de arrays de forma parcial de manera nativa, 
+        // recorremos el listado local "listadoLive" que ya tienes sincronizado en tiempo real para no gastar lecturas)
+        if (tipo === 'curp') {
+            const encontradoEnGrupo = listadoLive.find(d => 
+                d.integrantes && Array.isArray(d.integrantes) && 
+                d.integrantes.some(int => (int.curp || '').toUpperCase() === valorBusqueda)
+            );
+
+            if (encontradoEnGrupo) {
+                alert(`⚠️ ATENCIÓN: Esta CURP ya pertenece a un integrante del taller grupal del programa: "${encontradoEnGrupo.programa}" (${encontradoEnGrupo.subgrupo}).`);
+                return;
+            }
+        } else if (tipo === 'nombre') {
+            const encontradoEnGrupo = listadoLive.find(d => 
+                d.integrantes && Array.isArray(d.integrantes) && 
+                d.integrantes.some(int => {
+                    const nombreCompletoInt = `${int.nombre || ''} ${int.paterno || ''} ${int.materno || ''}`.trim().toUpperCase();
+                    return nombreCompletoInt === valorBusqueda;
+                })
+            );
+
+            if (encontradoEnGrupo) {
+                alert(`⚠️ ATENCIÓN: Este nombre ya pertenece a un integrante del taller grupal del programa: "${encontradoEnGrupo.programa}" (${encontradoEnGrupo.subgrupo}).`);
+                return;
+            }
+        }
+
+    } catch (error) {
+        console.error("Error al validar duplicado:", error);
+    }
+}
+// --- CONTROLADOR DE INTERFAZ DE PAGINACIÓN (CORREGIDO) ---
+    function actualizarControlesPaginacion(totalRegistros, totalPaginas) {
+        const info = document.getElementById('info_paginacion');
+        const btnAnt = document.getElementById('btn_pag_anterior');
+        const btnSig = document.getElementById('btn_pag_siguiente');
+
+        // Se lee estrictamente desde window.paginaActual
+        if (info) {
+            info.innerText = `Mostrando página ${window.paginaActual} de ${totalPaginas} (${totalRegistros} registros totales)`;
+        }
+        
+        if (btnAnt) btnAnt.disabled = (window.paginaActual === 1);
+        if (btnSig) btnSig.disabled = (window.paginaActual === totalPaginas);
+    }
+
+    // --- ACCIONES GLOBALES ASIGNADAS A WINDOW (CORREGIDAS) ---
+    window.cambiarPagina = function(direccion) {
+        if (direccion === -1 && window.paginaActual > 1) {
+            window.paginaActual--;
+        }
+        if (direccion === 1) {
+            window.paginaActual++; 
+        }
+        renderizarTablasSincronizadas();
+    };
+
+    window.cambiarFilasPorPagina = function(valor) {
+        window.filasPorPagina = parseInt(valor);
+        window.paginaActual = 1; // Reseteamos siempre a la página 1
+        renderizarTablasSincronizadas();
+    };
+
+    window.ejecutarFiltroGlobal = function(valor) {
+        window.terminoBusqueda = valor.trim(); // Evita espacios vacíos fantasmas
+        window.paginaActual = 1;               // Reiniciar flujo de páginas al filtrar
+        renderizarTablasSincronizadas();
+    };
 </script>
 </body>
 </html>
