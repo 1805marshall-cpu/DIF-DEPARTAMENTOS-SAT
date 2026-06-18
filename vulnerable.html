@@ -530,6 +530,7 @@
         <input type="file" id="csv_file" accept=".csv" style="display: none;">
     </label>
     
+    <button id="btnVaciar" class="btn-admin btn-clear-db"><i class="fas fa-trash-alt"></i> Vaciar Base de Datos</button>
 </div>
         <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
     
@@ -574,6 +575,31 @@
                 <tbody id="cuerpo_tabla">
                     <tr><td colspan="8" style="text-align:center; padding:15px; color:#64748b;">No hay registros cargados en el padrón local.</td></tr>
                 </tbody>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; background: #f8fafc; padding: 10px 15px; border-radius: 6px; border: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;">
+    
+    <div id="info_paginacion" style="font-size: 13px; font-weight: 600; color: #475569;">
+        Cargando información de páginas...
+    </div>
+
+    <div style="display: flex; gap: 8px;">
+        <button id="btn_pag_anterior" 
+                onclick="window.cambiarPagina(-1)" 
+                style="padding: 6px 14px; background: #64748b; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+            ◀ Ant
+        </button>
+        
+        <button id="id_indicador_visual" style="padding: 6px 12px; background: white; color: #334155; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: bold; pointer-events: none;">
+            -
+        </button>
+
+        <button id="btn_pag_siguiente" 
+                onclick="window.cambiarPagina(1)" 
+                style="padding: 6px 14px; background: #64748b; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+            Sig ▶
+        </button>
+    </div>
+</div>
             </table>
         </div>
     </div>
@@ -1325,20 +1351,30 @@ window.validarDuplicado = async function(tipo, valor) {
         console.error("Error al validar duplicado:", error);
     }
 }
-// --- CONTROLADOR DE INTERFAZ DE PAGINACIÓN (CORREGIDO) ---
-    function actualizarControlesPaginacion(totalRegistros, totalPaginas) {
-        const info = document.getElementById('info_paginacion');
-        const btnAnt = document.getElementById('btn_pag_anterior');
-        const btnSig = document.getElementById('btn_pag_siguiente');
+function actualizarControlesPaginacion(totalRegistros, totalPaginas) {
+    const info = document.getElementById('info_paginacion');
+    const btnAnt = document.getElementById('btn_pag_anterior');
+    const btnSig = document.getElementById('btn_pag_siguiente');
+    const indicador = document.getElementById('id_indicador_visual');
 
-        // Se lee estrictamente desde window.paginaActual
-        if (info) {
-            info.innerText = `Mostrando página ${window.paginaActual} de ${totalPaginas} (${totalRegistros} registros totales)`;
-        }
-        
-        if (btnAnt) btnAnt.disabled = (window.paginaActual === 1);
-        if (btnSig) btnSig.disabled = (window.paginaActual === totalPaginas);
+    // Actualiza el texto descriptivo
+    if (info) {
+        info.innerText = `Mostrando página ${window.paginaActual} de ${totalPaginas} (${totalRegistros} registros en total)`;
     }
+    
+    // Actualiza el número en el botón del centro
+    if (indicador) {
+        indicador.innerText = window.paginaActual;
+    }
+    
+    // Activa o desactiva botones según la posición actual del usuario
+    if (btnAnt) btnAnt.disabled = (window.paginaActual === 1);
+    if (btnSig) btnSig.disabled = (window.paginaActual === totalPaginas);
+
+    // Estilo visual opcional para denotar botones deshabilitados
+    if (btnAnt) btnAnt.style.opacity = (window.paginaActual === 1) ? "0.5" : "1";
+    if (btnSig) btnSig.style.opacity = (window.paginaActual === totalPaginas) ? "0.5" : "1";
+}
 
     // --- ACCIONES GLOBALES ASIGNADAS A WINDOW (CORREGIDAS) ---
     window.cambiarPagina = function(direccion) {
