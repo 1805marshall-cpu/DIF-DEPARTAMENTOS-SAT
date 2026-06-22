@@ -46,10 +46,18 @@
             
 
 <div class="flex gap-3 flex-wrap">
-
+    <button id="btnExportarExcel" type="button" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg shadow uppercase tracking-wider transition flex items-center gap-1.5">
+        🟢 Exportar a Excel
+    </button>
+    
+    <label for="btnImportarExcel" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-lg shadow uppercase tracking-wider transition cursor-pointer text-center flex items-center gap-1.5">
+        📊 Importar desde Excel
+    </label>
     <input type="file" id="btnImportarExcel" accept=".xlsx, .xls" class="hidden">
 </div>
-
+<button type="button" id="btnPurgarBD" class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded shadow transition flex items-center gap-2">
+    🗑️ Eliminar Base de Datos
+</button>
         </div>
 
         <form id="formExpediente" class="bg-white p-8 rounded-b-xl shadow-md space-y-8">
@@ -542,77 +550,83 @@
         }
     });
 
-    // --- 4. MOTOR DE FILTRADO Y PAGINACIÓN DINÁMICA ---
-    function renderizarTablaCivis() {
-        if (!tablaExpedientes) return;
+   // --- 4. MOTOR DE FILTRADO Y PAGINACIÓN DINÁMICA ---
+function renderizarTablaCivis() {
+    if (!tablaExpedientes) return;
+    
+    tablaExpedientes.innerHTML = "";
+    const busqueda = buscadorInput ? buscadorInput.value.toLowerCase().trim() : "";
+    const limiteFilas = selectorFilas ? selectorFilas.value : "20";
+
+    // 1. Diccionario de mapeo para los estados de ejecución (Tailwind CSS)
+    const estadosConfig = {
+        "REALIZADO": `<span class="bg-emerald-100 text-emerald-800 font-bold text-xs px-2 py-1 rounded shadow-sm">✅ REALIZADO</span>`,
+        "PENDIENTE": `<span class="bg-amber-100 text-amber-800 font-bold text-xs px-2 py-1 rounded shadow-sm">⚠️ PENDIENTE</span>`,
+        "NO PROCEDE": `<span class="bg-rose-100 text-rose-800 font-bold text-xs px-2 py-1 rounded shadow-sm">❌ NO PROCEDE</span>`
+    };
+
+    let expedientesFiltrados = expedientesLocalesCache.filter(item => {
+        const folio = (item.folio || "").toLowerCase();
+        const nombre = (item.ciudadano?.nombre || "").toLowerCase();
+        const area = (item.area || "").toLowerCase();
+        const estatus = (item.estatus || "").toLowerCase();
+        const noProg = String(item.no_progresivo || "");
         
-        tablaExpedientes.innerHTML = "";
-        const busqueda = buscadorInput ? buscadorInput.value.toLowerCase().trim() : "";
-        const limiteFilas = selectorFilas ? selectorFilas.value : "20";
+        return folio.includes(busqueda) || 
+               nombre.includes(busqueda) || 
+               area.includes(busqueda) || 
+               estatus.includes(busqueda) ||
+               noProg.includes(busqueda);
+    });
 
-        let expedientesFiltrados = expedientesLocalesCache.filter(item => {
-            const folio = (item.folio || "").toLowerCase();
-            const nombre = (item.ciudadano?.nombre || "").toLowerCase();
-            const area = (item.area || "").toLowerCase();
-            const estatus = (item.estatus || "").toLowerCase();
-            const noProg = String(item.no_progresivo || "");
-            
-            return folio.includes(busqueda) || 
-                   nombre.includes(busqueda) || 
-                   area.includes(busqueda) || 
-                   estatus.includes(busqueda) ||
-                   noProg.includes(busqueda);
-        });
+    const totalRegistros = expedientesFiltrados.length;
 
-        const totalRegistros = expedientesFiltrados.length;
-
-        if (totalRegistros === 0) {
-            tablaExpedientes.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400 italic">No se encontraron registros coincidentes.</td></tr>`;
-            actualizarControlesPaginacion(0, 0, 0, 1, 1);
-            return;
-        }
-
-        let filasPorPagina = limiteFilas === "all" ? totalRegistros : parseInt(limiteFilas);
-        const totalPaginas = Math.ceil(totalRegistros / filasPorPagina) || 1;
-
-        if (paginaActualCivis > totalPaginas) paginaActualCivis = totalPaginas;
-
-        const indiceInicio = (paginaActualCivis - 1) * filasPorPagina;
-        const indiceFin = Math.min(indiceInicio + filasPorPagina, totalRegistros);
-        const expedientesVisibles = expedientesFiltrados.slice(indiceInicio, indiceFin);
-
-        expedientesVisibles.forEach(item => {
-            const badgeEjecucion = item.ejecucion === "REALIZADO" 
-                ? `<span class="bg-emerald-100 text-emerald-800 font-bold text-xs px-2 py-1 rounded">✅ REALIZADO</span>`
-                : `<span class="bg-amber-100 text-amber-800 font-bold text-xs px-2 py-1 rounded">⚠️ PENDIENTE</span>`;
-
-            const tr = document.createElement('tr');
-            tr.className = "border-b border-slate-200 hover:bg-slate-50 text-xs";
-            tr.innerHTML = `
-                <td class="p-3 text-center font-bold text-slate-500 bg-slate-50/50">${item.no_progresivo || '-'}</td>
-                <td class="p-3 font-mono font-bold text-slate-700">${item.folio}</td>
-                <td class="p-3 font-medium">${item.ciudadano?.nombre || 'Anónimo'}</td>
-                <td class="p-3 text-slate-500 font-semibold">${item.area}</td>
-                <td class="p-3">${badgeEjecucion}</td>
-                <td class="p-3"><span class="bg-slate-200 px-2 py-0.5 rounded text-slate-700 font-medium">${item.estatus}</span></td>
-                <td class="p-3 font-bold text-blue-600">${item.fotos ? item.fotos.length : 0} img.</td>
-                <td class="p-3 text-center flex justify-center gap-2">
-                    <button type="button" class="btn-editar bg-blue-100 text-blue-700 hover:bg-blue-200 font-bold px-2.5 py-1 rounded transition" data-id="${item.id}">Editar</button>
-                    <button type="button" class="btn-eliminar bg-red-100 text-red-700 hover:bg-red-200 font-bold px-2.5 py-1 rounded transition" data-id="${item.id}">Eliminar</button>
-                </td>
-            `;
-            tablaExpedientes.appendChild(tr);
-        });
-
-        actualizarControlesPaginacion(indiceInicio + 1, indiceFin, totalRegistros, paginaActualCivis, totalPaginas);
-
-        tablaExpedientes.querySelectorAll('.btn-editar').forEach(btn => {
-            btn.onclick = (e) => cargarExpedienteParaEditar(e.target.getAttribute('data-id'));
-        });
-        tablaExpedientes.querySelectorAll('.btn-eliminar').forEach(btn => {
-            btn.onclick = (e) => eliminarExpedienteFirestore(e.target.getAttribute('data-id'));
-        });
+    if (totalRegistros === 0) {
+        tablaExpedientes.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400 italic">No se encontraron registros coincidentes.</td></tr>`;
+        actualizarControlesPaginacion(0, 0, 0, 1, 1);
+        return;
     }
+
+    let filasPorPagina = limiteFilas === "all" ? totalRegistros : parseInt(limiteFilas);
+    const totalPaginas = Math.ceil(totalRegistros / filasPorPagina) || 1;
+
+    if (paginaActualCivis > totalPaginas) paginaActualCivis = totalPaginas;
+
+    const indiceInicio = (paginaActualCivis - 1) * filasPorPagina;
+    const indiceFin = Math.min(indiceInicio + filasPorPagina, totalRegistros);
+    const expedientesVisibles = expedientesFiltrados.slice(indiceInicio, indiceFin);
+
+    expedientesVisibles.forEach(item => {
+        // 2. Aplicación dinámica del Badge. Si viene vacío o corrupto, por defecto será PENDIENTE
+        const badgeEjecucion = estadosConfig[item.ejecucion] || estadosConfig["PENDIENTE"];
+
+        const tr = document.createElement('tr');
+        tr.className = "border-b border-slate-200 hover:bg-slate-50 text-xs";
+        tr.innerHTML = `
+            <td class="p-3 text-center font-bold text-slate-500 bg-slate-50/50">${item.no_progresivo || '-'}</td>
+            <td class="p-3 font-mono font-bold text-slate-700">${item.folio}</td>
+            <td class="p-3 font-medium">${item.ciudadano?.nombre || 'Anónimo'}</td>
+            <td class="p-3 text-slate-500 font-semibold">${item.area}</td>
+            <td class="p-3">${badgeEjecucion}</td>
+            <td class="p-3"><span class="bg-slate-200 px-2 py-0.5 rounded text-slate-700 font-medium">${item.estatus}</span></td>
+            <td class="p-3 font-bold text-blue-600">${item.fotos ? item.fotos.length : 0} img.</td>
+            <td class="p-3 text-center flex justify-center gap-2">
+                <button type="button" class="btn-editar bg-blue-100 text-blue-700 hover:bg-blue-200 font-bold px-2.5 py-1 rounded transition" data-id="${item.id}">Editar</button>
+                <button type="button" class="btn-eliminar bg-red-100 text-red-700 hover:bg-red-200 font-bold px-2.5 py-1 rounded transition" data-id="${item.id}">Eliminar</button>
+            </td>
+        `;
+        tablaExpedientes.appendChild(tr);
+    });
+
+    actualizarControlesPaginacion(indiceInicio + 1, indiceFin, totalRegistros, paginaActualCivis, totalPaginas);
+
+    tablaExpedientes.querySelectorAll('.btn-editar').forEach(btn => {
+        btn.onclick = (e) => cargarExpedienteParaEditar(e.target.getAttribute('data-id'));
+    });
+    tablaExpedientes.querySelectorAll('.btn-eliminar').forEach(btn => {
+        btn.onclick = (e) => eliminarExpedienteFirestore(e.target.getAttribute('data-id'));
+    });
+}
 
     function actualizarControlesPaginacion(inicio, fin, total, pagActual, totalPags) {
         const pagInicioEl = document.getElementById("pagInicio");
