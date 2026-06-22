@@ -559,22 +559,23 @@
     </div>
 
         <div style="overflow-x: auto;">
-            <table id="tabla_beneficiarios" style="width: 100%; border-collapse: collapse; background: white; font-size: 12px;">
-                <thead>
-                    <tr style="background: #f1f5f9; color: #475569; text-align: left;">
-                        <th style="padding: 10px; border: 1px solid var(--border); text-align: center;">NO.</th>
-                        <th style="padding: 10px; border: 1px solid var(--border);">MODALIDAD</th>
-                        <th style="padding: 10px; border: 1px solid var(--border);">LOCALIDAD / COLONIA</th>
-                        <th style="padding: 10px; border: 1px solid var(--border);">CURP / CLAVE</th>
-                        <th style="padding: 10px; border: 1px solid var(--border);">IDENTIFICACIÓN CAPTURA (ESCUELA / PERSONA / DETALLE)</th>
-                        <th style="padding: 10px; border: 1px solid var(--border); text-align: center;">ESTATUS / DIF</th>
-                        <th style="padding: 10px; border: 1px solid var(--border);">FECHA DE REGISTRO</th>
-                        <th style="padding: 10px; border: 1px solid var(--border); text-align: center;">ACCIONES</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpo_tabla">
-                    <tr><td colspan="8" style="text-align:center; padding:15px; color:#64748b;">No hay registros cargados en el padrón local.</td></tr>
-                </tbody>
+<table style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr style="background: #f1f5f9; color: #475569; text-align: left;">
+            <th style="padding: 10px; border: 1px solid var(--border); text-align: center;">NO.</th>
+            <th style="padding: 10px; border: 1px solid var(--border);">MODALIDAD</th>
+            <th style="padding: 10px; border: 1px solid var(--border);">LOCALIDAD / COLONIA</th>
+            <th style="padding: 10px; border: 1px solid var(--border);">CURP / CLAVE</th>
+            <th style="padding: 10px; border: 1px solid var(--border);">IDENTIFICACIÓN CAPTURA (ESCUELA / PERSONA / DETALLE)</th>
+            <th style="padding: 10px; border: 1px solid var(--border); text-align: center;">ESTATUS / DIF</th>
+            <th style="padding: 10px; border: 1px solid var(--border);">FECHA DE REGISTRO</th>
+            <th style="padding: 10px; border: 1px solid var(--border); text-align: center;">ACCIONES</th>
+        </tr>
+    </thead>
+    
+    <tbody id="cuerpo_tabla">
+        </tbody>
+</table>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; background: #f8fafc; padding: 10px 15px; border-radius: 6px; border: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;">
     
@@ -600,28 +601,30 @@
         </button>
     </div>
 </div>
-            </table>
+            
         </div>
     </div>
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";    
     // --- CONFIGURACIÓN E INICIALIZACIÓN DE FIREBASE ---
-    const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
+const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
+
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const apoyosRef = collection(db, "proyetos_pv");
+    const NOMBRE_COLECCION = "proyetos_pv"; // La constante para la edición en línea
 
-// El array local de datos se queda igual
-let listadoLive = [];
+// ==========================================
+    // PARTE 3: VARIABLES DE CONTROL (GLOBALES Y LOCALES)
+    // ==========================================
+    let listadoLive = [];
 
-// --- VARIABLES DE CONTROL ASIGNADAS CORRECTAMENTE A WINDOW ---
-window.paginaActual = 1;
-window.filasPorPagina = 20; 
-window.terminoBusqueda = "";
+    window.paginaActual = 1;
+    window.filasPorPagina = 20; 
+    window.terminoBusqueda = "";
 
 // Si ya no vas a usar la selección masiva de filas, puedes borrar esta línea por completo:
 let registrosSeleccionados = new Set();
@@ -681,7 +684,7 @@ window.cambiarPagina = function(direccion) {
 };
 
 // 3. FUNCIÓN DE RENDERIZADO CORREGIDA (Lectura global estricta)
-function renderizarTablasSincronizadas() {
+window.renderizarTablasSincronizadas = function() {
     const tbodyResumen = document.getElementById('cuerpo_tabla');
     if (tbodyResumen) tbodyResumen.innerHTML = '';
 
@@ -806,22 +809,31 @@ function renderizarTablasSincronizadas() {
 
             if (tbodyResumen) {
                 const filaR = tbodyResumen.insertRow();
-                filaR.innerHTML = `
-                    <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; text-align: center; color: #64748b;">${nProgresivo}</td>
-                    <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; color: var(--primary);">${d.programa || ''}</td>
-                    <td style="padding: 10px; border: 1px solid var(--border);">${lugar}</td>
-                    <td style="padding: 10px; border: 1px solid var(--border); font-family: monospace; font-weight: bold;">${infoCurpClave}</td>
-                    <td style="padding: 10px; border: 1px solid var(--border); font-size:11px; line-height:1.4;">
-                        ${infoIdentificacion}
-                        <br><small style="color:#475569;">📞 Tel: ${telefonoMostrar} | 📝 Obs: ${obsMostrar}</small>
-                    </td>
-                    <td style="padding: 10px; border: 1px solid var(--border); text-align:center; line-height:1.3;">${celdaControlInterno}</td>
-                    <td style="padding: 10px; border: 1px solid var(--border);">${fecha}</td>
-                    <td style="padding: 10px; border: 1px solid var(--border); text-align:center;">
-                        <button class="btn-admin" style="background:var(--danger); padding:4px 8px;" onclick="window.borrarRegistro('${d.id_firestore}')">🗑️</button>
-                        <button class="btn-admin" style="background:#64748b; padding:4px 8px;" onclick="window.editarRegistro('${d.id_firestore}')">✏️</button>
-                    </td>
-                `;
+
+// BUSCA EL CASO B DENTRO DE TU FUNCIÓN DE RENDERIZADO Y REEMPLAZA ESE REGISTRO POR ESTE:
+const telefonoMostrar = d.telefono_general || 'S/N';
+const obsMostrar = d.observaciones || 'SIN OBSERVACIONES';
+
+if (tbodyResumen) {
+    const filaR = tbodyResumen.insertRow();
+    filaR.innerHTML = `
+        <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; text-align: center; color: #64748b;">${nProgresivo}</td>
+        
+        <td class="celda-programa" style="padding: 10px; border: 1px solid var(--border); font-weight: bold; color: var(--primary);">${d.programa || ''}</td>
+        <td class="celda-lugar" style="padding: 10px; border: 1px solid var(--border);">${lugar}</td>
+        <td class="celda-curp" style="padding: 10px; border: 1px solid var(--border); font-family: monospace; font-weight: bold;">${infoCurpClave}</td>
+        <td class="celda-identificacion" style="padding: 10px; border: 1px solid var(--border); font-size:11px; line-height:1.4;">
+            ${infoIdentificacion}
+            <br><small style="color:#475569;">📞 Tel: <span class="txt-telefono">${telefonoMostrar}</span> | 📝 Obs: <span class="txt-obs">${obsMostrar}</span></small>
+        </td>
+        <td class="celda-estatus" style="padding: 10px; border: 1px solid var(--border); text-align:center; line-height:1.3;">${celdaControlInterno}</td>
+        <td style="padding: 10px; border: 1px solid var(--border);">${fecha}</td>
+        <td class="celda-acciones" style="padding: 10px; border: 1px solid var(--border); text-align:center;">
+            <button class="btn-admin" style="background:var(--danger); padding:4px 8px; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="window.borrarRegistro('${d.id_firestore}')">🗑️</button>
+            <button class="btn-admin" style="background:#3b82f6; padding:4px 8px; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="window.habilitarEdicionEnLinea(this, '${d.id_firestore}')">✏️ Editar</button>
+        </td>
+    `;
+}
             }
         }
     });
@@ -1398,6 +1410,137 @@ function actualizarControlesPaginacion(totalRegistros, totalPaginas) {
         window.paginaActual = 1;               // Reiniciar flujo de páginas al filtrar
         renderizarTablasSincronizadas();
     };
+    window.habilitarEdicionEnLinea = function(boton, idFirestore) {
+    const fila = boton.closest('tr');
+    const registroOriginal = listadoLive.find(d => d.id_firestore === idFirestore);
+    if (!registroOriginal) return;
+
+    // Seleccionamos todas las celdas de la fila
+    const celdaPrograma = fila.querySelector('.celda-programa');
+    const celdaLugar = fila.querySelector('.celda-lugar');
+    const celdaCurp = fila.querySelector('.celda-curp');
+    const celdaIdentificacion = fila.querySelector('.celda-identificacion');
+    const celdaEstatus = fila.querySelector('.celda-estatus');
+    const celdaAcciones = fila.querySelector('.celda-acciones');
+
+    // 1. Editar Programa / Modalidad
+    if (celdaPrograma) {
+        celdaPrograma.innerHTML = `<input type="text" value="${registroOriginal.programa || ''}" id="edit_programa_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; box-sizing: border-box;">`;
+    }
+
+    // 2. Editar Localidad
+    if (celdaLugar) {
+        const valorLugar = registroOriginal.localidad || registroOriginal.col_loc || '';
+        celdaLugar.innerHTML = `<input type="text" value="${valorLugar}" id="edit_lugar_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; box-sizing: border-box;">`;
+    }
+
+    // 3. Editar CURP o Clave CCT
+    if (celdaCurp) {
+        const valorCurp = registroOriginal.pae_clave_escuela || registroOriginal.beneficiario?.curp || '';
+        celdaCurp.innerHTML = `<input type="text" value="${valorCurp}" id="edit_curp_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; font-family:monospace; box-sizing: border-box;">`;
+    }
+
+    // 4. Editar Identificación (Nombre de Persona o Nombre de Escuela) + Teléfono y Observaciones
+    if (celdaIdentificacion) {
+        const esEscuela = !!registroOriginal.pae_escuela;
+        const nombreActual = esEscuela 
+            ? registroOriginal.pae_escuela 
+            : `${registroOriginal.beneficiario?.nombre || ''} ${registroOriginal.beneficiario?.paterno || ''} ${registroOriginal.beneficiario?.materno || ''}`.trim();
+        
+        celdaIdentificacion.innerHTML = `
+            <label style="font-size:10px; display:block; color:#64748b;">${esEscuela ? 'Escuela:' : 'Beneficiario:'}</label>
+            <input type="text" value="${nombreActual}" id="edit_nombre_${idFirestore}" style="width:100%; padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px; box-sizing: border-box;">
+            
+            <label style="font-size:10px; display:block; color:#64748b;">Teléfono:</label>
+            <input type="text" value="${registroOriginal.telefono_general || ''}" id="edit_tel_${idFirestore}" style="width:100%; padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px; box-sizing: border-box;">
+            
+            <label style="font-size:10px; display:block; color:#64748b;">Observaciones:</label>
+            <input type="text" value="${registroOriginal.observaciones || ''}" id="edit_obs_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; box-sizing: border-box;">
+        `;
+    }
+
+    // 5. Editar Estatus y Reporte DIF
+    if (celdaEstatus) {
+        const estatusActual = registroOriginal.estatus || 'PENDIENTE';
+        const difActual = registroOriginal.capturado_dif_estatal || 'NO';
+        
+        celdaEstatus.innerHTML = `
+            <select id="edit_estatus_${idFirestore}" style="padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px; font-size:11px; width:100%; box-sizing: border-box;">
+                <option value="PENDIENTE" ${estatusActual === 'PENDIENTE' ? 'selected' : ''}>PENDIENTE</option>
+                <option value="VALIDADO" ${estatusActual === 'VALIDADO' ? 'selected' : ''}>VALIDADO</option>
+                <option value="ENTREGADO" ${estatusActual === 'ENTREGADO' ? 'selected' : ''}>ENTREGADO</option>
+                <option value="EN REVISIÓN" ${estatusActual === 'EN REVISIÓN' ? 'selected' : ''}>EN REVISIÓN</option>
+            </select>
+            <select id="edit_dif_${idFirestore}" style="padding:4px; border:1px solid #3b82f6; border-radius:4px; font-size:11px; width:100%; box-sizing: border-box;">
+                <option value="SI" ${difActual === 'SI' ? 'selected' : ''}>DIF: SÍ</option>
+                <option value="NO" ${difActual === 'NO' ? 'selected' : ''}>DIF: NO</option>
+            </select>
+        `;
+    }
+
+    // 6. Botones de Acción de Guardado
+    if (celdaAcciones) {
+        celdaAcciones.innerHTML = `
+            <button class="btn-admin" style="background:#10b981; padding:4px 8px; font-weight:bold; color:white; border:none; border-radius:4px; width:100%; cursor:pointer;" onclick="window.guardarEdicionEnLinea('${idFirestore}')">💾 Guardar</button>
+            <button class="btn-admin" style="background:#64748b; padding:4px 8px; margin-top:4px; color:white; border:none; border-radius:4px; width:100%; cursor:pointer;" onclick="renderizarTablasSincronizadas()">❌ Cancelar</button>
+        `;
+    }
+};
+
+window.guardarEdicionEnLinea = async function(idFirestore) {
+    const registroOriginal = listadoLive.find(d => d.id_firestore === idFirestore);
+    if (!registroOriginal) return;
+
+    // Recolectamos absolutamente todos los inputs mutados de la tabla
+    const nuevoPrograma = document.getElementById(`edit_programa_${idFirestore}`).value.trim().toUpperCase();
+    const nuevoLugar = document.getElementById(`edit_lugar_${idFirestore}`).value.trim().toUpperCase();
+    const nuevaCurpClave = document.getElementById(`edit_curp_${idFirestore}`).value.trim().toUpperCase();
+    const nuevoNombreInput = document.getElementById(`edit_nombre_${idFirestore}`).value.trim().toUpperCase();
+    const nuevoTel = document.getElementById(`edit_tel_${idFirestore}`).value.trim();
+    const nuevaObs = document.getElementById(`edit_obs_${idFirestore}`).value.trim().toUpperCase();
+    const nuevoEstatus = document.getElementById(`edit_estatus_${idFirestore}`).value;
+    const nuevoDif = document.getElementById(`edit_dif_${idFirestore}`).value;
+
+    // Preparamos el objeto base para el updateDoc
+    let datosActualizados = {
+        programa: nuevoPrograma,
+        localidad: nuevoLugar,
+        col_loc: nuevoLugar,
+        telefono_general: nuevoTel,
+        observaciones: nuevaObs,
+        estatus: nuevoEstatus,
+        capturado_dif_estatal: nuevoDif
+    };
+
+    // Estructuramos la información dependiendo si el renglón es una Escuela o una Persona Individual
+    if (registroOriginal.pae_escuela) {
+        datosActualizados.pae_escuela = nuevoNombreInput;
+        datosActualizados.pae_clave_escuela = nuevaCurpClave;
+    } else {
+        // Separamos el nombre completo de la celda de forma básica para actualizar el objeto beneficiario de Firebase
+        const partes = nuevoNombreInput.split(" ");
+        const nombre = partes[0] || "";
+        const paterno = partes[1] || "";
+        const materno = partes.slice(2).join(" ") || "";
+
+        datosActualizados["beneficiario.nombre"] = nombre;
+        datosActualizados["beneficiario.paterno"] = paterno;
+        datosActualizados["beneficiario.materno"] = materno;
+        datosActualizados["beneficiario.curp"] = nuevaCurpClave;
+    }
+
+    try {
+        const docRef = doc(db, "proyetos_pv", idFirestore);
+        
+        // Ejecutamos la actualización completa en la base de datos
+        await updateDoc(docRef, datosActualizados);
+        console.log("¡Todo el registro se ha actualizado con éxito!");
+        
+    } catch (error) {
+        console.error("Error al guardar los cambios globales:", error);
+        alert("Ocurrió un error al intentar actualizar todos los campos.");
+    }
+};
 </script>
 </body>
 </html>
