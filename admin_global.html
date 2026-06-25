@@ -308,26 +308,35 @@
         </div>
         <a href="vulnerable.html" class="btn-open" style="background: white; color: var(--vulnerable-color); padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">Abrir Módulo de Captura</a>
     </div>
+<h3 style="color: #1e293b; margin-bottom: 10px;">📊 Estatus de Gestión Operativa</h3>
 
-    <h3 style="color: #1e293b; margin-bottom: 10px;">📊 Estatus de Gestión Operativa</h3>
-    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
-        <div class="stat-box" style="background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #3b82f6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <small style="color:#64748b; font-weight: bold;">Total Padrón</small>
-            <div id="v-total" style="font-size: 24px; font-weight: bold; color: #1e293b;">0</div>
-        </div>
-        <div class="stat-box" style="background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #10b981; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <small style="color:#64748b; font-weight: bold;">Entregados</small>
-            <div id="v-ent" style="font-size: 24px; font-weight: bold; color: #10b981;">0</div>
-        </div>
-        <div class="stat-box" style="background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #f59e0b; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <small style="color:#64748b; font-weight: bold;">Pendientes</small>
-            <div id="v-pen" style="font-size: 24px; font-weight: bold; color: #ef4444;">0</div>
-        </div>
-        <div class="stat-box" style="background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #8b5cf6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-            <small style="color:#64748b; font-weight: bold;">Sincronizado DIF Estatal</small>
-            <div id="v-estatal-stats" style="font-size: 24px; font-weight: bold; color: #8b5cf6;">0</div>
-        </div>
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; margin-bottom: 25px;">
+    
+    <div class="stat-box" style="grid-column: span 2; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #3b82f6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <small style="color:#64748b; font-weight: bold;">Total Padrón</small>
+        <div id="v-total" style="font-size: 24px; font-weight: bold; color: #1e293b;">0</div>
     </div>
+    
+    <div class="stat-box" style="grid-column: span 2; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #10b981; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <small style="color:#64748b; font-weight: bold;">Entregados</small>
+        <div id="v-ent" style="font-size: 24px; font-weight: bold; color: #10b981;">0</div>
+    </div>
+    
+    <div class="stat-box" style="grid-column: span 2; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #f59e0b; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <small style="color:#64748b; font-weight: bold;">Pendientes</small>
+        <div id="v-pen" style="font-size: 24px; font-weight: bold; color: #ef4444;">0</div>
+    </div>
+
+    <div class="stat-box" style="grid-column: span 3; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #8b5cf6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <small style="color:#64748b; font-weight: bold;"> DIF Estatal</small>
+        <div id="v-estatal-stats" style="font-size: 24px; font-weight: bold; color: #8b5cf6;">0</div>
+    </div>
+
+    <div class="stat-box" style="grid-column: span 3; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #64748b; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <small style="color:#64748b; font-weight: bold;"> DIF Municipal</small>
+        <div id="v-estatal-no-stats" style="font-size: 24px; font-weight: bold; color: #64748b;">0</div>
+    </div>
+</div>
 
     <h3 style="color: #1e293b; margin-bottom: 10px;">👥 Demografía e Indicadores de Inclusión</h3>
     <div class="stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
@@ -774,12 +783,16 @@ window.reprocesarVulnerable = () => {
     const totalRegistros = data.length;
     const entregados = data.filter(item => item.estatus === "ENTREGADO").length;
     const pendientes = data.filter(item => item.estatus === "PENDIENTE").length;
+    
+    // Sincronizados y No Sincronizados con el DIF Estatal
     const difEstatal = data.filter(item => item.capturado_dif_estatal === "SI").length;
+    const noEstatal = data.filter(item => item.capturado_dif_estatal !== "SI").length; // 🌟 NUEVA MÉTRICA
 
     if(document.getElementById('v-total')) document.getElementById('v-total').innerText = totalRegistros;
     if(document.getElementById('v-ent')) document.getElementById('v-ent').innerText = entregados;
     if(document.getElementById('v-pen')) document.getElementById('v-pen').innerText = pendientes;
     if(document.getElementById('v-estatal-stats')) document.getElementById('v-estatal-stats').innerText = difEstatal;
+    if(document.getElementById('v-estatal-no-stats')) document.getElementById('v-estatal-no-stats').innerText = noEstatal; // 🌟 INYECCIÓN EN EL DOM
 // =============================================================================
     // 2. CONTEO Y CUANTIFICACIÓN GEOGRÁFICA (ZONAS Y SUBGRUPOS)
     // =============================================================================
