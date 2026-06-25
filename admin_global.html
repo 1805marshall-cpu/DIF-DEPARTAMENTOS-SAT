@@ -101,6 +101,8 @@
 .sidebar.collapsed .nav-exit span { display: none;}
 .sidebar.collapsed .nav-exit i {font-size: 18px;}
 
+
+
 /* Layout específico para Psicología */
     .psicos-grid-layout { display: grid;    grid-template-columns: repeat(3, 1fr);  gap: 15px;margin-bottom: 20px;}
 
@@ -204,6 +206,24 @@
     gap: 20px; 
     margin-top: 20px;
 }
+/* 1. Ocultar el texto de Cerrar Sesión (dejar solo el icono centrado) */
+.sidebar.collapsed .nav-exit span { 
+    display: none; 
+}
+
+/* 2. Ocultar los textos del perfil de usuario (Nombre, Rol, etc.) */
+.sidebar.collapsed .user-profile-box span,
+.sidebar.collapsed .user-profile-box div,
+.sidebar.collapsed .user-profile-box p { 
+    display: none; 
+}
+
+/* 3. Ajustar el centrado de los bloques inferiores al colapsar */
+.sidebar.collapsed .user-profile-box, 
+.sidebar.collapsed .nav-exit {
+    justify-content: center;
+    padding: 15px 0;
+}
     </style>
 </head>
 <body>
@@ -226,8 +246,8 @@
         </nav>
         <!-- Agrega este bloque antes del nav-exit -->
 <div class="user-profile-box">
-    <div class="user-avatar">
-        <i class="fas fa-user-circle"></i>
+<i class="fas fa-user-circle" style="font-size: 20px;"></i> <div> <b style="display:block; font-size:11px;">Admin_Global</b>
+        <small style="color: #94a3b8;">Sistema DIF</small>
     </div>
     <div class="user-details">
         <span id="user-name-display">Cargando...</span>
@@ -235,9 +255,9 @@
     </div>
 </div>
 
-<div class="nav-exit" onclick="cerrarSesion()">
-    <i class="fas fa-sign-out-alt"></i> <span>CERRAR SESIÓN</span>
-</div>
+<div class="nav-exit">
+    <i class="fas fa-sign-out-alt"></i>
+    <span>Cerrar Sesión</span> </div>
     </div>
 
     <div class="main-content">
@@ -862,33 +882,34 @@ window.reprocesarVulnerable = () => {
     // 3. RENDERIZADO DE LAS 3 LISTAS DE ANÁLISIS (CON BARRAS EN LISTA 3)
     // ==========================================
 // ==========================================
-    // RENDERIZADO DE MÚLTIPLES GRÁFICOS DE PASTEL
+    // RENDERIZADO DE MÚLTIPLES GRÁFICOS DE PASTEL CON BOTÓN DE DESCARGA (EXCEL/CSV)
     // ==========================================
     const contenedorTerritorio = document.getElementById('v-lista-territorio');
 
     if (contenedorTerritorio) {
         contenedorTerritorio.innerHTML = '';
         
-        // Paleta de colores institucionales fijas para las rebanadas del pastel
         const coloresPaleta = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#6366f1', '#ef4444', '#14b8a6', '#f43f5e', '#a855f7'];
-        
-        // Objeto para agrupar: { PROGRAMA: { "LOCALIDAD (COL. COLONIA)": CANTIDAD } }
         const acumPorApoyo = {};
+        // Guardamos las referencias de los documentos originales indexados por Apoyo y Zona para la descarga posterior
+        const documentosPorCelda = {}; 
 
         data.forEach(item => {
             const programa = (item.programa || 'SIN ESPECIFICAR').trim().toUpperCase();
             const localidad = (item.localidad || item.col_loc || 'LOCALIDAD NO REGISTRADA').trim().toUpperCase();
             const coloniaRef = (item.vul_colonia || 'S/C').trim().toUpperCase();
-
             const claveZona = `${localidad} (COL. ${coloniaRef})`;
 
-            if (!acumPorApoyo[programa]) {
-                acumPorApoyo[programa] = {};
-            }
-            if (!acumPorApoyo[programa][claveZona]) {
-                acumPorApoyo[programa][claveZona] = 0;
-            }
-            
+            // Inicialización de acumuladores analíticos
+            if (!acumPorApoyo[programa]) acumPorApoyo[programa] = {};
+            if (!acumPorApoyo[programa][claveZona]) acumPorApoyo[programa][claveZona] = 0;
+
+            // Inicialización de almacenamiento de documentos para descarga
+            const idCelda = `${programa}|||${claveZona}`;
+            if (!documentosPorCelda[idCelda]) documentosPorCelda[idCelda] = [];
+            documentosPorCelda[idCelda].push(item);
+
+            // Conteo de volumen exacto
             const incremento = (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) 
                 ? item.integrantes.length 
                 : 1;
@@ -896,63 +917,67 @@ window.reprocesarVulnerable = () => {
             acumPorApoyo[programa][claveZona] += incremento;
         });
 
-        // GENERAR TARJETAS DE PASTEL INDEPENDIENTES
+        // GENERACIÓN E INYECCIÓN DE TARJETAS DE GRÁFICOS EN EL DOM
         const apoyosOrdenados = Object.keys(acumPorApoyo).sort();
 
         if (apoyosOrdenados.length > 0) {
             apoyosOrdenados.forEach(apoyo => {
                 const zonasAsociadas = acumPorApoyo[apoyo];
-                
-                // 1. Calcular el gran total de este apoyo específico para sacar los porcentajes exactos
                 let totalApoyosPrograma = 0;
                 Object.values(zonasAsociadas).forEach(cant => totalApoyosPrograma += cant);
 
-                // 2. Construir el gradiente cónico para el círculo CSS y las leyendas laterales
                 let gradienteEstilo = "conic-gradient(";
                 let acumuladoPorcentaje = 0;
                 let htmlLeyenda = `<div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">`;
 
-                Object.keys(zonasAsociadas).sort().forEach((zona, indice) => {
-                    const cantidad = zonasAsociadas[zona];
-                    const porcentaje = (cantidad / totalApoyosPrograma) * 100;
-                    const colorAsignado = coloresPaleta[indice % coloresPaleta.length];
+Object.keys(zonasAsociadas).sort().forEach((zona, indice) => {
+    const cantidad = zonasAsociadas[zona];
+    const porcentaje = (cantidad / totalApoyosPrograma) * 100;
+    const colorAsignado = coloresPaleta[indice % coloresPaleta.length];
 
-                    // Rangos del gradiente para esta rebanada
-                    const inicioAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
-                    acumuladoPorcentaje += porcentaje;
-                    const finAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
+    const inicioAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
+    acumuladoPorcentaje += porcentaje;
+    const finAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
 
-                    // Agregar fragmento al gradiente CSS
-                    gradienteEstilo += `${colorAsignado} ${inicioAngulo}deg ${finAngulo}deg${indice < Object.keys(zonasAsociadas).length - 1 ? ', ' : ''}`;
+    gradienteEstilo += `${colorAsignado} ${inicioAngulo}deg ${finAngulo}deg${indice < Object.keys(zonasAsociadas).length - 1 ? ', ' : ''}`;
 
-                    // Generar renglón de la leyenda explicativa
-                    htmlLeyenda += `
-                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #475569;">
-                            <div style="display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%;">
-                                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${colorAsignado}; flex-shrink: 0;"></span>
-                                <span title="${zona}" style="overflow: hidden; text-overflow: ellipsis;">${zona}</span>
-                            </div>
-                            <span style="font-weight: bold; color: #1e293b; font-family: monospace;">${cantidad} pza(s) (${porcentaje.toFixed(1)}%)</span>
-                        </div>
-                    `;
-                });
+    const idCeldaClave = `${apoyo}|||${zona}`;
+
+    // Renglón con la leyenda y un botón nativo sin iconos externos
+    htmlLeyenda += `
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #475569; padding: 4px 0; border-bottom: 1px dotted #e2e8f0;">
+            <div style="display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%;">
+                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${colorAsignado}; flex-shrink: 0;"></span>
+                <span title="${zona}" style="overflow: hidden; text-overflow: ellipsis;">${zona}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                <span style="font-weight: bold; color: #1e293b; font-family: monospace;">${cantidad} pza(s)</span>
+                
+                <button onclick="descargarPadronCelda('${idCeldaClave}')" 
+                        title="Descargar Excel de esta zona" 
+                        style="background: #137333; color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: bold; display: inline-flex; align-items: center; gap: 3px; transition: background 0.2s;"
+                        onmouseover="this.style.background='#0f5b28';" 
+                        onmouseout="this.style.background='#137333';">
+                    📊 EXCEL
+                </button>
+            </div>
+        </div>
+    `;
+});
                 
                 gradienteEstilo += ")";
                 htmlLeyenda += `</div>`;
 
-                // 3. Crear el nodo de la tarjeta
                 const tarjetaPastel = document.createElement('div');
-                tarjetaPastel.style.cssText = "background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; box-shadow: 0 1px 2px rgba(0,0,0,0.02); height: fit-content;";
+                tarjetaPastel.style.cssText = "background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.05); height: fit-content;";
                 
-                // Construcción de la estructura interna (Título, Círculo de Pastel y Leyendas)
                 tarjetaPastel.innerHTML = `
                     <div style="font-weight: bold; color: #1e293b; font-size: 13px; margin-bottom: 15px; border-bottom: 2px solid #10b981; padding-bottom: 6px; text-transform: uppercase;">
                         <i class="fas fa-box" style="color:#10b981; margin-right: 5px;"></i> ${apoyo} 
                         <span style="font-size: 11px; color:#64748b; font-weight: normal; text-transform: none; float: right;">Total: ${totalApoyosPrograma}</span>
                     </div>
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-                        <div style="width: 130px; height: 130px; border-radius: 50%; background: ${gradienteEstilo}; box-shadow: inset 0 0 5px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.05); flex-shrink: 0;"></div>
-                        
+                        <div style="width: 130px; height: 130px; border-radius: 50%; background: ${gradienteEstilo}; flex-shrink: 0;"></div>
                         ${htmlLeyenda}
                     </div>
                 `;
@@ -960,10 +985,73 @@ window.reprocesarVulnerable = () => {
                 contenedorTerritorio.appendChild(tarjetaPastel);
             });
         } else {
-            contenedorTerritorio.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:30px; color:#64748b; font-size:13px;">No hay registros de apoyos para generar gráficos de pastel.</div>';
+            contenedorTerritorio.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:30px; color:#64748b; font-size:13px;">No hay registros de apoyos para generar gráficos.</div>';
         }
+
+        // ==========================================
+        // FUNCIÓN GLOBAL INYECTADA PARA LA DESCARGA INDIVIDUAL POR FILAS
+        // ==========================================
+        window.descargarPadronCelda = function(idCelda) {
+            const coleccionItems = documentosPorCelda[idCelda];
+            if (!coleccionItems || coleccionItems.length === 0) {
+                alert("No hay registros disponibles para exportar en este rubro.");
+                return;
+            }
+
+            const [progNombre, zonaNombre] = idCelda.split('|||');
+
+            // Encabezados estándar del CSV administrativo
+            let contenidoCsv = "\uFEFF"; // BOM para forzar UTF-8 correcto en Excel
+            contenidoCsv += "PROGRAMA,LOCALIDAD/COLONIA,BENEFICIARIO,CURP,SEXO,TELEFONO,DIRECCION,TIPO PADRON\n";
+
+            // Procesamos documento por documento desglosando integrantes en líneas independientes
+            coleccionItems.forEach(item => {
+                const programa = item.programa || 'SIN ESPECIFICAR';
+                const colLoc = item.localidad || item.col_loc || 'NO REGISTRADA';
+                const colRef = item.vul_colonia || 'S/C';
+                const zonaString = `"${colLoc} (COL. ${colRef})"`;
+                const telefono = item.telefono_general || item.ta_telefono || 'S/T';
+                const direccion = `"${(item.direccion || 'CONOCIDA').replace(/"/g, '""')}"`;
+
+                if (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) {
+                    // Caso Colectivo: Una fila individual por cada integrante
+                    item.integrantes.forEach(int => {
+                        const nombreCompleto = `"${(`${int.nombre || ''} ${int.paterno || ''} ${int.materno || ''}`).trim().toUpperCase()}"`;
+                        const curp = int.curp || 'SIN CURP';
+                        const sexo = int.sexo || 'MUJER';
+                        contenidoCsv += `"${programa}",${zonaString},${nombreCompleto},${curp},${sexo},${telefono},${direccion},"COLECTIVO (TALLER)"\n`;
+                    });
+                } else if (item.beneficiario) {
+                    // Caso Individual: Fila única ordinaria
+                    const nombreCompleto = `"${(item.beneficiario.nombre_completo_cache || `${item.beneficiario.nombre || ''} ${item.beneficiario.paterno || ''} ${item.beneficiario.materno || ''}`).trim().toUpperCase()}"`;
+                    const curp = item.beneficiario.curp || 'SIN CURP';
+                    const sexo = item.beneficiario.sexo || 'MUJER';
+                    contenidoCsv += `"${programa}",${zonaString},${nombreCompleto},${curp},${sexo},${telefono},${direccion},"INDIVIDUAL"\n`;
+                } else {
+                    // Respaldo Institucional (Escuelas / Grupos sin estructurar)
+                    const nombreEscuela = `"${(item.pae_escuela || 'INSTITUCIÓN / ESCUELA').replace(/"/g, '""')}"`;
+                    const cct = item.pae_clave_escuela || 'SIN CCT';
+                    contenidoCsv += `"${programa}",${zonaString},${nombreEscuela},${cct},"N/A",${telefono},${direccion},"INSTITUCIONAL"\n`;
+                }
+            });
+
+            // Generación y disparo del archivo descargable
+            const blob = new Blob([contenidoCsv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const nombreArchivo = `PADRON_${progNombre.replace(/\s+/g, '_')}_${zonaNombre.replace(/[\s\(\)\.]+/g, '_')}.csv`;
+            
+            if (navigator.msSaveBlob) { 
+                navigator.msSaveBlob(blob, nombreArchivo);
+            } else {
+                link.href = URL.createObjectURL(blob);
+                link.setAttribute("download", nombreArchivo);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        };
     }
-};
+      };
 
 
 /////////////////////////////////////////////
@@ -1454,11 +1542,6 @@ window.renderReporteJerarquico = function() {
 };
 
         ///////////////////////////////////////////////
-        // --- PROCESAMIENTO POBLACION VULNERABLE ---
-
-
-
-        ///////////////////////////////////////////////
         // --- PROCESAMIENTO civis ---
 window.reprocesarCivis = function() {
     // Si la vista de CIVIS no existe en el HTML, detenemos la ejecución para evitar errores
@@ -1664,8 +1747,6 @@ window.cerrarSesion = function() {
         window.location.href = "index.html";
     }
 };
-
-
 // =============================================================================
 // --- CORRECCIÓN FINAL DE CARGA OPERATIVA ---
 // =============================================================================
@@ -1674,6 +1755,24 @@ window.onload = () => {
     // garantizando que no haya clics forzados molestos en otras pestañas.
     console.log("Sistema global y Monitor CIVIS cargados y listos.");
 };
+document.addEventListener("DOMContentLoaded", function() {
+    const btnToggle = document.getElementById('btn-toggle');
+    const sidebar = document.querySelector('.sidebar'); // Selecciona tu menú usando tu clase CSS
+
+    if (btnToggle && sidebar) {
+        btnToggle.addEventListener('click', function() {
+            // Alterna la clase nativa que ya tienes configurada en tu CSS
+            sidebar.classList.toggle('collapsed');
+            
+            // Feedback visual opcional: rotación leve al hacer clic
+            btnToggle.style.transform = sidebar.classList.contains('collapsed') ? 'rotate(90deg)' : 'rotate(0deg)';
+        });
+        
+        // Asegurar una transición suave para la rotación del icono
+        btnToggle.style.transition = "transform 0.3s ease, color 0.2s";
+        btnToggle.style.cursor = "pointer";
+    }
+});
 </script>
 </body>
 </html>
