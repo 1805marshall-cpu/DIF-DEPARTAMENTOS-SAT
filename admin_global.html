@@ -756,7 +756,6 @@ onSnapshot(collection(db, "proyetos_pv"), (s) => {store.proyectos = s.docs.map(d
 
 /////////////////////////////////////////////
 // Función específica de Poblacion Vulnerable
-
 window.reprocesarVulnerable = () => {
     const data = store.proyectos; 
     
@@ -781,25 +780,25 @@ window.reprocesarVulnerable = () => {
     if(document.getElementById('v-ent')) document.getElementById('v-ent').innerText = entregados;
     if(document.getElementById('v-pen')) document.getElementById('v-pen').innerText = pendientes;
     if(document.getElementById('v-estatal-stats')) document.getElementById('v-estatal-stats').innerText = difEstatal;
-
-// ==========================================
-    // 2. CONTEO Y CUANTIFICACIÓN GEOGRÁFICA (ZONAS)
-    // ==========================================
+// =============================================================================
+    // 2. CONTEO Y CUANTIFICACIÓN GEOGRÁFICA (ZONAS Y SUBGRUPOS)
+    // =============================================================================
     let mujeres = 0;
     let hombres = 0;
     let indigenas = 0;
     let discapacidad = 0;
 
-    // Objeto para agrupar todo el árbol territorial y sus apoyos
+    // Objeto para agrupar todo el árbol territorial, sus apoyos y modalidades
     const mapeoTerritorial = {};
 
     data.forEach(item => {
-        // Normalizamos los nombres geográficos para evitar duplicados por minúsculas/espacios
+        // Normalizamos los nombres geográficos y metadatos para evitar duplicados
         const localidad = (item.localidad || item.col_loc || 'LOCALIDAD NO REGISTRADA').trim().toUpperCase();
         const colonia = (item.vul_colonia || 'CENTRO / GENERAL').trim().toUpperCase();
         const programa = (item.programa || 'SIN ESPECIFICAR').trim().toUpperCase();
+        const subgrupo = (item.subgrupo || 'GENERAL').trim().toUpperCase(); // 🌟 CAMPO ADICIONADO
 
-        // 1. Conteo Demográfico Base (Mantiene tus contadores de arriba funcionando al 100%)
+        // 1. Conteo Demográfico Base
         if (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) {
             item.integrantes.forEach(integ => {
                 if (integ.sexo === "MUJER") mujeres++;
@@ -814,7 +813,7 @@ window.reprocesarVulnerable = () => {
             if (item.beneficiario.discapacidad === "SI") discapacidad++;
         }
 
-        // 2. Estructuración del árbol: Localidad -> Colonia -> Apoyos
+        // 2. Estructuración del árbol extendido: Localidad -> Colonia -> Programa -> Subgrupo
         if (!mapeoTerritorial[localidad]) {
             mapeoTerritorial[localidad] = {};
         }
@@ -822,24 +821,27 @@ window.reprocesarVulnerable = () => {
             mapeoTerritorial[localidad][colonia] = {};
         }
         if (!mapeoTerritorial[localidad][colonia][programa]) {
-            mapeoTerritorial[localidad][colonia][programa] = 0;
+            mapeoTerritorial[localidad][colonia][programa] = {}; // 🌟 Cambiado a objeto para meter subgrupos
+        }
+        if (!mapeoTerritorial[localidad][colonia][programa][subgrupo]) {
+            mapeoTerritorial[localidad][colonia][programa][subgrupo] = 0;
         }
 
-        // Si es un taller grupal sumamos la cantidad de integrantes beneficiados, si es individual cuenta como 1 apoyo
+        // Conteo del volumen (taller grupal cuenta integrantes, individual cuenta como 1)
         const cantidadApoyos = (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) 
             ? item.integrantes.length 
             : 1;
 
-        mapeoTerritorial[localidad][colonia][programa] += cantidadApoyos;
+        mapeoTerritorial[localidad][colonia][programa][subgrupo] += cantidadApoyos;
     });
 
-    // Inyección de indicadores demográficos globales en el DOM (permanecen intactos)
+    // Inyección de indicadores demográficos globales en el DOM
     if(document.getElementById('v-mujeres')) document.getElementById('v-mujeres').innerText = mujeres;
     if(document.getElementById('v-hombres')) document.getElementById('v-hombres').innerText = hombres;
     if(document.getElementById('v-indigena')) document.getElementById('v-indigena').innerText = indigenas;
     if(document.getElementById('v-discapacidad')) document.getElementById('v-discapacidad').innerText = discapacidad;
 
-    // Pintar el nuevo desglose geográfico en el Grid Territorial
+    // Pintar el nuevo desglose geográfico en el Grid Territorial (CON ACORDEONES DESPLEGABLES)
     const territorialGrid = document.getElementById('v-cobertura-territorial-grid');
     if (territorialGrid) {
         territorialGrid.innerHTML = '';
@@ -852,21 +854,47 @@ window.reprocesarVulnerable = () => {
             
             let htmlContenido = `<div style="font-size: 14px; font-weight: bold; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;"><i class="fas fa-map-marked-alt"></i> ${loc}</div>`;
             
-            // Desglosamos las colonias pertenecientes a esta localidad
+            // Desglosamos las colonias
             Object.keys(mapeoTerritorial[loc]).forEach(col => {
                 htmlContenido += `<div style="margin-top: 5px; padding-left: 5px;">
                     <span style="font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase;">📍 Col. ${col}</span>
-                    <ul style="margin: 4px 0 8px 0; padding-left: 15px; list-style-type: disc; font-size: 12px; color: #334155;">`;
+                    <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 4px;">`;
                 
-                // Enumeramos cada programa con su cantidad exacta asignada en esta zona
+                // Desglosamos los programas usando <details> interactivos
                 Object.keys(mapeoTerritorial[loc][col]).forEach(prog => {
-                    const totalApoyosProg = mapeoTerritorial[loc][col][prog];
-                    htmlContenido += `<li style="margin-bottom: 2px;">
-                        <strong>${prog}:</strong> <span style="background: #e0e7ff; color: #4338ca; padding: 1px 6px; border-radius: 10px; font-weight: bold; font-size: 11px;">${totalApoyosProg}</span>
-                    </li>`;
+                    const subgruposDelPrograma = mapeoTerritorial[loc][col][prog];
+                    
+                    let totalProgramaEnColonia = 0;
+                    Object.values(subgruposDelPrograma).forEach(cant => totalProgramaEnColonia += cant);
+
+                    // 🌟 TRANSFORMADO A ACORDEÓN DESPLEGABLE NATIVO
+                    htmlContenido += `
+                        <details style="background: white; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden; font-size: 12px;">
+                            <summary style="padding: 6px 8px; font-weight: bold; color: #334155; cursor: pointer; background: #f1f5f9; display: flex; align-items: center; justify-content: space-between; user-select: none;">
+                                <span style="display: inline-flex; align-items: center; gap: 5px;">
+                                    <i class="fas fa-box" style="font-size: 10px; color: #6366f1;"></i> ${prog}
+                                </span>
+                                <span style="background: #e0e7ff; color: #4338ca; padding: 1px 6px; border-radius: 10px; font-weight: bold; font-size: 10px;">${totalProgramaEnColonia} tot.</span>
+                            </summary>
+                            
+                            <div style="padding: 6px 10px; background: #ffffff; display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #e2e8f0;">`;
+                    
+                    Object.keys(subgruposDelPrograma).sort().forEach(sub => {
+                        const cantSub = subgruposDelPrograma[sub];
+                        htmlContenido += `
+                            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #4b5563; padding: 2px 0;">
+                                <span style="display: inline-flex; align-items: center; gap: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75%;">
+                                    <i class="fas fa-tag" style="font-size: 8px; color: #9ca3af;"></i> 
+                                    <span>${sub}</span>
+                                </span>
+                                <span style="color: #1e293b; font-family: monospace; font-weight: bold; background: #f8fafc; padding: 1px 4px; border-radius: 3px; border: 1px dashed #cbd5e1;">${cantSub} pza</span>
+                            </div>`;
+                    });
+
+                    htmlContenido += `</div></details>`;
                 });
 
-                htmlContenido += `</ul></div>`;
+                htmlContenido += `</div></div>`;
             });
 
             tarjetaLoc.innerHTML = htmlContenido;
@@ -881,9 +909,9 @@ window.reprocesarVulnerable = () => {
 // ==========================================
     // 3. RENDERIZADO DE LAS 3 LISTAS DE ANÁLISIS (CON BARRAS EN LISTA 3)
     // ==========================================
-// ==========================================
-    // RENDERIZADO DE MÚLTIPLES GRÁFICOS DE PASTEL CON BOTÓN DE DESCARGA (EXCEL/CSV)
-    // ==========================================
+// =============================================================================
+    // RENDERIZADO DE MÚLTIPLES GRÁFICOS DE PASTEL CON DESGLOSE POR SUBGRUPO ABAJO
+    // =============================================================================
     const contenedorTerritorio = document.getElementById('v-lista-territorio');
 
     if (contenedorTerritorio) {
@@ -891,25 +919,24 @@ window.reprocesarVulnerable = () => {
         
         const coloresPaleta = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#6366f1', '#ef4444', '#14b8a6', '#f43f5e', '#a855f7'];
         const acumPorApoyo = {};
-        // Guardamos las referencias de los documentos originales indexados por Apoyo y Zona para la descarga posterior
         const documentosPorCelda = {}; 
 
         data.forEach(item => {
             const programa = (item.programa || 'SIN ESPECIFICAR').trim().toUpperCase();
+            const subgrupo = (item.subgrupo || 'GENERAL').trim().toUpperCase();
             const localidad = (item.localidad || item.col_loc || 'LOCALIDAD NO REGISTRADA').trim().toUpperCase();
             const coloniaRef = (item.vul_colonia || 'S/C').trim().toUpperCase();
-            const claveZona = `${localidad} (COL. ${coloniaRef})`;
+            
+            // Mantenemos la clave extendida para la separación interna de datos
+            const claveZona = `${localidad} (COL. ${coloniaRef}) [MOD: ${subgrupo}]`;
 
-            // Inicialización de acumuladores analíticos
             if (!acumPorApoyo[programa]) acumPorApoyo[programa] = {};
             if (!acumPorApoyo[programa][claveZona]) acumPorApoyo[programa][claveZona] = 0;
 
-            // Inicialización de almacenamiento de documentos para descarga
             const idCelda = `${programa}|||${claveZona}`;
             if (!documentosPorCelda[idCelda]) documentosPorCelda[idCelda] = [];
             documentosPorCelda[idCelda].push(item);
 
-            // Conteo de volumen exacto
             const incremento = (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) 
                 ? item.integrantes.length 
                 : 1;
@@ -917,7 +944,8 @@ window.reprocesarVulnerable = () => {
             acumPorApoyo[programa][claveZona] += incremento;
         });
 
-        // GENERACIÓN E INYECCIÓN DE TARJETAS DE GRÁFICOS EN EL DOM
+        window.documentosPorCeldaActuales = documentosPorCelda;
+
         const apoyosOrdenados = Object.keys(acumPorApoyo).sort();
 
         if (apoyosOrdenados.length > 0) {
@@ -928,42 +956,52 @@ window.reprocesarVulnerable = () => {
 
                 let gradienteEstilo = "conic-gradient(";
                 let acumuladoPorcentaje = 0;
-                let htmlLeyenda = `<div style="display: flex; flex-direction: column; gap: 6px; width: 100%;">`;
+                let htmlLeyenda = `<div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">`;
 
-Object.keys(zonasAsociadas).sort().forEach((zona, indice) => {
-    const cantidad = zonasAsociadas[zona];
-    const porcentaje = (cantidad / totalApoyosPrograma) * 100;
-    const colorAsignado = coloresPaleta[indice % coloresPaleta.length];
+                Object.keys(zonasAsociadas).sort().forEach((zona, indice) => {
+                    const cantidad = zonasAsociadas[zona];
+                    const porcentaje = (cantidad / totalApoyosPrograma) * 100;
+                    const colorAsignado = coloresPaleta[indice % coloresPaleta.length];
 
-    const inicioAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
-    acumuladoPorcentaje += porcentaje;
-    const finAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
+                    const inicioAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
+                    acumuladoPorcentaje += porcentaje;
+                    const finAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
 
-    gradienteEstilo += `${colorAsignado} ${inicioAngulo}deg ${finAngulo}deg${indice < Object.keys(zonasAsociadas).length - 1 ? ', ' : ''}`;
+                    gradienteEstilo += `${colorAsignado} ${inicioAngulo}deg ${finAngulo}deg${indice < Object.keys(zonasAsociadas).length - 1 ? ', ' : ''}`;
 
-    const idCeldaClave = `${apoyo}|||${zona}`;
+                    const idCeldaClave = `${apoyo}|||${zona}`;
 
-    // Renglón con la leyenda y un botón nativo sin iconos externos
-    htmlLeyenda += `
-        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #475569; padding: 4px 0; border-bottom: 1px dotted #e2e8f0;">
-            <div style="display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%;">
-                <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: ${colorAsignado}; flex-shrink: 0;"></span>
-                <span title="${zona}" style="overflow: hidden; text-overflow: ellipsis;">${zona}</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-                <span style="font-weight: bold; color: #1e293b; font-family: monospace;">${cantidad} pza(s)</span>
-                
-                <button onclick="descargarPadronCelda('${idCeldaClave}')" 
-                        title="Descargar Excel de esta zona" 
-                        style="background: #137333; color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: bold; display: inline-flex; align-items: center; gap: 3px; transition: background 0.2s;"
-                        onmouseover="this.style.background='#0f5b28';" 
-                        onmouseout="this.style.background='#137333';">
-                    📊 EXCEL
-                </button>
-            </div>
-        </div>
-    `;
-});
+                    // --- EXTRACCIÓN DE TEXTOS PARA EL DISEÑO JERÁRQUICO ---
+                    // Separamos "LOCALIDAD (COL. X)" de "[MOD: SUBGRUPO]" para acomodarlo abajo
+                    const partesFiltro = zona.split(" [MOD: ");
+                    const textoUbicacion = partesFiltro[0] || 'N/A';
+                    const textoSubgrupo = partesFiltro[1] ? partesFiltro[1].replace(']', '') : 'GENERAL';
+
+                    // Renglón con la leyenda adaptada (Ubicación arriba, Subgrupo abajo)
+                    htmlLeyenda += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; padding: 6px 0; border-bottom: 1px dotted #e2e8f0;">
+                            <div style="display: flex; align-items: flex-start; gap: 8px; max-width: 65%; overflow: hidden;">
+                                <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: ${colorAsignado}; flex-shrink: 0; margin-top: 4px;"></span>
+                                <div style="display: flex; flex-direction: column; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;">
+                                    <span title="${textoUbicacion}" style="font-weight: 600; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${textoUbicacion}</span>
+                                    <span title="Subgrupo/Modalidad" style="font-size: 10px; color: #64748b; font-weight: 500;"><i class="fas fa-tags" style="font-size: 8px; margin-right: 2px;"></i> ${textoSubgrupo}</span>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                                <span style="font-weight: bold; color: #1e293b; font-family: monospace;">${cantidad} pza(s)</span>
+                                
+                                <button onclick="descargarPadronCelda('${idCeldaClave}')" 
+                                        title="Descargar Excel de este subgrupo y zona" 
+                                        style="background: #137333; color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: bold; display: inline-flex; align-items: center; gap: 3px; transition: background 0.2s;"
+                                        onmouseover="this.style.background='#0f5b28';" 
+                                        onmouseout="this.style.background='#137333';">
+                                    📊 EXCEL
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
                 
                 gradienteEstilo += ")";
                 htmlLeyenda += `</div>`;
@@ -987,16 +1025,19 @@ Object.keys(zonasAsociadas).sort().forEach((zona, indice) => {
         } else {
             contenedorTerritorio.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:30px; color:#64748b; font-size:13px;">No hay registros de apoyos para generar gráficos.</div>';
         }
+    
+    
 
         // ==========================================
         // FUNCIÓN GLOBAL INYECTADA PARA LA DESCARGA INDIVIDUAL POR FILAS
         // ==========================================
-        window.descargarPadronCelda = function(idCelda) {
-            const coleccionItems = documentosPorCelda[idCelda];
-            if (!coleccionItems || coleccionItems.length === 0) {
-                alert("No hay registros disponibles para exportar en este rubro.");
-                return;
-            }
+window.descargarPadronCelda = function(idCeldaClave) {
+    const registrosMuestra = window.documentosPorCeldaActuales?.[idCeldaClave] || [];
+    if(registrosMuestra.length === 0) {
+        alert("No hay registros en esta modalidad y zona.");
+        return;
+    }
+
 
             const [progNombre, zonaNombre] = idCelda.split('|||');
 
@@ -1672,6 +1713,23 @@ window.reprocesarCivis = function() {
 // =============================================================================
 // --- LISTENERS REACTIVOS EN TIEMPO REAL (ESCUCHA ACTIVA DE FIRESTORE) ---
 // =============================================================================
+
+onSnapshot(collection(db, "proyetos_pv"), (snap) => {
+    const registros = snap.docs.map(doc => ({ 
+        id: doc.id, 
+        id_firestore: doc.id, // Estandarizado para edición/borrado en línea
+        ...doc.data() 
+    }));
+    
+    store.proyectos = registros; // 🌟 Corregido: Separado en su propia variable del store
+    window.listadoLive = registros; // Sincroniza el padrón activo para filtros y Excel
+
+    if (typeof reprocesarVulnerable === 'function') window.reprocesarVulnerable();
+    
+    // Auto-refrescar la tabla principal en pantalla ante cualquier cambio masivo o edición
+    if (typeof window.renderizarTablasSincronizadas === 'function') window.renderizarTablasSincronizadas();
+});
+
 onSnapshot(collection(db, "trabajo_social"), (snapshot) => {
     store.social = snapshot.docs.map(doc => doc.data()); 
     window.reprocesarTrabSoc();
@@ -1703,6 +1761,7 @@ onSnapshot(collection(db, "reporte_civis"), (snap) => {
     store.civis = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     if (typeof window.reprocesarCivis === 'function') window.reprocesarCivis();
 });
+
 
 
 // =============================================================================
@@ -1747,6 +1806,8 @@ window.cerrarSesion = function() {
         window.location.href = "index.html";
     }
 };
+
+
 // =============================================================================
 // --- CORRECCIÓN FINAL DE CARGA OPERATIVA ---
 // =============================================================================
