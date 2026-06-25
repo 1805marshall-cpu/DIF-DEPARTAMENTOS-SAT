@@ -763,8 +763,7 @@ window.renderizarTablasSincronizadas = function() {
     }
 
     if (registrosPaginados.length === 0) {
-        // Ajustado colspan a 9 columnas reales ahora
-        tbodyResumen.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:15px; color:#64748b;">No se encontraron registros.</td></tr>`;
+        tbodyResumen.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:15px; color:#64748b;">No se encontraron registros.</td></tr>`;
         return;
     }
 
@@ -774,7 +773,6 @@ window.renderizarTablasSincronizadas = function() {
         const nProgresivo = d.num_progresivo || '-';
         const docId = d.id_firestore || d.id; 
         
-        // Formateo de los campos de programa y modalidad
         const progInstitucional = (d.programa || 'SIN ASIGNAR').toUpperCase();
         const subModalidad = (d.subgrupo || 'GENERAL').toUpperCase();
         
@@ -791,9 +789,7 @@ window.renderizarTablasSincronizadas = function() {
 
         const celdaControlInterno = `${badgeEstatusHtml}${badgeDifHtml}`;
 
-        // Selección dinámica de arreglo de fotos
         const listaFotos = d.fotos && Array.isArray(d.fotos) ? d.fotos : (d.foto_hex ? [d.foto_hex] : []);
-        
         let fotoHtml = `<div style="display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; min-width: 60px;">`;
 
         if (listaFotos.length > 0) {
@@ -805,7 +801,6 @@ window.renderizarTablasSincronizadas = function() {
                          style="width:40px; height:40px; border-radius:4px; object-fit:cover; border:1px solid #cbd5e1; cursor:zoom-in;" 
                          onclick="window.verFotoGrande('${hexImg}')"
                          title="Ver foto ${fIdx + 1}">
-                    
                     <button onclick="window.eliminarFotoDelArray('${docId}', '${hexImg}')" 
                             style="position:absolute; top:-4px; right:-4px; background:#ef4444; color:white; width:13px; height:13px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:none; padding:0; font-size:7px; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.4);" 
                             title="Eliminar esta foto">
@@ -813,7 +808,6 @@ window.renderizarTablasSincronizadas = function() {
                     </button>
                 </div>`;
             });
-
             fotoHtml += `
             <label style="background:#10b981; color:white; width:24px; height:24px; border-radius:4px; display:inline-flex; align-items:center; justify-content:center; font-size:10px; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,0.15);" title="Añadir otra foto">
                 <i class="fas fa-plus"></i>
@@ -829,34 +823,42 @@ window.renderizarTablasSincronizadas = function() {
         fotoHtml += `</div>`;
 
         // =================================================================
-        // CASO A: EXPEDIENTES COLECTIVOS / INTEGRANTES DE GRUPO
+        // CASO A: EXPEDIENTES COLECTIVOS / INTEGRANTES DE GRUPO (CORREGIDO PARA EDICIÓN POR FILA)
         // =================================================================
         if (d.integrantes && Array.isArray(d.integrantes) && d.integrantes.length > 0) {
             d.integrantes.forEach((int, index) => {
                 const nombreInt = `${int.nombre || ''} ${int.paterno || ''} ${int.materno || ''}`.trim().toUpperCase();
-                const telefonoMostrar = d.telefono_general || d.ta_telefono || 'S/N';
-                const obsMostrar = d.observaciones || 'SIN OBSERVACIONES';
+                const telefonoMostrar = int.telefono || d.telefono_general || d.ta_telefono || 'S/N';
+                const obsMostrar = int.observaciones || d.observaciones || 'SIN OBSERVACIONES';
 
                 const filaR = tbodyResumen.insertRow();
                 filaR.innerHTML = `
                     <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; text-align: center; color: #64748b;">${nProgresivo}</td>
-                    <td style="padding: 10px; border: 1px solid var(--border); text-align:center; line-height:1.3;">${celdaControlInterno}</td>
+                    <td class="celda-estatus" style="padding: 10px; border: 1px solid var(--border); text-align:center; line-height:1.3;">${celdaControlInterno}</td>
                     
-                    <td style="padding: 10px; border: 1px solid var(--border); font-weight: bold; color: #475569;">${progInstitucional}</td>
-                    <td style="padding: 10px; border: 1px solid var(--border); text-align: center;">
+                    <td class="celda-programa" style="padding: 10px; border: 1px solid var(--border); font-weight: bold; color: #475569;">${progInstitucional}</td>
+                    <td class="celda-subgrupo" style="padding: 10px; border: 1px solid var(--border); text-align: center;">
                         <small style="color: #475569; background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: 600;">${subModalidad}</small>
                     </td>
                     
-                    <td style="padding: 10px; border: 1px solid var(--border);">${lugar}</td>
-                    <td style="padding: 10px; border: 1px solid var(--border); font-family: monospace; font-weight: bold;">${int.curp || 'N/A'}</td>
-                    <td style="padding: 10px; border: 1px solid var(--border); font-size:11px;">
+                    <td class="celda-lugar" style="padding: 10px; border: 1px solid var(--border);">${lugar}</td>
+                    <td class="celda-curp" style="padding: 10px; border: 1px solid var(--border); font-family: monospace; font-weight: bold;">${int.curp || 'N/A'}</td>
+                    <td class="celda-identificacion" style="padding: 10px; border: 1px solid var(--border); font-size:11px;">
                         <i class="fas fa-users"></i> <strong>Integrante:</strong> ${nombreInt}
-                        <br><small style="color:#475569;">📞 Tel: ${telefonoMostrar} | 📝 Obs: ${obsMostrar}</small>
+                        <br><small style="color:#475569;">📞 Tel: <span class="txt-telefono">${telefonoMostrar}</span> | 📝 Obs: <span class="txt-obs">${obsMostrar}</span></small>
                     </td>
                     <td style="padding: 10px; border: 1px solid var(--border);">${fecha}</td>
                     <td style="padding: 10px; border: 1px solid var(--border); text-align:center;">${index === 0 ? fotoHtml : ''}</td>
-                    <td style="padding: 10px; border: 1px solid var(--border); text-align:center;">
-                        ${index === 0 ? `<button class="btn-admin" style="background:var(--danger); padding:4px 8px; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="window.borrarRegistro('${docId}')">🗑️</button>` : ''}
+                    
+                    <td class="celda-acciones" style="padding: 10px; border: 1px solid var(--border); text-align:center; white-space:nowrap;">
+                        <button class="btn-admin" style="background:#3b82f6; padding:4px 8px; color:white; border:none; border-radius:4px; cursor:pointer;" 
+                                onclick="window.habilitarEdicionEnLinea(this, '${docId}', ${index})">
+                            ✏️ Editar
+                        </button>
+                        <button class="btn-admin" style="background:var(--danger); padding:4px 8px; color:white; border:none; border-radius:4px; cursor:pointer; margin-left:4px;" 
+                                onclick="window.eliminarIntegranteFila('${docId}', ${index})">
+                            🗑️
+                        </button>
                     </td>
                 `;
             });
@@ -873,11 +875,8 @@ window.renderizarTablasSincronizadas = function() {
             } else {
                 const nombreCompleto = d.beneficiario?.nombre_completo_cache || `${d.beneficiario?.nombre || ''} ${d.beneficiario?.paterno || ''} ${d.beneficiario?.materno || ''}`.trim();
                 infoIdentificacion = `<i class="fas fa-user"></i> ${nombreCompleto}`.toUpperCase();
-                
-                // Si es Apoyo en Marcha / Representante usa rep_curp, si no beneficiario.curp
                 infoCurpClave = d.beneficiario?.curp || d.rep_curp || 'N/A';
                 
-                // Si tiene representante, añadimos la pequeña marca visual
                 if(d.rep_nombre) {
                     infoIdentificacion += `<br><small style="color:#2563eb;"><i class="fas fa-hands-helping"></i> Rep: ${d.rep_nombre.toUpperCase()}</small>`;
                 }
@@ -904,9 +903,16 @@ window.renderizarTablasSincronizadas = function() {
                 </td>
                 <td style="padding: 10px; border: 1px solid var(--border);">${fecha}</td>
                 <td style="padding: 10px; border: 1px solid var(--border); text-align:center;">${fotoHtml}</td>
-                <td class="celda-acciones" style="padding: 10px; border: 1px solid var(--border); text-align:center;">
-                    <button class="btn-admin" style="background:var(--danger); padding:4px 8px; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="window.borrarRegistro('${docId}')">🗑️</button>
-                    <button class="btn-admin" style="background:#3b82f6; padding:4px 8px; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="window.habilitarEdicionEnLinea(this, '${docId}')">✏️ Editar</button>
+                
+                <td class="celda-acciones" style="padding: 10px; border: 1px solid var(--border); text-align:center; white-space:nowrap;">
+                    <button class="btn-admin" style="background:#3b82f6; padding:4px 8px; color:white; border:none; border-radius:4px; cursor:pointer;" 
+                            onclick="window.habilitarEdicionEnLinea(this, '${docId}')">
+                        ✏️ Editar
+                    </button>
+                    <button class="btn-admin" style="background:var(--danger); padding:4px 8px; color:white; border:none; border-radius:4px; cursor:pointer; margin-left:4px;" 
+                            onclick="window.borrarRegistro('${docId}')">
+                        🗑️
+                    </button>
                 </td>
             `;
         }
@@ -1571,80 +1577,115 @@ window.habilitarEdicionEnLinea = function(boton, idFirestore) {
     }
 };
 // =========================================================================
-// GUARDAR EDICIÓN EN LÍNEA (CON SOPORTE PARA SUBGRUPO / MODALIDAD)
+// GUARDAR EDICIÓN EN LÍNEA (CON SOPORTE COMPLETO PARA SUBGRUPO Y CURP)
 // =========================================================================
-window.guardarEdicionEnLinea = async function(idFirestore) {
+window.habilitarEdicionEnLinea = function(boton, idFirestore, indexIntegrante = null) {
+    const fila = boton.closest('tr');
     const registroOriginal = listadoLive.find(d => d.id_firestore === idFirestore || d.id === idFirestore);
-    if (!registroOriginal) {
-        alert("❌ No se encontró el registro original en el listado local.");
-        return;
+    if (!registroOriginal) return;
+
+    if (indexIntegrante !== null) {
+        fila.setAttribute('data-index-integrante', indexIntegrante);
     }
 
-    // Recolectamos los inputs globales del registro
-    const datosActualizados = {
-        programa: document.getElementById(`edit_programa_${idFirestore}`).value.trim().toUpperCase(),
-        // 🌟 NUEVOS: Captura y guarda el subgrupo / modalidad editado
-        subgrupo: document.getElementById(`edit_subgrupo_${idFirestore}`).value.trim().toUpperCase(), 
-        localidad: document.getElementById(`edit_lugar_${idFirestore}`).value.trim().toUpperCase(),
-        col_loc: document.getElementById(`edit_lugar_${idFirestore}`).value.trim().toUpperCase(),
-        telefono_general: document.getElementById(`edit_tel_${idFirestore}`).value.trim(),
-        observaciones: document.getElementById(`edit_obs_${idFirestore}`).value.trim().toUpperCase(),
-        estatus: document.getElementById(`edit_estatus_${idFirestore}`).value,
-        capturado_dif_estatal: document.getElementById(`edit_dif_${idFirestore}`).value
-    };
+    const celdaPrograma = fila.querySelector('.celda-programa');
+    const celdaSubgrupo = fila.querySelector('.celda-subgrupo'); 
+    const celdaLugar = fila.querySelector('.celda-lugar');
+    const celdaCurp = fila.querySelector('.celda-curp');
+    const celdaIdentificacion = fila.querySelector('.celda-identificacion');
+    const celdaEstatus = fila.querySelector('.celda-estatus');
+    const celdaAcciones = fila.querySelector('.celda-acciones');
 
-    // 1. CASO ESCRUELA (PAE)
-    if (registroOriginal.pae_escuela) {
-        datosActualizados.pae_escuela = document.getElementById(`edit_nombre_${idFirestore}`).value.trim().toUpperCase();
-        datosActualizados.pae_clave_escuela = document.getElementById(`edit_curp_${idFirestore}`).value.trim().toUpperCase();
-    } 
-    // 2. CASO COLECTIVO (Integrantes de Grupo)
-    else if (registroOriginal.integrantes && Array.isArray(registroOriginal.integrantes) && registroOriginal.integrantes.length > 0) {
-        // En la edición en línea rápida, modificamos los datos del primer integrante (representante del grupo)
-        let nuevosIntegrantes = [...registroOriginal.integrantes];
-        if (nuevosIntegrantes[0]) {
-            const partes = document.getElementById(`edit_nombre_${idFirestore}`).value.trim().toUpperCase().split(" ");
-            nuevosIntegrantes[0] = {
-                ...nuevosIntegrantes[0],
-                nombre: partes[0] || "",
-                paterno: partes[1] || "",
-                materno: partes.slice(2).join(" ") || "",
-                curp: document.getElementById(`edit_curp_${idFirestore}`).value.trim().toUpperCase()
-            };
+    // 1. Inputs comunes
+    if (celdaPrograma) celdaPrograma.innerHTML = `<input type="text" value="${registroOriginal.programa || ''}" id="edit_programa_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px;">`;
+    if (celdaSubgrupo) celdaSubgrupo.innerHTML = `<input type="text" value="${registroOriginal.subgrupo || ''}" id="edit_subgrupo_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; font-weight:600;">`;
+    
+    if (celdaLugar) {
+        const valorLugar = registroOriginal.localidad || registroOriginal.col_loc || '';
+        celdaLugar.innerHTML = `<input type="text" value="${valorLugar}" id="edit_lugar_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px;">`;
+    }
+
+    // =================================================================
+    // CASO A: SI ES INTEGRANTE DE GRUPO / TALLER
+    // =================================================================
+    if (indexIntegrante !== null && registroOriginal.integrantes) {
+        const integrante = registroOriginal.integrantes[indexIntegrante];
+        const nombreCompleto = `${integrante.nombre || ''} ${integrante.paterno || ''} ${integrante.materno || ''}`.trim();
+        const telInteg = integrante.telefono || registroOriginal.telefono_general || '';
+        const obsInteg = integrante.observaciones || registroOriginal.observaciones || 'SIN OBSERVACIONES';
+
+        // 🌟 CORREGIDO: Extrae de forma correcta el valor 'curp' del objeto integrante
+        if (celdaCurp) {
+            celdaCurp.innerHTML = `<input type="text" value="${integrante.curp || ''}" id="edit_curp_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; font-family:monospace; font-weight:bold;">`;
         }
-        datosActualizados.integrantes = nuevosIntegrantes;
+
+        if (celdaIdentificacion) {
+            celdaIdentificacion.innerHTML = `
+                <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">REPR. GRUPO:</label>
+                <input type="text" value="${nombreCompleto}" id="edit_nombre_${idFirestore}" style="width:100%; padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px;">
+                <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">TELÉFONO:</label>
+                <input type="text" value="${telInteg}" id="edit_tel_${idFirestore}" style="width:100%; padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px;">
+                <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">OBSERVACIONES:</label>
+                <input type="text" value="${obsInteg}" id="edit_obs_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px;">
+            `;
+        }
     } 
-    // 3. CASO INDIVIDUAL / REPRESENTANTE
+    // =================================================================
+    // CASO B: REGISTRO INDIVIDUAL
+    // =================================================================
     else {
-        const partes = document.getElementById(`edit_nombre_${idFirestore}`).value.trim().toUpperCase().split(" ");
+        let nombreActual = "";
+        let infoCurpClave = registroOriginal.beneficiario?.curp || registroOriginal.rep_curp || '';
         
-        let nuevoBeneficiario = { ...registroOriginal.beneficiario };
-        nuevoBeneficiario.nombre = partes[0] || "";
-        nuevoBeneficiario.paterno = partes[1] || "";
-        nuevoBeneficiario.materno = partes.slice(2).join(" ") || "";
-        nuevoBeneficiario.curp = document.getElementById(`edit_curp_${idFirestore}`).value.trim().toUpperCase();
-        nuevoBeneficiario.nombre_completo_cache = `${nuevoBeneficiario.nombre} ${nuevoBeneficiario.paterno} ${nuevoBeneficiario.materno}`.trim();
+        if (registroOriginal.pae_escuela) {
+            nombreActual = registroOriginal.pae_escuela;
+            infoCurpClave = registroOriginal.pae_clave_escuela || '';
+        } else {
+            nombreActual = registroOriginal.beneficiario?.nombre_completo_cache || `${registroOriginal.beneficiario?.nombre || ''} ${registroOriginal.beneficiario?.paterno || ''} ${registroOriginal.beneficiario?.materno || ''}`.trim();
+        }
 
-        datosActualizados.beneficiario = nuevoBeneficiario;
+        const telefonoActual = registroOriginal.telefono_general || registroOriginal.ta_telefono || registroOriginal.rep_telefono || '';
 
-        // Si es Apoyo en Marcha y tiene asignado un representante en la raíz, actualizamos su CURP de control
-        if (registroOriginal.rep_curp) {
-            datosActualizados.rep_curp = document.getElementById(`edit_curp_${idFirestore}`).value.trim().toUpperCase();
+        if (celdaCurp) {
+            celdaCurp.innerHTML = `<input type="text" value="${infoCurpClave}" id="edit_curp_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; font-family:monospace;">`;
+        }
+
+        if (celdaIdentificacion) {
+            celdaIdentificacion.innerHTML = `
+                <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">BENEFICIARIO:</label>
+                <input type="text" value="${nombreActual}" id="edit_nombre_${idFirestore}" style="width:100%; padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px;">
+                <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">TELÉFONO:</label>
+                <input type="text" value="${telefonoActual}" id="edit_tel_${idFirestore}" style="width:100%; padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px;">
+                <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">OBSERVACIONES:</label>
+                <input type="text" value="${registroOriginal.observaciones || ''}" id="edit_obs_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px;">
+            `;
         }
     }
 
-    try {
-        // Ejecutar actualización en la colección 'proyetos_pv' de Firestore
-        await updateDoc(doc(db, "proyetos_pv", idFirestore), datosActualizados);
-        alert("✅ Registro y Subgrupo actualizados con éxito.");
-        
-        // Renderizar de nuevo para destruir los inputs y plasmar el texto plano actualizado
-        if (typeof renderizarTablasSincronizadas === 'function') {
-            renderizarTablasSincronizadas(); 
-        }
-    } catch (error) {
-        console.error("Error al actualizar Firestore:", error);
-        alert("❌ Error al guardar: " + error.message);
+    if (celdaEstatus) {
+        const estatusActual = registroOriginal.estatus || 'PENDIENTE';
+        const difActual = registroOriginal.capturado_dif_estatal || 'NO';
+        celdaEstatus.innerHTML = `
+            <select id="edit_estatus_${idFirestore}" style="padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px; width:100%; font-weight:bold;">
+                <option value="PENDIENTE" ${estatusActual === 'PENDIENTE' ? 'selected' : ''}>PENDIENTE</option>
+                <option value="VALIDADO" ${estatusActual === 'VALIDADO' ? 'selected' : ''}>VALIDADO</option>
+                <option value="ENTREGADO" ${estatusActual === 'ENTREGADO' ? 'selected' : ''}>ENTREGADO</option>
+            </select>
+            <select id="edit_dif_${idFirestore}" style="padding:4px; border:1px solid #3b82f6; border-radius:4px; width:100%;">
+                <option value="SI" ${difActual === 'SI' ? 'selected' : ''}>DIF: SÍ</option>
+                <option value="NO" ${difActual === 'NO' ? 'selected' : ''}>DIF: NO</option>
+            </select>
+        `;
+    }
+
+    // 🌟 CORREGIDO: Contenedor flex horizontal para que los botones mantengan su tamaño original y estilizado
+    if (celdaAcciones) {
+        celdaAcciones.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; width: 100%;">
+                <button class="btn-admin" style="background:#10b981; padding:6px 10px; font-weight:bold; color:white; border:none; border-radius:4px; cursor:pointer; width: 75px; font-size:11px;" onclick="window.guardarEdicionEnLinea('${idFirestore}', ${indexIntegrante})">💾 Guardar</button>
+                <button class="btn-admin" style="background:#64748b; padding:6px 10px; color:white; border:none; border-radius:4px; cursor:pointer; width: 75px; font-size:11px;" onclick="renderizarTablasSincronizadas()">❌ Cancelar</button>
+            </div>
+        `;
     }
 };
 document.addEventListener("DOMContentLoaded", function() {
