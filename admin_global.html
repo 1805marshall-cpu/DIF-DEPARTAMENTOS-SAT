@@ -762,7 +762,7 @@ onSnapshot(collection(db, "jefatura_psicologia"), (s) => { store.jefatura = s.do
 onSnapshot(collection(db, "procuraduria"), (s) => { store.procuraduria = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarProcuraduria(); });
 onSnapshot(collection(db, "area_medica_v2"), (s) => { store.medica = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarMedica(); window.renderReporteJerarquico();});
 onSnapshot(collection(db, "proyetos_pv"), (s) => {store.proyectos = s.docs.map(d => ({id: d.id, ...d.data()}));console.log("Datos cargados de proyetos_pv:", store.proyectos.length);window.reprocesarVulnerable(); });
-
+onSnapshot(collection(db, "reporte_civis"), (snap) => {store.civis = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));if (typeof window.reprocesarCivis === 'function') window.reprocesarCivis();});
 /////////////////////////////////////////////
 // Función específica de Poblacion Vulnerable
 window.reprocesarVulnerable = () => {
@@ -1521,81 +1521,6 @@ window.reprocesarTrabSoc = function() {
     }
 };
         ///////////////////////////////////////////////
-        // --- PROCESAMIENTO TODAS LAS COLONIAS Y LOCALIDADES ---
-window.renderReporteJerarquico = function() {
-    const container = document.getElementById('territorial-master-list');
-    if (!container) return;
-
-    // 1. Captura de valores de los filtros globales
-    const busquedaTexto = document.getElementById('global-search-input').value.toLowerCase();
-    const busquedaZona = document.getElementById('global-zone-search').value.toLowerCase();
-    const mesFiltro = document.getElementById('global-month-filter').value; // '01', '02', etc. o 'all'
-
-    // 2. Consolidación de datos con fecha (asumiendo que tus objetos tienen 'fecha' en formato YYYY-MM-DD o similar)
-    const data = [
-        ...store.social.map(i => ({ dep: 'SOCIAL', zona: i.col_loc || 'N/A', estatus: i.estatus || 'N/A', info: i.asunto, nombre: i.nombre || '', folio: i.folio || '', fecha: i.fecha || '' })),
-        ...store.psicologia.map(i => ({ dep: 'PSICO', zona: i.col_loc || 'N/A', estatus: 'ATENDIDO', info: i.tema, nombre: i.paciente || '', folio: '', fecha: i.fecha || '' })),
-        ...store.procuraduria.map(i => ({ dep: 'PROCU', zona: i.lugar || 'N/A', estatus: 'ACTIVO', info: i.asuntos, nombre: i.nombre || '', folio: '', fecha: i.fecha || '' })),
-        ...store.jefatura.map(i => ({ dep: 'JEFATURA', zona: i.colonia || 'N/A', estatus: 'REALIZADO', info: i.actividad, nombre: '', folio: i.oficio || '', fecha: i.fecha || '' }))
-    ];
-
-    // 3. Lógica de Filtrado Multicriterio
-    const filtrados = data.filter(i => {
-        // Filtro por Mes (Extrae el mes de la fecha si existe)
-        const mesItem = i.fecha ? i.fecha.split('-')[1] : null; 
-        const coincideMes = (mesFiltro === 'all' || mesItem === mesFiltro);
-        
-        // Filtros de texto (Zona, Nombre, Folio, Dep)
-        const coincideZona = i.zona.toLowerCase().includes(busquedaZona);
-        const coincideBusqueda = (
-            i.nombre.toLowerCase().includes(busquedaTexto) || 
-            i.folio.toLowerCase().includes(busquedaTexto) || 
-            i.dep.toLowerCase().includes(busquedaTexto) ||
-            i.info.toLowerCase().includes(busquedaTexto)
-        );
-        
-        return coincideMes && coincideZona && coincideBusqueda;
-    });
-
-    // 4. Agrupamiento
-    const agrupado = filtrados.reduce((acc, item) => {
-        if (!acc[item.zona]) acc[item.zona] = [];
-        acc[item.zona].push(item);
-        return acc;
-    }, {});
-
-    // 5. Renderizado
-    container.innerHTML = Object.entries(agrupado)
-        .sort((a, b) => b[1].length - a[1].length)
-        .map(([zona, items]) => {
-            const pendientesCount = items.filter(i => i.estatus === 'PENDIENTE').length;
-            const esPrioridad = pendientesCount >= 3;
-            
-            return `
-        <div style="margin-bottom: 20px; background: #fff; border-radius: 10px; border: 2px solid ${esPrioridad ? '#ef4444' : '#e2e8f0'}; overflow:hidden;">
-            <div style="background: ${esPrioridad ? '#fef2f2' : '#f8fafc'}; padding: 10px 15px; display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-weight: 900; color: #1e293b; font-size: 13px;">
-                    <i class="fas fa-map-marker-alt" style="color:${esPrioridad ? '#ef4444' : 'var(--primary)'}; margin-right:5px;"></i> 
-                    ${zona.toUpperCase()}
-                </span>
-                <span style="background:${esPrioridad ? '#ef4444' : 'var(--primary)'}; color:white; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:bold;">
-                    ${items.length} REGISTROS
-                </span>
-            </div>
-            ${items.map(i => `
-                <div style="padding:8px 15px; font-size:11px; border-bottom:1px solid #f8fafc;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <b style="color:var(--primary)">${i.dep}</b>
-                        <span style="font-weight:bold; color:${i.estatus === 'PENDIENTE' ? '#ea580c' : '#16a34a'};">${i.estatus}</span>
-                    </div>
-                    <div style="color:#334155; margin-top:3px;">${i.nombre ? `<b>${i.nombre}</b> - ` : ''}${i.info}</div>
-                </div>
-            `).join('')}
-        </div>
-    `}).join('');
-};
-
-        ///////////////////////////////////////////////
         // --- PROCESAMIENTO civis ---
 window.reprocesarCivis = function() {
     // Si la vista de CIVIS no existe en el HTML, detenemos la ejecución para evitar errores
@@ -1723,59 +1648,140 @@ window.reprocesarCivis = function() {
     }
 };
 
-// =============================================================================
-// --- LISTENERS REACTIVOS EN TIEMPO REAL (ESCUCHA ACTIVA DE FIRESTORE) ---
-// =============================================================================
+///////////////////////////////////////////////
+// --- PROCESAMIENTO TODAS LAS COLONIAS Y LOCALIDADES ---
+window.renderReporteJerarquico = function() {
+    const container = document.getElementById('territorial-master-list');
+    if (!container) return;
 
-onSnapshot(collection(db, "proyetos_pv"), (snap) => {
-    const registros = snap.docs.map(doc => ({ 
-        id: doc.id, 
-        id_firestore: doc.id, // Estandarizado para edición/borrado en línea
-        ...doc.data() 
-    }));
-    
-    store.proyectos = registros; // 🌟 Corregido: Separado en su propia variable del store
-    window.listadoLive = registros; // Sincroniza el padrón activo para filtros y Excel
+    // 1. Captura de valores de los filtros globales
+    const busquedaTexto = document.getElementById('global-search-input').value.toLowerCase();
+    const busquedaZona = document.getElementById('global-zone-search').value.toLowerCase();
+    const mesFiltro = document.getElementById('global-month-filter').value; // '01', '02', etc. o 'all'
 
-    if (typeof reprocesarVulnerable === 'function') window.reprocesarVulnerable();
-    
-    // Auto-refrescar la tabla principal en pantalla ante cualquier cambio masivo o edición
-    if (typeof window.renderizarTablasSincronizadas === 'function') window.renderizarTablasSincronizadas();
-});
+    // --- Mapeo Especial para Padrón Vulnerable / Proyectos ---
+    const registrosVulnerablesProcesados = [];
+    if (store.proyectos && Array.isArray(store.proyectos)) {
+        store.proyectos.forEach(p => {
+            const zonaAsignada = p.localidad || p.col_loc || 'N/A';
+            const estatusAsignado = p.estatus || 'PENDIENTE';
+            const subgrupoActividad = p.subgrupo || 'GENERAL';
+            const fechaRegistro = p.fecha_registro || p.fecha || ''; // Soporte para formato de fecha de proyectos
 
-onSnapshot(collection(db, "trabajo_social"), (snapshot) => {
-    store.social = snapshot.docs.map(doc => doc.data()); 
-    window.reprocesarTrabSoc();
-});
+            if (p.integrantes && Array.isArray(p.integrantes) && p.integrantes.length > 0) {
+                // Si es un taller grupal, agregamos a cada integrante de forma individual al territorio
+                p.integrantes.forEach(int => {
+                    const nombreInt = `${int.nombre || ''} ${int.paterno || ''} ${int.materno || ''}`.trim();
+                    registrosVulnerablesProcesados.push({
+                        dep: 'VULNERABLE',
+                        zona: zonaAsignada,
+                        estatus: estatusAsignado,
+                        info: `TALLER: ${p.programa || 'SIN ESPECIFICAR'} (${subgrupoActividad})`,
+                        nombre: nombreInt || 'INTEGRANTE DE GRUPO',
+                        folio: p.num_progresivo ? String(p.num_progresivo) : '',
+                        fecha: fechaRegistro
+                    });
+                });
+            } else {
+                // Registro Individual o Escuela PAE
+                let nombreBeneficiario = "";
+                let infoDetalle = p.programa || 'APOYO INDIVIDUAL';
 
-onSnapshot(collection(db, "psicologia"), (snapshot) => {
-    store.psicologia = snapshot.docs.map(doc => doc.data()); 
-    window.reprocesarPsico();
-});
+                if (p.pae_escuela) {
+                    nombreBeneficiario = `ESCUELA: ${p.pae_escuela}`;
+                    infoDetalle = `PAE - CCT: ${p.pae_clave_escuela || 'S/C'}`;
+                } else {
+                    nombreBeneficiario = p.beneficiario?.nombre_completo_cache || 
+                                         `${p.beneficiario?.nombre || ''} ${p.beneficiario?.paterno || ''} ${p.beneficiario?.materno || ''}`.trim();
+                }
 
-onSnapshot(collection(db, "jefatura_psicologia"), (snapshot) => {
-    store.jefatura = snapshot.docs.map(doc => doc.data()); 
-    window.reprocesarJefatura();
-});
+                registrosVulnerablesProcesados.push({
+                    dep: 'POBLACION VULNERABLE',
+                    zona: zonaAsignada,
+                    estatus: estatusAsignado,
+                    info: infoDetalle,
+                    nombre: nombreBeneficiario || 'BENEFICIARIO DIRECTO',
+                    folio: p.num_progresivo ? String(p.num_progresivo) : '',
+                    fecha: fechaRegistro
+                });
+            }
+        });
+    }
 
-onSnapshot(collection(db, "procuraduria"), (snap) => {
-    store.procuraduria = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); 
-    window.reprocesarProcuraduria();
-});
+    // 2. Consolidación de datos con fecha (Se añade Vulnerable a la lista)
+    const data = [
+        ...store.social.map(i => ({ dep: 'TRABAJO SOCIAL', zona: i.col_loc || 'N/A', estatus: i.estatus || 'N/A', info: i.asunto, nombre: i.nombre || '', folio: i.folio || '', fecha: i.fecha || '' })),
+        ...store.psicologia.map(i => ({ dep: 'PSICOLOGIA', zona: i.col_loc || 'N/A', estatus: 'ATENDIDO', info: i.tema, nombre: i.paciente || '', folio: '', fecha: i.fecha || '' })),
+        ...store.procuraduria.map(i => ({ dep: 'PROCURADURIA', zona: i.lugar || 'N/A', estatus: 'ACTIVO', info: i.asuntos, nombre: i.nombre || '', folio: '', fecha: i.fecha || '' })),
+        ...store.jefatura.map(i => ({ dep: 'JEFATURA DE PSICOLOGIA', zona: i.colonia || 'N/A', estatus: 'REALIZADO', info: i.actividad, nombre: '', folio: i.oficio || '', fecha: i.fecha || '' })),
+        ...registrosVulnerablesProcesados // 🌟 Incorporación del padrón en la matriz territorial
+    ];
 
-onSnapshot(collection(db, "area_medica_v2"), (snap) => {
-    store.medica = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    if (typeof window.reprocesarMedica === 'function') window.reprocesarMedica();
-    if (typeof window.renderReporteJerarquico === 'function') window.renderReporteJerarquico();
-});
+    // 3. Lógica de Filtrado Multicriterio
+    const filtrados = data.filter(i => {
+        // Filtro por Mes
+        const mesItem = i.fecha ? i.fecha.split('-')[1] : null; 
+        const coincideMes = (mesFiltro === 'all' || mesItem === mesFiltro);
+        
+        // Filtros de texto (Zona, Nombre, Folio, Dep)
+        const coincideZona = i.zona.toLowerCase().includes(busquedaZona);
+        const coincideBusqueda = (
+            i.nombre.toLowerCase().includes(busquedaTexto) || 
+            i.folio.toLowerCase().includes(busquedaTexto) || 
+            i.dep.toLowerCase().includes(busquedaTexto) ||
+            i.info.toLowerCase().includes(busquedaTexto)
+        );
+        
+        return coincideMes && coincideZona && coincideBusqueda;
+    });
 
-// 🔥 NUEVA ESCUCHA INTEGRADA PARA EL MONITOR CIVIS
-onSnapshot(collection(db, "reporte_civis"), (snap) => {
-    store.civis = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    if (typeof window.reprocesarCivis === 'function') window.reprocesarCivis();
-});
+    // 4. Agrupamiento
+    const agrupado = filtrados.reduce((acc, item) => {
+        if (!acc[item.zona]) acc[item.zona] = [];
+        acc[item.zona].push(item);
+        return acc;
+    }, {});
 
+    // 5. Renderizado
+    container.innerHTML = Object.entries(agrupado)
+        .sort((a, b) => b[1].length - a[1].length)
+        .map(([zona, items]) => {
+            const pendientesCount = items.filter(i => i.estatus === 'PENDIENTE').length;
+            const esPrioridad = pendientesCount >= 3;
+            
+            return `
+        <div style="margin-bottom: 20px; background: #fff; border-radius: 10px; border: 2px solid ${esPrioridad ? '#ef4444' : '#e2e8f0'}; overflow:hidden;">
+            <div style="background: ${esPrioridad ? '#fef2f2' : '#f8fafc'}; padding: 10px 15px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight: 900; color: #1e293b; font-size: 13px;">
+                    <i class="fas fa-map-marker-alt" style="color:${esPrioridad ? '#ef4444' : 'var(--primary)'}; margin-right:5px;"></i> 
+                    ${zona.toUpperCase()}
+                </span>
+                <span style="background:${esPrioridad ? '#ef4444' : 'var(--primary)'}; color:white; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:bold;">
+                    ${items.length} REGISTROS
+                </span>
+            </div>
+            ${items.map(i => {
+                // Color dinámico de estatus adaptado a Padrón Vulnerable (VALIDADO, ENTREGADO)
+                let colorEstatus = '#16a34a'; // Verde por defecto
+                if (i.estatus === 'PENDIENTE') colorEstatus = '#ea580c'; // Naranja
+                if (i.estatus === 'VALIDADO') colorEstatus = '#2563eb'; // Azul
 
+                return `
+                <div style="padding:8px 15px; font-size:11px; border-bottom:1px solid #f8fafc;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <b style="color:${i.dep === 'POBLACION VULNERABLE' ? 'var(--genloc-color, #a855f7)' : 'var(--primary)'}">${i.dep}</b>
+                        <span style="font-weight:bold; color:${colorEstatus};">${i.estatus}</span>
+                    </div>
+                    <div style="color:#334155; margin-top:3px;">
+                        ${i.folio ? `<small style="background:#e2e8f0; padding:1px 4px; border-radius:3px; margin-right:4px; font-weight:700;">#${i.folio}</small>` : ''}
+                        ${i.nombre ? `<b>${i.nombre}</b> - ` : ''}${i.info}
+                    </div>
+                </div>
+                `;
+            }).join('')}
+        </div>
+    `}).join('');
+};
 
 // =============================================================================
 // --- NAVEGACIÓN Y CONTROL DINÁMICO DE LA INTERFAZ (CONTROL GLOBAL) ---
@@ -1800,10 +1806,24 @@ window.showView = function(viewId, element) {
         titleElement.innerText = element.innerText.trim();
     }
 
-    // 5. Lógica de refresco inteligente
-    // Si la vista es 'vulnerable', forzamos el cálculo de estadísticas
-    if (viewId === 'vulnerable' && typeof window.reprocesarVulnerable === 'function') {
-        window.reprocesarVulnerable();
+    // 5. Lógica de refresco inteligente (SISTEMA VULNERABLE / RESUMEN TERRITORIAL)
+    if (viewId === 'vulnerable') {
+        // A. Forzamos el cálculo de estadísticas globales y gráficas
+        if (typeof window.reprocesarVulnerable === 'function') {
+            window.reprocesarVulnerable();
+        }
+        
+        // B. Reseteamos los filtros en pantalla para asegurar una carga limpia del territorio
+        window.terminoBusqueda = ""; 
+        window.paginaActual = 1;
+        
+        const inputBusqueda = document.getElementById('buscar_vulnerable') || document.getElementById('input_buscar');
+        if (inputBusqueda) inputBusqueda.value = ""; 
+
+        // C. Renderizado instantáneo de la tabla sincronizada con las nuevas columnas y lógica por fila
+        if (typeof window.renderizarTablasSincronizadas === 'function') {
+            window.renderizarTablasSincronizadas();
+        }
     }
 };
 
