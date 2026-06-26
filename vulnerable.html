@@ -538,6 +538,8 @@
         <i class="fas fa-upload"></i> Importar desde Excel (.xlsx)
     </button>
 
+    
+    <button id="btnVaciar" class="btn-admin btn-clear-db"><i class="fas fa-trash-alt"></i> Vaciar Base de Datos</button>
 </div>
         <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
     
@@ -1473,117 +1475,19 @@ function actualizarControlesPaginacion(totalRegistros, totalPaginas) {
         window.paginaActual = 1;               // Reiniciar flujo de páginas al filtrar
         renderizarTablasSincronizadas();
     };
-    // =========================================================================
-// HABILITAR EDICIÓN EN LÍNEA (CON SOPORTE PARA SUBGRUPO / MODALIDAD)
-// =========================================================================
-window.habilitarEdicionEnLinea = function(boton, idFirestore) {
-    const fila = boton.closest('tr');
-    // Soporte para id_firestore o id
-    const registroOriginal = listadoLive.find(d => d.id_firestore === idFirestore || d.id === idFirestore);
-    if (!registroOriginal) return;
-
-    // Seleccionamos todas las celdas de la fila incluyendo la nueva de subgrupo
-    const celdaPrograma = fila.querySelector('.celda-programa');
-    const celdaSubgrupo = fila.querySelector('.celda-subgrupo'); // 🌟 NUEVA
-    const celdaLugar = fila.querySelector('.celda-lugar');
-    const celdaCurp = fila.querySelector('.celda-curp');
-    const celdaIdentificacion = fila.querySelector('.celda-identificacion');
-    const celdaEstatus = fila.querySelector('.celda-estatus');
-    const celdaAcciones = fila.querySelector('.celda-acciones');
-
-    // 1. Editar Programa
-    if (celdaPrograma) {
-        celdaPrograma.innerHTML = `<input type="text" value="${registroOriginal.programa || ''}" id="edit_programa_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; box-sizing: border-box;">`;
-    }
-
-    // 🌟 2. NUEVO: Editar Subgrupo / Modalidad
-    if (celdaSubgrupo) {
-        celdaSubgrupo.innerHTML = `<input type="text" value="${registroOriginal.subgrupo || ''}" id="edit_subgrupo_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; box-sizing: border-box; font-weight: 600;">`;
-    }
-
-    // 3. Editar Localidad
-    if (celdaLugar) {
-        const valorLugar = registroOriginal.localidad || registroOriginal.col_loc || '';
-        celdaLugar.innerHTML = `<input type="text" value="${valorLugar}" id="edit_lugar_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; box-sizing: border-box;">`;
-    }
-
-    // 4. Editar CURP o Clave CCT
-    if (celdaCurp) {
-        const valorCurp = registroOriginal.pae_clave_escuela || registroOriginal.beneficiario?.curp || registroOriginal.rep_curp || '';
-        celdaCurp.innerHTML = `<input type="text" value="${valorCurp}" id="edit_curp_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; font-family:monospace; box-sizing: border-box;">`;
-    }
-
-    // 5. Editar Identificación + Teléfono y Observaciones (Soporta colectivos y representantes)
-    if (celdaIdentificacion) {
-        const esEscuela = !!registroOriginal.pae_escuela;
-        const esColectivo = registroOriginal.integrantes && Array.isArray(registroOriginal.integrantes) && registroOriginal.integrantes.length > 0;
-        
-        let nombreActual = "";
-        let tagLabel = "Beneficiario:";
-
-        if (esEscuela) {
-            nombreActual = registroOriginal.pae_escuela;
-            tagLabel = "Escuela:";
-        } else if (esColectivo) {
-            const first = registroOriginal.integrantes[0];
-            nombreActual = `${first.nombre || ''} ${first.paterno || ''} ${first.materno || ''}`.trim();
-            tagLabel = "Repr. Grupo:";
-        } else {
-            nombreActual = registroOriginal.beneficiario?.nombre_completo_cache || `${registroOriginal.beneficiario?.nombre || ''} ${registroOriginal.beneficiario?.paterno || ''} ${registroOriginal.beneficiario?.materno || ''}`.trim();
-            if (registroOriginal.rep_nombre) tagLabel = "Beneficiario (Individual):";
-        }
-        
-        const telefonoActual = registroOriginal.telefono_general || registroOriginal.ta_telefono || registroOriginal.rep_telefono || '';
-
-        celdaIdentificacion.innerHTML = `
-            <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">${tagLabel}</label>
-            <input type="text" value="${nombreActual}" id="edit_nombre_${idFirestore}" style="width:100%; padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px; box-sizing: border-box;">
-            
-            <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">Teléfono:</label>
-            <input type="text" value="${telefonoActual}" id="edit_tel_${idFirestore}" style="width:100%; padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px; box-sizing: border-box;">
-            
-            <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">Observaciones:</label>
-            <input type="text" value="${registroOriginal.observaciones || ''}" id="edit_obs_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; box-sizing: border-box;">
-        `;
-    }
-
-    // 6. Editar Estatus y Reporte DIF
-    if (celdaEstatus) {
-        const estatusActual = registroOriginal.estatus || 'PENDIENTE';
-        const difActual = registroOriginal.capturado_dif_estatal || 'NO';
-        
-        celdaEstatus.innerHTML = `
-            <select id="edit_estatus_${idFirestore}" style="padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px; font-size:11px; width:100%; box-sizing: border-box; font-weight:bold;">
-                <option value="PENDIENTE" ${estatusActual === 'PENDIENTE' ? 'selected' : ''}>PENDIENTE</option>
-                <option value="VALIDADO" ${estatusActual === 'VALIDADO' ? 'selected' : ''}>VALIDADO</option>
-                <option value="ENTREGADO" ${estatusActual === 'ENTREGADO' ? 'selected' : ''}>ENTREGADO</option>
-                <option value="EN REVISIÓN" ${estatusActual === 'EN REVISIÓN' ? 'selected' : ''}>EN REVISIÓN</option>
-            </select>
-            <select id="edit_dif_${idFirestore}" style="padding:4px; border:1px solid #3b82f6; border-radius:4px; font-size:11px; width:100%; box-sizing: border-box;">
-                <option value="SI" ${difActual === 'SI' ? 'selected' : ''}>DIF: SÍ</option>
-                <option value="NO" ${difActual === 'NO' ? 'selected' : ''}>DIF: NO</option>
-            </select>
-        `;
-    }
-
-    // 7. Botones de Acción de Guardado / Cancelación
-    if (celdaAcciones) {
-        celdaAcciones.innerHTML = `
-            <button class="btn-admin" style="background:#10b981; padding:4px 8px; font-weight:bold; color:white; border:none; border-radius:4px; width:100%; cursor:pointer;" onclick="window.guardarEdicionEnLinea('${idFirestore}')">💾 Guardar</button>
-            <button class="btn-admin" style="background:#64748b; padding:4px 8px; margin-top:4px; color:white; border:none; border-radius:4px; width:100%; cursor:pointer;" onclick="renderizarTablasSincronizadas()">❌ Cancelar</button>
-        `;
-    }
-};
-// =========================================================================
-// GUARDAR EDICIÓN EN LÍNEA (CON SOPORTE COMPLETO PARA SUBGRUPO Y CURP)
+   // =========================================================================
+// 1. HABILITAR EDICIÓN EN LÍNEA (BLINDADO CON DATA-ATTRIBUTES)
 // =========================================================================
 window.habilitarEdicionEnLinea = function(boton, idFirestore, indexIntegrante = null) {
     const fila = boton.closest('tr');
     const registroOriginal = listadoLive.find(d => d.id_firestore === idFirestore || d.id === idFirestore);
     if (!registroOriginal) return;
 
-    if (indexIntegrante !== null) {
+    // Guardamos el índice directamente en el elemento HTML de la fila para no perderlo
+    if (indexIntegrante !== null && indexIntegrante !== undefined && indexIntegrante !== 'null') {
         fila.setAttribute('data-index-integrante', indexIntegrante);
+    } else {
+        fila.removeAttribute('data-index-integrante');
     }
 
     const celdaPrograma = fila.querySelector('.celda-programa');
@@ -1594,42 +1498,49 @@ window.habilitarEdicionEnLinea = function(boton, idFirestore, indexIntegrante = 
     const celdaEstatus = fila.querySelector('.celda-estatus');
     const celdaAcciones = fila.querySelector('.celda-acciones');
 
-    // 1. Inputs comunes
-    if (celdaPrograma) celdaPrograma.innerHTML = `<input type="text" value="${registroOriginal.programa || ''}" id="edit_programa_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px;">`;
-    if (celdaSubgrupo) celdaSubgrupo.innerHTML = `<input type="text" value="${registroOriginal.subgrupo || ''}" id="edit_subgrupo_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; font-weight:600;">`;
-    
+    const estiloInputChico = "width:100%; padding:2px 4px; font-size:11px; border:1px solid #3b82f6; border-radius:3px; box-sizing: border-box;";
+
+    // Inputs comunes de la raíz
+    if (celdaPrograma) celdaPrograma.innerHTML = `<input type="text" value="${registroOriginal.programa || ''}" id="edit_programa_${idFirestore}" style="${estiloInputChico}">`;
+    if (celdaSubgrupo) celdaSubgrupo.innerHTML = `<input type="text" value="${registroOriginal.subgrupo || ''}" id="edit_subgrupo_${idFirestore}" style="${estiloInputChico} font-weight:600;">`;
     if (celdaLugar) {
         const valorLugar = registroOriginal.localidad || registroOriginal.col_loc || '';
-        celdaLugar.innerHTML = `<input type="text" value="${valorLugar}" id="edit_lugar_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px;">`;
+        celdaLugar.innerHTML = `<input type="text" value="${valorLugar}" id="edit_lugar_${idFirestore}" style="${estiloInputChico}">`;
     }
 
-    // =================================================================
-    // CASO A: SI ES INTEGRANTE DE GRUPO / TALLER
-    // =================================================================
-    if (indexIntegrante !== null && registroOriginal.integrantes) {
-        const integrante = registroOriginal.integrantes[indexIntegrante];
-        const nombreCompleto = `${integrante.nombre || ''} ${integrante.paterno || ''} ${integrante.materno || ''}`.trim();
-        const telInteg = integrante.telefono || registroOriginal.telefono_general || '';
-        const obsInteg = integrante.observaciones || registroOriginal.observaciones || 'SIN OBSERVACIONES';
+    // Determinar con certeza si esta fila en específico es de un integrante de taller
+    const esCasoIntegrante = indexIntegrante !== null && indexIntegrante !== undefined && indexIntegrante !== 'null';
 
-        // 🌟 CORREGIDO: Extrae de forma correcta el valor 'curp' del objeto integrante
-        if (celdaCurp) {
-            celdaCurp.innerHTML = `<input type="text" value="${integrante.curp || ''}" id="edit_curp_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; font-family:monospace; font-weight:bold;">`;
-        }
+    // =================================================================
+    // CASO A: INTEGRANTE INDIVIDUAL DE UN TALLER COLECTIVO
+    // =================================================================
+    if (esCasoIntegrante && registroOriginal.integrantes) {
+        const idx = parseInt(indexIntegrante, 10);
+        const integrante = registroOriginal.integrantes[idx];
+        
+        if (integrante) {
+            const nombreCompleto = `${integrante.nombre || ''} ${integrante.paterno || ''} ${integrante.materno || ''}`.trim();
+            const telInteg = integrante.telefono || registroOriginal.telefono_general || '';
+            const obsInteg = integrante.observaciones || registroOriginal.observaciones || 'SIN OBSERVACIONES';
 
-        if (celdaIdentificacion) {
-            celdaIdentificacion.innerHTML = `
-                <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">REPR. GRUPO:</label>
-                <input type="text" value="${nombreCompleto}" id="edit_nombre_${idFirestore}" style="width:100%; padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px;">
-                <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">TELÉFONO:</label>
-                <input type="text" value="${telInteg}" id="edit_tel_${idFirestore}" style="width:100%; padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px;">
-                <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">OBSERVACIONES:</label>
-                <input type="text" value="${obsInteg}" id="edit_obs_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px;">
-            `;
+            if (celdaCurp) {
+                celdaCurp.innerHTML = `<input type="text" value="${integrante.curp || ''}" id="edit_curp_${idFirestore}_${idx}" style="${estiloInputChico} font-family:monospace; font-weight:bold;">`;
+            }
+
+            if (celdaIdentificacion) {
+                celdaIdentificacion.innerHTML = `
+                    <label style="font-size:9px; display:block; color:#64748b; font-weight:bold; margin-bottom:1px;">INTEGRANTE GRUPO:</label>
+                    <input type="text" value="${nombreCompleto}" id="edit_nombre_${idFirestore}_${idx}" style="${estiloInputChico} margin-bottom:2px;">
+                    <label style="font-size:9px; display:block; color:#64748b; font-weight:bold; margin-bottom:1px;">TELÉFONO:</label>
+                    <input type="text" value="${telInteg}" id="edit_tel_${idFirestore}_${idx}" style="${estiloInputChico} margin-bottom:2px;">
+                    <label style="font-size:9px; display:block; color:#64748b; font-weight:bold; margin-bottom:1px;">OBSERVACIONES:</label>
+                    <input type="text" value="${obsInteg}" id="edit_obs_${idFirestore}_${idx}" style="${estiloInputChico}">
+                `;
+            }
         }
     } 
     // =================================================================
-    // CASO B: REGISTRO INDIVIDUAL
+    // CASO B: REGISTRO INDIVIDUAL ORDINARIO O ESCUELA
     // =================================================================
     else {
         let nombreActual = "";
@@ -1645,17 +1556,17 @@ window.habilitarEdicionEnLinea = function(boton, idFirestore, indexIntegrante = 
         const telefonoActual = registroOriginal.telefono_general || registroOriginal.ta_telefono || registroOriginal.rep_telefono || '';
 
         if (celdaCurp) {
-            celdaCurp.innerHTML = `<input type="text" value="${infoCurpClave}" id="edit_curp_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px; font-family:monospace;">`;
+            celdaCurp.innerHTML = `<input type="text" value="${infoCurpClave}" id="edit_curp_${idFirestore}" style="${estiloInputChico} font-family:monospace;">`;
         }
 
         if (celdaIdentificacion) {
             celdaIdentificacion.innerHTML = `
-                <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">BENEFICIARIO:</label>
-                <input type="text" value="${nombreActual}" id="edit_nombre_${idFirestore}" style="width:100%; padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px;">
-                <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">TELÉFONO:</label>
-                <input type="text" value="${telefonoActual}" id="edit_tel_${idFirestore}" style="width:100%; padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px;">
-                <label style="font-size:10px; display:block; color:#64748b; font-weight:bold;">OBSERVACIONES:</label>
-                <input type="text" value="${registroOriginal.observaciones || ''}" id="edit_obs_${idFirestore}" style="width:100%; padding:4px; border:1px solid #3b82f6; border-radius:4px;">
+                <label style="font-size:9px; display:block; color:#64748b; font-weight:bold; margin-bottom:1px;">BENEFICIARIO:</label>
+                <input type="text" value="${nombreActual}" id="edit_nombre_${idFirestore}" style="${estiloInputChico} margin-bottom:2px;">
+                <label style="font-size:9px; display:block; color:#64748b; font-weight:bold; margin-bottom:1px;">TELÉFONO:</label>
+                <input type="text" value="${telefonoActual}" id="edit_tel_${idFirestore}" style="${estiloInputChico} margin-bottom:2px;">
+                <label style="font-size:9px; display:block; color:#64748b; font-weight:bold; margin-bottom:1px;">OBSERVACIONES:</label>
+                <input type="text" value="${registroOriginal.observaciones || ''}" id="edit_obs_${idFirestore}" style="${estiloInputChico}">
             `;
         }
     }
@@ -1664,26 +1575,167 @@ window.habilitarEdicionEnLinea = function(boton, idFirestore, indexIntegrante = 
         const estatusActual = registroOriginal.estatus || 'PENDIENTE';
         const difActual = registroOriginal.capturado_dif_estatal || 'NO';
         celdaEstatus.innerHTML = `
-            <select id="edit_estatus_${idFirestore}" style="padding:4px; margin-bottom:4px; border:1px solid #3b82f6; border-radius:4px; width:100%; font-weight:bold;">
+            <select id="edit_estatus_${idFirestore}" style="padding:2px; margin-bottom:3px; border:1px solid #3b82f6; border-radius:4px; width:100%; font-weight:bold; font-size:10px; box-sizing: border-box;">
                 <option value="PENDIENTE" ${estatusActual === 'PENDIENTE' ? 'selected' : ''}>PENDIENTE</option>
                 <option value="VALIDADO" ${estatusActual === 'VALIDADO' ? 'selected' : ''}>VALIDADO</option>
                 <option value="ENTREGADO" ${estatusActual === 'ENTREGADO' ? 'selected' : ''}>ENTREGADO</option>
+                <option value="EN REVISIÓN" ${estatusActual === 'EN REVISIÓN' ? 'selected' : ''}>EN REVISIÓN</option>
             </select>
-            <select id="edit_dif_${idFirestore}" style="padding:4px; border:1px solid #3b82f6; border-radius:4px; width:100%;">
+            <select id="edit_dif_${idFirestore}" style="padding:2px; border:1px solid #3b82f6; border-radius:4px; width:100%; font-size:10px; box-sizing: border-box;">
                 <option value="SI" ${difActual === 'SI' ? 'selected' : ''}>DIF: SÍ</option>
                 <option value="NO" ${difActual === 'NO' ? 'selected' : ''}>DIF: NO</option>
             </select>
         `;
     }
 
-    // 🌟 CORREGIDO: Contenedor flex horizontal para que los botones mantengan su tamaño original y estilizado
     if (celdaAcciones) {
+        // Pasamos 'this' (el botón) para poder leer los atributos de la fila al guardar
         celdaAcciones.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; width: 100%;">
-                <button class="btn-admin" style="background:#10b981; padding:6px 10px; font-weight:bold; color:white; border:none; border-radius:4px; cursor:pointer; width: 75px; font-size:11px;" onclick="window.guardarEdicionEnLinea('${idFirestore}', ${indexIntegrante})">💾 Guardar</button>
-                <button class="btn-admin" style="background:#64748b; padding:6px 10px; color:white; border:none; border-radius:4px; cursor:pointer; width: 75px; font-size:11px;" onclick="renderizarTablasSincronizadas()">❌ Cancelar</button>
+            <div style="display: flex; flex-direction: column; gap: 3px; align-items: center; justify-content: center; width: 100%;">
+                <button class="btn-admin" style="background:#10b981; padding:3px 6px; font-weight:bold; color:white; border:none; border-radius:3px; cursor:pointer; width: 65px; font-size:10px;" onclick="window.guardarEdicionEnLinea(this, '${idFirestore}')">💾 Guardar</button>
+                <button class="btn-admin" style="background:#64748b; padding:3px 6px; color:white; border:none; border-radius:3px; cursor:pointer; width: 65px; font-size:10px;" onclick="renderizarTablasSincronizadas()">❌ Cancelar</button>
             </div>
         `;
+    }
+};
+
+// =========================================================================
+// 2. GUARDAR EDICIÓN EN LÍNEA (DOBLE VALIDACIÓN DE ÍNDICE - SEPARACIÓN TOTAL)
+// =========================================================================
+window.guardarEdicionEnLinea = async function(elementoBoton, idFirestore) {
+    try {
+        const fila = elementoBoton.closest('tr');
+        const registroOriginal = listadoLive.find(d => d.id_firestore === idFirestore || d.id === idFirestore);
+        if (!registroOriginal) {
+            alert("Error: No se encontró el registro de referencia en memoria.");
+            return;
+        }
+
+        // Recuperamos el índice desde el atributo de la fila por si el parámetro falló
+        let attrIndex = fila.getAttribute('data-index-integrante');
+        let indexIntegrante = (attrIndex !== null && attrIndex !== undefined && attrIndex !== 'null') ? parseInt(attrIndex, 10) : null;
+
+        const inputPrograma = document.getElementById(`edit_programa_${idFirestore}`);
+        const inputSubgrupo = document.getElementById(`edit_subgrupo_${idFirestore}`);
+        const inputLugar = document.getElementById(`edit_lugar_${idFirestore}`);
+        const selectEstatus = document.getElementById(`edit_estatus_${idFirestore}`);
+        const selectDif = document.getElementById(`edit_dif_${idFirestore}`);
+
+        const datosActualizados = {};
+
+        if (inputPrograma) datosActualizados.programa = inputPrograma.value.trim().toUpperCase();
+        if (inputSubgrupo) datosActualizados.subgrupo = inputSubgrupo.value.trim().toUpperCase();
+        if (selectEstatus) datosActualizados.estatus = selectEstatus.value;
+        if (selectDif) datosActualizados.capturado_dif_estatal = selectDif.value;
+
+        if (inputLugar) {
+            const valorLugar = inputLugar.value.trim().toUpperCase();
+            if (registroOriginal.localidad !== undefined) datosActualizados.localidad = valorLugar;
+            if (registroOriginal.col_loc !== undefined) datosActualizados.col_loc = valorLugar;
+        }
+
+        // =================================================================
+        // ESCENARIO A: ACTUALIZAR UN SOLO INTEGRANTE DEL TALLER COLECTIVO
+        // =================================================================
+        if (indexIntegrante !== null && registroOriginal.integrantes && Array.isArray(registroOriginal.integrantes)) {
+            
+            const inputCurpInt = document.getElementById(`edit_curp_${idFirestore}_${indexIntegrante}`);
+            const inputNombreInt = document.getElementById(`edit_nombre_${idFirestore}_${indexIntegrante}`);
+            const inputTelInt = document.getElementById(`edit_tel_${idFirestore}_${indexIntegrante}`);
+            const inputObsInt = document.getElementById(`edit_obs_${idFirestore}_${indexIntegrante}`);
+
+            // Hacemos clon profundo para no alterar el array en memoria prematuramente
+            const copiaIntegrantes = JSON.parse(JSON.stringify(registroOriginal.integrantes));
+            const itemInt = copiaIntegrantes[indexIntegrante];
+
+            if (itemInt && inputNombreInt) {
+                const nombreCompletoRaw = inputNombreInt.value.trim().toUpperCase();
+                const partesNombre = nombreCompletoRaw.split(' ');
+                
+                let nuevoNom = '', nuevoPat = '', nuevoMat = '';
+
+                if (partesNombre.length === 3) {
+                    nuevoNom = partesNombre[0];
+                    nuevoPat = partesNombre[1];
+                    nuevoMat = partesNombre[2];
+                } else if (partesNombre.length > 3) {
+                    nuevoNom = `${partesNombre[0]} ${partesNombre[1]}`;
+                    nuevoPat = partesNombre[2];
+                    nuevoMat = partesNombre.slice(3).join(' ');
+                } else {
+                    nuevoNom = partesNombre[0] || '';
+                    nuevoPat = partesNombre[1] || '';
+                }
+
+                // Modificamos ÚNICAMENTE la celda del integrante guardado
+                copiaIntegrantes[indexIntegrante] = {
+                    ...itemInt,
+                    nombre: nuevoNom,
+                    paterno: nuevoPat,
+                    materno: nuevoMat,
+                    curp: inputCurpInt ? inputCurpInt.value.trim().toUpperCase() : (itemInt.curp || ''),
+                    telefono: inputTelInt ? inputTelInt.value.trim() : (itemInt.telefono || ''),
+                    observaciones: inputObsInt ? inputObsInt.value.trim().toUpperCase() : (itemInt.observaciones || 'SIN OBSERVACIONES')
+                };
+
+                datosActualizados.integrantes = copiaIntegrantes;
+            }
+        } 
+        // =================================================================
+        // ESCENARIO B: ACTUALIZAR REGISTRO INDIVIDUAL O ESCUELA
+        // =================================================================
+        else {
+            const inputCurp = document.getElementById(`edit_curp_${idFirestore}`);
+            const inputNombre = document.getElementById(`edit_nombre_${idFirestore}`);
+            const inputTel = document.getElementById(`edit_tel_${idFirestore}`);
+            const inputObs = document.getElementById(`edit_obs_${idFirestore}`);
+
+            if (registroOriginal.pae_escuela) {
+                if (inputNombre) datosActualizados.pae_escuela = inputNombre.value.trim().toUpperCase();
+                if (inputCurp) datosActualizados.pae_clave_escuela = inputCurp.value.trim().toUpperCase();
+            } else {
+                if (inputNombre) {
+                    const nombreCompletoRaw = inputNombre.value.trim().toUpperCase();
+                    const partesNombre = nombreCompletoRaw.split(' ');
+                    
+                    let nuevoNom = partesNombre[0] || '';
+                    let nuevoPat = partesNombre[1] || '';
+                    let nuevoMat = partesNombre.slice(2).join(' ') || '';
+
+                    if (partesNombre.length > 3) {
+                        nuevoNom = `${partesNombre[0]} ${partesNombre[1]}`;
+                        nuevoPat = partesNombre[2];
+                        nuevoMat = partesNombre.slice(3).join(' ');
+                    }
+
+                    datosActualizados.beneficiario = {
+                        ...(registroOriginal.beneficiario || {}),
+                        nombre: nuevoNom,
+                        paterno: nuevoPat,
+                        materno: nuevoMat,
+                        curp: inputCurp ? inputCurp.value.trim().toUpperCase() : '',
+                        nombre_completo_cache: nombreCompletoRaw
+                    };
+                }
+            }
+
+            if (inputTel) datosActualizados.telefono_general = inputTel.value.trim();
+            if (inputObs) datosActualizados.observaciones = inputObs.value.trim().toUpperCase();
+        }
+
+        // Envío directo a Firebase actualizando solo lo cambiado
+        const docRef = doc(db, "proyetos_pv", idFirestore);
+        await updateDoc(docRef, datosActualizados);
+
+        console.log(`Guardado exitoso del elemento.`);
+        
+        if (typeof window.renderizarTablasSincronizadas === 'function') {
+            window.renderizarTablasSincronizadas();
+        }
+
+    } catch (error) {
+        console.error("Error al guardar:", error);
+        alert("No se pudo guardar la información de este integrante.");
     }
 };
 document.addEventListener("DOMContentLoaded", function() {
@@ -2052,7 +2104,7 @@ document.addEventListener("DOMContentLoaded", function() {
     } else {
         // Si no hay rastro del inicio de sesión, lo regresamos al login por seguridad
         console.warn("Acceso denegado: No se encontró una sesión activa.");
-        window.location.href = "login.html";
+        window.location.href = "index.html";
     }
 });
 
@@ -2073,7 +2125,7 @@ window.cerrarSesion = function() {
 
     console.log("Sesión destruida localmente.");
     // Redirigimos inmediatamente al archivo de acceso
-    window.location.href = "login.html";
+    window.location.href = "index.html";
 };
 </script>
 </body>
