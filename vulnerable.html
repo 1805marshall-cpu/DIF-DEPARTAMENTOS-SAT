@@ -51,6 +51,8 @@
         { background: #e2e8f0 !important; color: #475569 !important; border-color: #94a3b8 !important; }
         #cuerpo_tabla td button:hover 
         { filter: brightness(0.9); }
+        
+        
     </style>
 </head>
 <body>
@@ -147,7 +149,7 @@
         <option value="CHUNIAPAN DE ARRIBA">32 - CHUNIAPAN DE ARRIBA</option>
         <option value="DOS AGUAJES">33 - DOS AGUAJES</option>
         <option value="FRANCISCO I. MADERO">36 - FRANCISCO I. MADERO</option>
-        <option value="FRANCISO J. MORENO">37 - FRANCISO J. MORENO</option>
+        <option value="FRANCISCO J. MORENO">37 - FRANCISCO J. MORENO</option>
         <option value="LAS GALERAS">38 - LAS GALERAS</option>
         <option value="SALVADOR DIAZ MIRON">39 - SALVADOR DIAZ MIRON</option>
         <option value="EL HUIDERO">40 - EL HUIDERO</option>
@@ -185,7 +187,7 @@
         <option value="RIO TUXTLA">73 - RIO TUXTLA</option>
         <option value="SALINAS ROCA PARTIDA">74 - SALINAS ROCA PARTIDA</option>
         <option value="SALTO DE EYIPANTLA">75 - SALTO DE EYIPANTLA</option>
-        <option value="SAN ISIDRO XOTEPANA">76 - SAN ISIDRO XOTEPANA</option>
+        <option value="SAN ISIDRO XOTEAPAN">76 - SAN ISIDRO XOTEAPAN</option>
         <option value="SAN JUAN DE LA GLORIA">77 - SAN JUAN DE LA GLORIA</option>
         <option value="SAN LEOPOLDO">78 - SAN LEOPOLDO</option>
         <option value="SANTA ROSA ABATA">79 - SANTA ROSA ABATA</option>
@@ -195,8 +197,8 @@
         <option value="TEXALPAN DE ABAJO">84 - TEXALPAN DE ABAJO</option>
         <option value="TEXCALTITAN XOTEAPAN">85 - TEXCALTITAN XOTEAPAN</option>
         <option value="TILAPAN">86 - TILAPAN</option>
-        <option value="TONALAPANA">87 - TONALAPANA</option>
-        <option value="TULAPANA">90 - TULAPANA</option>
+        <option value="TONALAPAN">87 - TONALAPAN</option>
+        <option value="TULAPAN">90 - TULAPAN</option>
         <option value="VISTA HERMOSA">91 - VISTA HERMOSA</option>
         <option value="XOTEAPAN">92 - XOTEAPAN</option>
         <option value="ARROYO DE LIMON">93 - ARROYO DE LIMON</option>
@@ -428,7 +430,7 @@
                     <div class="form-group pae-field hidden-field"><label>Nombre de Escuela</label><input type="text" id="pae_escuela"></div>
                     <div class="form-group pae-field hidden-field"><label>Escolaridad</label><input type="text" id="pae_escolaridad"></div>
                     <div class="form-group pae-field hidden-field"><label>Turno</label><input type="text" id="pae_turno"></div>
-                    <div class="form-group pae-field hidden-field"><label>Nivel</label><input type="text" id="pae_nivel"></div>
+                    <div class="form-group pae-field hidden-field"><label>Grado</label><input type="text" id="pae_nivel"></div>
                     <div class="form-group pae-field hidden-field"><label>Domicilio Escuela</label><input type="text" id="pae_domicilio"></div>
 
                     <div class="form-group vul-field hidden-field"><label>Calle</label><input type="text" id="vul_calle"></div>
@@ -537,9 +539,6 @@
     <button onclick="document.getElementById('inputImportarExcel').click()" class="btn-admin" style="background: #10b981; color: white;">
         <i class="fas fa-upload"></i> Importar desde Excel (.xlsx)
     </button>
-
-    
-    <button id="btnVaciar" class="btn-admin btn-clear-db"><i class="fas fa-trash-alt"></i> Vaciar Base de Datos</button>
 </div>
         <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
     
@@ -747,7 +746,7 @@ window.renderizarTablasSincronizadas = function() {
         }
     });
 
-    // 🌟 COMPATIBILIDAD CON EXCEL: Guardamos globalmente los registros que pasaron el filtro en pantalla
+    // COMPATIBILIDAD CON EXCEL: Guardamos globalmente los registros que pasaron el filtro en pantalla
     window.registrosFiltradosActuales = registrosFiltrados;
 
     const totalRegistros = registrosFiltrados.length;
@@ -823,7 +822,7 @@ window.renderizarTablasSincronizadas = function() {
         fotoHtml += `</div>`;
 
         // =================================================================
-        // CASO A: EXPEDIENTES COLECTIVOS / INTEGRANTES DE GRUPO (CORREGIDO PARA EDICIÓN POR FILA)
+        // CASO A: EXPEDIENTES COLECTIVOS / INTEGRANTES DE GRUPO
         // =================================================================
         if (d.integrantes && Array.isArray(d.integrantes) && d.integrantes.length > 0) {
             d.integrantes.forEach((int, index) => {
@@ -862,24 +861,59 @@ window.renderizarTablasSincronizadas = function() {
                     </td>
                 `;
             });
-        // =================================================================
+// =================================================================
         // CASO B: EXPEDIENTES INDIVIDUALES O PADRÓN ESCOLAR PAE / REPRESENTANTE
         // =================================================================
         } else {
-            let infoIdentificacion = "";
-            let infoCurpClave = "";
+            let celdaCurpClave = "";
+            let celdaIdentificacionHtml = "";
 
+            // 🌟 COMPORTAMIENTO EXCLUSIVO PARA CENTROS ESCOLARES (PAE)
             if (d.pae_escuela) {
-                infoIdentificacion = `<span style="color: var(--primary); font-weight: bold;"><i class="fas fa-school"></i> ESCUELA: ${d.pae_escuela}</span><br><small style="color: #334155; font-weight: 600;">🔑 CCT: ${d.pae_clave_escuela || 'SIN CLAVE'}</small>`;
-                infoCurpClave = d.pae_clave_escuela || 'SIN CLAVE';
-            } else {
-                const nombreCompleto = d.beneficiario?.nombre_completo_cache || `${d.beneficiario?.nombre || ''} ${d.beneficiario?.paterno || ''} ${d.beneficiario?.materno || ''}`.trim();
-                infoIdentificacion = `<i class="fas fa-user"></i> ${nombreCompleto}`.toUpperCase();
-                infoCurpClave = d.beneficiario?.curp || d.rep_curp || 'N/A';
+                const curpAlumno = d.beneficiario?.curp || 'SIN CURP';
+                const nombreAlumno = d.beneficiario?.nombre_completo_cache || 
+                    `${d.beneficiario?.nombre || ''} ${d.beneficiario?.paterno || ''} ${d.beneficiario?.materno || ''}`.trim();
                 
-                if(d.rep_nombre) {
-                    infoIdentificacion += `<br><small style="color:#2563eb;"><i class="fas fa-hands-helping"></i> Rep: ${d.rep_nombre.toUpperCase()}</small>`;
+                // Asignación correcta según tus definiciones:
+                const escolaridadText = (d.pae_escolaridad || 'SIN ESCOLARIDAD').toUpperCase(); // PRIMARIA, SECUNDARIA...
+                const nivelText = (d.pae_nivel || d.pae_grado || d.nivel || d.grado || 'SIN NIVEL').toUpperCase(); // 1, 2, 3...
+
+                // CURP / Clave apilados
+                celdaCurpClave = `
+                    <div style="font-weight: bold; color: #1e3a8a; font-family: monospace;">${d.pae_clave_escuela || 'SIN CCT'}</div>
+                    <div style="font-size: 10px; color: #64748b; margin-top: 3px; font-family: monospace; font-weight: normal;">
+                        <i class="fas fa-id-card"></i> ${curpAlumno.toUpperCase()}
+                    </div>
+                `;
+
+                // Nombre Escuela / Nombre Alumno + Escolaridad + Nivel apilados de forma limpia
+                celdaIdentificacionHtml = `
+                    <div style="color: var(--primary); font-weight: bold;"><i class="fas fa-school"></i> ESCUELA: ${(d.pae_escuela).toUpperCase()}</div>
+                    <div style="margin-top: 5px; display: flex; flex-direction: column; gap: 3px;">
+                        <span style="font-size: 11px; color: #334155; font-weight: 500;">
+                            <i class="fas fa-child" style="color: #64748b;"></i> Alumno: ${nombreAlumno.toUpperCase() || 'SIN ALUMNO ASIGNADO'}
+                        </span>
+                        <div style="display: flex; gap: 4px; align-items: center; flex-wrap: wrap; margin-top: 2px;">
+                            <span style="background: #f3e8ff; color: #6b21a8; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid #e9d5ff; white-space: nowrap;">
+                                🏫 ${escolaridadText}
+                            </span>
+                            <span style="background: #e0f2fe; color: #0369a1; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; border: 1px solid #bae6fd; white-space: nowrap;">
+                                🔢 GRADO: ${nivelText}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Comportamiento regular para registros individuales u otros programas
+                const nombreCompleto = d.beneficiario?.nombre_completo_cache || `${d.beneficiario?.nombre || ''} ${d.beneficiario?.paterno || ''} ${d.beneficiario?.materno || ''}`.trim();
+                let auxIdentificacion = `<i class="fas fa-user"></i> ${nombreCompleto}`.toUpperCase();
+                
+                if (d.rep_nombre) {
+                    auxIdentificacion += `<br><small style="color:#2563eb;"><i class="fas fa-hands-helping"></i> Rep: ${d.rep_nombre.toUpperCase()}</small>`;
                 }
+                
+                celdaCurpClave = d.beneficiario?.curp || d.rep_curp || 'N/A';
+                celdaIdentificacionHtml = auxIdentificacion;
             }
 
             const telefonoMostrar = d.telefono_general || d.ta_telefono || d.rep_telefono || 'S/N';
@@ -896,9 +930,9 @@ window.renderizarTablasSincronizadas = function() {
                 </td>
                 
                 <td class="celda-lugar" style="padding: 10px; border: 1px solid var(--border);">${lugar}</td>
-                <td class="celda-curp" style="padding: 10px; border: 1px solid var(--border); font-family: monospace; font-weight: bold;">${infoCurpClave}</td>
+                <td class="celda-curp" style="padding: 10px; border: 1px solid var(--border);">${celdaCurpClave}</td>
                 <td class="celda-identificacion" style="padding: 10px; border: 1px solid var(--border); font-size:11px; line-height:1.4;">
-                    ${infoIdentificacion}
+                    ${celdaIdentificacionHtml}
                     <br><small style="color:#475569;">📞 Tel: <span class="txt-telefono">${telefonoMostrar}</span> | 📝 Obs: <span class="txt-obs">${obsMostrar}</span></small>
                 </td>
                 <td style="padding: 10px; border: 1px solid var(--border);">${fecha}</td>
@@ -916,6 +950,7 @@ window.renderizarTablasSincronizadas = function() {
                 </td>
             `;
         }
+        
     });
 
     if (typeof window.verificarTablaVacia === 'function') {
@@ -1211,26 +1246,25 @@ window.borrarRegistro = async function(idDocumento) {
         }
     }
 
-// =========================================================================
-// --- IMPORTACIÓN MASIVA DESDE EXCEL (.XLSX) OPTIMIZADA EN BATCH ---
-// =========================================================================
 window.importarExcel = function(input) {
     const file = input.files[0];
     if (!file) return;
 
+    // Verificar librería XLSX antes de empezar
+    if (typeof XLSX === 'undefined') {
+        alert("❌ Error Crítico: La librería SheetJS (XLSX) no está cargada en el sistema. Añade el script de CDN en el HTML.");
+        return;
+    }
+
     const reader = new FileReader();
-    // Leemos el archivo como un array binario compatible con hojas de cálculo
     reader.onload = async function(e) {
         try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
             
-            // Tomamos la primera hoja del archivo de Excel
             const nombreHoja = workbook.SheetNames[0];
             const hoja = workbook.Sheets[nombreHoja];
             
-            // Convertimos las celdas a un arreglo JSON plano
-            // 'defval: ""' asegura que las celdas vacías no desaparezcan del objeto
             const filasExcel = XLSX.utils.sheet_to_json(hoja, { defval: "" });
 
             if (filasExcel.length === 0) {
@@ -1238,109 +1272,139 @@ window.importarExcel = function(input) {
                 return;
             }
 
-            if (confirm(`¿Proceder con la importación masiva de ${filasExcel.length} filas desde Excel al sistema?`)) {
-                alert("⏳ Procesando registros en bloques Batch... Por favor, espere.");
+            if (confirm(`¿Proceder con la importación masiva de ${filasExcel.length} filas? Los registros con la misma CURP se SOBREESCRIBIRÁN.`)) {
+                alert("⏳ Procesando registros y buscando duplicados... Por favor, espere.");
                 
-                let contadorProgresivo = listadoLive.reduce((max, item) => Math.max(max, item.num_progresivo || 0), 0);
+                const coleccionDestino = (typeof NOMBRE_COLECCION !== 'undefined') ? NOMBRE_COLECCION : "proyetos_pv";
+                const listaLocal = window.listadoLive || [];
+                let contadorProgresivo = listaLocal.reduce((max, item) => Math.max(max, item.num_progresivo || 0), 0);
+                
+                // Verificar Firebase Batch de forma segura
+                if (typeof writeBatch !== 'function') {
+                    alert("❌ Error: 'writeBatch' no está definido. Verifica tus importaciones de Firebase Firestore.");
+                    return;
+                }
                 
                 let batch = writeBatch(db);
                 let contadorOperaciones = 0;
-                let registrosExitosos = 0;
+                let registrosNuevos = 0;
+                let registrosActualizados = 0;
 
                 for (let i = 0; i < filasExcel.length; i++) {
                     const fila = filasExcel[i];
 
-                    // Normalizar claves a minúsculas para evitar errores si modifican los títulos del Excel
+                    // Normalizar claves a minúsculas
                     let fNormalizada = {};
                     Object.keys(fila).forEach(key => {
                         fNormalizada[key.trim().toLowerCase()] = fila[key];
                     });
 
-                    contadorProgresivo++;
+                    // Extraer CURP
+                    const curpExcel = (fNormalizada["curp beneficiario"] || fNormalizada["curp"] || "").toUpperCase().trim();
+
+                    let docRefDestino;
+                    let esDuplicado = false;
+                    let numProgresivoAsignar = 0;
+
+                    if (curpExcel && listaLocal.length > 0) {
+                        const registroExistente = listaLocal.find(d => {
+                            if (d.beneficiario && d.beneficiario.curp === curpExcel) return true;
+                            if (d.integrantes && d.integrantes.some(int => int.curp === curpExcel)) return true;
+                            return false;
+                        });
+
+                        if (registroExistente) {
+                            const idDoc = registroExistente.id_firestore || registroExistente.id;
+                            docRefDestino = doc(db, coleccionDestino, idDoc);
+                            numProgresivoAsignar = registroExistente.num_progresivo || (contadorProgresivo + 1);
+                            esDuplicado = true;
+                        }
+                    }
+
+                    if (!esDuplicado) {
+                        // Generar ID único seguro sin depender obligatoriamente de collection()
+                        const idAleatorio = `AUTO_${Math.random().toString(36).substring(2, 11).toUpperCase()}_${Date.now()}`;
+                        docRefDestino = doc(db, coleccionDestino, idAleatorio);
+                        contadorProgresivo++;
+                        numProgresivoAsignar = contadorProgresivo;
+                    }
 
                     let prog = (fNormalizada["programa institucional"] || fNormalizada["programa"] || "").toUpperCase();
                     let sub = (fNormalizada["subgrupo modalidad"] || fNormalizada["subgrupo"] || "").toUpperCase();
                     let loc = fNormalizada["localidad / colonia"] || fNormalizada["localidad"] || "";
 
-// Dentro de tu ciclo for de window.importarExcel:
-// Añade este mapeo de campos específicos del representante al objeto "datosDocumento":
+                    let datosDocumento = {
+                        num_progresivo: numProgresivoAsignar,
+                        programa: prog,
+                        subgrupo: sub,
+                        localidad: loc,
+                        fecha_registro: new Date().toISOString(),
+                        fotos: [], 
+                        
+                        telefono_general: String(fNormalizada["teléfono de contacto"] || fNormalizada["telefono_general"] || fNormalizada["rep_telefono"] || ''),
+                        estatus: (fNormalizada["estatus local"] || fNormalizada["estatus"] || 'PENDIENTE').toUpperCase(),
+                        capturado_dif_estatal: (fNormalizada["capturado dif estatal"] || fNormalizada["capturado_dif_estatal"] || 'NO').toUpperCase(),
+                        observaciones: String(fNormalizada["observaciones"] || 'SIN OBSERVACIONES').toUpperCase(),
 
-let datosDocumento = {
-    num_progresivo: contadorProgresivo,
-    programa: prog,
-    subgrupo: sub,
-    localidad: loc,
-    fecha_registro: new Date().toISOString(),
-    fotos: [], 
-    
-    telefono_general: fNormalizada["teléfono de contacto"] || fNormalizada["telefono_general"] || fNormalizada["rep_telefono"] || '',
-    estatus: (fNormalizada["estatus local"] || fNormalizada["estatus"] || 'PENDIENTE').toUpperCase(),
-    capturado_dif_estatal: (fNormalizada["capturado dif estatal"] || fNormalizada["capturado_dif_estatal"] || 'NO').toUpperCase(),
-    observaciones: (fNormalizada["observaciones"] || 'SIN OBSERVACIONES').toUpperCase(),
+                        rep_curp: String(fNormalizada["curp representante"] || fNormalizada["rep_curp"] || '').toUpperCase(),
+                        rep_nombre: String(fNormalizada["nombre representante"] || fNormalizada["rep_nombre"] || '').toUpperCase(),
+                        rep_parentesco: String(fNormalizada["parentesco / vínculo"] || fNormalizada["rep_parentesco"] || '').toUpperCase(),
+                        rep_calle: String(fNormalizada["dirección / calle"] || fNormalizada["rep_calle"] || '').toUpperCase(),
+                        rep_numero: String(fNormalizada["número cobro / ext"] || fNormalizada["rep_numero"] || ''),
+                        rep_cp: String(fNormalizada["código postal"] || fNormalizada["rep_cp"] || ''),
+                        rep_entre_calle: String(fNormalizada["entre calle 1"] || fNormalizada["rep_entre_calle"] || '').toUpperCase(),
+                        rep_y_calle: String(fNormalizada["y calle 2"] || fNormalizada["rep_y_calle"] || '').toUpperCase(),
+                        rep_referencia: String(fNormalizada["referencia domicilio"] || fNormalizada["rep_referencia"] || '').toUpperCase(),
 
-    // 🌟 ASIGNACIÓN MÁSIVA DE CAMPOS DE REPRESENTANTE (SI EXISTEN EN EL EXCEL)
-    rep_curp: (fNormalizada["curp representante"] || fNormalizada["rep_curp"] || '').toUpperCase(),
-    rep_nombre: (fNormalizada["nombre representante"] || fNormalizada["rep_nombre"] || '').toUpperCase(),
-    rep_parentesco: (fNormalizada["parentesco / vínculo"] || fNormalizada["rep_parentesco"] || '').toUpperCase(),
-    rep_calle: (fNormalizada["dirección / calle"] || fNormalizada["rep_calle"] || '').toUpperCase(),
-    rep_numero: fNormalizada["número cobro / ext"] || fNormalizada["rep_numero"] || '',
-    rep_cp: fNormalizada["código postal"] || fNormalizada["rep_cp"] || '',
-    rep_entre_calle: (fNormalizada["entre calle 1"] || fNormalizada["rep_entre_calle"] || '').toUpperCase(),
-    rep_y_calle: (fNormalizada["y calle 2"] || fNormalizada["rep_y_calle"] || '').toUpperCase(),
-    rep_referencia: (fNormalizada["referencia domicilio"] || fNormalizada["rep_referencia"] || '').toUpperCase(),
+                        pae_clave_escuela: String(fNormalizada["clave escuela (cct)"] || fNormalizada["clave escuela"] || '').toUpperCase(),
+                        pae_escuela: String(fNormalizada["nombre escuela"] || '').toUpperCase(),
+                        pae_escolaridad: String(fNormalizada["escolaridad"] || '').toUpperCase(), 
+                        pae_nivel: String(fNormalizada["nivel"] || fNormalizada["grado"] || fNormalizada["pae_nivel"] || '').toUpperCase(), 
+                        pae_turno: String(fNormalizada["turno"] || '').toUpperCase(),
+                        pae_domicilio_esc: String(fNormalizada["domicilio escuela"] || '').toUpperCase(),
 
-    // Módulo escolar PAE
-    pae_clave_escuela: (fNormalizada["clave escuela (cct)"] || fNormalizada["clave escuela"] || '').toUpperCase(),
-    pae_escuela: (fNormalizada["nombre escuela"] || '').toUpperCase(),
-    pae_escolaridad: (fNormalizada["escolaridad"] || '').toUpperCase(),
-    pae_turno: (fNormalizada["turno"] || '').toUpperCase(),
-    pae_domicilio_esc: (fNormalizada["domicilio escuela"] || '').toUpperCase(),
-
-    // Módulo General / Vulnerables
-    vul_calle: (fNormalizada["dirección / calle"] || fNormalizada["vul_calle"] || '').toUpperCase(),
-    vul_numero: fNormalizada["número cobro / ext"] || fNormalizada["vul_numero"] || '',
-    vul_cp: fNormalizada["código postal"] || fNormalizada["vul_cp"] || '',
-    vul_entre_calle: (fNormalizada["entre calle 1"] || '').toUpperCase(),
-    vul_y_calle: (fNormalizada["y calle 2"] || '').toUpperCase(),
-    vul_referencia: (fNormalizada["referencia domicilio"] || '').toUpperCase()
-};
+                        vul_calle: String(fNormalizada["dirección / calle"] || fNormalizada["vul_calle"] || '').toUpperCase(),
+                        vul_numero: String(fNormalizada["número cobro / ext"] || fNormalizada["vul_numero"] || ''),
+                        vul_cp: String(fNormalizada["código postal"] || fNormalizada["vul_cp"] || ''),
+                        vul_entre_calle: String(fNormalizada["entre calle 1"] || '').toUpperCase(),
+                        vul_y_calle: String(fNormalizada["y calle 2"] || '').toUpperCase(),
+                        vul_referencia: String(fNormalizada["referencia domicilio"] || '').toUpperCase()
+                    };
 
                     if (["CARPINTERIA", "PANADERIA", "COCINA"].includes(prog)) {
                         datosDocumento.integrantes = [{
-                            curp: (fNormalizada["curp beneficiario"] || fNormalizada["curp"] || "").toUpperCase(),
-                            nombre: (fNormalizada["nombre(s)"] || fNormalizada["nombre"] || "").toUpperCase(),
-                            paterno: (fNormalizada["apellido paterno"] || fNormalizada["paterno"] || "").toUpperCase(),
-                            materno: (fNormalizada["apellido materno"] || fNormalizada["materno"] || "").toUpperCase(),
-                            fecha_nac: fNormalizada["fecha nacimiento"] || fNormalizada["fecha_nac"] || "",
-                            edad: fNormalizada["edad"] || "",
-                            sexo: (fNormalizada["sexo"] || "MUJER").toUpperCase(),
-                            civil: (fNormalizada["estado civil"] || "").toUpperCase(),
-                            indigena: (fNormalizada["indígena"] || "NO").toUpperCase(),
-                            discapacidad: (fNormalizada["discapacidad"] || "NO").toUpperCase()
+                            curp: curpExcel,
+                            nombre: String(fNormalizada["nombre(s)"] || fNormalizada["nombre"] || "").toUpperCase(),
+                            paterno: String(fNormalizada["apellido paterno"] || fNormalizada["paterno"] || "").toUpperCase(),
+                            materno: String(fNormalizada["apellido materno"] || fNormalizada["materno"] || "").toUpperCase(),
+                            fecha_nac: String(fNormalizada["fecha nacimiento"] || fNormalizada["fecha_nac"] || ""),
+                            edad: String(fNormalizada["edad"] || ""),
+                            sexo: String(fNormalizada["sexo"] || "MUJER").toUpperCase(),
+                            civil: String(fNormalizada["estado civil"] || "").toUpperCase(),
+                            indigena: String(fNormalizada["indígena"] || "NO").toUpperCase(),
+                            discapacidad: String(fNormalizada["discapacidad"] || "NO").toUpperCase()
                         }];
                     } else {
                         datosDocumento.beneficiario = {
-                            curp: (fNormalizada["curp beneficiario"] || fNormalizada["curp"] || "").toUpperCase(),
-                            nombre: (fNormalizada["nombre(s)"] || fNormalizada["nombre"] || "").toUpperCase(),
-                            paterno: (fNormalizada["apellido paterno"] || fNormalizada["paterno"] || "").toUpperCase(),
-                            materno: (fNormalizada["apellido materno"] || fNormalizada["materno"] || "").toUpperCase(),
-                            fecha_acimiento: fNormalizada["fecha nacimiento"] || fNormalizada["fecha_nacimiento"] || "",
-                            edad: fNormalizada["edad"] || "",
-                            sexo: (fNormalizada["sexo"] || "MUJER").toUpperCase(),
-                            civil: (fNormalizada["estado civil"] || "").toUpperCase(),
-                            indigena: (fNormalizada["indígena"] || "NO").toUpperCase(),
-                            discapacidad: (fNormalizada["discapacidad"] || "NO").toUpperCase()
+                            curp: curpExcel,
+                            nombre: String(fNormalizada["nombre(s)"] || fNormalizada["nombre"] || "").toUpperCase(),
+                            paterno: String(fNormalizada["apellido paterno"] || fNormalizada["paterno"] || "").toUpperCase(),
+                            materno: String(fNormalizada["apellido materno"] || fNormalizada["materno"] || "").toUpperCase(),
+                            fecha_nacimiento: String(fNormalizada["fecha nacimiento"] || fNormalizada["fecha_nacimiento"] || ""),
+                            edad: String(fNormalizada["edad"] || ""),
+                            sexo: String(fNormalizada["sexo"] || "MUJER").toUpperCase(),
+                            civil: String(fNormalizada["estado civil"] || "").toUpperCase(),
+                            indigena: String(fNormalizada["indígena"] || "NO").toUpperCase(),
+                            discapacidad: String(fNormalizada["discapacidad"] || "NO").toUpperCase(),
+                            nombre_completo_cache: `${fNormalizada["nombre(s)"] || fNormalizada["nombre"] || ""} ${fNormalizada["apellido paterno"] || fNormalizada["paterno"] || ""} ${fNormalizada["apellido materno"] || fNormalizada["materno"] || ""}`.trim().toUpperCase()
                         };
                     }
 
-                    // Agregar operación al bloque Batch de Firestore
-                    const nuevoDocRef = doc(apoyosRef); 
-                    batch.set(nuevoDocRef, datosDocumento);
+                    batch.set(docRefDestino, datosDocumento, { merge: true });
                     
+                    if (esDuplicado) registrosActualizados++; else registrosNuevos++;
                     contadorOperaciones++;
-                    registrosExitosos++;
 
-                    // Consolidar lote cada 400 elementos
                     if (contadorOperaciones === 400) {
                         await batch.commit();
                         batch = writeBatch(db);
@@ -1348,20 +1412,23 @@ let datosDocumento = {
                     }
                 }
 
-                // Guardar remanentes finales
                 if (contadorOperaciones > 0) {
                     await batch.commit();
                 }
 
-                alert(`✨ ¡Importación desde Excel completada! Se guardaron ${registrosExitosos} registros.`);
+                alert(`✨ ¡Importación completada!\n🟢 Registros nuevos: ${registrosNuevos}\n🔄 Sobreescritos: ${registrosActualizados}`);
                 input.value = ""; 
+                
+                if (typeof window.recargarDatosDesdeFirestore === 'function') {
+                    window.recargarDatosDesdeFirestore();
+                }
             }
         } catch (err) {
-            console.error("Error al procesar el archivo Excel binario:", err);
-            alert("❌ El archivo de Excel está dañado o no tiene el formato correcto.");
+            console.error("Error exacto:", err);
+            alert(`❌ Error en el proceso: ${err.message}\n\nPresiona F12 en tu teclado para ver los detalles técnicos en la pestaña 'Consola'.`);
         }
     };
-    reader.readAsArrayBuffer(file); // Requerido para leer la estructura binaria .xlsx
+    reader.readAsArrayBuffer(file);
 };
 // --- ASIGNACIÓN DE ENLACES DE EVENTOS DOM ---
 document.addEventListener("DOMContentLoaded", () => {
@@ -1475,15 +1542,14 @@ function actualizarControlesPaginacion(totalRegistros, totalPaginas) {
         window.paginaActual = 1;               // Reiniciar flujo de páginas al filtrar
         renderizarTablasSincronizadas();
     };
-   // =========================================================================
-// 1. HABILITAR EDICIÓN EN LÍNEA (BLINDADO CON DATA-ATTRIBUTES)
+// =========================================================================
+// 1. HABILITAR EDICIÓN EN LÍNEA (BLINDADO CON DATA-ATTRIBUTES Y SOPORTE PAE)
 // =========================================================================
 window.habilitarEdicionEnLinea = function(boton, idFirestore, indexIntegrante = null) {
     const fila = boton.closest('tr');
     const registroOriginal = listadoLive.find(d => d.id_firestore === idFirestore || d.id === idFirestore);
     if (!registroOriginal) return;
 
-    // Guardamos el índice directamente en el elemento HTML de la fila para no perderlo
     if (indexIntegrante !== null && indexIntegrante !== undefined && indexIntegrante !== 'null') {
         fila.setAttribute('data-index-integrante', indexIntegrante);
     } else {
@@ -1499,8 +1565,8 @@ window.habilitarEdicionEnLinea = function(boton, idFirestore, indexIntegrante = 
     const celdaAcciones = fila.querySelector('.celda-acciones');
 
     const estiloInputChico = "width:100%; padding:2px 4px; font-size:11px; border:1px solid #3b82f6; border-radius:3px; box-sizing: border-box;";
+    const estiloLabelChico = "font-size:9px; display:block; color:#475569; font-weight:bold; margin-top:2px; margin-bottom:1px;";
 
-    // Inputs comunes de la raíz
     if (celdaPrograma) celdaPrograma.innerHTML = `<input type="text" value="${registroOriginal.programa || ''}" id="edit_programa_${idFirestore}" style="${estiloInputChico}">`;
     if (celdaSubgrupo) celdaSubgrupo.innerHTML = `<input type="text" value="${registroOriginal.subgrupo || ''}" id="edit_subgrupo_${idFirestore}" style="${estiloInputChico} font-weight:600;">`;
     if (celdaLugar) {
@@ -1508,7 +1574,6 @@ window.habilitarEdicionEnLinea = function(boton, idFirestore, indexIntegrante = 
         celdaLugar.innerHTML = `<input type="text" value="${valorLugar}" id="edit_lugar_${idFirestore}" style="${estiloInputChico}">`;
     }
 
-    // Determinar con certeza si esta fila en específico es de un integrante de taller
     const esCasoIntegrante = indexIntegrante !== null && indexIntegrante !== undefined && indexIntegrante !== 'null';
 
     // =================================================================
@@ -1529,30 +1594,71 @@ window.habilitarEdicionEnLinea = function(boton, idFirestore, indexIntegrante = 
 
             if (celdaIdentificacion) {
                 celdaIdentificacion.innerHTML = `
-                    <label style="font-size:9px; display:block; color:#64748b; font-weight:bold; margin-bottom:1px;">INTEGRANTE GRUPO:</label>
+                    <label style="${estiloLabelChico}">INTEGRANTE GRUPO:</label>
                     <input type="text" value="${nombreCompleto}" id="edit_nombre_${idFirestore}_${idx}" style="${estiloInputChico} margin-bottom:2px;">
-                    <label style="font-size:9px; display:block; color:#64748b; font-weight:bold; margin-bottom:1px;">TELÉFONO:</label>
+                    <label style="${estiloLabelChico}">TELÉFONO:</label>
                     <input type="text" value="${telInteg}" id="edit_tel_${idFirestore}_${idx}" style="${estiloInputChico} margin-bottom:2px;">
-                    <label style="font-size:9px; display:block; color:#64748b; font-weight:bold; margin-bottom:1px;">OBSERVACIONES:</label>
+                    <label style="${estiloLabelChico}">OBSERVACIONES:</label>
                     <input type="text" value="${obsInteg}" id="edit_obs_${idFirestore}_${idx}" style="${estiloInputChico}">
                 `;
             }
         }
     } 
     // =================================================================
-    // CASO B: REGISTRO INDIVIDUAL ORDINARIO O ESCUELA
+    // CASO B: PADRÓN ESCOLAR PAE (ESCUELAS CON ALUMNO)
     // =================================================================
-    else {
-        let nombreActual = "";
-        let infoCurpClave = registroOriginal.beneficiario?.curp || registroOriginal.rep_curp || '';
-        
-        if (registroOriginal.pae_escuela) {
-            nombreActual = registroOriginal.pae_escuela;
-            infoCurpClave = registroOriginal.pae_clave_escuela || '';
-        } else {
-            nombreActual = registroOriginal.beneficiario?.nombre_completo_cache || `${registroOriginal.beneficiario?.nombre || ''} ${registroOriginal.beneficiario?.paterno || ''} ${registroOriginal.beneficiario?.materno || ''}`.trim();
+    else if (registroOriginal.pae_escuela) {
+        const curpAlumno = registroOriginal.beneficiario?.curp || '';
+        const nombreAlumno = registroOriginal.beneficiario?.nombre_completo_cache || 
+            `${registroOriginal.beneficiario?.nombre || ''} ${registroOriginal.beneficiario?.paterno || ''} ${registroOriginal.beneficiario?.materno || ''}`.trim();
+
+        if (celdaCurp) {
+            celdaCurp.innerHTML = `
+                <label style="${estiloLabelChico} color:#1e3a8a;">🔑 CCT ESCUELA:</label>
+                <input type="text" value="${registroOriginal.pae_clave_escuela || ''}" id="edit_cct_${idFirestore}" style="${estiloInputChico} font-family:monospace; font-weight:bold; margin-bottom:2px;">
+                <label style="${estiloLabelChico} color:#64748b;">👤 CURP ALUMNO:</label>
+                <input type="text" value="${curpAlumno}" id="edit_curp_alumno_${idFirestore}" style="${estiloInputChico} font-family:monospace;">
+            `;
         }
 
+        if (celdaIdentificacion) {
+            celdaIdentificacion.innerHTML = `
+                <label style="${estiloLabelChico} color:#1e3a8a;">🏫 NOMBRE ESCUELA:</label>
+                <input type="text" value="${registroOriginal.pae_escuela}" id="edit_escuela_${idFirestore}" style="${estiloInputChico} margin-bottom:2px; font-weight:bold;">
+                <label style="${estiloLabelChico} color:#64748b;">👤 NOMBRE ALUMNO:</label>
+                <input type="text" value="${nombreAlumno}" id="edit_nombre_alumno_${idFirestore}" style="${estiloInputChico} margin-bottom:4px;">
+                
+                <div style="display: flex; gap: 4px; width: 100%; margin-bottom: 4px;">
+                    <div style="flex: 1;">
+                        <label style="${estiloLabelChico} color: #6b21a8;">🏫 ESCOLARIDAD:</label>
+                        <input type="text" value="${registroOriginal.pae_escolaridad || ''}" id="edit_escolaridad_${idFirestore}" placeholder="PREESCOLAR, PRIMARIA..." style="${estiloInputChico}">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="${estiloLabelChico} color: #0369a1;">🔢 NIVEL (GRADO):</label>
+                        <input type="text" value="${registroOriginal.pae_nivel || registroOriginal.pae_grado || ''}" id="edit_nivel_${idFirestore}" placeholder="1, 2, 3..." style="${estiloInputChico}">
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 4px; width: 100%;">
+                    <div style="flex: 1;">
+                        <label style="${estiloLabelChico}">📞 TELÉFONO:</label>
+                        <input type="text" value="${registroOriginal.telefono_general || ''}" id="edit_tel_${idFirestore}" style="${estiloInputChico}">
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="${estiloLabelChico}">📝 OBS:</label>
+                        <input type="text" value="${registroOriginal.observaciones || ''}" id="edit_obs_${idFirestore}" style="${estiloInputChico}">
+                    </div>
+                </div>
+            `;
+        }
+    }
+    // =================================================================
+    // CASO C: REGISTRO INDIVIDUAL ORDINARIO O CON REPRESENTANTE
+    // =================================================================
+    else {
+        const nombreActual = registroOriginal.beneficiario?.nombre_completo_cache || 
+            `${registroOriginal.beneficiario?.nombre || ''} ${registroOriginal.beneficiario?.paterno || ''} ${registroOriginal.beneficiario?.materno || ''}`.trim();
+        const infoCurpClave = registroOriginal.beneficiario?.curp || registroOriginal.rep_curp || '';
         const telefonoActual = registroOriginal.telefono_general || registroOriginal.ta_telefono || registroOriginal.rep_telefono || '';
 
         if (celdaCurp) {
@@ -1561,11 +1667,11 @@ window.habilitarEdicionEnLinea = function(boton, idFirestore, indexIntegrante = 
 
         if (celdaIdentificacion) {
             celdaIdentificacion.innerHTML = `
-                <label style="font-size:9px; display:block; color:#64748b; font-weight:bold; margin-bottom:1px;">BENEFICIARIO:</label>
+                <label style="${estiloLabelChico}">BENEFICIARIO:</label>
                 <input type="text" value="${nombreActual}" id="edit_nombre_${idFirestore}" style="${estiloInputChico} margin-bottom:2px;">
-                <label style="font-size:9px; display:block; color:#64748b; font-weight:bold; margin-bottom:1px;">TELÉFONO:</label>
+                <label style="${estiloLabelChico}">TELÉFONO:</label>
                 <input type="text" value="${telefonoActual}" id="edit_tel_${idFirestore}" style="${estiloInputChico} margin-bottom:2px;">
-                <label style="font-size:9px; display:block; color:#64748b; font-weight:bold; margin-bottom:1px;">OBSERVACIONES:</label>
+                <label style="${estiloLabelChico}">OBSERVACIONES:</label>
                 <input type="text" value="${registroOriginal.observaciones || ''}" id="edit_obs_${idFirestore}" style="${estiloInputChico}">
             `;
         }
@@ -1589,7 +1695,6 @@ window.habilitarEdicionEnLinea = function(boton, idFirestore, indexIntegrante = 
     }
 
     if (celdaAcciones) {
-        // Pasamos 'this' (el botón) para poder leer los atributos de la fila al guardar
         celdaAcciones.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 3px; align-items: center; justify-content: center; width: 100%;">
                 <button class="btn-admin" style="background:#10b981; padding:3px 6px; font-weight:bold; color:white; border:none; border-radius:3px; cursor:pointer; width: 65px; font-size:10px;" onclick="window.guardarEdicionEnLinea(this, '${idFirestore}')">💾 Guardar</button>
@@ -1598,9 +1703,8 @@ window.habilitarEdicionEnLinea = function(boton, idFirestore, indexIntegrante = 
         `;
     }
 };
-
 // =========================================================================
-// 2. GUARDAR EDICIÓN EN LÍNEA (DOBLE VALIDACIÓN DE ÍNDICE - SEPARACIÓN TOTAL)
+// 2. GUARDAR EDICIÓN EN LÍNEA (BLINDADO CON SOPORTE COMPLETO ESCOLARIDAD/NIVEL)
 // =========================================================================
 window.guardarEdicionEnLinea = async function(elementoBoton, idFirestore) {
     try {
@@ -1611,7 +1715,6 @@ window.guardarEdicionEnLinea = async function(elementoBoton, idFirestore) {
             return;
         }
 
-        // Recuperamos el índice desde el atributo de la fila por si el parámetro falló
         let attrIndex = fila.getAttribute('data-index-integrante');
         let indexIntegrante = (attrIndex !== null && attrIndex !== undefined && attrIndex !== 'null') ? parseInt(attrIndex, 10) : null;
 
@@ -1634,40 +1737,33 @@ window.guardarEdicionEnLinea = async function(elementoBoton, idFirestore) {
             if (registroOriginal.col_loc !== undefined) datosActualizados.col_loc = valorLugar;
         }
 
+        const esCasoIntegrante = indexIntegrante !== null && indexIntegrante !== undefined && indexIntegrante !== 'null';
+
         // =================================================================
-        // ESCENARIO A: ACTUALIZAR UN SOLO INTEGRANTE DEL TALLER COLECTIVO
+        // ESCENARIO A: INTEGRANTES DE TALLER COLECTIVO
         // =================================================================
-        if (indexIntegrante !== null && registroOriginal.integrantes && Array.isArray(registroOriginal.integrantes)) {
-            
+        if (esCasoIntegrante && registroOriginal.integrantes && Array.isArray(registroOriginal.integrantes)) {
             const inputCurpInt = document.getElementById(`edit_curp_${idFirestore}_${indexIntegrante}`);
             const inputNombreInt = document.getElementById(`edit_nombre_${idFirestore}_${indexIntegrante}`);
             const inputTelInt = document.getElementById(`edit_tel_${idFirestore}_${indexIntegrante}`);
             const inputObsInt = document.getElementById(`edit_obs_${idFirestore}_${indexIntegrante}`);
 
-            // Hacemos clon profundo para no alterar el array en memoria prematuramente
             const copiaIntegrantes = JSON.parse(JSON.stringify(registroOriginal.integrantes));
             const itemInt = copiaIntegrantes[indexIntegrante];
 
             if (itemInt && inputNombreInt) {
                 const nombreCompletoRaw = inputNombreInt.value.trim().toUpperCase();
                 const partesNombre = nombreCompletoRaw.split(' ');
-                
                 let nuevoNom = '', nuevoPat = '', nuevoMat = '';
 
                 if (partesNombre.length === 3) {
-                    nuevoNom = partesNombre[0];
-                    nuevoPat = partesNombre[1];
-                    nuevoMat = partesNombre[2];
+                    nuevoNom = partesNombre[0]; nuevoPat = partesNombre[1]; nuevoMat = partesNombre[2];
                 } else if (partesNombre.length > 3) {
-                    nuevoNom = `${partesNombre[0]} ${partesNombre[1]}`;
-                    nuevoPat = partesNombre[2];
-                    nuevoMat = partesNombre.slice(3).join(' ');
+                    nuevoNom = `${partesNombre[0]} ${partesNombre[1]}`; nuevoPat = partesNombre[2]; nuevoMat = partesNombre.slice(3).join(' ');
                 } else {
-                    nuevoNom = partesNombre[0] || '';
-                    nuevoPat = partesNombre[1] || '';
+                    nuevoNom = partesNombre[0] || ''; nuevoPat = partesNombre[1] || '';
                 }
 
-                // Modificamos ÚNICAMENTE la celda del integrante guardado
                 copiaIntegrantes[indexIntegrante] = {
                     ...itemInt,
                     nombre: nuevoNom,
@@ -1677,12 +1773,55 @@ window.guardarEdicionEnLinea = async function(elementoBoton, idFirestore) {
                     telefono: inputTelInt ? inputTelInt.value.trim() : (itemInt.telefono || ''),
                     observaciones: inputObsInt ? inputObsInt.value.trim().toUpperCase() : (itemInt.observaciones || 'SIN OBSERVACIONES')
                 };
-
                 datosActualizados.integrantes = copiaIntegrantes;
             }
         } 
         // =================================================================
-        // ESCENARIO B: ACTUALIZAR REGISTRO INDIVIDUAL O ESCUELA
+        // ESCENARIO B: PADRÓN ESCOLAR PAE (NUEVO TRATAMIENTO ESCOLARIDAD/NIVEL)
+        // =================================================================
+        else if (registroOriginal.pae_escuela) {
+            const inputCct = document.getElementById(`edit_cct_${idFirestore}`);
+            const inputCurpAlumno = document.getElementById(`edit_curp_alumno_${idFirestore}`);
+            const inputEscuela = document.getElementById(`edit_escuela_${idFirestore}`);
+            const inputNombreAlumno = document.getElementById(`edit_nombre_alumno_${idFirestore}`);
+            const inputEscolaridad = document.getElementById(`edit_escolaridad_${idFirestore}`);
+            const inputNivel = document.getElementById(`edit_nivel_${idFirestore}`);
+            const inputTel = document.getElementById(`edit_tel_${idFirestore}`);
+            const inputObs = document.getElementById(`edit_obs_${idFirestore}`);
+
+            if (inputEscuela) datosActualizados.pae_escuela = inputEscuela.value.trim().toUpperCase();
+            if (inputCct) datosActualizados.pae_clave_escuela = inputCct.value.trim().toUpperCase();
+            
+            // Guardado correcto de Escolaridad y Nivel según tus definiciones
+            if (inputEscolaridad) datosActualizados.pae_escolaridad = inputEscolaridad.value.trim().toUpperCase();
+            if (inputNivel) datosActualizados.pae_nivel = inputNivel.value.trim().toUpperCase();
+
+            if (inputNombreAlumno) {
+                const nombreCompletoRaw = inputNombreAlumno.value.trim().toUpperCase();
+                const partesNombre = nombreCompletoRaw.split(' ');
+                let nuevoNom = partesNombre[0] || '';
+                let nuevoPat = partesNombre[1] || '';
+                let nuevoMat = partesNombre.slice(2).join(' ') || '';
+
+                if (partesNombre.length > 3) {
+                    nuevoNom = `${partesNombre[0]} ${partesNombre[1]}`; nuevoPat = partesNombre[2]; nuevoMat = partesNombre.slice(3).join(' ');
+                }
+
+                datosActualizados.beneficiario = {
+                    ...(registroOriginal.beneficiario || {}),
+                    nombre: nuevoNom,
+                    paterno: nuevoPat,
+                    materno: nuevoMat,
+                    curp: inputCurpAlumno ? inputCurpAlumno.value.trim().toUpperCase() : '',
+                    nombre_completo_cache: nombreCompletoRaw
+                };
+            }
+
+            if (inputTel) datosActualizados.telefono_general = inputTel.value.trim();
+            if (inputObs) datosActualizados.observaciones = inputObs.value.trim().toUpperCase();
+        }
+        // =================================================================
+        // ESCENARIO C: REGISTRO INDIVIDUAL ORDINARIO
         // =================================================================
         else {
             const inputCurp = document.getElementById(`edit_curp_${idFirestore}`);
@@ -1690,52 +1829,43 @@ window.guardarEdicionEnLinea = async function(elementoBoton, idFirestore) {
             const inputTel = document.getElementById(`edit_tel_${idFirestore}`);
             const inputObs = document.getElementById(`edit_obs_${idFirestore}`);
 
-            if (registroOriginal.pae_escuela) {
-                if (inputNombre) datosActualizados.pae_escuela = inputNombre.value.trim().toUpperCase();
-                if (inputCurp) datosActualizados.pae_clave_escuela = inputCurp.value.trim().toUpperCase();
-            } else {
-                if (inputNombre) {
-                    const nombreCompletoRaw = inputNombre.value.trim().toUpperCase();
-                    const partesNombre = nombreCompletoRaw.split(' ');
-                    
-                    let nuevoNom = partesNombre[0] || '';
-                    let nuevoPat = partesNombre[1] || '';
-                    let nuevoMat = partesNombre.slice(2).join(' ') || '';
+            if (inputNombre) {
+                const nombreCompletoRaw = inputNombre.value.trim().toUpperCase();
+                const partesNombre = nombreCompletoRaw.split(' ');
+                let nuevoNom = partesNombre[0] || '';
+                let nuevoPat = partesNombre[1] || '';
+                let nuevoMat = partesNombre.slice(2).join(' ') || '';
 
-                    if (partesNombre.length > 3) {
-                        nuevoNom = `${partesNombre[0]} ${partesNombre[1]}`;
-                        nuevoPat = partesNombre[2];
-                        nuevoMat = partesNombre.slice(3).join(' ');
-                    }
-
-                    datosActualizados.beneficiario = {
-                        ...(registroOriginal.beneficiario || {}),
-                        nombre: nuevoNom,
-                        paterno: nuevoPat,
-                        materno: nuevoMat,
-                        curp: inputCurp ? inputCurp.value.trim().toUpperCase() : '',
-                        nombre_completo_cache: nombreCompletoRaw
-                    };
+                if (partesNombre.length > 3) {
+                    nuevoNom = `${partesNombre[0]} ${partesNombre[1]}`; nuevoPat = partesNombre[2]; nuevoMat = partesNombre.slice(3).join(' ');
                 }
+
+                datosActualizados.beneficiario = {
+                    ...(registroOriginal.beneficiario || {}),
+                    nombre: nuevoNom,
+                    paterno: nuevoPat,
+                    materno: nuevoMat,
+                    curp: inputCurp ? inputCurp.value.trim().toUpperCase() : '',
+                    nombre_completo_cache: nombreCompletoRaw
+                };
             }
 
             if (inputTel) datosActualizados.telefono_general = inputTel.value.trim();
             if (inputObs) datosActualizados.observaciones = inputObs.value.trim().toUpperCase();
         }
 
-        // Envío directo a Firebase actualizando solo lo cambiado
-        const docRef = doc(db, "proyetos_pv", idFirestore);
+        // Envío directo a Firebase usando la constante del módulo
+        const docRef = doc(db, NOMBRE_COLECCION || "proyetos_pv", idFirestore);
         await updateDoc(docRef, datosActualizados);
 
-        console.log(`Guardado exitoso del elemento.`);
-        
+        console.log(`Guardado exitoso en Firebase.`);
         if (typeof window.renderizarTablasSincronizadas === 'function') {
             window.renderizarTablasSincronizadas();
         }
 
     } catch (error) {
         console.error("Error al guardar:", error);
-        alert("No se pudo guardar la información de este integrante.");
+        alert("No se pudo guardar la información de este registro.");
     }
 };
 document.addEventListener("DOMContentLoaded", function() {
@@ -1762,8 +1892,10 @@ window.exportarA_Excel = function() {
         const subgrupo = (d.subgrupo || '').toUpperCase();
         const localidad = (d.localidad || d.col_loc || '').toUpperCase();
 
-        // 🌟 TELÉFONO EN CASO DE REPRESENTANTE
         const telefono = d.telefono_general || d.ta_telefono || d.rep_telefono || '';
+
+        // Extraer de forma segura la CURP del estudiante usando los mapeos de tu sistema
+        const curpEstudiante = (d.beneficiario?.curp || d.pae_curp_alumno || d.curp_alumno || '').toUpperCase().trim();
 
         // Estructura base común para el registro
         const baseDocumento = {
@@ -1775,7 +1907,6 @@ window.exportarA_Excel = function() {
             "SUBGRUPO MODALIDAD": subgrupo,
             "LOCALIDAD / COLONIA": localidad,
             
-            // Campos de Dirección / Ubicación (Soporta prefijo de vulnerables, talleres y representante)
             "DIRECCIÓN / CALLE": (d.vul_calle || d.ta_direccion || d.rep_calle || '').toUpperCase(),
             "NÚMERO COBRO / EXT": d.vul_numero || d.ta_numero || d.rep_numero || '',
             "CÓDIGO POSTAL": d.vul_cp || d.ta_cp || d.rep_cp || '',
@@ -1783,17 +1914,17 @@ window.exportarA_Excel = function() {
             "Y CALLE 2": (d.vul_y_calle || d.rep_y_calle || '').toUpperCase(),
             "REFERENCIA DOMICILIO": (d.vul_referencia || d.rep_referencia || '').toUpperCase(),
             
-            // 🌟 NUEVO: Datos exclusivos del Representante / Apoyo en Marcha
             "CURP REPRESENTANTE": (d.rep_curp || '').toUpperCase(),
             "NOMBRE REPRESENTANTE": (d.rep_nombre || '').toUpperCase(),
             "PARENTESCO / VÍNCULO": (d.rep_parentesco || '').toUpperCase(),
             
-            // Campos del Módulo Escolar PAE
+            // Campos del Módulo Escolar PAE (Fijos en la raíz)
             "CLAVE ESCUELA (CCT)": (d.pae_clave_escuela || '').toUpperCase(),
             "NOMBRE ESCUELA": (d.pae_escuela || '').toUpperCase(),
-            "ESCOLARIDAD": (d.pae_escolaridad || '').toUpperCase(),
-            "TURNO": (d.pae_turno || '').toUpperCase(),
+            "ESCOLARIDAD": (d.pae_escolaridad || '').toUpperCase(), 
+            "GRADO": (d.pae_nivel || d.pae_grado || '').toUpperCase(),    
             "DOMICILIO ESCUELA": (d.pae_domicilio_esc || '').toUpperCase(),
+            "CURP ALUMNO": curpEstudiante, // ✨ NUEVA COLUMNA EXPLICITA EN LA BASE
             
             "FECHA CAPTURA SISTEMA": fechaFormateada,
             "OBSERVACIONES GENERALES": observaciones
@@ -1825,11 +1956,11 @@ window.exportarA_Excel = function() {
             matrizPlana.push({
                 ...baseDocumento,
                 "TIPO BENEFICIARIO": tipoBeneficiario,
-                "CURP BENEFICIARIO": d.pae_clave_escuela ? d.pae_clave_escuela : (d.beneficiario?.curp || '').toUpperCase(),
-                "NOMBRE(S)": d.pae_escuela ? d.pae_escuela : (d.beneficiario?.nombre || '').toUpperCase(),
+                "CURP BENEFICIARIO": curpEstudiante, // Mapeado correctamente aquí también
+                "NOMBRE(S)": (d.beneficiario?.nombre || '').toUpperCase(),       
                 "APELLIDO PATERNO": d.beneficiario?.paterno ? d.beneficiario.paterno.toUpperCase() : '',
                 "APELLIDO MATERNO": d.beneficiario?.materno ? d.beneficiario.materno.toUpperCase() : '',
-                "FECHA NACIMIENTO": d.beneficiario?.fecha_imiento || d.beneficiario?.fecha_nacimiento || d.beneficiario?.fecha_nac || '',
+                "FECHA NACIMIENTO": d.beneficiario?.fecha_nacimiento || d.beneficiario?.fecha_nac || d.beneficiario?.fecha_nac_alumno || '', 
                 "EDAD": d.beneficiario?.edad || '', 
                 "SEXO": (d.beneficiario?.sexo || 'MUJER').toUpperCase(), 
                 "ESTADO CIVIL": (d.beneficiario?.civil || '').toUpperCase(),
