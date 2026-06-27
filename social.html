@@ -513,31 +513,39 @@
     };
 
     function renderTabla() {
-        const totalPaginas = Math.ceil(datosFiltrados.length / filasPorPagina) || 1;
-        if(paginaActual > totalPaginas) paginaActual = totalPaginas;
+    const totalPaginas = Math.ceil(datosFiltrados.length / filasPorPagina) || 1;
+    if(paginaActual > totalPaginas) paginaActual = totalPaginas;
 
-        const inicio = (paginaActual - 1) * filasPorPagina;
-        const segmento = datosFiltrados.slice(inicio, inicio + filasPorPagina);
-        const tbody = document.getElementById('cuerpoTabla');
-        document.getElementById('info-total').innerText = `TOTAL: ${datosFiltrados.length} REGISTROS`;
-        
-        tbody.innerHTML = segmento.map(reg => `
-            <tr>
-                <td><b>${reg.numero_consecutivo}</b></td>
-                <td>${reg.url_evidencia ? `<button onclick="abrirFoto('${reg.url_evidencia}')" class="btn" style="background:#6366f1; padding: 5px 10px; font-size: 8px;">VER FOTO</button>` : '<span style="color:#cbd5e1; font-size:9px;">Sin foto</span>'}</td>
-                <td>${reg.fecha_registro || ''}</td>
-                <td><b>${reg.nombre}</b></td>
-                <td>${reg.col_loc || ''}</td>
-                <td style="font-size:9px;">${reg.programa || ''}</td>
-                <td>${reg.asunto || ''} ${reg.detalle_asunto ? `<br><small style="color:blue">${reg.detalle_asunto}</small>` : ''}</td>
-                <td><span class="status-badge bg-${reg.estatus?.toLowerCase().replace(" ","-") || 'pendiente'}">${reg.estatus || 'PENDIENTE'}</span></td>
-                <td>${reg.usuario || ''}</td>
-                <td class="no-print">
-                    <button onclick="editarLocal('${reg.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
-                    <button onclick="eliminarDoc('${reg.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
-                </td>
-            </tr>
-        `).join('');
+    const inicio = (paginaActual - 1) * filasPorPagina;
+    const segmento = datosFiltrados.slice(inicio, inicio + filasPorPagina);
+    const tbody = document.getElementById('cuerpoTabla');
+    document.getElementById('info-total').innerText = `TOTAL: ${datosFiltrados.length} REGISTROS`;
+    
+    tbody.innerHTML = segmento.map(reg => `
+        <tr>
+            <td><b>${reg.numero_consecutivo}</b></td>
+            <td>
+                ${reg.url_evidencia ? `
+                    <img src="${reg.url_evidencia}" 
+                         onclick="abrirFoto('${reg.url_evidencia}')" 
+                         alt="Evidencia" 
+                         style="max-width: 60px; max-height: 45px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid #cbd5e1;"
+                         title="Clic para ampliar" />
+                ` : '<span style="color:#cbd5e1; font-size:9px;">Sin foto</span>'}
+            </td>
+            <td>${reg.fecha_registro || ''}</td>
+            <td><b>${reg.nombre}</b></td>
+            <td>${reg.col_loc || ''}</td>
+            <td style="font-size:9px;">${reg.programa || ''}</td>
+            <td>${reg.asunto || ''} ${reg.detalle_asunto ? `<br><small style="color:blue">${reg.detalle_asunto}</small>` : ''}</td>
+            <td><span class="status-badge bg-${reg.estatus?.toLowerCase().replace(" ","-") || 'pendiente'}">${reg.estatus || 'PENDIENTE'}</span></td>
+            <td>${reg.usuario || ''}</td>
+            <td class="no-print">
+                <button onclick="editarLocal('${reg.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
+                <button onclick="eliminarDoc('${reg.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
+            </td>
+        </tr>
+    `).join('');
 
         document.getElementById('page-info').innerText = `Página ${paginaActual} de ${totalPaginas}`;
         document.getElementById('btn-prev').disabled = paginaActual === 1;
