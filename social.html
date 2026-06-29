@@ -6,6 +6,7 @@
     <title>DIF 2026 | Trabajo Social </title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root { 
             --primary: #1e40af; --success: #059669; --warning: #f59e0b; 
@@ -273,32 +274,54 @@
     };
 
     // 2. LANZAR ALERTA EN TIEMPO REAL CON EL HISTORIAL COMPLETO DE FECHAS
-    window.revisarNombreDuplicado = () => {
-        const nombreInput = document.getElementById('nombre');
-        if (!nombreInput) return;
+    window.revisarNombreDuplicado = async () => {
+    const nombreInput = document.getElementById('nombre');
+    if (!nombreInput) return;
 
-        const nombreActual = nombreInput.value;
-        const idActual = document.getElementById('edit-id').value || null;
+    const nombreActual = nombreInput.value;
+    const idActual = document.getElementById('edit-id').value || null;
 
-        const historial = window.verificarApoyoActivo(nombreActual, idActual);
+    const historial = window.verificarApoyoActivo(nombreActual, idActual);
 
-        if (historial) {
-            let mensaje = `🚨 ANTECEDENTES ENCONTRADOS PARA:\n"${nombreActual.toUpperCase()}"\n\n`;
-            mensaje += `Este ciudadano ya cuenta con ${historial.length} registro(s) en el sistema:\n`;
-            mensaje += `--------------------------------------------------\n`;
+    if (historial) {
+        // Construimos las filas de los antecedentes de forma dinámica
+        let filasHtml = '';
+        historial.forEach((reg, index) => {
+            filasHtml += `
+                <div style="text-align: left; background: #f8f9fa; border-left: 4px solid #dc3545; padding: 10px; margin-bottom: 10px; border-radius: 4px; font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; color: #333;">
+                        <span>📅 ${reg.fecha_registro || 'Sin fecha'}</span>
+                        <span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; color: #4a5568;">${reg.estatus || 'PENDIENTE'}</span>
+                    </div>
+                    <div style="color: #555; margin-left: 5px;">
+                        <div><b>Programa:</b> ${reg.programa || 'NO ASIGNADO'}</div>
+                        <div><b>Asunto:</b> ${reg.asunto || 'NO ASIGNADO'}</div>
+                    </div>
+                </div>
+            `;
+        });
 
-            historial.forEach((reg, index) => {
-                mensaje += `${index + 1}. FECHA: ${reg.fecha_registro || 'Sin fecha'}\n`;
-                mensaje += `   • Programa: ${reg.programa || 'NO ASIGNADO'}\n`;
-                mensaje += `   • Asunto: ${reg.asunto || 'NO ASIGNADO'}\n`;
-                mensaje += `   • Estatus: [${reg.estatus || 'PENDIENTE'}]\n`;
-                mensaje += `--------------------------------------------------\n`;
-            });
-
-            mensaje += `\nPor favor, revisa si procede otorgar un nuevo apoyo basándote en estas fechas.`;
-            alert(mensaje);
-        }
-    };
+        // Lanzamos la alerta estilizada
+        Swal.fire({
+            title: '⚠️ Antecedentes Detectados',
+            html: `
+                <div style="margin-bottom: 15px; font-size: 1rem; color: #333;">
+                    El ciudadano <b style="color: #dc3545;">${nombreActual.toUpperCase()}</b> ya cuenta con <b>${historial.length}</b> registro(s) previo(s):
+                </div>
+                <div style="max-height: 280px; overflow-y: auto; padding-right: 5px;">
+                    ${filasHtml}
+                </div>
+                <p style="margin-top: 15px; font-size: 0.85rem; color: #666; font-style: italic;">
+                    Por favor, revisa si procede otorgar un nuevo apoyo basándote en la regla de temporalidad.
+                </p>
+            `,
+            icon: 'warning',
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#3085d6',
+            width: '500px'
+        });
+    }
+};
 
     // 3. ADAPTACIÓN DE BOTÓN GUARDAR CON REVISIÓN GLOBAL
     window.subirYGuardar = async () => {
