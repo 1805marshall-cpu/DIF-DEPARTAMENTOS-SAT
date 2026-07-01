@@ -3,449 +3,1918 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Plataforma de Administración de Asignaciones y Contratos</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
+    <title>SISTEMA DIF 2026 - 2029 | Admin Global</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --gov-dark-green: #135838;    /* Verde institucional de la franja superior */
-            --gov-accent-gold: #dfb36c;   /* Dorado elegante para alertas/detalles */
-            --bg-light: #f8f9fa;
-            --border-color: #cbd5e1;
-            --text-main: #2d3748;
-            --text-muted: #64748b;
-        }
+        
+:root { 
+    /* Color único para todos los módulos */
+    --primary: #8a1538;       /* Guinda Institucional */
+    --sidebar-bg: #2d1e22;    /* Fondo oscuro para sidebar */
+    --secondary: #c5a059;     /* Dorado/Arena Institucional */
+    
+    /* Aplicamos el color institucional a todos los departamentos */
+    --vulnerable-color: var(--primary);
+    --psico-color: var(--primary);
+    --procu-color: var(--primary);
+    --med-color: var(--primary);
+    --social-color: var(--primary);
+    --genloc-color: var(--primary);
+    --escolar-color: var(--primary);
+}
+        
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; color: #1e293b; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; flex-shrink: 0; transition: all 0.3s; z-index: 1000; }
+        .sidebar.collapsed { width: 80px; }
+        .sidebar-header { padding: 25px 15px; text-align: center; border-bottom: 1px solid #1e293b; }
+        .sidebar-header h3 { font-size: 1.1rem; margin: 0; letter-spacing: 1px; font-weight: 800; }
+        .sidebar.collapsed .sidebar-header h3, .sidebar.collapsed .sidebar-header small { display: none; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
+        .nav-menu { flex-grow: 1; padding: 10px 0; overflow-y: auto; }
+        .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 15px; color: #94a3b8; cursor: pointer; transition: 0.3s; font-size: 13px; border-left: 4px solid transparent; }
+        .nav-item:hover, .nav-item.active { background: #1e293b; color: white; border-left-color: var(--primary); }
+        .sidebar.collapsed .nav-item { justify-content: center; padding: 15px 0; }
+        .sidebar.collapsed .nav-item span { display: none; }
 
-        body {
-            background-color: var(--bg-light);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
+        /* Main Content */
+        .main-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
+        .top-bar { background: white; padding: 0 30px; height: 70px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 2px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        
+        /* Search Bars Uniformes */
+        .search-container { display: flex; gap: 15px; flex-grow: 1; max-width: 900px; margin: 0 30px; }
+        .search-wrapper { position: relative; flex: 1; }
+        .search-wrapper i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px; }
+        .search-wrapper input { width: 100%; padding: 10px 15px 10px 40px; border-radius: 10px; border: 1px solid #e2e8f0; outline: none; font-size: 12px; font-weight: 600; transition: 0.2s; background: #f8fafc; }
+        .search-wrapper input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
 
-        /* Franja de Alerta / Actualización Superior */
-        .top-alert {
-            background-color: #fbc02d;
-            color: #000;
-            font-size: 0.78rem;
-            font-weight: 700;
-            text-align: center;
-            padding: 6px 10px;
-            letter-spacing: 0.3px;
-            border-bottom: 1px solid #f9a825;
-        }
+        /* View Components */
+        .view-container { padding: 25px; display: none; }
+        .view-container.active { display: block; animation: fadeIn 0.4s ease; }
+        
+        .access-card { padding: 18px 25px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .access-card b { font-size: 16px; letter-spacing: 0.5px; }
+        .btn-open { background: rgba(255,255,255,0.2); color: white; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-size: 11px; font-weight: 800; border: 1px solid rgba(255,255,255,0.4); transition: 0.3s; text-transform: uppercase; }
+        .btn-open:hover { background: white; color: #0f172a; }
+        
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
+        .stat-box small { color: #64748b; font-weight: 800; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
+        .stat-box div { font-size: 22px; font-weight: 800; color: #0f172a; }
+        .stat-box div { transition: color 0.3s ease;} 
+        /* Opcional: una animación de pulso suave cuando el filtro está activo */
+.filter-active-indicator {   animation: pulse-blue 2s infinite; }
 
-        /* Encabezado Principal */
-        .main-header {
-            background-color: #fff;
-            border-bottom: 2px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            height: 55px;
-        }
+@keyframes pulse-blue {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
 
-        .brand-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
+        /* Panels */
+        .panel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .panel { background: white; border-radius: 15px; padding: 20px; border: 1px solid #e2e8f0; height: 480px; overflow-y: auto; }
+        .panel b { display: block; margin-bottom: 15px; font-size: 10px; text-transform: uppercase; color: #94a3b8; border-bottom: 2px solid #f8fafc; padding-bottom: 10px; letter-spacing: 1px; }
+        
+        .group-container { background: #f8fafc; border-radius: 12px; margin-bottom: 15px; padding: 12px; border-left: 5px solid var(--primary); }
+        .group-header { display: flex; justify-content: space-between; font-weight: 800; font-size: 11px; margin-bottom: 10px; color: #334155; }
+        .member-line { font-size: 11px; padding: 10px; background: white; margin-bottom: 5px; border-radius: 8px; display: flex; justify-content: space-between; border: 1px solid #f1f5f9; align-items: center; font-weight: 500; }
+        
+        #reloj { font-weight: 800; color: #64748b; font-size: 14px; font-variant-numeric: tabular-nums; }
 
-        .brand-area h1 {
-            font-size: 1.3rem;
-            color: #4a5568;
-            font-weight: 600;
-            border-left: 2px solid var(--border-color);
-            padding-left: 15px;
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Contenedor Split de Doble Columna */
-        .workspace {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
+        /* Contenedor de Salida en la Sidebar */
+        .nav-exit { margin-top: auto; /* Empuja el botón al final del menú */ 
+        padding: 18px 25px;display: flex;align-items: center;gap: 15px;color: #f87171; /* Rojo suave inicial */cursor: pointer;transition: all 0.3s ease;border-top: 1px solid #1e293b;font-size: 13px;font-weight: 700;text-transform: uppercase;letter-spacing: 0.5px;
+}
 
-        /* Panel Izquierdo: Visor Cartográfico */
-        .map-panel {
-            width: 40%;
-            height: 100%;
-            border-right: 3px solid var(--border-color);
-            position: relative;
-        }
+        .nav-exit i {
+        font-size: 16px;
+}
 
-        #map {
-            width: 100%;
-            height: 100%;
-        }
+.nav-exit:hover {background: #ef4444; color: white;}
+/* Ajuste para cuando la Sidebar está colapsada */
+.sidebar.collapsed .nav-exit {justify-content: center;padding: 20px 0;}
+.sidebar.collapsed .nav-exit span { display: none;}
+.sidebar.collapsed .nav-exit i {font-size: 18px;}
 
-        /* Panel Derecho: Cuadro de Mando Integrado */
-        .dashboard-panel {
-            width: 60%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            background: #fff;
-        }
 
-        /* Barra de Identificación del Bloque */
-        .block-badge-bar {
-            background-color: var(--gov-dark-green);
-            color: #fff;
-            padding: 10px 20px;
-            font-weight: 700;
-            font-size: 1.05rem;
-            text-align: center;
-            letter-spacing: 0.5px;
-        }
 
-        /* Menú Táctico de Pestañas (Íconos) */
-        .tabs-navbar {
-            display: flex;
-            background-color: #edf2f7;
-            border-bottom: 1px solid var(--border-color);
-            padding: 4px 10px 0 10px;
-            gap: 4px;
-        }
+/* Layout específico para Psicología */
+    .psicos-grid-layout { display: grid;    grid-template-columns: repeat(3, 1fr);  gap: 15px;margin-bottom: 20px;}
 
-        .tab-btn {
-            background: #e2e8f0;
-            border: 1px solid var(--border-color);
-            border-bottom: none;
-            padding: 8px 16px;
-            font-size: 1rem;
-            color: #4a5568;
-            cursor: pointer;
-            border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
-            transition: all 0.2s ease;
-        }
+    /* Hacemos que los cuadros de "Total" resalten un poco más */
+    .main-total {background: #fff; padding: 15px !important;}
+    .main-total div {font-size: 1.8rem !important; font-weight: 800;}
+    /* En dispositivos móviles, podemos bajar a 1 columna si es necesario */
+    @media (max-width: 768px) {
+    .psicos-grid-layout { grid-template-columns: repeat(2, 1fr);}
+    .main-total:last-child {grid-column: span 2;}
+}
+.access-card { 
+    background: var(--primary); 
+    border-bottom: 3px solid var(--secondary); /* Añade un borde dorado */
+}
+/* Ejemplo para asegurar que los paneles se ajusten bien */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
 
-        .tab-btn:hover {
-            background: #f7fafc;
-        }
+.view-container {
+    display: none; /* Ocultar todas por defecto */
+    padding: 20px;
+}
 
-        .tab-btn.active {
-            background: #fff;
-            color: var(--gov-dark-green);
-            border-top: 3px solid var(--gov-dark-green);
-            font-weight: bold;
-            position: relative;
-            z-index: 5;
-            margin-bottom: -1px;
-            padding-bottom: 9px;
-        }
+.view-container.active {
+    display: block; /* Mostrar solo la activa */
+}
+/* Asegura que el contenedor de usuario tenga margen inferior */
+.user-profile-box {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0,0,0,0.15);
+    border-top: 1px solid #1e293b; /* Borde superior para separar del nav */
+    color: white;
+    margin-top: auto; /* Empuja todo el bloque al final de la sidebar */
+}
 
-        /* Área de visualización del contenido de la pestaña */
-        .tab-content-viewport {
-            flex: 1;
-            padding: 25px;
-            overflow-y: auto;
-            background: #fff;
-        }
+/* El botón de cerrar sesión debe ir debajo */
+.nav-exit {
+    padding: 15px 25px;
+    background: #7f1d1d; /* Un rojo más oscuro que combine con el sidebar */
+    color: #f87171;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 800;
+}
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+}
+.tabla-box table tbody tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+.card { background: white; padding: 20px; border-radius: 15px; border-top: 5px solid #991b1b; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.card.money { border-top-color: #059669; }
+.card.valid { border-top-color: #0369a1; }
+.monto { font-size: 20px; font-weight: 800; display: block; margin-top: 5px; }
+.resumen-list { list-style: none; padding: 0; font-size: 12px; }
+.resumen-list li { display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding: 2px 0; }
+.registro-item {
+    transition: background 0.2s;
+}
+.registro-item:hover {
+    background: #f1f5f9;
+}
+/* Asegurar que las cajas de PAE Caliente/Grupos se vean igual que tus otros módulos */
+.v-stats-card {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    border-top: 4px solid var(--primary); /* Resalta la parte superior */
+}
 
-        .tab-pane {
-            display: none;
-        }
+/* Para el desglose Estatal/Municipal */
+.desglose-recurso {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #e2e8f0;
+    color: #64748b;
+}
+.registro-item:hover { background: #f8fafc; cursor: pointer; }
+#stats-dinamicas { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+.panel-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+    gap: 20px; 
+    margin-top: 20px;
+}
+/* 1. Ocultar el texto de Cerrar Sesión (dejar solo el icono centrado) */
+.sidebar.collapsed .nav-exit span { 
+    display: none; 
+}
 
-        .tab-pane.active {
-            display: block;
-        }
+/* 2. Ocultar los textos del perfil de usuario (Nombre, Rol, etc.) */
+.sidebar.collapsed .user-profile-box span,
+.sidebar.collapsed .user-profile-box div,
+.sidebar.collapsed .user-profile-box p { 
+    display: none; 
+}
 
-        /* --- ESTILOS DE LOS MÓDULOS INTERNOS --- */
-        /* Vista 1: Resumen en Grid */
-        .overview-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-        }
-
-        .metric-card {
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 20px;
-            background: #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-        }
-
-        .metric-card h3 {
-            font-size: 1.1rem;
-            color: #475569;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .metric-value-box {
-            display: flex;
-            justify-content: space-around;
-            text-align: center;
-        }
-
-        .sub-metric .num {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1e293b;
-        }
-
-        .sub-metric .label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-
-        /* Tablas de Datos Generales */
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            font-size: 0.9rem;
-        }
-
-        .data-table th, .data-table td {
-            border: 1px solid #e2e8f0;
-            padding: 10px 12px;
-            text-align: left;
-        }
-
-        .data-table th {
-            background-color: #f8fafc;
-            color: #334155;
-            font-weight: 700;
-        }
-
-        .data-table tr:nth-child(even) {
-            background-color: #fafafa;
-        }
-
-        .section-title {
-            font-size: 1.2rem;
-            color: #1e293b;
-            border-bottom: 2px solid #e2e8f0;
-            padding-bottom: 8px;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        /* Gráficos */
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-            margin-top: 15px;
-        }
+/* 3. Ajustar el centrado de los bloques inferiores al colapsar */
+.sidebar.collapsed .user-profile-box, 
+.sidebar.collapsed .nav-exit {
+    justify-content: center;
+    padding: 15px 0;
+}
     </style>
 </head>
 <body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>DIF GLOBAL</h3>
+            <small id="role-tag" style="color:var(--warning); font-size: 10px;"></small>
+        </div>
+        <nav class="nav-menu">
+            <div id="nav-medica" class="nav-item" onclick="showView('medica', this)"><i class="fas fa-notes-medical"></i> <span>Área Médica</span></div>
+            <div id="nav-social" class="nav-item" onclick="showView('social', this)"><i class="fa-solid fa-users"></i> <span>Trabajo Social</span></div>
+            <div id="nav-psicologia" class="nav-item" onclick="showView('psicologia', this)"><i class="fas fa-brain"></i> <span>Psicología</span></div>
+            <div id="nav-jefatura-psicologia" class="nav-item" onclick="showView('jefatura-psicologia', this)"><i class="fas fa-user-shield"></i> <span>Jefatura Psicología</span></div>
+            <div id="nav-vulnerable" class="nav-item" onclick="showView('vulnerable', this)"><i class="fas fa-hand-holding-heart"></i> <span>Pob. Vulnerable</span></div>
+            <div id="nav-procuraduria" class="nav-item" onclick="showView('procuraduria', this)"><i class="fas fa-balance-scale"></i> <span>Procuraduría</span></div>
+            <div id="nav-escolar" class="nav-item" onclick="showView('escolar', this)"><i class="fas fa-school"></i> <span>Req. Escolares</span></div>
+            <div id="nav-civis" class="nav-item" onclick="showView('civis', this)"><i class="fas fa-folder-open"></i> <span>Reportes CIVIS</span></div>
+            <div id="nav-territorial" class="nav-item" onclick="showView('territorial', this)"><i class="fas fa-city"></i> <span>Resumen Territorial</span></div>
 
-    <div class="top-alert">
-        ⚠️ AVISO IMPORTANTE: El sitio web está operando bajo entorno consolidado de datos de exploración y producción de hidrocarburos.
+        </nav>
+        <!-- Agrega este bloque antes del nav-exit -->
+<div class="user-profile-box">
+<i class="fas fa-user-circle" style="font-size: 20px;"></i> <div> <b style="display:block; font-size:11px;">Admin_Global</b>
+        <small style="color: #94a3b8;">Sistema DIF</small>
+    </div>
+    <div class="user-details">
+        <span id="user-name-display">Cargando...</span>
+        <small id="user-role-display">SISTEMA DIF</small>
+    </div>
+</div>
+
+<div class="nav-exit" onclick="window.cerrarSesion()" style="cursor: pointer;">
+    <i class="fas fa-sign-out-alt"></i>
+    <span>Cerrar Sesión</span> </div>
     </div>
 
-    <header class="main-header">
-        <div class="brand-area">
-            <img src="https://www.gob.mx/cms/uploads/image/file/447021/logo-energia-subsecretaria.jpg" alt="Sener" height="35" style="object-fit: contain;">
-            <h1>Asignaciones</h1>
-        </div>
-        <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600;">
-            <i class="fa-solid fa-clock-rotate-left"></i> Periodo Actualizado: 2026
-        </div>
-    </header>
-
-    <main class="workspace">
+    <div class="main-content">
+        <div class="top-bar">
         
-        <section class="map-panel">
-            <div id="map"></div>
-        </section>
-
-        <section class="dashboard-panel">
-            <div class="block-badge-bar">
-                AE-0130-2M - LLAVE
+            <div style="display:flex; align-items:center; gap:20px;">
+                <i class="fas fa-bars" id="btn-toggle"></i>
+                <h2 id="view-title" style="margin:0;">Panel</h2>
             </div>
-
-            <nav class="tabs-navbar">
-                <button class="tab-btn active" onclick="switchTab(event, 'tab-resumen')"><i class="fa-solid fa-chart-pie"></i></button>
-                <button class="tab-btn" onclick="switchTab(event, 'tab-generales')"><i class="fa-solid fa-file-invoice"></i></button>
-                <button class="tab-btn" onclick="switchTab(event, 'tab-actividades')"><i class="fa-solid fa-list-check"></i></button>
-                <button class="tab-btn" onclick="switchTab(event, 'tab-produccion')"><i class="fa-solid fa-droplet"></i></button>
-            </nav>
-
-            <div class="tab-content-viewport">
-                
-                <div id="tab-resumen" class="tab-pane active">
-                    <div class="overview-grid">
-                        <div class="metric-card">
-                            <h3><i class="fa-solid fa-wave-square" style="color:#2b6cb0;"></i> Adquisición de Sísmica</h3>
-                            <div class="metric-value-box">
-                                <div class="sub-metric"><div class="num">2D</div><div class="label">-</div></div>
-                                <div class="sub-metric"><div class="num">196.3</div><div class="label">KM</div></div>
-                            </div>
-                        </div>
-                        <div class="metric-card">
-                            <h3><i class="fa-solid fa-gears" style="color:#319795;"></i> Procesamiento Sísmica</h3>
-                            <div class="metric-value-box">
-                                <div class="sub-metric"><div class="num">708.7</div><div class="label">2D KM</div></div>
-                                <div class="sub-metric"><div class="num">3,114.9</div><div class="label">3D KM²</div></div>
-                            </div>
-                        </div>
-                        <div class="metric-card">
-                            <h3><i class="fa-solid fa-dollar-sign" style="color:#2f855a;"></i> Inversión Operación</h3>
-                            <div class="metric-value-box">
-                                <div class="sub-metric"><div class="num">94.8</div><div class="label">MMUSD INVERSIÓN</div></div>
-                            </div>
-                        </div>
-                        <div class="metric-card">
-                            <h3><i class="fa-solid fa-tower-cell" style="color:#c53030;"></i> Pozos Perforados</h3>
-                            <div class="metric-value-box">
-                                <div class="sub-metric"><div class="num">2</div><div class="label">EXPLORATORIOS</div></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="tab-generales" class="tab-pane">
-                    <h2 class="section-title">Título de Asignación</h2>
-                    <table class="data-table">
-                        <thead>
-                            <tr><th colspan="2">DATOS GENERALES</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td><strong>Bloque</strong></td><td>AE-0130-2M - LLAVE</td></tr>
-                            <tr><td><strong>Última modificación</strong></td><td>30 de mayo, 2024</td></tr>
-                            <tr><td><strong>Vigencia</strong></td><td>28/08/2019 - 28/08/2049</td></tr>
-                            <tr><td><strong>Superficie</strong></td><td>980.6 Km²</td></tr>
-                            <tr><td><strong>Ubicación</strong></td><td>Terrestre</td></tr>
-                            <tr><td><strong>Cuenca</strong></td><td>Veracruz</td></tr>
-                            <tr><td><strong>Entidad federativa</strong></td><td>Veracruz de Ignacio de la Llave</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div id="tab-actividades" class="tab-pane">
-                    <h2 class="section-title">Resoluciones y Dictámenes</h2>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Resolución</th>
-                                <th>Enlace</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>03-sep-2024</td><td>Aclaración a la Resolución CNH.E.28.02/2024</td><td><a href="#" style="color:var(--gov-dark-green);">CNH.E.28.02/2024</a></td></tr>
-                            <tr><td>21-mar-2024</td><td>Aclaración a la Resolución CNH.E.08.01/2024</td><td><a href="#" style="color:var(--gov-dark-green);">CNH.E.08.01/2024</a></td></tr>
-                            <tr><td>12-oct-2023</td><td>Aclaración a la Resolución CNH.E.16.07/2023</td><td><a href="#" style="color:var(--gov-dark-green);">CNH.E.16.07/2023</a></td></tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div id="tab-produccion" class="tab-pane">
-                    <h2 class="section-title">Evolución Histórica de Producción</h2>
-                    <div class="chart-container">
-                        <canvas id="productionChart"></canvas>
-                    </div>
-                </div>
-
+            <div style="flex-grow: 1; max-width: 400px; margin: 0 20px; position: relative;">
+    <i class="fas fa-search" style="position: absolute; left: 12px; top: 10px; color: #64748b;"></i>
+    <input type="text" id="global-search-input" placeholder="BUSCAR POR NOMBRE, FOLIO O CAMPO CLAVE..." 
+        onkeyup="window.reprocesarTodo()" 
+        style="width: 90%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
+</div>
+            <div style="flex-grow: 1; max-width: 400px; margin: 0 20px; position: relative;">
+                <i class="fas fa-map-marker-alt" style="position: absolute; left: 12px; top: 10px; color: #64748b;"></i>
+                <input type="text" id="global-zone-search" placeholder="BUSCAR POR ZONA / LOCALIDAD..." 
+                    onkeyup="window.reprocesarTodo()" 
+                    style="width: 90%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
             </div>
-        </section>
-    </main>
+            <div style="margin: 0 15px;">
+    <select id="global-month-filter" onchange="window.reprocesarTodo()" 
+        style="padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; font-weight: bold; outline: none; cursor: pointer;">
+        <option value="all">📅 TODOS LOS MESES</option>
+        <option value="01">Enero</option>
+        <option value="02">Febrero</option>
+        <option value="03">Marzo</option>
+        <option value="04">Abril</option>
+        <option value="05">Mayo</option>
+        <option value="06">Junio</option>
+        <option value="07">Julio</option>
+        <option value="08">Agosto</option>
+        <option value="09">Septiembre</option>
+        <option value="10">Octubre</option>
+        <option value="11">Noviembre</option>
+        <option value="12">Diciembre</option>
+    </select>
+</div>
+            <div id="reloj"></div>
+        </div>   
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<div id="view-vulnerable" class="view-container" style="display:none;">
+    <div class="access-card" style="background: var(--vulnerable-color); padding: 20px; color: white; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <h2 style="margin:0;">Panel Global de Población Vulnerable</h2>
+            <small>Coordinación de Indicadores Operativos y Demográficos</small>
+        </div>
+        <a href="vulnerable.html" class="btn-open" style="background: white; color: var(--vulnerable-color); padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">Abrir Módulo de Captura</a>
+    </div>
+<h3 style="color: #1e293b; margin-bottom: 10px;">📊 Estatus de Gestión Operativa</h3>
 
-    <script>
-        // 1. INICIALIZACIÓN DEL MAPA (Coordenadas aproximadas de la región del bloque "Llave" en Veracruz)
-        const map = L.map('map').setView([17.8500, -95.5000], 8);
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; margin-bottom: 25px;">
+    
+    <div class="stat-box" style="grid-column: span 2; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #3b82f6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <small style="color:#64748b; font-weight: bold;">Total Padrón</small>
+        <div id="v-total" style="font-size: 24px; font-weight: bold; color: #1e293b;">0</div>
+    </div>
+    
+    <div class="stat-box" style="grid-column: span 2; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #10b981; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <small style="color:#64748b; font-weight: bold;">Entregados</small>
+        <div id="v-ent" style="font-size: 24px; font-weight: bold; color: #10b981;">0</div>
+    </div>
+    
+    <div class="stat-box" style="grid-column: span 2; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #f59e0b; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <small style="color:#64748b; font-weight: bold;">Pendientes</small>
+        <div id="v-pen" style="font-size: 24px; font-weight: bold; color: #ef4444;">0</div>
+    </div>
 
-        // Capa de Mapa base (Estilo claro/terrestre para asemejar la cartografía oficial)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+    <div class="stat-box" style="grid-column: span 3; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #8b5cf6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <small style="color:#64748b; font-weight: bold;"> DIF Estatal</small>
+        <div id="v-estatal-stats" style="font-size: 24px; font-weight: bold; color: #8b5cf6;">0</div>
+                <div style="display: flex; gap: 10px; margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 8px;">
+            <span style="font-size: 11px; color: #16a34a; font-weight: 600;">
+                📦 Entregados: <span id="v-estatal-ent" style="font-family: monospace; font-size: 12px;">0</span>
+            </span>
+            <span style="font-size: 11px; color: #ef4444; font-weight: 600;">
+                ⏳ Pendientes: <span id="v-estatal-pen" style="font-family: monospace; font-size: 12px;">0</span>
+            </span>
+        </div>
+    </div>
 
-        // Dibujar el polígono que delimita el bloque asignado (Líneas verdes rellenas)
-        const coordenadaBloque = [
-            [17.95, -95.65],
-            [17.95, -95.45],
-            [17.75, -95.45],
-            [17.75, -95.65]
-        ];
+    <div class="stat-box" style="grid-column: span 3; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #64748b; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <small style="color:#64748b; font-weight: bold;"> DIF Municipal</small>
+        <div id="v-estatal-no-stats" style="font-size: 24px; font-weight: bold; color: #64748b;">0</div>
+                <div style="display: flex; gap: 10px; margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 8px;">
+            <span style="font-size: 11px; color: #16a34a; font-weight: 600;">
+                📦 Entregados: <span id="v-no-estatal-ent" style="font-family: monospace; font-size: 12px;">0</span>
+            </span>
+            <span style="font-size: 11px; color: #ef4444; font-weight: 600;">
+                ⏳ Pendientes: <span id="v-no-estatal-pen" style="font-family: monospace; font-size: 12px;">0</span>
+            </span>
+        </div>
+    </div>
+
+</div>
+
+    <h3 style="color: #1e293b; margin-bottom: 10px;">👥 Demografía e Indicadores de Inclusión</h3>
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
+        <div class="stat-box" style="background: #fdf2f8; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <small style="color:#db2777; font-weight: bold;">Mujeres Beneficiadas</small>
+            <div id="v-mujeres" style="font-size: 24px; font-weight: bold; color: #db2777;">0</div>
+        </div>
+        <div class="stat-box" style="background: #f0fdf4; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <small style="color:#16a34a; font-weight: bold;">Hombres Beneficiados</small>
+            <div id="v-hombres" style="font-size: 24px; font-weight: bold; color: #16a34a;">0</div>
+        </div>
+        <div class="stat-box" style="background: #fefce8; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <small style="color:#ca8a04; font-weight: bold;">Población Indígena</small>
+            <div id="v-indigena" style="font-size: 24px; font-weight: bold; color: #ca8a04;">0</div>
+        </div>
+        <div class="stat-box" style="background: #f0fdfa; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <small style="color:#0d9488; font-weight: bold;">Con Discapacidad</small>
+            <div id="v-discapacidad" style="font-size: 24px; font-weight: bold; color: #0d9488;">0</div>
+        </div>
+    </div>
+
+  <div class="panel-cobertura-territorial" style="margin-top: 25px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #6366f1;">
+    <h3 style="color: #1e293b; margin-bottom: 5px;">📍 Distribución Geográfica y Cuantificación de Apoyos</h3>
+    <p style="color: #64748b; font-size: 13px; margin-bottom: 15px; margin-top: 0;">Cantidades exactas entregadas o gestionadas por cada zona/comunidad.</p>
+    
+    <div id="v-cobertura-territorial-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
+        </div>
+</div>
+
+<div class="panel-cobertura-territorial" style="margin-top: 25px; font-family: sans-serif;">
+    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #10b981;">
+        <h3 style="font-size: 16px; color: #1e293b; margin: 0 0 5px 0;"><i class="fas fa-chart-pie" style="color:#10b981;"></i> Distribución Porcentual por Programa</h3>
+        <p style="color: #64748b; font-size: 13px; margin: 0 0 20px 0;">Representación en gráficos de pastel del impacto de cada apoyo en las comunidades.</p>
         
-        const polygon = L.polygon(coordenadaBloque, {
-            color: '#1b7a43',
-            fillColor: '#27ae60',
-            fillOpacity: 0.6,
-            weight: 2
-        }).addTo(map);
+        <div id="v-lista-territorio" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; max-height: 750px; overflow-y: auto; padding-right: 5px;">
+            </div>
+    </div>
+</div>
+</div>
 
-        polygon.bindPopup("<b>Asignación: AE-0130-2M - LLAVE</b><br>Superficie: 980.6 Km²").openPopup();
+<div id="view-social" class="view-container" style="display:none;">
+    <div class="access-card" style="background: var(--social-color);">
+        <div><b>Trabajo Social</b></div>
+        <a href="social.html" class="btn-open">Ir al Módulo</a>
+    </div>
+    
+    <!-- Estadísticas Principales -->
+    <div class="stats-grid">
+        <div class="stat-box"><small>Total Casos</small><div id="s-total">0</div></div>
+        <div class="stat-box"><small>Atendidos</small><div id="s-atendidos" style="color:var(--success)">0</div></div>
+        <div class="stat-box"><small>Pendientes</small><div id="s-pendientes" style="color:var(--warning)">0</div></div>
+        
+    </div>
+    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+    <div class="stat-box">
+        <small>Programas</small>
+        <div id="stat-programa" style="font-size:14px; font-weight:bold;">0</div>
+    </div>
+    <div class="stat-box">
+        <small>Asuntos</small>
+        <div id="stat-asunto" style="font-size:14px; font-weight:bold;">0</div>
+    </div>
+    <div class="stat-box">
+        <small>Detalles</small>
+        <div id="stat-detalle" style="font-size:14px; font-weight:bold;">0</div>
+    </div>
+</div>
 
-        // 2. LÓGICA DE CONTROL DE PESTAÑAS (TABS)
-        function switchTab(event, tabId) {
-            // Desactivar todos los botones y paneles
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+    <!-- Contabilidad (Stat Boxes Dinámicas) -->
+    <div id="s-reporte-contable" class="stats-grid" style="margin-bottom: 20px;"></div>
 
-            // Activar pestaña seleccionada
-            event.currentTarget.classList.add('active');
-            document.getElementById(tabId).classList.add('active');
+    <!-- Paneles de Columnas -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+        <div class="panel"><b>Últimos Registros</b><div id="col-1"></div></div>
+        <div class="panel"><b>Asunto / Programa</b><div id="col-2"></div></div>
+        <div class="panel"><b>Zona / Localidad</b><div id="col-3"></div></div>
+    </div>
 
-            // Forzar actualización de tamaño de las gráficas si se cambia a la pestaña de producción
-            if(tabId === 'tab-produccion') {
-                initProductionChart();
-            }
+    <div class="panel-pastel-social" style="margin-top: 15px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #10b981; font-family: sans-serif;">
+    <b style="font-size: 12px; color: #1e293b; display: block; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+        <i class="fas fa-chart-pie" style="color:#10b981; margin-right: 5px;"></i> Impacto y Distribución por Beneficiario
+    </b>
+    <div id="social-pastel-contenedor" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+        </div>
+</div>
+</div>
+
+        <div id="view-procuraduria" class="view-container" style="display:none;">
+            <div class="access-card" style="background: var(--procu-color);"><div><b>Procuraduría</b></div><a href="procuraduria.html" class="btn-open">Módulo</a></div>
+            <div class="filter-bar"></div>
+            <div class="stats-grid"><div class="stat-box"><small>Expedientes</small><div id="pr-total">0</div></div><div class="stat-box"><small>H. Mixtos</small><div id="pr-mixtos">0</div></div></div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
+                <div class="panel"><b>Asuntos</b><div id="pr-conteo-tabla"></div></div>
+                <div class="panel"><b>Listado</b><div id="pr-list-casos"></div></div>
+                <div class="panel"><b>Zonas</b><div id="pr-list-geo"></div></div>
+            </div>
+        </div>
+
+<div id="view-historial" class="view-container" style="display:none;">
+    <div class="dash">
+        <div class="card money"><h3>Ingreso Periodo</h3><span class="monto" id="t-caja">$0.00</span></div>
+        <div class="card valid"><h3>Ingreso Validado</h3><span class="monto" id="t-validado">$0.00</span></div>
+        <div class="card"><h3>Atenciones</h3><span class="monto" id="t-pacientes">0</span></div>
+    </div>
+    <div class="tabla-box">
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha / Folio</th>
+                    <th>Paciente</th>
+                    <th>Servicio</th>
+                    <th>Estado</th>
+                    <th>Costo</th>
+                    <th>Acción</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-historial"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="view-medica" class="view-container" style="display:none;">
+    <!-- Tarjetas de Dashboard -->
+    <div class="dash" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px;">
+        <div class="card money"><h3>Ingreso en Periodo</h3><span class="monto" id="t-caja">$0.00</span></div>
+        <div class="card valid"><h3>Ingreso Validado</h3><span class="monto" id="t-validado">$0.00</span></div>
+        <div class="card"><h3>Total Atenciones</h3><span class="monto" id="t-pacientes">0</span></div>
+    </div>
+
+    <!-- Panel de Resumen -->
+    <div class="resumen-detallado" style="background: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+        <div class="resumen-item"><h4>Tipo de Población</h4><ul class="resumen-list" id="res-poblacion"></ul></div>
+        <div class="resumen-item"><h4>Categoría</h4><ul class="resumen-list" id="res-categorias"></ul></div>
+        <div class="resumen-item"><h4>Servicio</h4><ul class="resumen-list" id="res-servicios"></ul></div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-box" style="background: white; border-radius: 15px; border: 1px solid #e2e8f0; overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8fafc;">
+                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">FECHA / FOLIO</th>
+                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">PACIENTE</th>
+                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">SERVICIO</th>
+                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">ESTADO</th>
+                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">COSTO</th>
+                </tr>
+            </thead>
+            <tbody id="tbody-medica"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="view-psicologia" class="view-container" style="display:none;">
+    <div class="access-card" style="background: var(--psico-color);">
+        <div><b>Psicología</b></div>
+        <a href="psicologia.html" class="btn-open">Módulo</a>
+    </div>
+
+    <div class="filter-bar"></div>
+
+  <div class="stats-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+    
+    <div class="stat-box" style="border-top:4px solid var(--psico-color); background: #fff;">
+        <small style="font-weight:bold; color:#64748b;">TOTAL PACIENTES</small>
+        <div id="p-total" style="font-weight:800; font-size:1.8rem; color:#1e293b;">0</div>
+    </div>
+    <div class="stat-box" style="border-top:4px solid #64748b; background: #fff;">
+        <small style="font-weight:bold; color:#64748b;">TOTAL ACOMPAÑANTES</small>
+        <div id="p-total-a" style="font-weight:800; font-size:1.8rem; color:#1e293b;">0</div>
+    </div>
+    <div class="stat-box" style="border-top:4px solid var(--success); background: #fff;">
+        <small style="font-weight:bold; color:#64748b;">TOTAL SESIONES</small>
+        <div id="p-ses" style="font-weight:800; font-size:1.8rem; color:var(--success);">0</div>
+    </div>
+
+    <div class="stat-box" style="border-left:4px solid #2563eb;"> <small style="color:#2563eb; font-weight:bold;">PACIENTES H</small>
+        <div id="p-hombres" style="font-size:1.5rem; font-weight:700; color:#2563eb;">0</div>
+    </div>
+    <div class="stat-box" style="border-left:4px solid #db2777;"> <small style="color:#db2777; font-weight:bold;">PACIENTES M</small>
+        <div id="p-mujeres" style="font-size:1.5rem; font-weight:700; color:#db2777;">0</div>
+    </div>
+    <div class="stat-box" style="border-left:4px solid #f59e0b;"> <small style="color:#f59e0b; font-weight:bold;">PACIENTES MENORES</small>
+        <div id="p-menores" style="font-size:1.5rem; font-weight:700; color:#f59e0b;">0</div>
+    </div>
+
+    <div class="stat-box" style="border-left:4px solid #2563eb; opacity: 0.9;">
+        <small style="color:#2563eb; font-weight:bold;">ACOMPAÑANTES H</small>
+        <div id="p-hombres-a" style="font-size:1.3rem; font-weight:700; color:#2563eb;">0</div>
+    </div>
+    <div class="stat-box" style="border-left:4px solid #db2777; opacity: 0.9;">
+        <small style="color:#db2777; font-weight:bold;">ACOMPAÑANTES M</small>
+        <div id="p-mujeres-a" style="font-size:1.3rem; font-weight:700; color:#db2777;">0</div>
+    </div>
+    <div class="stat-box" style="border-left:4px solid #f59e0b; opacity: 0.9;">
+        <small style="color:#f59e0b; font-weight:bold;">ACOMPAÑANTES MENORES</small>
+        <div id="p-menores-a" style="font-size:1.3rem; font-weight:700; color:#f59e0b;">0</div>
+    </div>
+</div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px;">
+    <!-- Lista 1 -->
+    <div class="panel">
+        <b><i class="fas fa-user"></i> Pacientes Recientes</b>
+        <div id="p-list-pacientes" style="margin-top:10px;"></div>
+    </div>
+    <!-- Lista 2: Rangos de Edad -->
+    <div class="panel">
+        <b><i class="fas fa-list-ul"></i> ZONAS / Temas Frecuentes</b>
+        <div id="p-list-asuntos" style="margin-top:10px;"></div>
+    </div>
+    <!-- Lista 3: Asuntos (Motivos) y conteo -->
+    <div class="panel">
+        <b><i class="fas fa-child"></i> Rangos de Edad</b>
+        <div id="p-list-edades" style="margin-top:10px;"></div>
+    </div>
+    </div>  
+</div>
+
+<div id="view-jefatura-psicologia" class="view-container" style="display:none;">
+    <div class="access-card" style="background: #701a27;"><div><b>Jefatura de Psicología</b></div><a href="jefatura_psicologia.html" class="btn-open">Módulo</a></div>
+    <div class="filter-bar"></div>
+    <div class="stats-grid">
+        <div class="stat-box" style="border-top:3px solid #701a27"><small>Total de Actividades</small><div id="jp-total">0</div></div>
+        
+        <div class="stat-box"><small>Total de Personas</small><div id="jp-ent" style="color:var(--success)">0</div></div>
+    </div>
+    <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px;">
+        <div class="panel"><b>Resumen por Dependencia</b><div id="jp-list-actividades"></div></div>
+        <div class="panel"><b>Zonas de Intervención</b><div id="jp-list-geo"></div></div>
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- PANEL DE PREVISUALIZACIÓN Y CONTROL: CIVIS -->
+<!-- ========================================== -->
+<div id="view-civis" class="view-container" style="display:none;">
+    
+    <!-- Tarjeta de Acceso Directo con Estilo Institucional -->
+    <div class="access-card" style="background: linear-gradient(135deg, #1e293b, #334155); color: white;">
+        <div><b>Control Institucional CIVIS</b></div>
+        <a href="reporte_civis.html" class="btn-open" style="background: white; color: #1e293b; font-weight: bold; padding: 6px 12px; rounded: 6px;">Ir al Módulo</a>
+    </div>
+    
+    <!-- Estadísticas Operativas Principales -->
+    <div class="stats-grid">
+        <div class="stat-box"><small>Total Reportes</small><div id="civis-total">0</div></div>
+        <div class="stat-box"><small>Ejecutados</small><div id="civis-realizados" style="color:var(--success)">0</div></div>
+        <div class="stat-box"><small>Pendientes</small><div id="civis-pendientes" style="color:var(--warning)">0</div></div>
+    </div>
+
+    <!-- Desglose Métrico de Clasificación -->
+    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-box">
+            <small>Áreas Asignadas</small>
+            <div id="civis-stat-areas" style="font-size:14px; font-weight:bold;">0</div>
+        </div>
+        <div class="stat-box">
+            <small>Evidencias Colectadas</small>
+            <div id="civis-stat-fotos" style="font-size:14px; font-weight:bold; color: #2563eb;">0</div>
+        </div>
+        <div class="stat-box">
+            <small>Fuera de Jurisdicción</small>
+            <div id="civis-stat-jurisdiccion" style="font-size:14px; font-weight:bold; color: #dc2626;">0</div>
+        </div>
+    </div>
+
+    <!-- Panel de Contabilidad de Estatus / Tipos Dinámicos -->
+    <div id="civis-reporte-contable" class="stats-grid" style="margin-bottom: 20px;"></div>
+
+    <!-- Paneles de Columnas de Monitoreo Rápido -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+        <div class="panel">
+            <b>Últimos Folios CIVIS</b>
+            <div id="civis-col-1" class="panel-lista-scroll" style="margin-top:10px; max-height:300px; overflow-y:auto;">
+                <!-- Carga dinámica de folios y nombres -->
+            </div>
+        </div>
+        <div class="panel">
+            <b>Distribución por Área</b>
+            <div id="civis-col-2" class="panel-lista-scroll" style="margin-top:10px; max-height:300px; overflow-y:auto;">
+                <!-- Carga dinámica de áreas y contadores -->
+            </div>
+        </div>
+        <div class="panel">
+            <b>Zonas de Incidencia</b>
+            <div id="civis-col-3" class="panel-lista-scroll" style="margin-top:10px; max-height:300px; overflow-y:auto;">
+                <!-- Carga dinámica de domicilios o localidades -->
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div id="view-escolar" class="view-container"><div class="access-card" style="background: #1e3a8a;"><div><b>Solicitudes Generales</b></div><a href="solicitudes.html" class="btn-open">Módulo</a></div>
+    <div class="stats-grid">
+        <div class="stat-box"><small>Solicitudes</small><div id="re-total">0</div></div>
+        <div class="stat-box"><small>Atendidos</small><div id="re-ate" style="color:var(--success)">0</div></div>
+        <div class="stat-box"><small>Pendientes</small><div id="re-pen" style="color:var(--warning)">0</div></div>
+        <div class="stat-box"><small>No Procede</small><div id="re-nop" style="color:var(--danger)">0</div></div>
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1.2fr; gap:20px;">
+        <div class="panel"><b>Resumen por Área</b><div id="re-list-areas"></div></div>
+        <div class="panel"><b>Por Responsable</b><div id="re-list-responsables"></div></div>
+        <div class="panel"><b>Localidad y Requerimiento</b><div id="re-list-geo"></div></div>
+    </div>
+    </div>
+
+    <!-- Vista Territorial -->
+<div id="view-territorial" class="view-container">
+    <div class="access-card" style="background: var(--genloc-color);">
+        <div><b>RESUMEN TERRITORIAL INTEGRAL</b></div>
+    </div>
+    
+    <div id="territorial-master-list" style="padding: 20px;">
+        </div>
+</div>
+
+    <!-- NUEVA UBICACIÓN: La bienvenida debe estar fuera de cualquier otra vista -->
+    <div id="view-bienvenida" class="view-container" style="display:none; flex-direction:column; align-items:center; justify-content:center; height:80vh; text-align:center;">
+        <img src="logo_dif.png" alt="Logo DIF" style="width:250px; margin-bottom: 20px;">
+        <h2 style="color:#1e293b;">Bienvenido al Sistema Institucional</h2>
+        <p style="color:#64748b;">Selecciona un módulo del menú lateral para comenzar.</p>
+    </div>
+
+</div> <!-- Cierre del main-content -->
+</div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, doc, onSnapshot, query, orderBy, setDoc, deleteDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+    const usuario = localStorage.getItem('activeUser');
+    const departamento = localStorage.getItem('userDep');
+    
+    if (usuario) {
+        document.getElementById("user-name-display").innerText = usuario.toUpperCase();
+        document.getElementById("user-role-display").innerText = departamento || "SISTEMA DIF";
+        
+        // 1. Ocultar los botones que no debe ver
+        aplicarRestriccionesDeDepartamento();
+        
+        // 2. NUEVA LÓGICA: En lugar de hacer .click(), mostramos una bienvenida
+        // Primero ocultamos todas las vistas activas
+        document.querySelectorAll('.view-container').forEach(view => {
+            view.style.display = 'none';
+        });
+
+        // Mostramos la carátula institucional (asegúrate de tener este ID en tu HTML)
+        const vistaBienvenida = document.getElementById('view-bienvenida');
+        if (vistaBienvenida) {
+            vistaBienvenida.style.display = 'flex';
         }
 
-        // 3. MOTOR DE GRÁFICAS DE ALTO RENDIMIENTO (Chart.js)
-        let chartInstance = null;
-        function initProductionChart() {
-            if (chartInstance) return; // Evitar duplicaciones de renderizado
+    } else {
+        window.location.href = "index.html";
+    }
+});
+    // --- FUNCIÓN DE SEGURIDAD PARA OCULTAR VISTAS ---
+function aplicarRestriccionesDeDepartamento() {
+    const depUsuario = localStorage.getItem('userDep');
+    
+    // Si es GLOBAL, acceso total
+    if (depUsuario === "GLOBAL") return;
 
-            const ctx = document.getElementById('productionChart').getContext('2d');
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Ene 24', 'Feb 24', 'Mar 24', 'Abr 24', 'May 24', 'Jun 24', 'Jul 24', 'Ago 24', 'Sep 24', 'Oct 24', 'Nov 24'],
-                    datasets: [{
-                        label: 'Petróleo (Mbd)',
-                        data: [0.135, 0.135, 0.136, 0.134, 0.135, 0.133, 0.131, 0.098, 0.145, 0.122, 0.015],
-                        borderColor: '#2b6cb0',
-                        backgroundColor: 'rgba(43, 108, 176, 0.1)',
-                        borderWidth: 3,
-                        tension: 0.1,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'top' }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#e2e8f0' }
-                        },
-                        x: {
-                            grid: { display: false }
-                        }
-                    }
-                }
+    // Definimos qué módulos ve cada quién
+    // Para ver múltiples, simplemente agregamos los IDs al array
+    const permisos = {
+        "PSICOLOGIA": ["nav-psicologia", "nav-jefatura-psicologia", "view-psicologia", "view-jefatura-psicologia"],
+        "SOCIAL": ["nav-social", "view-social"],
+        "PROCURADURIA": ["nav-procuraduria", "view-procuraduria"],
+        "MEDICA": ["nav-medica", "view-medica"],
+        "VULNERABLE": ["nav-vulnerable", "view-vulnerable"]
+    };
+
+    // Obtenemos los elementos permitidos para el usuario actual
+    const permitidos = permisos[depUsuario] || ["nav-territorial"]; // Si no tiene permiso, al menos ve el resumen
+
+    // Ocultar botones de navegación no permitidos
+    document.querySelectorAll('.nav-item').forEach(item => {
+        if (!permitidos.includes(item.id) && item.id !== "nav-territorial") {
+            item.style.display = 'none';
+        }
+    });
+
+    // Ocultar vistas no permitidas
+    document.querySelectorAll('.view-container').forEach(view => {
+        if (!permitidos.includes(view.id) && view.id !== "view-territorial") {
+            view.style.display = 'none';
+        }
+    });
+}
+
+    const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const store = { medica: [], social: [], psicologia: [], jefatura: [], procuraduria: [], general_localidades: [], civis: [], vulnerable: [] };
+
+window.reprocesarTodo = function() {
+    if (typeof window.reprocesarPsico === 'function') window.reprocesarPsico();
+    if (typeof window.reprocesarProcuraduria === 'function') window.reprocesarProcuraduria();
+    if (typeof window.reprocesarJefatura === 'function') window.reprocesarJefatura();
+    if (typeof window.reprocesarTrabSoc === 'function') window.reprocesarTrabSoc();
+    if (typeof window.reprocesarMedica === 'function') window.reprocesarMedica();
+    if (typeof window.reprocesarCivis === 'function') window.reprocesarCivis(); // <-- Nueva línea CIVIS
+    if (typeof window.renderReporteJerarquico === 'function') window.renderReporteJerarquico();
+    if (typeof window.reprocesarVulnerable === 'function') window.reprocesarVulnerable();
+};
+
+// Función UNIFICADA para eliminar (Solo necesitas esta)
+window.borrarRegistro = async (coleccion, id) => {
+    if (confirm("¿Eliminar este registro?")) {
+        await deleteDoc(doc(db, coleccion, id));
+        // No hace falta llamar a nada, el onSnapshot abajo detectará el cambio y refrescará todo
+    }
+};
+
+// --- LISTENERS (Aquí ocurre la magia de la unificación) ---
+onSnapshot(collection(db, "trabajo_social"), (s) => { store.social = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarTrabSoc(); });
+onSnapshot(collection(db, "psicologia"), (s) => { store.psicologia = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarPsico(); });
+onSnapshot(collection(db, "jefatura_psicologia"), (s) => { store.jefatura = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarJefatura(); });
+onSnapshot(collection(db, "procuraduria"), (s) => { store.procuraduria = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarProcuraduria(); });
+onSnapshot(collection(db, "area_medica_v2"), (s) => { store.medica = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarMedica(); window.renderReporteJerarquico();});
+onSnapshot(collection(db, "proyetos_pv"), (s) => {store.proyectos = s.docs.map(d => ({id: d.id, ...d.data()}));console.log("Datos cargados de proyetos_pv:", store.proyectos.length);window.reprocesarVulnerable(); });
+onSnapshot(collection(db, "reporte_civis"), (snap) => {store.civis = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));if (typeof window.reprocesarCivis === 'function') window.reprocesarCivis();});
+/////////////////////////////////////////////
+// Función específica de Poblacion Vulnerable
+window.reprocesarVulnerable = () => {
+    const data = store.proyectos; 
+    
+    // Si la colección está vacía en Firestore, reseteamos de forma segura la UI
+    if (!data || data.length === 0) {
+        console.warn("Módulo Vulnerable: No se detectaron registros en proyetos_pv.");
+        document.querySelectorAll("[id^='v-']").forEach(el => { if(el.tagName !== "TBODY") el.innerText = "0"; });
+        const tabla = document.getElementById('v-tabla-registros');
+        if (tabla) tabla.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:15px; color:#64748b;">Sin registros en la base de datos central.</td></tr>';
+        return;
+    }
+
+// ==========================================
+    // 1. MÉTRICAS OPERATIVAS (LLAVES RAÍZ EN CRUZ)
+    // ==========================================
+    const totalRegistros = data.length;
+    const entregados = data.filter(item => item.estatus === "ENTREGADO").length;
+    const pendientes = data.filter(item => item.estatus === "PENDIENTE").length;
+    
+    // Sincronizados y No Sincronizados con el DIF Estatal (Totales)
+    const difEstatal = data.filter(item => item.capturado_dif_estatal === "SI").length;
+    const noEstatal = data.filter(item => item.capturado_dif_estatal !== "SI").length;
+
+    // 🌟 NUEVOS CRUCES: Entregados vs Pendientes por tipo de Sincronización
+    const difEstatalEntregados = data.filter(item => item.capturado_dif_estatal === "SI" && item.estatus === "ENTREGADO").length;
+    const difEstatalPendientes = data.filter(item => item.capturado_dif_estatal === "SI" && item.estatus === "PENDIENTE").length;
+    
+    const noEstatalEntregados  = data.filter(item => item.capturado_dif_estatal !== "SI" && item.estatus === "ENTREGADO").length;
+    const noEstatalPendientes  = data.filter(item => item.capturado_dif_estatal !== "SI" && item.estatus === "PENDIENTE").length;
+
+    // Inyecciones base en el DOM
+    if(document.getElementById('v-total')) document.getElementById('v-total').innerText = totalRegistros;
+    if(document.getElementById('v-ent')) document.getElementById('v-ent').innerText = entregados;
+    if(document.getElementById('v-pen')) document.getElementById('v-pen').innerText = pendientes;
+    if(document.getElementById('v-estatal-stats')) document.getElementById('v-estatal-stats').innerText = difEstatal;
+    if(document.getElementById('v-estatal-no-stats')) document.getElementById('v-estatal-no-stats').innerText = noEstatal;
+
+    // 🌟 INYECCIÓN EN EL DOM DE LAS NUEVAS MÉTRICAS CRUZADAS
+    if(document.getElementById('v-estatal-ent')) document.getElementById('v-estatal-ent').innerText = difEstatalEntregados;
+    if(document.getElementById('v-estatal-pen')) document.getElementById('v-estatal-pen').innerText = difEstatalPendientes;
+    if(document.getElementById('v-no-estatal-ent')) document.getElementById('v-no-estatal-ent').innerText = noEstatalEntregados;
+    if(document.getElementById('v-no-estatal-pen')) document.getElementById('v-no-estatal-pen').innerText = noEstatalPendientes;
+// =============================================================================
+    // 2. CONTEO Y CUANTIFICACIÓN GEOGRÁFICA (ZONAS Y SUBGRUPOS)
+    // =============================================================================
+    let mujeres = 0;
+    let hombres = 0;
+    let indigenas = 0;
+    let discapacidad = 0;
+
+    // Objeto para agrupar todo el árbol territorial, sus apoyos y modalidades
+    const mapeoTerritorial = {};
+
+    data.forEach(item => {
+        // Normalizamos los nombres geográficos y metadatos para evitar duplicados
+        const localidad = (item.localidad || item.col_loc || 'LOCALIDAD NO REGISTRADA').trim().toUpperCase();
+        const colonia = (item.vul_colonia || 'CENTRO / GENERAL').trim().toUpperCase();
+        const programa = (item.programa || 'SIN ESPECIFICAR').trim().toUpperCase();
+        const subgrupo = (item.subgrupo || 'GENERAL').trim().toUpperCase(); // 🌟 CAMPO ADICIONADO
+
+        // 1. Conteo Demográfico Base
+        if (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) {
+            item.integrantes.forEach(integ => {
+                if (integ.sexo === "MUJER") mujeres++;
+                if (integ.sexo === "HOMBRE") hombres++;
+                if (integ.indigena === "SI") indigenas++;
+                if (integ.discapacidad === "SI") discapacidad++;
             });
+        } else if (item.beneficiario) {
+            if (item.beneficiario.sexo === "MUJER") mujeres++;
+            if (item.beneficiario.sexo === "HOMBRE") hombres++;
+            if (item.beneficiario.indigena === "SI") indigenas++;
+            if (item.beneficiario.discapacidad === "SI") discapacidad++;
         }
-    </script>
+
+        // 2. Estructuración del árbol extendido: Localidad -> Colonia -> Programa -> Subgrupo
+        if (!mapeoTerritorial[localidad]) {
+            mapeoTerritorial[localidad] = {};
+        }
+        if (!mapeoTerritorial[localidad][colonia]) {
+            mapeoTerritorial[localidad][colonia] = {};
+        }
+        if (!mapeoTerritorial[localidad][colonia][programa]) {
+            mapeoTerritorial[localidad][colonia][programa] = {}; // 🌟 Cambiado a objeto para meter subgrupos
+        }
+        if (!mapeoTerritorial[localidad][colonia][programa][subgrupo]) {
+            mapeoTerritorial[localidad][colonia][programa][subgrupo] = 0;
+        }
+
+        // Conteo del volumen (taller grupal cuenta integrantes, individual cuenta como 1)
+        const cantidadApoyos = (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) 
+            ? item.integrantes.length 
+            : 1;
+
+        mapeoTerritorial[localidad][colonia][programa][subgrupo] += cantidadApoyos;
+    });
+
+    // Inyección de indicadores demográficos globales en el DOM
+    if(document.getElementById('v-mujeres')) document.getElementById('v-mujeres').innerText = mujeres;
+    if(document.getElementById('v-hombres')) document.getElementById('v-hombres').innerText = hombres;
+    if(document.getElementById('v-indigena')) document.getElementById('v-indigena').innerText = indigenas;
+    if(document.getElementById('v-discapacidad')) document.getElementById('v-discapacidad').innerText = discapacidad;
+
+    // Pintar el nuevo desglose geográfico en el Grid Territorial (CON ACORDEONES DESPLEGABLES)
+    const territorialGrid = document.getElementById('v-cobertura-territorial-grid');
+    if (territorialGrid) {
+        territorialGrid.innerHTML = '';
+
+        // Iteramos las localidades ordenadas alfabéticamente
+        Object.keys(mapeoTerritorial).sort().forEach(loc => {
+            const tarjetaLoc = document.createElement('div');
+            tarjetaLoc.className = 'stat-box';
+            tarjetaLoc.style.cssText = "background: #f8fafc; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 4px solid #6366f1; display: flex; flex-direction: column; gap: 8px;";
+            
+            let htmlContenido = `<div style="font-size: 14px; font-weight: bold; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;"><i class="fas fa-map-marked-alt"></i> ${loc}</div>`;
+            
+            // Desglosamos las colonias
+            Object.keys(mapeoTerritorial[loc]).forEach(col => {
+                htmlContenido += `<div style="margin-top: 5px; padding-left: 5px;">
+                    <span style="font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase;">📍 Col. ${col}</span>
+                    <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 4px;">`;
+                
+                // Desglosamos los programas usando <details> interactivos
+                Object.keys(mapeoTerritorial[loc][col]).forEach(prog => {
+                    const subgruposDelPrograma = mapeoTerritorial[loc][col][prog];
+                    
+                    let totalProgramaEnColonia = 0;
+                    Object.values(subgruposDelPrograma).forEach(cant => totalProgramaEnColonia += cant);
+
+                    // 🌟 TRANSFORMADO A ACORDEÓN DESPLEGABLE NATIVO
+                    htmlContenido += `
+                        <details style="background: white; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden; font-size: 12px;">
+                            <summary style="padding: 6px 8px; font-weight: bold; color: #334155; cursor: pointer; background: #f1f5f9; display: flex; align-items: center; justify-content: space-between; user-select: none;">
+                                <span style="display: inline-flex; align-items: center; gap: 5px;">
+                                    <i class="fas fa-box" style="font-size: 10px; color: #6366f1;"></i> ${prog}
+                                </span>
+                                <span style="background: #e0e7ff; color: #4338ca; padding: 1px 6px; border-radius: 10px; font-weight: bold; font-size: 10px;">${totalProgramaEnColonia} tot.</span>
+                            </summary>
+                            
+                            <div style="padding: 6px 10px; background: #ffffff; display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #e2e8f0;">`;
+                    
+                    Object.keys(subgruposDelPrograma).sort().forEach(sub => {
+                        const cantSub = subgruposDelPrograma[sub];
+                        htmlContenido += `
+                            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #4b5563; padding: 2px 0;">
+                                <span style="display: inline-flex; align-items: center; gap: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75%;">
+                                    <i class="fas fa-tag" style="font-size: 8px; color: #9ca3af;"></i> 
+                                    <span>${sub}</span>
+                                </span>
+                                <span style="color: #1e293b; font-family: monospace; font-weight: bold; background: #f8fafc; padding: 1px 4px; border-radius: 3px; border: 1px dashed #cbd5e1;">${cantSub} pza</span>
+                            </div>`;
+                    });
+
+                    htmlContenido += `</div></details>`;
+                });
+
+                htmlContenido += `</div></div>`;
+            });
+
+            tarjetaLoc.innerHTML = htmlContenido;
+            territorialGrid.appendChild(tarjetaLoc);
+        });
+
+        if (Object.keys(mapeoTerritorial).length === 0) {
+            territorialGrid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 20px; color: #64748b;">No hay datos geográficos disponibles.</div>';
+        }
+    }
+
+// ==========================================
+    // 3. RENDERIZADO DE LAS 3 LISTAS DE ANÁLISIS (CON BARRAS EN LISTA 3)
+    // ==========================================
+
+    const contenedorTerritorio = document.getElementById('v-lista-territorio');
+
+    if (contenedorTerritorio) {
+        contenedorTerritorio.innerHTML = '';
+        
+        const coloresPaleta = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#6366f1', '#ef4444', '#14b8a6', '#f43f5e', '#a855f7'];
+        const acumPorApoyo = {};
+        const documentosPorCelda = {}; 
+
+        data.forEach(item => {
+            const programa = (item.programa || 'SIN ESPECIFICAR').trim().toUpperCase();
+            const subgrupo = (item.subgrupo || 'GENERAL').trim().toUpperCase();
+            const localidad = (item.localidad || item.col_loc || 'LOCALIDAD NO REGISTRADA').trim().toUpperCase();
+            const coloniaRef = (item.vul_colonia || 'S/C').trim().toUpperCase();
+            
+            // Mantenemos la clave extendida para la separación interna de datos
+            const claveZona = `${localidad} (COL. ${coloniaRef}) [MOD: ${subgrupo}]`;
+
+            if (!acumPorApoyo[programa]) acumPorApoyo[programa] = {};
+            if (!acumPorApoyo[programa][claveZona]) acumPorApoyo[programa][claveZona] = 0;
+
+            const idCelda = `${programa}|||${claveZona}`;
+            if (!documentosPorCelda[idCelda]) documentosPorCelda[idCelda] = [];
+            documentosPorCelda[idCelda].push(item);
+
+            const incremento = (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) 
+                ? item.integrantes.length 
+                : 1;
+
+            acumPorApoyo[programa][claveZona] += incremento;
+        });
+
+        window.documentosPorCeldaActuales = documentosPorCelda;
+
+        const apoyosOrdenados = Object.keys(acumPorApoyo).sort();
+
+        if (apoyosOrdenados.length > 0) {
+            apoyosOrdenados.forEach(apoyo => {
+                const zonasAsociadas = acumPorApoyo[apoyo];
+                let totalApoyosPrograma = 0;
+                Object.values(zonasAsociadas).forEach(cant => totalApoyosPrograma += cant);
+
+                let gradienteEstilo = "conic-gradient(";
+                let acumuladoPorcentaje = 0;
+                let htmlLeyenda = `<div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">`;
+
+                Object.keys(zonasAsociadas).sort().forEach((zona, indice) => {
+                    const cantidad = zonasAsociadas[zona];
+                    const porcentaje = (cantidad / totalApoyosPrograma) * 100;
+                    const colorAsignado = coloresPaleta[indice % coloresPaleta.length];
+
+                    const inicioAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
+                    acumuladoPorcentaje += porcentaje;
+                    const finAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
+
+                    gradienteEstilo += `${colorAsignado} ${inicioAngulo}deg ${finAngulo}deg${indice < Object.keys(zonasAsociadas).length - 1 ? ', ' : ''}`;
+
+                    const idCeldaClave = `${apoyo}|||${zona}`;
+
+                    // --- EXTRACCIÓN DE TEXTOS PARA EL DISEÑO JERÁRQUICO ---
+                    // Separamos "LOCALIDAD (COL. X)" de "[MOD: SUBGRUPO]" para acomodarlo abajo
+                    const partesFiltro = zona.split(" [MOD: ");
+                    const textoUbicacion = partesFiltro[0] || 'N/A';
+                    const textoSubgrupo = partesFiltro[1] ? partesFiltro[1].replace(']', '') : 'GENERAL';
+
+                    // Renglón con la leyenda adaptada (Ubicación arriba, Subgrupo abajo)
+                    htmlLeyenda += `
+                        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; padding: 6px 0; border-bottom: 1px dotted #e2e8f0;">
+                            <div style="display: flex; align-items: flex-start; gap: 8px; max-width: 65%; overflow: hidden;">
+                                <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: ${colorAsignado}; flex-shrink: 0; margin-top: 4px;"></span>
+                                <div style="display: flex; flex-direction: column; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;">
+                                    <span title="${textoUbicacion}" style="font-weight: 600; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${textoUbicacion}</span>
+                                    <span title="Subgrupo/Modalidad" style="font-size: 10px; color: #64748b; font-weight: 500;"><i class="fas fa-tags" style="font-size: 8px; margin-right: 2px;"></i> ${textoSubgrupo}</span>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                                <span style="font-weight: bold; color: #1e293b; font-family: monospace;">${cantidad} pza(s)</span>
+                                
+                                <button onclick="descargarPadronCelda('${idCeldaClave}')" 
+                                        title="Descargar Excel de este subgrupo y zona" 
+                                        style="background: #137333; color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: bold; display: inline-flex; align-items: center; gap: 3px; transition: background 0.2s;"
+                                        onmouseover="this.style.background='#0f5b28';" 
+                                        onmouseout="this.style.background='#137333';">
+                                    📊 EXCEL
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                gradienteEstilo += ")";
+                htmlLeyenda += `</div>`;
+
+                const tarjetaPastel = document.createElement('div');
+                tarjetaPastel.style.cssText = "background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.05); height: fit-content;";
+                
+                tarjetaPastel.innerHTML = `
+                    <div style="font-weight: bold; color: #1e293b; font-size: 13px; margin-bottom: 15px; border-bottom: 2px solid #10b981; padding-bottom: 6px; text-transform: uppercase;">
+                        <i class="fas fa-box" style="color:#10b981; margin-right: 5px;"></i> ${apoyo} 
+                        <span style="font-size: 11px; color:#64748b; font-weight: normal; text-transform: none; float: right;">Total: ${totalApoyosPrograma}</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                        <div style="width: 130px; height: 130px; border-radius: 50%; background: ${gradienteEstilo}; flex-shrink: 0;"></div>
+                        ${htmlLeyenda}
+                    </div>
+                `;
+
+                contenedorTerritorio.appendChild(tarjetaPastel);
+            });
+        } else {
+            contenedorTerritorio.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:30px; color:#64748b; font-size:13px;">No hay registros de apoyos para generar gráficos.</div>';
+        }
+    
+    
+
+        // ==========================================
+        // FUNCIÓN GLOBAL INYECTADA PARA LA DESCARGA INDIVIDUAL POR FILAS
+        // ==========================================
+window.descargarPadronCelda = function(idCeldaClave) {
+    // 1. Validamos y extraemos los registros precargados de la celda actual
+    const coleccionItems = window.documentosPorCeldaActuales?.[idCeldaClave] || [];
+    
+    if (coleccionItems.length === 0) {
+        alert("No hay registros en esta modalidad y zona.");
+        return;
+    }
+
+    // 2. Extraemos el programa y la zona desde el separador único '|||'
+    let progNombre = "PROGRAMA", zonaNombre = "ZONA";
+    if (idCeldaClave.includes('|||')) {
+        const partes = idCeldaClave.split('|||');
+        progNombre = partes[0] || "PROGRAMA";
+        zonaNombre = partes[1] || "ZONA";
+    }
+
+    // 3. Encabezados estándar del CSV administrativo (🌟 Añadido: SUBPROGRAMA)
+    let contenidoCsv = "\uFEFF"; // BOM para forzar UTF-8 correcto en Excel
+    contenidoCsv += "PROGRAMA,SUBPROGRAMA,LOCALIDAD/COLONIA,BENEFICIARIO,CURP,SEXO,TELEFONO,DIRECCION,TIPO PADRON\n";
+
+    // 4. Procesamos documento por documento desglosando integrantes en líneas independientes
+    coleccionItems.forEach(item => {
+        const programa = item.programa || 'SIN ESPECIFICAR';
+        const subgrupo = item.subgrupo || 'GENERAL'; // 🌟 Extraemos la modalidad o subgrupo
+        const colLoc = item.localidad || item.col_loc || 'NO REGISTRADA';
+        const colRef = item.vul_colonia || 'S/C';
+        const zonaString = `"${colLoc} (COL. ${colRef})"`;
+        const telefono = item.telefono_general || item.ta_telefono || 'S/T';
+        const direccion = `"${(item.direccion || 'CONOCIDA').replace(/"/g, '""')}"`;
+
+        if (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) {
+            // Caso Colectivo: Una fila individual por cada integrante
+            item.integrantes.forEach(int => {
+                const nombreCompleto = `"${(`${int.nombre || ''} ${int.paterno || ''} ${int.materno || ''}`).trim().toUpperCase()}"`;
+                const curp = int.curp || 'SIN CURP';
+                const sexo = int.sexo || 'MUJER';
+                contenidoCsv += `"${programa}","${subgrupo}",${zonaString},${nombreCompleto},${curp},${sexo},${telefono},${direccion},"COLECTIVO (TALLER)"\n`;
+            });
+        } else if (item.beneficiario) {
+            // Caso Individual: Fila única ordinaria
+            const nombreCompleto = `"${(item.beneficiario.nombre_completo_cache || `${item.beneficiario.nombre || ''} ${item.beneficiario.paterno || ''} ${item.beneficiario.materno || ''}`).trim().toUpperCase()}"`;
+            const curp = item.beneficiario.curp || 'SIN CURP';
+            const sexo = item.beneficiario.sexo || 'MUJER';
+            contenidoCsv += `"${programa}","${subgrupo}",${zonaString},${nombreCompleto},${curp},${sexo},${telefono},${direccion},"INDIVIDUAL"\n`;
+        } else {
+            // Respaldo Institucional (Escuelas / Grupos sin estructurar)
+            const nombreEscuela = `"${(item.pae_escuela || 'INSTITUCIÓN / ESCUELA').replace(/"/g, '""')}"`;
+            const cct = item.pae_clave_escuela || 'SIN CCT';
+            contenidoCsv += `"${programa}","${subgrupo}",${zonaString},${nombreEscuela},${cct},"N/A",${telefono},${direccion},"INSTITUCIONAL"\n`;
+        }
+    });
+
+    // 5. Generación y disparo del archivo descargable .csv
+    const blob = new Blob([contenidoCsv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    
+    // Limpiamos caracteres raros o espacios del nombre del archivo resultante
+    const nombreArchivo = `PADRON_${progNombre.replace(/\s+/g, '_')}_${zonaNombre.replace(/[\s\(\)\.]+/g, '_')}.csv`;
+    
+    if (navigator.msSaveBlob) { 
+        navigator.msSaveBlob(blob, nombreArchivo);
+    } else {
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", nombreArchivo);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+};
+    }
+};
+/////////////////////////////////////////////
+// Función específica de Area Medica
+
+window.reprocesarMedica = function() {
+    const tbody = document.getElementById('tbody-medica');
+    if (!tbody) return;
+
+    // 1. FILTRADO DE SEGURIDAD
+    // Ignoramos registros donde el nombre sea undefined o vacío
+    const registrosValidos = store.medica.filter(p => p.nombre && p.nombre !== "undefined");
+
+    // Calcular estadísticas usando SOLO los registros válidos
+    let totalCaja = 0;
+    let totalValidado = 0;
+    
+    tbody.innerHTML = registrosValidos.map(p => {
+        const esValido = p.validado_dir === 'SI';
+        const costo = parseFloat(p.costo || 0);
+        totalCaja += costo;
+        if(esValido) totalValidado += costo;
+
+        return `
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 15px;"><b>${p.fecha_cap}</b><br><small>${p.folio || ''}</small></td>
+                <td style="padding: 15px;"><b>${p.nombre}</b></td>
+                <td style="padding: 15px;">${p.estudio_servicio || 'N/A'}</td>
+                <td style="padding: 15px;">
+                    <span class="badge" style="background:${esValido ? '#16a34a' : '#ea580c'}; color:white; padding:4px 8px; border-radius:5px; font-size:10px;">
+                        ${esValido ? 'VALIDADO' : 'PENDIENTE'}
+                    </span>
+                </td>
+                <td style="padding: 15px; font-weight:bold;">$${costo.toFixed(2)}</td>
+                <td style="padding: 15px;">
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    // Actualizar Dashboards con los datos limpios
+    document.getElementById('t-caja').innerText = '$' + totalCaja.toFixed(2);
+    document.getElementById('t-validado').innerText = '$' + totalValidado.toFixed(2);
+    document.getElementById('t-pacientes').innerText = registrosValidos.length; // Usa registrosValidos
+};
+
+/////////////////////////////////////////////
+// Función específica de Psicología
+window.reprocesarPsico = function() {
+    const busqueda = document.getElementById('global-search-input').value.toLowerCase();
+    const zona = document.getElementById('global-zone-search').value.toLowerCase();
+    const mes = document.getElementById('global-month-filter').value;
+
+    const filtrados = store.psicologia.filter(item => {
+        const paciente = (item.paciente || "").toLowerCase();
+        const z = (item.col_loc || "").toLowerCase();
+        const fecha = item.fecha || ""; 
+        const mesRegistro = fecha ? fecha.split('-')[1] : null;
+        
+        return paciente.includes(busqueda) && 
+               z.includes(zona) && 
+               (mes === 'all' || mesRegistro === mes);
+    });
+
+    // 1. Estadísticas Superiores
+    document.getElementById('p-total').innerText = filtrados.length;
+    document.getElementById('p-total-a').innerText = filtrados.filter(d => d.nombre_a && d.nombre_a !== "").length;
+    document.getElementById('p-ses').innerText = filtrados.length;
+
+    // 2. Estadísticas de Pacientes/Acompañantes
+    document.getElementById('p-hombres').innerText = filtrados.filter(d => d.genero_p === 'MASCULINO').length;
+    document.getElementById('p-mujeres').innerText = filtrados.filter(d => d.genero_p === 'FEMENINO').length;
+    document.getElementById('p-menores').innerText = filtrados.filter(d => parseInt(d.edad_p) < 18).length;
+    document.getElementById('p-hombres-a').innerText = filtrados.filter(d => d.genero_a === 'MASCULINO').length;
+    document.getElementById('p-mujeres-a').innerText = filtrados.filter(d => d.genero_a === 'FEMENINO').length;
+    document.getElementById('p-menores-a').innerText = filtrados.filter(d => parseInt(d.edad_a) < 18).length;
+
+    // --- LÓGICA DE PROCESAMIENTO ---
+
+    // Agrupación para Lista 2 (Edades + Temas)
+    const edadTemas = { "0-17": {}, "18-35": {}, "36-55": {}, "56+": {} };
+    filtrados.forEach(d => {
+        const edad = parseInt(d.edad_p);
+        const tema = d.tema || "SIN MOTIVO";
+        if (!isNaN(edad)) {
+            let r = edad < 18 ? "0-17" : edad <= 35 ? "18-35" : edad <= 55 ? "36-55" : "56+";
+            edadTemas[r][tema] = (edadTemas[r][tema] || 0) + 1;
+        }
+    });
+
+    // Agrupación para Lista 3: Localidades -> Asuntos
+    const localTemas = {};
+    filtrados.forEach(d => {
+        const loc = d.col_loc || "SIN LOCALIDAD";
+        const tema = d.tema || "SIN MOTIVO";
+        if (!localTemas[loc]) localTemas[loc] = {};
+        localTemas[loc][tema] = (localTemas[loc][tema] || 0) + 1;
+    });
+
+    // --- RENDERIZADO ---
+
+    // Lista 1: Pacientes Recientes
+    document.getElementById('p-list-pacientes').innerHTML = filtrados.slice(-15).reverse().map(d => `
+        <div style="border-bottom:1px solid #f1f5f9; padding:6px 0;">
+            <div style="font-weight:800; font-size:11px; color:#0f172a;">${d.paciente || 'S/N'}</div>
+            <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.tema || 'SIN MOTIVO'}</div>
+            <div style="font-size:9px; color:#94a3b8; font-weight:bold;">Sesión: ${d.n_sesion || '1'} | ${d.fecha || ''}</div>
+        </div>`).join('');
+
+    // Lista 2: Edades con Temas abajo
+    document.getElementById('p-list-edades').innerHTML = Object.entries(edadTemas).map(([rango, temas]) => `
+        <div style="margin-bottom:10px;">
+            <div style="font-weight:800; font-size:11px; background:#f1f5f9; padding:2px 5px; border-radius:3px;">${rango} años</div>
+            ${Object.entries(temas).map(([tema, count]) => `
+                <div style="display:flex; justify-content:space-between; font-size:9px; padding-left:8px; margin-top:1px;">
+                    <span style="color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${tema}</span>
+                    <b style="color:#0f172a;">${count}</b>
+                </div>
+            `).join('')}
+        </div>`).join('');
+
+    // Lista 3: Localidades y sus Asuntos
+    document.getElementById('p-list-asuntos').innerHTML = Object.entries(localTemas).map(([loc, temas]) => `
+        <div style="margin-bottom:12px;">
+            <div style="font-weight:800; font-size:11px; background:#e2e8f0; padding:3px 6px; border-radius:3px;">${loc}</div>
+            ${Object.entries(temas).map(([tema, count]) => `
+                <div style="display:flex; justify-content:space-between; font-size:9px; padding-left:8px; margin-top:2px;">
+                    <span style="color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${tema}</span>
+                    <b style="color:#0f172a;">${count}</b>
+                </div>
+            `).join('')}
+        </div>`).join('');
+};
+/////////////////////////////////////////////
+// Función específica de JefaturaPsicología
+    window.reprocesarJefatura = function() {
+    const busqueda = document.getElementById('global-search-input').value.toLowerCase();
+    const zona = document.getElementById('global-zone-search').value.toLowerCase();
+    const mes = document.getElementById('global-month-filter').value;
+
+    const filtrados = store.jefatura.filter(item => {
+        const paciente = (item.paciente || "").toLowerCase();
+        const z = (item.colonia || "").toLowerCase();
+        const fecha = item.fecha || ""; 
+        const mesRegistro = fecha ? fecha.split('-')[1] : null;
+        
+        return paciente.includes(busqueda) && 
+               z.includes(zona) && 
+               (mes === 'all' || mesRegistro === mes);
+    });
+
+    // Estadísticas
+    document.getElementById('jp-total').innerText = filtrados.length;
+    document.getElementById('jp-ent').innerText = filtrados.reduce((sum, d) => sum + (parseInt(d.personas) || 0), 0);
+
+    // 1. Resumen por Dependencia (Lista detallada)
+    // Mostramos los 15 más recientes
+    document.getElementById('jp-list-actividades').innerHTML = filtrados.slice(-15).reverse().map(d => `
+        <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+            <div style="flex:1;">
+                <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.dependencia || 'N/A'}</div>
+                <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.actividad || 'SIN ACTIVIDAD'}</div>
+            </div>
+            <div style="text-align:right; font-size:9px; color:#64748b;">
+                ${d.fecha || ''}<br>${d.horario || '--:--'}
+            </div>
+        </div>
+    `).join('');
+
+    // 2. Zonas de Intervención (Lista detallada)
+    document.getElementById('jp-list-geo').innerHTML = filtrados.slice(-15).reverse().map(d => `
+        <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+            <div style="flex:1;">
+                <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.colonia || 'SIN ZONA'}</div>
+                <div style="font-size:9px; color:#64748b; font-weight:700;">${d.actividad || ''}</div>
+            </div>
+            <div style="font-size:9px; font-weight:bold; color:var(--accent); text-align:right;">
+                ${d.oficio || 'S/N'}
+            </div>
+        </div>
+    `).join('');
+};
+
+        ///////////////////////////////////////////////
+        // --- PROCESAMIENTO PROCURADURIA ---
+window.reprocesarProcuraduria = function() {
+    const busqueda = document.getElementById('global-search-input').value.toLowerCase();
+    const zona = document.getElementById('global-zone-search').value.toLowerCase();
+    const mes = document.getElementById('global-month-filter').value;
+
+    const filtrados = store.procuraduria.filter(item => {
+        const nombre = (item.nombre || "").toLowerCase();
+        const z = (item.lugar || "").toLowerCase();
+        const fecha = item.fecha || ""; 
+        const mesRegistro = fecha ? fecha.split('-')[1] : null;
+        
+        return nombre.includes(busqueda) && 
+               z.includes(zona) && 
+               (mes === 'all' || mesRegistro === mes);
+    });
+
+    // Estadísticas superiores
+    document.getElementById('pr-total').innerText = filtrados.length;
+    document.getElementById('pr-mixtos').innerText = filtrados.filter(d => d.horarios_mixtos === 'Si').length;
+
+    // 1. Panel: ASESORÍA (Agrupación y conteo)
+    const conteoAsuntos = {};
+    filtrados.forEach(d => { const a = d.asuntos || "S/ASUNTO"; conteoAsuntos[a] = (conteoAsuntos[a] || 0) + 1; });
+    
+    document.getElementById('pr-conteo-tabla').innerHTML = Object.entries(conteoAsuntos)
+        .sort((a,b) => b[1] - a[1])
+        .map(([asunto, count]) => `
+        <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+            <div style="flex:1;">
+                <div style="font-weight:800; font-size:11px; color:#1e293b; text-transform: uppercase;">${asunto}</div>
+                <div style="font-size:10px; color:var(--primary); font-weight:700;">TOTAL: ${count}</div>
+            </div>
+        </div>`).join('');
+
+    // 2. Panel: NOMBRE (Nombre + Asuntos)
+    document.getElementById('pr-list-casos').innerHTML = filtrados.slice(-15).reverse().map(d => `
+      <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+            <div style="flex:1;">
+                <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.nombre || 'SIN NOMBRE'}</div>
+                <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.asuntos || 'S/A'}</div>
+            </div>
+        </div>`).join('');
+
+    // 3. Panel: LUGAR (Lugar + Domicilio)
+    document.getElementById('pr-list-geo').innerHTML = filtrados.slice(-15).reverse().map(d => `
+          <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+            <div style="flex:1;">
+                <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.lugar || 'SIN LUGAR'}</div>
+                <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.domicilio || 'SIN DOMICILIO'}</div>
+            </div>
+        </div>`).join('');
+};
+       ///////////////////////////////////////////////
+        // --- PROCESAMIENTO TRABAJO SOCIAL ---
+window.reprocesarTrabSoc = function() {
+    const busqueda = document.getElementById('global-search-input').value.toLowerCase();
+    const zona = document.getElementById('global-zone-search').value.toLowerCase();
+    const mes = document.getElementById('global-month-filter').value;
+
+    const filtrados = store.social.filter(item => {
+        const nombre = (item.nombre || "").toLowerCase();
+        const programa = (item.programa || "").toLowerCase();
+        const asunto = (item.asunto || "").toLowerCase();
+        const z = (item.col_loc || "").toLowerCase();
+        const fecha = (item.fecha_registro || "").trim();
+        const partes = fecha.split('-');
+        const mesRegistro = partes.length >= 2 ? partes[1] : "";
+        
+        const coincideBusqueda = nombre.includes(busqueda) || programa.includes(busqueda) || asunto.includes(busqueda);
+        return coincideBusqueda && z.includes(zona) && (mes === 'all' || mesRegistro === mes);
+    });
+
+    // Cálculo de conteos globales y por Personal que Atendió
+    const contPrograma = {}, contAsunto = {}, contDetalle = {}, contPersonal = {};
+    
+    filtrados.forEach(i => {
+        const p = i.programa || "SIN PROG.";
+        const a = i.asunto || "SIN ASUNTO";
+        const d = i.detalle_asunto || "SIN DETALLE";
+        
+        // CAMBIO AQUÍ: Captura el usuario del sistema que atendió el caso 
+        // (Ajusta 'usuario_atendio' por el campo exacto que tengas en tu Firestore, ej: 'usuario' o 'atendido_por')
+        const trabajador = (i.usuario_atendio || i.usuario || i.atendido_por || "NO ASIGNADO").trim().toUpperCase();
+
+        contPrograma[p] = (contPrograma[p] || 0) + 1;
+        contAsunto[a] = (contAsunto[a] || 0) + 1;
+        contDetalle[d] = (contDetalle[d] || 0) + 1;
+        
+        // Acumulación para el gráfico de pastel del personal
+        contPersonal[trabajador] = (contPersonal[trabajador] || 0) + 1;
+    });
+
+    // Actualizar Stats principales
+    document.getElementById('s-total').innerText = filtrados.length;
+    document.getElementById('s-atendidos').innerText = filtrados.filter(d => ['ATENDIDO', 'ENTREGADO', 'REALIZADO', 'VALIDADO'].includes(d.estatus)).length;
+    document.getElementById('s-pendientes').innerText = filtrados.filter(d => ['PENDIENTE', 'EN PROCESO'].includes(d.estatus)).length;
+    
+    // Función de color para estatus
+    const getColor = (e) => {
+        const colores = {
+            'ATENDIDO': '#16a34a', 'ENTREGADO': '#16a34a', 'REALIZADO': '#16a34a', 'VALIDADO': '#16a34a',
+            'PENDIENTE': '#ea580c', 'EN PROCESO': '#2563eb', 'CANCELADO': '#dc2626'
+        };
+        return colores[e] || '#64748b';
+    };
+
+    // Renderizado Stats
+    const renderStatCompleto = (id, titulo, objetoConteo) => {
+        const container = document.getElementById(id);
+        if (!container) return;
+        const ordenado = Object.entries(objetoConteo).sort((a, b) => b[1] - a[1]);
+        container.innerHTML = `
+            <div style="font-size: 10px; font-weight: 800; color: #64748b; margin-bottom: 5px; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px;">
+                ${titulo} (${Object.keys(objetoConteo).length})
+            </div>
+            <div style="max-height: 120px; overflow-y: auto;">
+                ${ordenado.map(([nombre, cant]) => `
+                    <div style="display:flex; justify-content:space-between; font-size:9px; margin-bottom:2px; padding-right:5px;">
+                        <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;">${nombre}</span>
+                        <b style="color:var(--primary);">${cant}</b>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    };
+    renderStatCompleto('stat-programa', 'PROGRAMAS', contPrograma);
+    renderStatCompleto('stat-asunto', 'ASUNTOS', contAsunto);
+    renderStatCompleto('stat-detalle', 'DETALLES', contDetalle);
+
+    // Agrupación para Columna 2
+    const cont = {};
+    filtrados.forEach(i => {
+        const key = `${i.asunto || "SIN ASUNTO"}|${i.programa || "SIN PROG."}|${i.detalle_asunto || "SIN DETALLE"}`;
+        cont[key] = (cont[key] || 0) + 1;
+    });
+    const ordenado = Object.entries(cont).sort((a, b) => b[1] - a[1]);
+
+    // 1. Renderizado Columna 1
+    document.getElementById('col-1').innerHTML = filtrados.slice(-15).reverse().map(i => `
+        <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
+        <div style="flex-grow:1; overflow:hidden;">
+            <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.nombre||'N/A'}</div>
+            <div style="font-size:9px; color:#64748b;">${i.fecha_registro||''}</div>
+            <div style="font-size:9px; color:var(--primary); font-weight:700;">${i.asunto||''}</div>
+            <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus||'SIN ESTADO'}</div>
+            </div>
+        </div>
+    `).join('');
+    
+    // 2. Renderizado Columna 2
+    document.getElementById('col-2').innerHTML = ordenado.map(([key, count]) => {
+        const [asunto, programa, detalle] = key.split('|');
+        return `
+            <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+                <div style="flex-grow:1; overflow:hidden;">
+                    <div style="font-weight:800; font-size:11px; color:#1e293b; white-space:nowrap; text-overflow:ellipsis;">${asunto}</div>
+                    <div style="font-size:9px; color:var(--primary); font-weight:700;">${programa}</div>
+                    <div style="font-size:9px; color:#64748b; font-style:italic;">${detalle}</div>
+                </div>
+                <div style="background:#f8fafc; padding:2px 8px; border-radius:10px; font-weight:800; font-size:12px; border:1px solid #e2e8f0; margin-left:10px;">${count}</div>
+            </div>`;
+    }).join('');
+
+    // 3. Renderizado Columna 3
+    document.getElementById('col-3').innerHTML = filtrados.slice(-15).reverse().map(i => `
+        <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
+        <div style="flex-grow:1; overflow:hidden;">
+            <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.col_loc||'N/A'}</div>
+            <div style="font-size:9px; color:#64748b;">${i.direccion||''}</div>
+            <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus||'SIN ESTADO'}</div>
+            </div>
+        </div>
+    `).join('');
+
+    // ==========================================
+    // RENDERIZADO DEL GRÁFICO DE PASTEL (PERSONAL OPERATIVO) - DISEÑO HORIZONTAL
+    // ==========================================
+    const contenedorPastel = document.getElementById('social-pastel-contenedor');
+    if (contenedorPastel) {
+        contenedorPastel.innerHTML = '';
+        const personalOrdenado = Object.entries(contPersonal).sort((a, b) => b[1] - a[1]);
+        const totalRegistros = filtrados.length;
+
+        if (totalRegistros > 0) {
+            const coloresPaleta = ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#14b8a6', '#f43f5e', '#a855f7'];
+            let gradienteEstilo = "conic-gradient(";
+            let acumuladoPorcentaje = 0;
+            
+            // Contenedor de la leyenda con scroll interno por si son muchos usuarios
+            let htmlLeyenda = `<div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1; max-height: 160px; overflow-y: auto; padding-right: 5px; width: 60%;">`;
+
+            personalOrdenado.forEach(([trabajador, cantidad], indice) => {
+                const porcentaje = (cantidad / totalRegistros) * 100;
+                const colorAsignado = coloresPaleta[indice % coloresPaleta.length];
+
+                const inicioAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
+                acumuladoPorcentaje += porcentaje;
+                const finAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
+
+                gradienteEstilo += `${colorAsignado} ${inicioAngulo}deg ${finAngulo}deg${indice < personalOrdenado.length - 1 ? ', ' : ''}`;
+
+                htmlLeyenda += `
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #475569; padding: 2px 0; border-bottom: 1px solid #f1f5f9;">
+                        <div style="display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%;">
+                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${colorAsignado}; flex-shrink: 0;"></span>
+                            <span title="${trabajador}" style="overflow: hidden; text-overflow: ellipsis; font-weight: 700;">${trabajador}</span>
+                        </div>
+                        <span style="font-family: monospace; color: #1e293b; font-weight: bold; flex-shrink: 0; margin-left: 10px;">${cantidad} ({${porcentaje.toFixed(1)}%})</span>
+                    </div>
+                `;
+            });
+
+            gradienteEstilo += ")";
+            htmlLeyenda += `</div>`;
+
+            // Aplicamos flex-direction: row para poner la gráfica a la izquierda y leyendas a la derecha
+            contenedorPastel.style.cssText = "display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 20px; width: 100%;";
+
+            contenedorPastel.innerHTML = `
+                <div style="width: 160px; height: 160px; border-radius: 50%; background: ${gradienteEstilo}; box-shadow: inset 0 0 5px rgba(0,0,0,0.05), 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0;"></div>
+                
+                ${htmlLeyenda}
+            `;
+        } else {
+            contenedorPastel.style.cssText = "display: flex; justify-content: center; width: 100%;";
+            contenedorPastel.innerHTML = '<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin acciones registradas para graficar.</div>';
+        }
+    }
+};
+        ///////////////////////////////////////////////
+        // --- PROCESAMIENTO civis ---
+window.reprocesarCivis = function() {
+    // Si la vista de CIVIS no existe en el HTML, detenemos la ejecución para evitar errores
+    const vistaContenedora = document.getElementById('view-civis');
+    if (!vistaContenedora) return;
+
+    // 1. OBTENER DATOS DEL STORE Y CONTEOS BÁSICOS
+    const total = store.civis.length;
+    const realizados = store.civis.filter(e => e.ejecucion === "REALIZADO").length;
+    const pendientes = total - realizados;
+    const fueraJurisdiccion = store.civis.filter(e => e.fuera_de_jurisdiccion === true).length;
+    
+    let totalFotos = 0;
+    const conteoAreas = {};
+    const conteoEstatus = {};
+    const zonasMapa = {};
+
+    let htmlCol1 = ""; // Aquí se acumulará la lista completa de folios con sus asuntos
+
+    // Ordenamos los registros por número progresivo de mayor a menor (más recientes primero)
+    const registrosOrdenados = [...store.civis].sort((a, b) => (b.no_progresivo || 0) - (a.no_progresivo || 0));
+
+    registrosOrdenados.forEach((item) => {
+        // Contar imágenes totales del módulo
+        if (item.fotos) totalFotos += item.fotos.length;
+
+        // Agrupar por Área Responsable (Columna 2)
+        if (item.area) {
+            conteoAreas[item.area] = (conteoAreas[item.area] || 0) + 1;
+        }
+
+        // Agrupar por Estatus (Bloque contable inferior)
+        if (item.estatus) {
+            conteoEstatus[item.estatus] = (conteoEstatus[item.estatus] || 0) + 1;
+        }
+
+        // Agrupar por Ubicación/Domicilio (Columna 3)
+        const zona = item.ubicacion?.domicilio_completo || "No Especificado";
+        zonasMapa[zona] = (zonasMapa[zona] || 0) + 1;
+
+        // 2. CONSTRUIR LA LISTA DE FOLIOS CON ASUNTOS (COLUMNA 1)
+        const icono = item.ejecucion === "REALIZADO" ? "🟢" : "🟡";
+        
+        // Extraemos el asunto/problema o descripción del reporte
+        const asuntoReporte = item.problema || item.descripcion || "Sin asunto especificado";
+
+        htmlCol1 += `
+            <div style="padding: 10px; border-b: 1px solid #f1f5f9; font-size: 11px; display: flex; flex-direction: column; gap: 3px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>${icono} <b style="color: #1e293b;">${item.folio}</b></span>
+                    <span style="color: #94a3b8; font-size: 10px; font-weight: bold;">#${item.no_progresivo || '-'}</span>
+                </div>
+                <div style="color: #0284c7; font-weight: bold; font-size: 11px; line-height: 1.2;">
+                    📝 ${asuntoReporte}
+                </div>
+                <div style="color: #475569; font-size: 10.5px;">
+                    👤 ${item.ciudadano?.nombre || 'Anónimo'}
+                </div>
+                <div style="color: #64748b; font-size: 10px; font-style: italic; margin-top: 1px;">
+                    🏢 ${item.area || 'Sin Área Asignada'}
+                </div>
+            </div>`;
+    });
+
+    // 3. INYECTAR DATOS EN LOS CUADRITOS DE MÉTRICAS (STAT BOXES)
+    if (document.getElementById("civis-total")) document.getElementById("civis-total").innerText = total;
+    if (document.getElementById("civis-realizados")) document.getElementById("civis-realizados").innerText = realizados;
+    if (document.getElementById("civis-pendientes")) document.getElementById("civis-pendientes").innerText = pendientes;
+    if (document.getElementById("civis-stat-areas")) document.getElementById("civis-stat-areas").innerText = Object.keys(conteoAreas).length;
+    if (document.getElementById("civis-stat-fotos")) document.getElementById("civis-stat-fotos").innerText = totalFotos;
+    if (document.getElementById("civis-stat-jurisdiccion")) document.getElementById("civis-stat-jurisdiccion").innerText = fueraJurisdiccion;
+
+    // 4. INYECTAR LA LISTA COMPLETA EN LA COLUMNA 1
+    const col1Container = document.getElementById("civis-col-1");
+    if (col1Container) {
+        col1Container.innerHTML = htmlCol1 || "<div style='padding:10px; color:#94a3b8; font-style:italic;'>Sin reportes registrados</div>";
+        col1Container.style.maxHeight = "400px";
+        col1Container.style.overflowY = "auto";
+    }
+
+    // 5. INYECTAR DISTRIBUCIÓN POR ÁREA (COLUMNA 2)
+    let htmlCol2 = "";
+    Object.keys(conteoAreas).sort((a,b) => conteoAreas[b] - conteoAreas[a]).forEach(area => {
+        htmlCol2 += `
+            <div style="display:flex; justify-content:space-between; padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 11px; align-items: center;">
+                <span>🏢 <b>${area}</b></span>
+                <span style="background:#e2e8f0; padding: 2px 8px; border-radius:4px; font-weight:bold; color:#334155;">${conteoAreas[area]}</span>
+            </div>`;
+    });
+    const col2Container = document.getElementById("civis-col-2");
+    if (col2Container) {
+        col2Container.innerHTML = htmlCol2 || "<div style='padding:10px; color:#94a3b8; font-style:italic;'>Sin áreas</div>";
+        col2Container.style.maxHeight = "400px";
+        col2Container.style.overflowY = "auto";
+    }
+
+    // 6. INYECTAR ZONAS DE INCIDENCIA (COLUMNA 3)
+    let htmlCol3 = "";
+    Object.keys(zonasMapa).sort((a,b) => zonasMapa[b] - zonasMapa[a]).forEach(zona => {
+        htmlCol3 += `
+            <div style="display:flex; justify-content:space-between; padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 11px; align-items: center;">
+                <span style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 170px;" title="${zona}">📍 ${zona}</span>
+                <span style="font-weight:bold; color:#64748b;">(${zonasMapa[zona]})</span>
+            </div>`;
+    });
+    const col3Container = document.getElementById("civis-col-3");
+    if (col3Container) {
+        col3Container.innerHTML = htmlCol3 || "<div style='padding:10px; color:#94a3b8; font-style:italic;'>Sin zonas</div>";
+        col3Container.style.maxHeight = "400px";
+        col3Container.style.overflowY = "auto";
+    }
+
+    // 7. INYECTAR EL REPORTE CONTABLE INFERIOR DE ESTATUS
+    let htmlContable = "";
+    Object.keys(conteoEstatus).forEach(estatus => {
+        htmlContable += `
+            <div class="stat-box" style="border-left: 4px solid #475569; background:#f8fafc;">
+                <small>${estatus.toUpperCase()}</small>
+                <div style="font-size:16px; font-weight:bold; color:#1e293b;">${conteoEstatus[estatus]}</div>
+            </div>`;
+    });
+    const reporteContableContainer = document.getElementById("civis-reporte-contable");
+    if (reporteContableContainer) {
+        reporteContableContainer.innerHTML = htmlContable;
+    }
+};
+
+///////////////////////////////////////////////
+// --- PROCESAMIENTO TODAS LAS COLONIAS Y LOCALIDADES ---
+window.renderReporteJerarquico = function() {
+    const container = document.getElementById('territorial-master-list');
+    if (!container) return;
+
+    // 1. Captura de valores de los filtros globales
+    const busquedaTexto = document.getElementById('global-search-input').value.toLowerCase();
+    const busquedaZona = document.getElementById('global-zone-search').value.toLowerCase();
+    const mesFiltro = document.getElementById('global-month-filter').value; // '01', '02', etc. o 'all'
+
+    // --- Mapeo Especial para Padrón Vulnerable / Proyectos ---
+    const registrosVulnerablesProcesados = [];
+    if (store.proyectos && Array.isArray(store.proyectos)) {
+        store.proyectos.forEach(p => {
+            const zonaAsignada = p.localidad || p.col_loc || 'N/A';
+            const estatusAsignado = p.estatus || 'PENDIENTE';
+            const subgrupoActividad = p.subgrupo || 'GENERAL';
+            const fechaRegistro = p.fecha_registro || p.fecha || ''; // Soporte para formato de fecha de proyectos
+
+            if (p.integrantes && Array.isArray(p.integrantes) && p.integrantes.length > 0) {
+                // Si es un taller grupal, agregamos a cada integrante de forma individual al territorio
+                p.integrantes.forEach(int => {
+                    const nombreInt = `${int.nombre || ''} ${int.paterno || ''} ${int.materno || ''}`.trim();
+                    registrosVulnerablesProcesados.push({
+                        dep: 'VULNERABLE',
+                        zona: zonaAsignada,
+                        estatus: estatusAsignado,
+                        info: `TALLER: ${p.programa || 'SIN ESPECIFICAR'} (${subgrupoActividad})`,
+                        nombre: nombreInt || 'INTEGRANTE DE GRUPO',
+                        folio: p.num_progresivo ? String(p.num_progresivo) : '',
+                        fecha: fechaRegistro
+                    });
+                });
+            } else {
+                // Registro Individual o Escuela PAE
+                let nombreBeneficiario = "";
+                let infoDetalle = p.programa || 'APOYO INDIVIDUAL';
+
+                if (p.pae_escuela) {
+                    nombreBeneficiario = `ESCUELA: ${p.pae_escuela}`;
+                    infoDetalle = `PAE - CCT: ${p.pae_clave_escuela || 'S/C'}`;
+                } else {
+                    nombreBeneficiario = p.beneficiario?.nombre_completo_cache || 
+                                         `${p.beneficiario?.nombre || ''} ${p.beneficiario?.paterno || ''} ${p.beneficiario?.materno || ''}`.trim();
+                }
+
+                registrosVulnerablesProcesados.push({
+                    dep: 'POBLACION VULNERABLE',
+                    zona: zonaAsignada,
+                    estatus: estatusAsignado,
+                    info: infoDetalle,
+                    nombre: nombreBeneficiario || 'BENEFICIARIO DIRECTO',
+                    folio: p.num_progresivo ? String(p.num_progresivo) : '',
+                    fecha: fechaRegistro
+                });
+            }
+        });
+    }
+
+    // 2. Consolidación de datos con fecha (Se añade Vulnerable a la lista)
+    const data = [
+        ...store.social.map(i => ({ dep: 'TRABAJO SOCIAL', zona: i.col_loc || 'N/A', estatus: i.estatus || 'N/A', info: i.asunto, nombre: i.nombre || '', folio: i.folio || '', fecha: i.fecha || '' })),
+        ...store.psicologia.map(i => ({ dep: 'PSICOLOGIA', zona: i.col_loc || 'N/A', estatus: 'ATENDIDO', info: i.tema, nombre: i.paciente || '', folio: '', fecha: i.fecha || '' })),
+        ...store.procuraduria.map(i => ({ dep: 'PROCURADURIA', zona: i.lugar || 'N/A', estatus: 'ACTIVO', info: i.asuntos, nombre: i.nombre || '', folio: '', fecha: i.fecha || '' })),
+        ...store.jefatura.map(i => ({ dep: 'JEFATURA DE PSICOLOGIA', zona: i.colonia || 'N/A', estatus: 'REALIZADO', info: i.actividad, nombre: '', folio: i.oficio || '', fecha: i.fecha || '' })),
+        ...registrosVulnerablesProcesados // 🌟 Incorporación del padrón en la matriz territorial
+    ];
+
+    // 3. Lógica de Filtrado Multicriterio
+    const filtrados = data.filter(i => {
+        // Filtro por Mes
+        const mesItem = i.fecha ? i.fecha.split('-')[1] : null; 
+        const coincideMes = (mesFiltro === 'all' || mesItem === mesFiltro);
+        
+        // Filtros de texto (Zona, Nombre, Folio, Dep)
+        const coincideZona = i.zona.toLowerCase().includes(busquedaZona);
+        const coincideBusqueda = (
+            i.nombre.toLowerCase().includes(busquedaTexto) || 
+            i.folio.toLowerCase().includes(busquedaTexto) || 
+            i.dep.toLowerCase().includes(busquedaTexto) ||
+            i.info.toLowerCase().includes(busquedaTexto)
+        );
+        
+        return coincideMes && coincideZona && coincideBusqueda;
+    });
+
+    // 4. Agrupamiento
+    const agrupado = filtrados.reduce((acc, item) => {
+        if (!acc[item.zona]) acc[item.zona] = [];
+        acc[item.zona].push(item);
+        return acc;
+    }, {});
+
+    // 5. Renderizado
+    container.innerHTML = Object.entries(agrupado)
+        .sort((a, b) => b[1].length - a[1].length)
+        .map(([zona, items]) => {
+            const pendientesCount = items.filter(i => i.estatus === 'PENDIENTE').length;
+            const esPrioridad = pendientesCount >= 3;
+            
+            return `
+        <div style="margin-bottom: 20px; background: #fff; border-radius: 10px; border: 2px solid ${esPrioridad ? '#ef4444' : '#e2e8f0'}; overflow:hidden;">
+            <div style="background: ${esPrioridad ? '#fef2f2' : '#f8fafc'}; padding: 10px 15px; display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight: 900; color: #1e293b; font-size: 13px;">
+                    <i class="fas fa-map-marker-alt" style="color:${esPrioridad ? '#ef4444' : 'var(--primary)'}; margin-right:5px;"></i> 
+                    ${zona.toUpperCase()}
+                </span>
+                <span style="background:${esPrioridad ? '#ef4444' : 'var(--primary)'}; color:white; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:bold;">
+                    ${items.length} REGISTROS
+                </span>
+            </div>
+            ${items.map(i => {
+                // Color dinámico de estatus adaptado a Padrón Vulnerable (VALIDADO, ENTREGADO)
+                let colorEstatus = '#16a34a'; // Verde por defecto
+                if (i.estatus === 'PENDIENTE') colorEstatus = '#ea580c'; // Naranja
+                if (i.estatus === 'VALIDADO') colorEstatus = '#2563eb'; // Azul
+
+                return `
+                <div style="padding:8px 15px; font-size:11px; border-bottom:1px solid #f8fafc;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <b style="color:${i.dep === 'POBLACION VULNERABLE' ? 'var(--genloc-color, #a855f7)' : 'var(--primary)'}">${i.dep}</b>
+                        <span style="font-weight:bold; color:${colorEstatus};">${i.estatus}</span>
+                    </div>
+                    <div style="color:#334155; margin-top:3px;">
+                        ${i.folio ? `<small style="background:#e2e8f0; padding:1px 4px; border-radius:3px; margin-right:4px; font-weight:700;">#${i.folio}</small>` : ''}
+                        ${i.nombre ? `<b>${i.nombre}</b> - ` : ''}${i.info}
+                    </div>
+                </div>
+                `;
+            }).join('')}
+        </div>
+    `}).join('');
+};
+
+// =============================================================================
+// --- NAVEGACIÓN Y CONTROL DINÁMICO DE LA INTERFAZ (CONTROL GLOBAL) ---
+// =============================================================================
+window.showView = function(viewId, element) {
+    // 1. Limpiar estados activos y ocultar vistas
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.view-container').forEach(el => el.style.display = 'none');
+    
+    // 2. Activar el botón clicado
+    element.classList.add('active');
+    
+    // 3. Mostrar la vista seleccionada
+    const targetView = document.getElementById(`view-${viewId}`);
+    if (targetView) {
+        targetView.style.display = 'block';
+    }
+
+    // 4. Actualizar título
+    const titleElement = document.getElementById('view-title');
+    if (titleElement) {
+        titleElement.innerText = element.innerText.trim();
+    }
+
+    // 5. Lógica de refresco inteligente (SISTEMA VULNERABLE / RESUMEN TERRITORIAL)
+    if (viewId === 'vulnerable') {
+        // A. Forzamos el cálculo de estadísticas globales y gráficas
+        if (typeof window.reprocesarVulnerable === 'function') {
+            window.reprocesarVulnerable();
+        }
+        
+        // B. Reseteamos los filtros en pantalla para asegurar una carga limpia del territorio
+        window.terminoBusqueda = ""; 
+        window.paginaActual = 1;
+        
+        const inputBusqueda = document.getElementById('buscar_vulnerable') || document.getElementById('input_buscar');
+        if (inputBusqueda) inputBusqueda.value = ""; 
+
+        // C. Renderizado instantáneo de la tabla sincronizada con las nuevas columnas y lógica por fila
+        if (typeof window.renderizarTablasSincronizadas === 'function') {
+            window.renderizarTablasSincronizadas();
+        }
+    }
+};
+
+// Reloj en tiempo real institucional
+setInterval(() => {
+    const reloj = document.getElementById('reloj');
+    if(reloj) reloj.innerText = new Date().toLocaleTimeString('es-MX', {hour: '2-digit', minute:'2-digit'});
+}, 1000);
+
+// Función de cierre de sesión segura y limpieza de estado
+window.cerrarSesion = function() {
+    if(confirm("¿Deseas cerrar la sesión actual del Administrador Global?")) {
+        try {
+            // 1. Limpiamos las credenciales y roles guardados en el navegador
+            sessionStorage.clear();
+            localStorage.clear();
+            
+            console.log("Sesión e historial local destruidos con éxito.");
+        } catch (error) {
+            console.error("Error al limpiar el almacenamiento local:", error);
+        }
+
+        // 2. Redirección inmediata al login/index
+        window.location.href = "index.html";
+    }
+};
+
+
+// =============================================================================
+// --- CORRECCIÓN FINAL DE CARGA OPERATIVA ---
+// =============================================================================
+window.onload = () => {
+    // Manteniendo tu lógica: El DOMContentLoaded se encarga de mostrar la bienvenida,
+    // garantizando que no haya clics forzados molestos en otras pestañas.
+    console.log("Sistema global y Monitor CIVIS cargados y listos.");
+};
+document.addEventListener("DOMContentLoaded", function() {
+    const btnToggle = document.getElementById('btn-toggle');
+    const sidebar = document.querySelector('.sidebar'); // Selecciona tu menú usando tu clase CSS
+
+    if (btnToggle && sidebar) {
+        btnToggle.addEventListener('click', function() {
+            // Alterna la clase nativa que ya tienes configurada en tu CSS
+            sidebar.classList.toggle('collapsed');
+            
+            // Feedback visual opcional: rotación leve al hacer clic
+            btnToggle.style.transform = sidebar.classList.contains('collapsed') ? 'rotate(90deg)' : 'rotate(0deg)';
+        });
+        
+        // Asegurar una transición suave para la rotación del icono
+        btnToggle.style.transition = "transform 0.3s ease, color 0.2s";
+        btnToggle.style.cursor = "pointer";
+    }
+});
+</script>
 </body>
 </html>
