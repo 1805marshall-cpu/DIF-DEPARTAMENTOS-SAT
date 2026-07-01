@@ -16,18 +16,57 @@
             --danger: #dc2626;
         }
 
-        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg-gradient); display: flex; flex-direction: column;align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px;box-sizing: border-box;}
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            background: var(--bg-gradient); 
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-        /* Animación de entrada suave */
-        @keyframes fadeInUp {from {opacity: 0; transform: translateY(15px); }to { opacity: 1;transform: translateY(0);}}
+        /* --- NUEVO: ANIMACIÓN DE ENTRADA SUAVE --- */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-        /* Banner de logotipos institucionales (Superior) - Optimizado para formato horizontal */
-        .brand-header {width: 100%;max-width: 430px; /* Ampliado para evitar que los logos se compriman en PC */ 
-        display: flex;justify-content: center;align-items: center;flex-wrap: wrap;gap: 20px;margin-bottom: 30px;padding: 15px 30px;background: rgba(255, 255, 255, 0.8);border-radius: 16px;
-        backdrop-filter: blur(10px);box-shadow: 0 4px 15px rgba(0,0,0,0.02);border: 1px solid rgba(226, 232, 240, 0.8);box-sizing: border-box;
-        /* Animación directa al cargar */
-            animation: fadeInUp 0.8s ease-out forwards;}
-        .brand-logo {height: 65px; object-fit: contain;max-width: 100%; }
+        /* Banner de logotipos institucionales (Superior) */
+        .brand-header {
+            width: 100%;
+            max-width: 430px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            
+            /* Aplicación de la transición a los logos */
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .brand-logo {
+            height: 65px;
+            object-fit: contain;
+            max-width: 100%;
+        }
 
         /* Contenedor principal de Login */
         .login-card {
@@ -41,11 +80,10 @@
             border: 1px solid #f1f5f9;
             position: relative;
             overflow: hidden;
-            box-sizing: border-box;
             
-            /* Animación con retraso para efecto escalonado */
+            /* Aplicación de la transición a la tarjeta (con un sutil retraso para dinamismo) */
             animation: fadeInUp 0.8s ease-out 0.2s forwards;
-            opacity: 0; 
+            opacity: 0; /* Se mantiene oculto hasta que inicia la animación */
         }
 
         /* Línea decorativa superior institucional */
@@ -186,9 +224,8 @@
         }
 
         @media (max-width: 600px) {
-            .brand-header { padding: 15px; margin-bottom: 20px; }
-            .brand-logo { height: 45px; }
-            .login-card { padding: 30px 20px; }
+            .brand-header { padding: 20px; }
+            .brand-logo { height: 50px; }
         }
     </style>
 </head>
@@ -199,7 +236,7 @@
 </div>
 
 <div class="login-card">
-    <img src="Captura_de_pantalla_2026-02-05_a_la_s__10.28.31_a.m.-removebg-preview.png" alt="Amor que protege" class="slogan-img">
+    <img src="Captura de pantalla 2026-02-05 a la(s) 10.28.31 a.m..png" alt="Amor que protege" class="slogan-img">
     
     <h2>SISTEMA INTEGRAL</h2>
     <p>Panel de Control 2026</p>
@@ -261,13 +298,12 @@
         "responsable.farma": { p: "farma.dif", url: "farmacia.html", dep: "FARMACIA" },
         "psicologia": { p: "psi123", url: "psicologia.html", dep: "PSICOLOGIA" },
         "samuel.pucheta": { p: "Samuel123..", url: "psicologia.html", dep: "PSICOLOGIA" },
-        "veronica.velasco": { p: "Veronica123..", url: "jefatura_psicologia.html", dep: "PSICOLOGIA" }, // Cambiado url a jefatura_psicologia.html
+        "veronica.velasco": { p: "Veronica123..", url: "admin_global.html", dep: "PSICOLOGIA" },
         "jefatura.psico": { p: "jefe.psi.2026", url: "jefatura_psicologia.html", dep: "PSICOLOGIA" },
         "localidades": { p: "DIF.gen.loc", url: "general_localidades.html", dep: "LOCALIDADES" },
-        "ariana.reyes": { p: "Ariana123..", url: "reporte_civis.html", dep: "CIVIS" },
+        "ariana.reyes": { p: "Ariana123..", url: "general_localidades.html", dep: "LOCALIDADES" },
         "escolar": { p: "esc123", url: "solicitudes.html", dep: "ESCOLAR" },
         "apoyo.escolar": { p: "DIF.esc.2026", url: "solicitudes.html", dep: "ESCOLAR" }
-        
     };
 
     const nombresMedicos = {
@@ -287,14 +323,9 @@
         if (cuentas[user] && cuentas[user].p === pass) {
             error.style.display = 'none';
             
-            // --- PERSISTENCIA DE SESIÓN COMPATIBLE CON JEFATURA DE PSICOLOGÍA ---
             sessionStorage.setItem('sesion_activa', 'true'); 
             sessionStorage.setItem('nombre_usuario', user);
             sessionStorage.setItem('departamento', cuentas[user].dep);
-            
-            // Guardado alternativo en localStorage para cumplir con las reglas del panel de psicología
-            localStorage.setItem('activeUser', user);
-            localStorage.setItem('userDep', cuentas[user].dep);
 
             if (nombresMedicos[user]) {
                 sessionStorage.setItem('nombre_medico', nombresMedicos[user]);
@@ -343,7 +374,6 @@
             eyeIcon.classList.add('fa-eye');
         }
     }
-</script>
 </script>
 </body>
 </html>
