@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Administración de Asignaciones y Contratos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        :root {
+            --gov-dark-green: #135838;    /* Verde institucional de la franja superior */
+            --gov-accent-gold: #dfb36c;   /* Dorado elegante para alertas/detalles */
+            --bg-light: #f8f9fa;
+            --border-color: #cbd5e1;
+            --text-main: #2d3748;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Franja de Alerta / Actualización Superior */
+        .top-alert {
+            background-color: #fbc02d;
+            color: #000;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-align: center;
+            padding: 6px 10px;
+            letter-spacing: 0.3px;
+            border-bottom: 1px solid #f9a825;
+        }
+
+        /* Encabezado Principal */
+        .main-header {
+            background-color: #fff;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            height: 55px;
+        }
+
+        .brand-area {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-area h1 {
+            font-size: 1.3rem;
+            color: #4a5568;
+            font-weight: 600;
+            border-left: 2px solid var(--border-color);
+            padding-left: 15px;
+        }
+
+        /* Contenedor Split de Doble Columna */
+        .workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Panel Izquierdo: Visor Cartográfico */
+        .map-panel {
+            width: 40%;
+            height: 100%;
+            border-right: 3px solid var(--border-color);
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Panel Derecho: Cuadro de Mando Integrado */
+        .dashboard-panel {
+            width: 60%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #fff;
+        }
+
+        /* Barra de Identificación del Bloque */
+        .block-badge-bar {
+            background-color: var(--gov-dark-green);
+            color: #fff;
+            padding: 10px 20px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        /* Menú Táctico de Pestañas (Íconos) */
+        .tabs-navbar {
+            display: flex;
+            background-color: #edf2f7;
+            border-bottom: 1px solid var(--border-color);
+            padding: 4px 10px 0 10px;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            background: #e2e8f0;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            padding: 8px 16px;
+            font-size: 1rem;
+            color: #4a5568;
+            cursor: pointer;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            background: #f7fafc;
+        }
+
+        .tab-btn.active {
+            background: #fff;
+            color: var(--gov-dark-green);
+            border-top: 3px solid var(--gov-dark-green);
+            font-weight: bold;
+            position: relative;
+            z-index: 5;
+            margin-bottom: -1px;
+            padding-bottom: 9px;
+        }
+
+        /* Área de visualización del contenido de la pestaña */
+        .tab-content-viewport {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background: #fff;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* --- ESTILOS DE LOS MÓDULOS INTERNOS --- */
+        /* Vista 1: Resumen en Grid */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .metric-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .metric-card h3 {
+            font-size: 1.1rem;
+            color: #475569;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .metric-value-box {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .sub-metric .num {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .sub-metric .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Tablas de Datos Generales */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid #e2e8f0;
+            padding: 10px 12px;
+            text-align: left;
+        }
+
+        .data-table th {
+            background-color: #f8fafc;
+            color: #334155;
+            font-weight: 700;
+        }
+
+        .data-table tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            color: #1e293b;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        /* Gráficos */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-alert">
+        ⚠️ AVISO IMPORTANTE: El sitio web está operando bajo entorno consolidado de datos de exploración y producción de hidrocarburos.
+    </div>
+
+    <header class="main-header">
+        <div class="brand-area">
+            <img src="https://www.gob.mx/cms/uploads/image/file/447021/logo-energia-subsecretaria.jpg" alt="Sener" height="35" style="object-fit: contain;">
+            <h1>Asignaciones</h1>
+        </div>
+        <div style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600;">
+            <i class="fa-solid fa-clock-rotate-left"></i> Periodo Actualizado: 2026
+        </div>
+    </header>
+
+    <main class="workspace">
+        
+        <section class="map-panel">
+            <div id="map"></div>
+        </section>
+
+        <section class="dashboard-panel">
+            <div class="block-badge-bar">
+                AE-0130-2M - LLAVE
+            </div>
+
+            <nav class="tabs-navbar">
+                <button class="tab-btn active" onclick="switchTab(event, 'tab-resumen')"><i class="fa-solid fa-chart-pie"></i></button>
+                <button class="tab-btn" onclick="switchTab(event, 'tab-generales')"><i class="fa-solid fa-file-invoice"></i></button>
+                <button class="tab-btn" onclick="switchTab(event, 'tab-actividades')"><i class="fa-solid fa-list-check"></i></button>
+                <button class="tab-btn" onclick="switchTab(event, 'tab-produccion')"><i class="fa-solid fa-droplet"></i></button>
+            </nav>
+
+            <div class="tab-content-viewport">
+                
+                <div id="tab-resumen" class="tab-pane active">
+                    <div class="overview-grid">
+                        <div class="metric-card">
+                            <h3><i class="fa-solid fa-wave-square" style="color:#2b6cb0;"></i> Adquisición de Sísmica</h3>
+                            <div class="metric-value-box">
+                                <div class="sub-metric"><div class="num">2D</div><div class="label">-</div></div>
+                                <div class="sub-metric"><div class="num">196.3</div><div class="label">KM</div></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <h3><i class="fa-solid fa-gears" style="color:#319795;"></i> Procesamiento Sísmica</h3>
+                            <div class="metric-value-box">
+                                <div class="sub-metric"><div class="num">708.7</div><div class="label">2D KM</div></div>
+                                <div class="sub-metric"><div class="num">3,114.9</div><div class="label">3D KM²</div></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <h3><i class="fa-solid fa-dollar-sign" style="color:#2f855a;"></i> Inversión Operación</h3>
+                            <div class="metric-value-box">
+                                <div class="sub-metric"><div class="num">94.8</div><div class="label">MMUSD INVERSIÓN</div></div>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <h3><i class="fa-solid fa-tower-cell" style="color:#c53030;"></i> Pozos Perforados</h3>
+                            <div class="metric-value-box">
+                                <div class="sub-metric"><div class="num">2</div><div class="label">EXPLORATORIOS</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-generales" class="tab-pane">
+                    <h2 class="section-title">Título de Asignación</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr><th colspan="2">DATOS GENERALES</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><strong>Bloque</strong></td><td>AE-0130-2M - LLAVE</td></tr>
+                            <tr><td><strong>Última modificación</strong></td><td>30 de mayo, 2024</td></tr>
+                            <tr><td><strong>Vigencia</strong></td><td>28/08/2019 - 28/08/2049</td></tr>
+                            <tr><td><strong>Superficie</strong></td><td>980.6 Km²</td></tr>
+                            <tr><td><strong>Ubicación</strong></td><td>Terrestre</td></tr>
+                            <tr><td><strong>Cuenca</strong></td><td>Veracruz</td></tr>
+                            <tr><td><strong>Entidad federativa</strong></td><td>Veracruz de Ignacio de la Llave</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="tab-actividades" class="tab-pane">
+                    <h2 class="section-title">Resoluciones y Dictámenes</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Resolución</th>
+                                <th>Enlace</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>03-sep-2024</td><td>Aclaración a la Resolución CNH.E.28.02/2024</td><td><a href="#" style="color:var(--gov-dark-green);">CNH.E.28.02/2024</a></td></tr>
+                            <tr><td>21-mar-2024</td><td>Aclaración a la Resolución CNH.E.08.01/2024</td><td><a href="#" style="color:var(--gov-dark-green);">CNH.E.08.01/2024</a></td></tr>
+                            <tr><td>12-oct-2023</td><td>Aclaración a la Resolución CNH.E.16.07/2023</td><td><a href="#" style="color:var(--gov-dark-green);">CNH.E.16.07/2023</a></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="tab-produccion" class="tab-pane">
+                    <h2 class="section-title">Evolución Histórica de Producción</h2>
+                    <div class="chart-container">
+                        <canvas id="productionChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // 1. INICIALIZACIÓN DEL MAPA (Coordenadas aproximadas de la región del bloque "Llave" en Veracruz)
+        const map = L.map('map').setView([17.8500, -95.5000], 8);
+
+        // Capa de Mapa base (Estilo claro/terrestre para asemejar la cartografía oficial)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Dibujar el polígono que delimita el bloque asignado (Líneas verdes rellenas)
+        const coordenadaBloque = [
+            [17.95, -95.65],
+            [17.95, -95.45],
+            [17.75, -95.45],
+            [17.75, -95.65]
+        ];
+        
+        const polygon = L.polygon(coordenadaBloque, {
+            color: '#1b7a43',
+            fillColor: '#27ae60',
+            fillOpacity: 0.6,
+            weight: 2
+        }).addTo(map);
+
+        polygon.bindPopup("<b>Asignación: AE-0130-2M - LLAVE</b><br>Superficie: 980.6 Km²").openPopup();
+
+        // 2. LÓGICA DE CONTROL DE PESTAÑAS (TABS)
+        function switchTab(event, tabId) {
+            // Desactivar todos los botones y paneles
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+
+            // Activar pestaña seleccionada
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+
+            // Forzar actualización de tamaño de las gráficas si se cambia a la pestaña de producción
+            if(tabId === 'tab-produccion') {
+                initProductionChart();
+            }
+        }
+
+        // 3. MOTOR DE GRÁFICAS DE ALTO RENDIMIENTO (Chart.js)
+        let chartInstance = null;
+        function initProductionChart() {
+            if (chartInstance) return; // Evitar duplicaciones de renderizado
+
+            const ctx = document.getElementById('productionChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Ene 24', 'Feb 24', 'Mar 24', 'Abr 24', 'May 24', 'Jun 24', 'Jul 24', 'Ago 24', 'Sep 24', 'Oct 24', 'Nov 24'],
+                    datasets: [{
+                        label: 'Petróleo (Mbd)',
+                        data: [0.135, 0.135, 0.136, 0.134, 0.135, 0.133, 0.131, 0.098, 0.145, 0.122, 0.015],
+                        borderColor: '#2b6cb0',
+                        backgroundColor: 'rgba(43, 108, 176, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#e2e8f0' }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
