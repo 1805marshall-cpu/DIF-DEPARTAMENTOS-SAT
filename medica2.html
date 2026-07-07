@@ -539,6 +539,9 @@ table {
     let currentFilteredList = [];
     let paginaActual = 1;
     let registrosPorPagina = 10;
+    
+    // NUEVA VARIABLE: Guarda el catálogo de trabajadores indexados por tipo de población
+    let baseTrabajadores = {};
 
     // Ajusta costos base por exenciones, respetando si la población tiene costo $0
     window.validarCostoPorPoblacion = () => {
@@ -547,10 +550,12 @@ table {
         const campoNombreTitular = document.getElementById('f-nom_trabajador');
         const campoAreaTitular = document.getElementById('f-area-titular');
 
+        // Reiniciar el datalist asignado al campo
+        campoNombreTitular.removeAttribute('list');
+
         if (tipoPob === "POBLACION EN GENERAL") {
             campoCosto.disabled = false;
             campoCosto.style.backgroundColor = "#fff";
-            // Ejecuta el recálculo dinámico basado en los servicios seleccionados
             window.calcularCostoDinamico();
             [campoNombreTitular, campoAreaTitular].forEach(el => {
                 el.value = "N/A"; el.disabled = true; el.style.backgroundColor = "#f1f5f9";
@@ -568,19 +573,73 @@ table {
                 el.disabled = false; el.style.backgroundColor = "#fff";
                 if(el.value === "N/A" || el.value === "TITULAR DIRECTO") el.value = "";
             });
+
+            // NUEVO: Asigna el contenedor de sugerencias dinámicas al campo de texto
+            campoNombreTitular.setAttribute('list', 'datalist-trabajadores');
+            actualizarSugerenciasTrabajadores(tipoPob);
         }
     };
 
-    // NUEVA FUNCIÓN: Calcula la suma acumulada de los servicios seleccionados
+    // NUEVO: Crea o actualiza las opciones del menú de autocompletado en base a la población seleccionada
+    const actualizarSugerenciasTrabajadores = (tipoPob) => {
+        // Mapea la población del familiar a la población del titular
+        let tipoTitular = "";
+        if (tipoPob.includes("CONFIANZA")) tipoTitular = "TRABAJADOR DE CONFIANZA";
+        else if (tipoPob.includes("SINDICALIZADO")) tipoTitular = "SINDICALIZADOS";
+        else if (tipoPob.includes("POLICIA")) tipoTitular = "POLICIAS";
+        else if (tipoPob.includes("TRANSITO")) tipoTitular = "TRANSITO";
+
+        let datalist = document.getElementById('datalist-trabajadores');
+        if (!datalist) {
+            datalist = document.createElement('datalist');
+            datalist.id = 'datalist-trabajadores';
+            document.body.appendChild(datalist);
+        }
+        datalist.innerHTML = "";
+
+        // Si tenemos registros guardados de ese tipo de titular, los añade como sugerencias
+        if (baseTrabajadores[tipoTitular]) {
+            baseTrabajadores[tipoTitular].forEach(nombreTrabajador => {
+                let option = document.createElement('option');
+                option.value = nombreTrabajador;
+                datalist.appendChild(option);
+            });
+        }
+    };
+
+    // NUEVO: Alimenta la memoria local del sistema leyendo de los datos existentes en Firebase
+    const indexarTrabajadoresExistentes = (registros) => {
+        baseTrabajadores = {};
+        registros.forEach(d => {
+            // Buscamos registros donde el campo nombre tenga valor y pertenezca a los titulares directos
+            if (d.nombre && ["TRABAJADOR DE CONFIANZA", "SINDICALIZADOS", "POLICIAS", "TRANSITO"].includes(d.tipo_pob)) {
+                if (!baseTrabajadores[d.tipo_pob]) {
+                    baseTrabajadores[d.tipo_pob] = new Set();
+                }
+                baseTrabajadores[d.tipo_pob].add(d.nombre.toUpperCase());
+            }
+        });
+        
+        // Convertimos los Sets a Arrays para manejarlos más fácil
+        for (let key in baseTrabajadores) {
+            baseTrabajadores[key] = Array.from(baseTrabajadores[key]).sort();
+        }
+
+        // Actualizar sugerencias si el usuario ya tiene seleccionado un familiar en pantalla
+        const tipoPobActual = document.getElementById('f-tipo_pob').value;
+        if (tipoPobActual.includes("FAM.")) {
+            actualizarSugerenciasTrabajadores(tipoPobActual);
+        }
+    };
+
+    // Calcula la suma acumulada de los servicios seleccionados
     window.calcularCostoDinamico = () => {
         const tipoPob = document.getElementById('f-tipo_pob').value;
-        // Si no es población general, el costo se rige por su respectiva regla de exención ($0)
         if (tipoPob !== "POBLACION EN GENERAL") return;
 
         const tiposSeleccionados = obtenerSeleccionAtencion();
         let costoTotal = 0;
 
-        // Si no hay nada seleccionado, dejamos un costo base por defecto de consulta general
         if (tiposSeleccionados.length === 0) {
             document.getElementById('f-costo').value = 30;
             return;
@@ -591,8 +650,9 @@ table {
                 costoTotal += 30;
             } else if (["CERTIFICADO MEDICO", "CERTIFICADO DE DISCAPACIDAD", "CURACION"].includes(servicio)) {
                 costoTotal += 50;
+            } else if (servicio === "DENTAL") {
+                costoTotal += 0; 
             } else {
-                // Costo base por defecto para otros servicios individuales no especificados
                 costoTotal += 30; 
             }
         });
@@ -600,7 +660,6 @@ table {
         document.getElementById('f-costo').value = costoTotal;
     };
 
-    // CORRECCIÓN: El contenedor del folio se fuerza a estar siempre visible
     window.evaluarVisibilidadFolio = () => {
         const contenedorFolio = document.getElementById('contenedor-folio-manual');
         if (contenedorFolio) {
@@ -615,8 +674,8 @@ table {
         
         if (categoria) {
             const opciones = categoria === "CONSULTA" 
-                ? ["MEDICA", "OCULISTA", "DENTAL", "GLUCOSA", "CURACION", "CERTIFICADO MEDICO", "CERTIFICADO DE DISCAPACIDAD"]
-                : ["RADIOGRAFIAS", "ULTRASONIDOS", "ANALISIS", "ELECTROCARDIOGRAMAS", "OTROS"];
+                ? ["MEDICA", "OCULISTA", "GLUCOSA", "CURACION", "CERTIFICADO MEDICO", "CERTIFICADO DE DISCAPACIDAD"]
+                : ["RADIOGRAFIAS", "ULTRASONIDOS", "ANALISIS", "ELECTROCARDIOGRAMAS", "DENTAL", "OTROS"];
             
             opciones.forEach(opt => {
                 let label = document.createElement("label");
@@ -626,7 +685,6 @@ table {
                 check.type = "checkbox";
                 check.name = "chk_atencion";
                 check.value = opt;
-                // Dispara el recálculo dinámico de costos al cambiar la selección
                 check.onchange = () => {
                     window.calcularCostoDinamico();
                 };
@@ -815,6 +873,8 @@ table {
 
     onSnapshot(query(mainRef, orderBy("t", "desc")), (snap) => {
         dataList = snap.docs.map(d => ({id: d.id, ...d.data()}));
+        // NUEVO: Cada que Firebase detecte un cambio o nueva inserción, se re-indexan los trabajadores
+        indexarTrabajadoresExistentes(dataList);
         window.filtrarTabla(); 
     });
 
@@ -865,7 +925,6 @@ table {
             });
         }
         
-        // Forzamos el costo guardado en lugar de recalcular al editar un registro viejo
         document.getElementById('f-costo').value = registro.costo || 0;
         document.getElementById('f-lugar').value = registro.lugar || "";
         document.getElementById('f-servicio').value = registro.servicio || "";
@@ -944,7 +1003,6 @@ table {
     };
 
     document.getElementById('f-fecha-captura').value = new Date().toISOString().split('T')[0];
-    // Se fuerza la visibilidad inicial del folio al cargar el script
     window.evaluarVisibilidadFolio();
     window.validarCostoPorPoblacion();
 </script>
