@@ -5,53 +5,294 @@
     <title>Historial Maestro | DIF Dirección</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --p: #991b1b; --s: #0369a1; --g: #059669; --bg: #f1f5f9; --dark: #1e293b; --warn: #d97706; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--dark); }
+        /* ==========================================================================
+           1. VARIABLES Y CONFIGURACIÓN GLOBAL
+           ========================================================================== */
+        :root { 
+            --p: #991b1b; 
+            --s: #0369a1; 
+            --g: #059669; 
+            --bg: #f1f5f9; 
+            --dark: #1e293b; 
+            --warn: #d97706; 
+            --border: #e2e8f0;
+        }
         
-        /* DASHBOARD PRINCIPAL */
-        .dash { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .card { background: white; padding: 20px; border-radius: 15px; border-top: 5px solid var(--p); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            padding: 20px; 
+            color: var(--dark); 
+            font-size: 13px; 
+        }
+
+        /* ==========================================================================
+           2. DASHBOARD Y RESÚMENES (LAYOUT)
+           ========================================================================== */
+        .dash { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+        
+        .card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 15px; 
+            border-top: 5px solid var(--p); 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+        }
+        
         .card.money { border-top-color: var(--g); }
         .card.valid { border-top-color: var(--s); }
-        .card h3 { margin: 0; font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-        .monto { font-size: 24px; font-weight: 800; display: block; margin: 8px 0; }
-
-        /* RESUMEN DETALLADO */
-        .resumen-detallado { background: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        .resumen-item h4 { font-size: 11px; color: var(--s); text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px; }
-        .resumen-list { list-style: none; padding: 0; margin: 0; font-size: 12px; }
-        .resumen-list li { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #eee; }
-
-        /* FILTROS */
-        .filtros { background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 25px; align-items: flex-end; }
-        .filtros select, .filtros input { padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; color: var(--dark); font-size: 13px; }
-        .filtros label { display: block; font-size: 10px; color: #64748b; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
-
-        /* TABLA */
-        .tabla-box { background: white; border-radius: 15px; overflow-x: auto; border: 1px solid #e2e8f0; }
-        table { width: 100%; border-collapse: collapse; min-width: 1100px; }
-        th { background: #f8fafc; padding: 15px; text-align: left; color: #64748b; font-size: 10px; text-transform: uppercase; border-bottom: 2px solid #edf2f7; }
-        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 13px; vertical-align: top; }
         
-        .badge { padding: 4px 8px; border-radius: 5px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
+        .card h3 { 
+            margin: 0; 
+            font-size: 10px; 
+            color: #64748b; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
+        
+        .monto { 
+            font-size: 24px; 
+            font-weight: 800; 
+            display: block; 
+            margin: 8px 0; 
+        }
+
+        .resumen-detallado { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 15px; 
+            margin-bottom: 25px; 
+            border: 1px solid var(--border); 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 20px; 
+        }
+        
+        .resumen-item h4 { 
+            font-size: 11px; 
+            color: var(--s); 
+            text-transform: uppercase; 
+            margin-bottom: 10px; 
+            border-bottom: 2px solid #f1f5f9; 
+            padding-bottom: 5px; 
+        }
+        
+        .resumen-list { 
+            list-style: none; 
+            padding: 0; 
+            margin: 0; 
+            font-size: 12px; 
+        }
+        
+        .resumen-list li { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 4px 0; 
+            border-bottom: 1px dashed #eee; 
+        }
+
+        /* ==========================================================================
+           3. FORMULARIOS Y FILTROS
+           ========================================================================== */
+        fieldset { 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            background: #ffffff; 
+        }
+        
+        legend { 
+            font-size: 11px; 
+            font-weight: 800; 
+            color: var(--s); 
+            padding: 0 10px; 
+            text-transform: uppercase; 
+        }
+        
+        .grid-form { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px; 
+        }
+        
+        .f-group { 
+            display: flex; 
+            flex-direction: column; 
+        }
+        
+        .f-group label, .filtros label { 
+            display: block; 
+            font-size: 10px; 
+            color: #64748b; 
+            margin-bottom: 5px; 
+            text-transform: uppercase; 
+            font-weight: bold; 
+        }
+        
+        .f-group input, .f-group select, .filtros select, .filtros input { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #cbd5e1; 
+            border-radius: 8px; 
+            font-size: 13px; 
+            outline: none; 
+            background: white;
+            color: var(--dark);
+            box-sizing: border-box;
+            transition: all 0.3s;
+        }
+
+        .f-group input:focus, .f-group select:focus, .filtros select:focus, .filtros input:focus {
+            border-color: var(--s);
+            box-shadow: 0 0 0 2px rgba(3, 105, 161, 0.1);
+        }
+
+        .filtros { 
+            background: #f8fafc; 
+            padding: 20px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border); 
+            display: flex; 
+            gap: 15px; 
+            flex-wrap: wrap; 
+            margin-bottom: 25px; 
+            align-items: flex-end; 
+        }
+        
+        .filtros > div { 
+            flex: 1; 
+            min-width: 150px; 
+        }
+
+        /* ==========================================================================
+           4. COMPONENTE TABLA DE DATOS (MÁS COMPACTA)
+           ========================================================================== */
+        .tabla-box { 
+            background: white; 
+            border-radius: 15px; 
+            overflow-x: auto; 
+            border: 1px solid var(--border); 
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            min-width: 1200px; 
+            font-size: 11px; 
+        }
+        
+        th { 
+            background: #f8fafc; 
+            padding: 10px 12px; 
+            text-align: left; 
+            color: #64748b; 
+            font-size: 10px; 
+            text-transform: uppercase; 
+            border-bottom: 2px solid #edf2f7; 
+        }
+        
+        td { 
+            padding: 10px 12px; 
+            border-bottom: 1px solid #f1f5f9; 
+            vertical-align: top; 
+            line-height: 1.4;
+        }
+        
+        .sem-label { 
+            background: #f1f5f9; 
+            color: #475569;
+            font-weight: 800; 
+            padding: 8px 15px; 
+            font-size: 11px; 
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Componentes internos de la tabla */
+        .badge { 
+            padding: 3px 6px; 
+            border-radius: 4px; 
+            font-size: 9px; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            display: inline-block;
+        }
         .b-pend { background: #fff7ed; color: #c2410c; }
         .b-ok { background: #f0fdf4; color: #166534; }
         
-        .sem-label { background: #cbd5e1; font-weight: 900; padding: 10px 20px; font-size: 12px; }
+        .badge-folio {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 10px;
+        }
 
-        fieldset { border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; background: #ffffff; }
-        legend { font-size: 11px; font-weight: 800; color: var(--s); padding: 0 10px; text-transform: uppercase; }
-        .grid-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .f-group label { display: block; font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
-        .f-group input, .f-group select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; }
+        /* ==========================================================================
+           5. BOTONES Y ACCIONES
+           ========================================================================== */
+        .btn-nav { 
+            background: var(--s); 
+            color: white; 
+            border: none; 
+            padding: 10px 18px; 
+            border-radius: 8px; 
+            font-size: 11px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .btn-nav:hover { opacity: 0.9; transform: translateY(-1px); }
 
-        .btn-nav { background: var(--s); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        /* ==========================================================================
+           6. RESPONSIVE Y CONFIGURACIÓN DE IMPRESIÓN
+           ========================================================================== */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            
+            div[style*="justify-content: space-between"] {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+            
+            #contenedor-flotante {
+                position: static !important;
+                margin-bottom: 15px;
+                flex-direction: row !important;
+                justify-content: center;
+                width: 100%;
+            }
+            
+            .grid-form {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .filtros {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            .filtros > div { width: 100%; }
+        }
+
+        @media print { .no-print { display: none !important; } }
     </style>
 </head>
 <body>
 
-    <!-- BARRA DE BIENVENIDA -->
-    <div style="background: #ffffff; padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <div class="no-print" style="background: #ffffff; padding: 15px 25px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
         <div id="usuario-saludo" style="font-weight: bold; color: #1e293b; font-size: 15px;">
             <i class="fas fa-user-shield" style="color: var(--s);"></i> Bienvenido Admin: <span id="nombre-admin-span" style="color: #3b82f6; text-transform: lowercase;">...</span>
         </div>
@@ -60,8 +301,7 @@
         </button>
     </div>
 
-    <!-- BOTONES FLOTANTES -->
-    <div id="contenedor-flotante" style="position: fixed; top: 80px; right: 20px; z-index: 9999; display: none; flex-direction: column; gap: 12px; align-items: flex-end;">
+    <div id="contenedor-flotante" class="no-print" style="position: fixed; top: 80px; right: 20px; z-index: 9999; display: none; flex-direction: column; gap: 12px; align-items: flex-end;">
         <button onclick="window.open('farmacia.html', '_blank')" class="btn-nav" style="background: #059669; border-radius: 50px; border: 2px solid white;"><i class="fas fa-pills"></i> FARMACIA</button>
         <button onclick="window.open('admin_global.html', '_blank')" class="btn-nav" style="background: #1e40af; border-radius: 50px; border: 2px solid white;"><i class="fas fa-chart-line"></i> DASHBOARD</button>
     </div>
@@ -70,7 +310,7 @@
 
     <div class="dash">
         <div class="card money"><h3><i class="fas fa-cash-register"></i> Ingreso en Periodo</h3><span class="monto" id="t-caja">$0.00</span></div>
-        <div class="card valid"><h3><i class="fas fa-check-double"></i> Ingreso Validado</h3><span class="monto" id="t-validado">$0.00</span></div>
+        <div class="card valid ="><h3><i class="fas fa-check-double"></i> Ingreso Validado</h3><span class="monto" id="t-validado">$0.00</span></div>
         <div class="card"><h3><i class="fas fa-users"></i> Total Atenciones</h3><span class="monto" id="t-pacientes">0</span></div>
     </div>
 
@@ -81,7 +321,7 @@
         <div class="resumen-item"><h4><i class="fas fa-hand-holding-usd"></i> Detalle Económico</h4><ul class="resumen-list" id="res-economico"></ul></div>
     </div>
 
-    <form id="form-registro">
+    <form id="form-registro" class="no-print">
         <fieldset>
             <legend><i class="fas fa-user"></i> Datos del Beneficiario</legend>
             <div class="grid-form">
@@ -158,7 +398,8 @@
         <table>
             <thead>
                 <tr>
-                    <th>Fecha / Folio</th>
+                    <th>Fecha</th>
+                    <th>Folio</th>
                     <th>Paciente / Población</th>
                     <th>Edad</th>
                     <th>Servicio / Estudio</th>
@@ -178,14 +419,15 @@
     const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
     const db = getFirestore(initializeApp(firebaseConfig));
 
+    let DB_RAW = []; 
     let esAdmin = false;
     const usuarioActual = (sessionStorage.getItem("nombre_usuario") || "").toLowerCase().trim();
     
+    // --- INICIALIZACIÓN ---
     function verificarPrivilegios() {
         const contenedorFlotante = document.getElementById('contenedor-flotante');
         document.getElementById('nombre-admin-span').innerText = usuarioActual || "Invitado";
-        const adminsPermitidos = ["director.medico", "ronaldo.bencomo"];
-        esAdmin = adminsPermitidos.includes(usuarioActual);
+        esAdmin = ["director.medico", "ronaldo.bencomo"].includes(usuarioActual);
         if (esAdmin) contenedorFlotante.style.display = "flex";
         else {
             const btnG = document.getElementById('btn-guardar-maestro');
@@ -194,183 +436,164 @@
     }
     verificarPrivilegios();
 
-    // --- 1. LÓGICA DE MAPEADO DE SERVICIOS ---
+    // --- LÓGICA DE INTERFAZ Y FORMULARIO ---
     window.actualizarOpciones = () => {
         const cat = document.getElementById('reg-categoria').value;
         const sel = document.getElementById('reg-estudio');
         sel.innerHTML = '<option value="">-- SELECCIONE --</option>';
-        
         const ops = { 
             'GABINETE': ["MASTOGRAFÍA", "TOMOGRAFÍA", "ELECTROCARDIOGRAMA", "RESONANCIAS MAGNÉTICAS", "ULTRASONIDOS", "RAYOS X", "ESTUDIO DE LABORATORIO CLÍNICO"], 
-            'VINCULACION': ["SERVICIOS MÉDICOS DE 2° NIVEL", "SERVICIOS MÉDICOS DE 3° NIVEL"] 
+            'VINCULACION': ["SERVICIOS MÉBICOS DE 2° NIVEL", "SERVICIOS MÉDICOS DE 3° NIVEL"] 
         };
-
         if (ops[cat]) {
             sel.disabled = false; sel.style.backgroundColor = "#fff";
             ops[cat].forEach(t => { let o = document.createElement('option'); o.value=t; o.innerText=t; sel.appendChild(o); });
         } else { sel.disabled = true; sel.style.backgroundColor = "#f1f5f9"; }
     };
 
-    // --- 2. LÓGICA DE SUGERENCIAS INTELIGENTES Y DATALIST ---
     document.getElementById('reg-estudio').addEventListener('change', function() {
         const servicio = this.value;
         const dataListDep = document.getElementById('lista-dependencias');
-        const inputDep = document.getElementById('reg-dependencia');
-        
         dataListDep.innerHTML = ""; 
-        inputDep.value = ""; 
-
-        const mapeoGabinete = {
-            "MASTOGRAFÍA": ["CRUZ ROJA"],
-            "TOMOGRAFÍA": ["TOMOGRAFIA DE LOS TUXTLAS", "CRUZ ROJA", "SALUD DIGNA", "COVADONGA"],
-            "ELECTROCARDIOGRAMA": ["CRUZ ROJA"],
-            "RESONANCIAS MAGNÉTICAS": ["TOMOGRAFIA DE LOS TUXTLA", "COVADONGA", "SALUD DIGNA"],
-            "ULTRASONIDOS": ["CRUZ ROJA"],
-            "RAYOS X": ["CRUZ ROJA"],
-            "ESTUDIO DE LABORATORIO CLÍNICO": ["LABO-MEDIC", "CRUZ ROJA"]
-        };
-
-        const mapeoVinculacion = {
-            "SERVICIOS MÉDICOS DE 2° NIVEL": ["IMSS", "ISSSTE", "HOSP. DR. BERNARDO PEÑA"],
-            "SERVICIOS MÉDICOS DE 3° NIVEL": ["CECAN (CENTRO DE CANCEROLOGÍA)", "CAEV (CENTRO DE ALTA ESPECIALIDAD DE VERACRUZ)"]
-        };
-
-        let sugerencias = mapeoGabinete[servicio] || mapeoVinculacion[servicio] || [];
-
-        sugerencias.forEach(dep => {
-            let opt = document.createElement('option');
-            opt.value = dep;
-            dataListDep.appendChild(opt);
-        });
+        const mapa = { "MASTOGRAFÍA": ["CRUZ ROJA"], "TOMOGRAFÍA": ["TOMOGRAFIA DE LOS TUXTLAS", "CRUZ ROJA", "SALUD DIGNA", "COVADONGA"], "ELECTROCARDIOGRAMA": ["CRUZ ROJA"], "RESONANCIAS MAGNÉTICAS": ["TOMOGRAFIA DE LOS TUXTLA", "COVADONGA", "SALUD DIGNA"], "ULTRASONIDOS": ["CRUZ ROJA"], "RAYOS X": ["CRUZ ROJA"], "ESTUDIO DE LABORATORIO CLÍNICO": ["LABO-MEDIC", "CRUZ ROJA"], "SERVICIOS MÉDICOS DE 2° NIVEL": ["IMSS", "ISSSTE", "HOSP. DR. BERNARDO PEÑA"], "SERVICIOS MÉDICOS DE 3° NIVEL": ["CECAN (CENTRO DE CANCEROLOGÍA)", "CAEV (CENTRO DE ALTA ESPECIALIDAD DE VERACRUZ)"] };
+        (mapa[servicio] || []).forEach(dep => { let opt = document.createElement('option'); opt.value = dep; dataListDep.appendChild(opt); });
     });
 
-    // --- LÓGICA DE TABLA Y FIREBASE ---
-    let DB_RAW = [];
-    const getW = (dStr) => {
-        const p = dStr.split('-');
-        const d = new Date(p[0], p[1]-1, p[2]);
-        return Math.ceil((d.getDate() + new Date(d.getFullYear(), d.getMonth(), 1).getDay()) / 7);
-    };
-
+    // --- RENDERIZADO OPTIMIZADO ---
     onSnapshot(query(collection(db, "area_medica_v2"), orderBy("t", "desc")), (snap) => {
         DB_RAW = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         run();
     });
 
+    // --- FUNCIÓN CORREGIDA PARA CALCULAR LA SEMANA SIN DESFASES ---
+    const getW = (dStr) => {
+        const p = dStr.split('-');
+        const anio = parseInt(p[0]);
+        const mes = parseInt(p[1]) - 1;
+        const dia = parseInt(p[2]);
+        // Usamos UTC para evitar que la zona horaria local altere el día
+        const d = new Date(Date.UTC(anio, mes, dia));
+        const primerDiaMes = new Date(Date.UTC(anio, mes, 1)).getUTCDay();
+        return Math.ceil((d.getUTCDate() + primerDiaMes) / 7);
+    };
+
+    // --- LÓGICA DE FILTRADO Y CONTEO OPERATIVO ---
     window.run = () => {
         const sY = parseInt(document.getElementById('f-year').value);
         const sM = document.getElementById('f-month').value;
         const sW = document.getElementById('f-week').value;
-        const sS = document.getElementById('f-search').value.toLowerCase();
+        const sS = document.getElementById('f-search').value.toLowerCase().trim();
         const tbody = document.getElementById('tbody');
-        tbody.innerHTML = "";
 
-        let stats = { caja: 0, valid: 0, total: 0, poblacion: { "Niños": 0, "Adultos": 0, "Adultos Mayores": 0 }, cats: {}, servs: {}, econ: { "Con Cuota": 0, "Gratuitos": 0 } };
+        // Inicializamos los acumuladores limpios para el periodo seleccionado
+        let stats = { 
+            caja: 0, 
+            valid: 0, 
+            total: 0, 
+            poblacion: { "Niños": 0, "Adultos": 0, "Adultos Mayores": 0 }, 
+            cats: {}, 
+            servs: {}, 
+            econ: { "Con Cuota": 0, "Gratuitos": 0 } 
+        };
+        
         const mesesNombres = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
         const grupos = {};
 
         DB_RAW.forEach(p => {
             const fStr = p.fecha_cap || "";
             if(!fStr) return;
+            
+            // Extracción directa de texto para evitar errores de zona horaria local
             const parts = fStr.split('-');
-            const dObj = new Date(parts[0], parts[1]-1, parts[2]);
-            const mNum = dObj.getMonth();
+            const regYear = parseInt(parts[0]);
+            const regMonth = parseInt(parts[1]) - 1; // Base 0 para alinearse con selectores
             const wNum = getW(fStr);
 
-            if(dObj.getFullYear() === sY && (sM === "all" || mNum === parseInt(sM)) && (sW === "all" || wNum.toString() === sW) && (p.nombre||"").toLowerCase().includes(sS)) {
-                const titulo = (sM === "all") ? mesesNombres[mNum] : `SEMANA ${wNum}`;
+            // Validamos contra los filtros seleccionados en la interfaz
+            const matchesYear = (regYear === sY);
+            const matchesMonth = (sM === "all" || regMonth === parseInt(sM));
+            const matchesWeek = (sW === "all" || wNum.toString() === sW);
+            const matchesSearch = ((p.nombre || "").toLowerCase().includes(sS) || (p.folio_str || "").toLowerCase().includes(sS));
+
+            if (matchesYear && matchesMonth && matchesWeek && matchesSearch) {
+                // Definir título del separador visual en la tabla
+                const titulo = (sM === "all") ? mesesNombres[regMonth] : `SEMANA ${wNum}`;
                 if(!grupos[titulo]) grupos[titulo] = [];
                 grupos[titulo].push(p);
 
+                // --- PROCESAMIENTO ECONÓMICO (Aquí se realiza la magia del periodo) ---
                 const costo = parseFloat(p.costo || 0);
-                stats.caja += costo; stats.total++;
-                if(p.validado_dir === "SI") stats.valid += costo;
+                stats.caja += costo; 
+                stats.total++;
+                
+                if(p.validado_dir === "SI") {
+                    stats.valid += costo;
+                }
+
+                // --- ESTADÍSTICAS COMPLEMENTARIAS ---
                 const edad = parseInt(p.edad || 0);
                 if(edad > 0) {
-                    if(edad <= 12) stats.poblacion["Niños"]++; else if(edad < 60) stats.poblacion["Adultos"]++; else stats.poblacion["Adultos Mayores"]++;
+                    if(edad <= 12) stats.poblacion["Niños"]++; 
+                    else if(edad < 60) stats.poblacion["Adultos"]++; 
+                    else stats.poblacion["Adultos Mayores"]++;
                 }
-                const catKey = p.consulta_estudios || "Otros";
-                stats.cats[catKey] = (stats.cats[catKey] || 0) + 1;
+                
+                stats.cats[p.consulta_estudios || "Otros"] = (stats.cats[p.consulta_estudios || "Otros"] || 0) + 1;
                 stats.servs[p.estudio_servicio || "Gral"] = (stats.servs[p.estudio_servicio || "Gral"] || 0) + 1;
                 costo > 0 ? stats.econ["Con Cuota"]++ : stats.econ["Gratuitos"]++;
             }
         });
 
-        Object.keys(grupos).forEach(nombreGrupo => {
-            tbody.innerHTML += `<tr><td colspan="7" class="sem-label">${nombreGrupo}</td></tr>`;
-            grupos[nombreGrupo].forEach(p => {
+        // Generar las filas de la tabla de manera reactiva
+        tbody.innerHTML = Object.keys(grupos).map(nombreGrupo => {
+            let filas = `<tr><td colspan="8" class="sem-label">${nombreGrupo}</td></tr>`;
+            filas += grupos[nombreGrupo].map(p => {
                 const isV = p.validado_dir === "SI";
-                tbody.innerHTML += `
-                    <tr>
-                        <td><b>${p.fecha_cap}</b><br><small>${p.folio || ''}</small></td>
-                        <td><b style="text-transform:uppercase">${p.nombre}</b><br><span style="font-size:10px;">${p.tipo_poblacion || 'GENERAL'}</span></td>
-                        <td><small>${p.edad || '-'}</small></td>
-                        <td><b>${p.estudio_servicio || 'SERVICIO'}</b></td>
-                        <td><span class="badge ${isV?'b-ok':'b-pend'}">${isV?'VALIDADO':'PENDIENTE'}</span></td>
-                        <td style="font-weight:800;">$${parseFloat(p.costo||0).toFixed(2)}</td>
-                        <td>
-                            <div style="display:flex; gap:10px;">
-                                ${esAdmin ? `
-                                    ${isV ? '<span style="color:var(--g)"><i class="fas fa-check-circle"></i></span>' : `<button onclick="firmarEntrega('${p.id}')" style="color:var(--s); border:none; background:none; cursor:pointer;"><i class="fas fa-pen-fancy"></i></button>`}
-                                    <button onclick="prepararEdicion('${p.id}')" style="color:var(--warn); border:none; background:none; cursor:pointer;"><i class="fas fa-edit"></i></button>
-                                    <button onclick="borrarRegistro('${p.id}')" style="color:var(--p); border:none; background:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
-                                ` : '<i class="fas fa-lock" style="color:#cbd5e1"></i>'}
-                            </div>
-                        </td>
-                    </tr>`;
-            });
-        });
+                return `<tr>
+                    <td><b>${p.fecha_cap}</b></td>
+                    <td><span class="badge-folio">${p.folio_str || 'S/F'}</span></td>
+                    <td><span style="font-weight: 600; color: #0f172a; text-transform:uppercase;">${p.nombre}</span><br><span style="font-size:10px; color:#64748b;">${p.tipo_poblacion || 'GENERAL'}</span></td>
+                    <td><small>${p.edad || '-'}</small></td>
+                    <td><b>${p.estudio_servicio || 'SERVICIO'}</b></td>
+                    <td><span class="badge ${isV?'b-ok':'b-pend'}">${isV?'VALIDADO':'PENDIENTE'}</span></td>
+                    <td style="font-weight:800;">$${parseFloat(p.costo||0).toFixed(2)}</td>
+                    <td>
+                        <div style="display:flex; gap:10px;">
+                            ${esAdmin ? `
+                                ${isV ? '<span style="color:var(--g)"><i class="fas fa-check-circle"></i></span>' : `<button onclick="firmarEntrega('${p.id}')" style="color:var(--s); border:none; background:none; cursor:pointer;"><i class="fas fa-pen-fancy"></i></button>`}
+                                <button onclick="prepararEdicion('${p.id}')" style="color:var(--warn); border:none; background:none; cursor:pointer;"><i class="fas fa-edit"></i></button>
+                                <button onclick="borrarRegistro('${p.id}')" style="color:var(--p); border:none; background:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
+                            ` : '<i class="fas fa-lock" style="color:#cbd5e1"></i>'}
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+            return filas;
+        }).join('');
 
-        document.getElementById('t-caja').innerText = `$${stats.caja.toLocaleString()}`;
-        document.getElementById('t-validado').innerText = `$${stats.valid.toLocaleString()}`;
+        // Inyección de los totales actualizados dinámicamente en los Cards superiores
+        document.getElementById('t-caja').innerText = `$${stats.caja.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('t-validado').innerText = `$${stats.valid.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         document.getElementById('t-pacientes').innerText = stats.total;
+        
         renderList('res-poblacion', stats.poblacion);
         renderList('res-categorias', stats.cats);
         renderList('res-servicios', stats.servs);
         renderList('res-economico', stats.econ);
     };
 
-    const renderList = (id, obj) => {
-        const el = document.getElementById(id); if (!el) return;
-        el.innerHTML = Object.entries(obj).map(([k, v]) => `<li><span>${k}</span><b>${v}</b></li>`).join('');
-    };
+    const renderList = (id, obj) => { const el = document.getElementById(id); if (el) el.innerHTML = Object.entries(obj).map(([k, v]) => `<li><span>${k}</span><b>${v}</b></li>`).join(''); };
 
+    // --- ACCIONES DE DATOS ---
     let editandoID = null;
     window.guardarRegistro = async () => {
         if(!esAdmin) return;
-        const datos = {
-            nombre: document.getElementById('reg-nombre').value.toUpperCase(),
-            edad: document.getElementById('reg-edad').value,
-            tipo_poblacion: document.getElementById('reg-poblacion').value,
-            procedencia: document.getElementById('reg-procedencia').value.toUpperCase(),
-            consulta_estudios: document.getElementById('reg-categoria').value,
-            estudio_servicio: document.getElementById('reg-estudio').value,
-            dependencia: document.getElementById('reg-dependencia').value.toUpperCase(),
-            costo: parseFloat(document.getElementById('reg-costo').value || 0),
-            fecha_cap: new Date().toISOString().split('T')[0],
-            t: new Date().toISOString()
-        };
-        try {
-            editandoID ? await updateDoc(doc(db, "area_medica_v2", editandoID), datos) : await addDoc(collection(db, "area_medica_v2"), { ...datos, folio: "HM-"+Math.floor(Math.random()*10000), validado_dir: "NO" });
-            alert("Listo"); document.getElementById('form-registro').reset(); editandoID = null;
-        } catch (e) { alert(e.message); }
+        const datos = { nombre: document.getElementById('reg-nombre').value.toUpperCase(), edad: document.getElementById('reg-edad').value, tipo_poblacion: document.getElementById('reg-poblacion').value, procedencia: document.getElementById('reg-procedencia').value.toUpperCase(), consulta_estudios: document.getElementById('reg-categoria').value, estudio_servicio: document.getElementById('reg-estudio').value, dependencia: document.getElementById('reg-dependencia').value.toUpperCase(), costo: parseFloat(document.getElementById('reg-costo').value || 0), fecha_cap: new Date().toISOString().split('T')[0], t: new Date().toISOString() };
+        try { editandoID ? await updateDoc(doc(db, "area_medica_v2", editandoID), datos) : await addDoc(collection(db, "area_medica_v2"), { ...datos, folio: "HM-"+Math.floor(Math.random()*10000), validado_dir: "NO" }); alert("Listo"); document.getElementById('form-registro').reset(); editandoID = null; } catch (e) { alert(e.message); }
     };
-
     window.firmarEntrega = async (id) => { if(prompt("PIN:") === "1234") await updateDoc(doc(db, "area_medica_v2", id), { validado_dir: "SI" }); };
     window.borrarRegistro = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "area_medica_v2", id)); };
-    
-    window.prepararEdicion = (id) => {
-        const p = DB_RAW.find(i => i.id === id); if(!p) return;
-        document.getElementById('reg-nombre').value = p.nombre;
-        document.getElementById('reg-categoria').value = p.consulta_estudios;
-        actualizarOpciones();
-        document.getElementById('reg-estudio').value = p.estudio_servicio;
-        document.getElementById('reg-dependencia').value = p.dependencia || "";
-        document.getElementById('reg-costo').value = p.costo;
-        document.getElementById('reg-edad').value = p.edad;
-        editandoID = id; window.scrollTo(0,0);
-    };
-
+    window.prepararEdicion = (id) => { const p = DB_RAW.find(i => i.id === id); if(!p) return; document.getElementById('reg-nombre').value = p.nombre; document.getElementById('reg-categoria').value = p.consulta_estudios; actualizarOpciones(); document.getElementById('reg-estudio').value = p.estudio_servicio; document.getElementById('reg-dependencia').value = p.dependencia || ""; document.getElementById('reg-costo').value = p.costo; document.getElementById('reg-edad').value = p.edad; editandoID = id; window.scrollTo(0,0); };
     window.cerrarSesion = () => { sessionStorage.clear(); window.location.href = "index.html"; };
     
     const sy = document.getElementById('f-year');
