@@ -392,7 +392,19 @@ table {
         </div>
     </div>
 </fieldset>
-
+        <fieldset style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px;">
+            <legend style="padding: 0 15px; font-weight: 800; color: #64748b; font-size: 11px; text-transform: uppercase;">Información Laboral</legend>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                <div class="form-group">
+                    <label>Nombre del Trabajador Titular</label> 
+                    <input type="text" id="f-nom_trabajador" placeholder="Nombre completo del titular">
+                </div>
+                <div class="form-group">
+                    <label>Área (Adscripción Titular)</label> 
+                    <input type="text" id="f-area-titular" placeholder="Área donde labora">
+                </div>
+            </div>
+        </fieldset>
         <fieldset style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px;">
             <legend style="padding: 0 15px; font-weight: 800; color: #0891b2; font-size: 11px; text-transform: uppercase;">Detalles del Servicio</legend>
             <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
@@ -436,20 +448,6 @@ table {
                         </div>
                         <input type="text" id="f-dependencia" value="DIF MUNICIPAL" style="margin-top: 8px; display: none; width: 100%;">
                     </div>
-                </div>
-            </div>
-        </fieldset>
-
-        <fieldset style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px;">
-            <legend style="padding: 0 15px; font-weight: 800; color: #64748b; font-size: 11px; text-transform: uppercase;">Información Laboral</legend>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                <div class="form-group">
-                    <label>Nombre del Trabajador Titular</label> 
-                    <input type="text" id="f-nom_trabajador" placeholder="Nombre completo del titular">
-                </div>
-                <div class="form-group">
-                    <label>Área (Adscripción Titular)</label> 
-                    <input type="text" id="f-area-titular" placeholder="Área donde labora">
                 </div>
             </div>
         </fieldset>
@@ -542,6 +540,7 @@ table {
     let paginaActual = 1;
     let registrosPorPagina = 10;
 
+    // Ajusta costos base por exenciones, respetando si la población tiene costo $0
     window.validarCostoPorPoblacion = () => {
         const tipoPob = document.getElementById('f-tipo_pob').value;
         const campoCosto = document.getElementById('f-costo');
@@ -551,7 +550,8 @@ table {
         if (tipoPob === "POBLACION EN GENERAL") {
             campoCosto.disabled = false;
             campoCosto.style.backgroundColor = "#fff";
-            if(campoCosto.value == 0 || campoCosto.value === "") campoCosto.value = 30;
+            // Ejecuta el recálculo dinámico basado en los servicios seleccionados
+            window.calcularCostoDinamico();
             [campoNombreTitular, campoAreaTitular].forEach(el => {
                 el.value = "N/A"; el.disabled = true; el.style.backgroundColor = "#f1f5f9";
             });
@@ -571,19 +571,40 @@ table {
         }
     };
 
-    window.evaluarVisibilidadFolio = () => {
-        const categoria = document.getElementById('f-consulta_estudios').value;
+    // NUEVA FUNCIÓN: Calcula la suma acumulada de los servicios seleccionados
+    window.calcularCostoDinamico = () => {
+        const tipoPob = document.getElementById('f-tipo_pob').value;
+        // Si no es población general, el costo se rige por su respectiva regla de exención ($0)
+        if (tipoPob !== "POBLACION EN GENERAL") return;
+
         const tiposSeleccionados = obtenerSeleccionAtencion();
+        let costoTotal = 0;
+
+        // Si no hay nada seleccionado, dejamos un costo base por defecto de consulta general
+        if (tiposSeleccionados.length === 0) {
+            document.getElementById('f-costo').value = 30;
+            return;
+        }
+
+        tiposSeleccionados.forEach(servicio => {
+            if (["OCULISTA", "GLUCOSA", "MEDICA", "INYECCION"].includes(servicio)) {
+                costoTotal += 30;
+            } else if (["CERTIFICADO MEDICO", "CERTIFICADO DE DISCAPACIDAD", "CURACION"].includes(servicio)) {
+                costoTotal += 50;
+            } else {
+                // Costo base por defecto para otros servicios individuales no especificados
+                costoTotal += 30; 
+            }
+        });
+
+        document.getElementById('f-costo').value = costoTotal;
+    };
+
+    // CORRECCIÓN: El contenedor del folio se fuerza a estar siempre visible
+    window.evaluarVisibilidadFolio = () => {
         const contenedorFolio = document.getElementById('contenedor-folio-manual');
-
-        const cumpleRequisitos = (categoria === "CONSULTA") && 
-                                 (tiposSeleccionados.includes("MEDICA") || tiposSeleccionados.includes("OCULISTA"));
-
-        if (cumpleRequisitos) {
+        if (contenedorFolio) {
             contenedorFolio.style.display = "flex";
-        } else {
-            contenedorFolio.style.display = "none";
-            document.getElementById('f-folio-manual').value = ""; 
         }
     };
 
@@ -605,7 +626,10 @@ table {
                 check.type = "checkbox";
                 check.name = "chk_atencion";
                 check.value = opt;
-                check.onchange = window.evaluarVisibilidadFolio;
+                // Dispara el recálculo dinámico de costos al cambiar la selección
+                check.onchange = () => {
+                    window.calcularCostoDinamico();
+                };
                 
                 label.appendChild(check);
                 label.appendChild(document.createTextNode(" " + opt));
@@ -647,7 +671,7 @@ table {
                 fecha_cap: document.getElementById('f-fecha-captura').value,
                 nombre: nombre.toUpperCase(),
                 edad: document.getElementById('f-edad').value,
-                genero: genero, // Se guarda en Firestore
+                genero: genero, 
                 tipo_pob: document.getElementById('f-tipo_pob').value,
                 area_beneficiario: document.getElementById('f-area-beneficiario').value.toUpperCase(),
                 area_titular: document.getElementById('f-area-titular').value.toUpperCase(),
@@ -668,7 +692,6 @@ table {
         } catch (e) { alert("Error: " + e.message); }
     };
 
-// Función modificada para mostrar TODOS los campos en la tabla
     const renderizarTabla = () => {
         const totalRegistros = currentFilteredList.length;
         const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
@@ -679,7 +702,6 @@ table {
         const indiceFinal = Math.min(indiceInicial + registrosPorPagina, totalRegistros);
         const registrosPaginaActual = currentFilteredList.slice(indiceInicial, indiceFinal);
 
-        // Inyectar HTML en el cuerpo de la tabla con las nuevas columnas
         document.getElementById('table-body').innerHTML = registrosPaginaActual.map(d => {
             const txtAtencion = Array.isArray(d.tipo_estudio) ? d.tipo_estudio.join(', ') : d.tipo_estudio;
             const BadgeFolioTabla = d.folio_str ? `<span class="badge-folio">${d.folio_str}</span>` : `<span style="color:#94a3b8">-</span>`;
@@ -709,13 +731,13 @@ table {
             `;
         }).join('');
 
-        // Actualizar barra e indicadores informativos de paginación
         document.getElementById('info-paginacion').innerText = totalRegistros > 0 
             ? `Mostrando ${indiceInicial + 1} - ${indiceFinal} de ${totalRegistros} registros`
             : `Mostrando 0 - 0 de 0 registros`;
 
         construirControlesPaginacion(totalPaginas);
     };
+
     const construirControlesPaginacion = (totalPaginas) => {
         const contenedor = document.getElementById('controles-paginacion');
         contenedor.innerHTML = '';
@@ -801,7 +823,7 @@ table {
         document.getElementById('f-folio-manual').value = "";
         document.getElementById('f-nombre').value = "";
         document.getElementById('f-edad').value = "";
-        document.getElementById('f-genero').value = ""; // Limpieza del nuevo campo
+        document.getElementById('f-genero').value = ""; 
         document.getElementById('f-lugar').value = "";
         document.getElementById('f-servicio').value = "";
         document.getElementById('f-nom_trabajador').value = "";
@@ -827,13 +849,10 @@ table {
         document.getElementById('f-fecha-captura').value = registro.fecha_cap || "";
         document.getElementById('f-nombre').value = registro.nombre || "";
         document.getElementById('f-edad').value = registro.edad || "";
-        document.getElementById('f-genero').value = registro.genero || ""; // Carga el género al editar
+        document.getElementById('f-genero').value = registro.genero || ""; 
         document.getElementById('f-tipo_pob').value = registro.tipo_pob || "POBLACION EN GENERAL";
         
         window.validarCostoPorPoblacion();
-        
-        document.getElementById('f-lugar').value = registro.lugar || "";
-        document.getElementById('f-costo').value = registro.costo || 0;
         
         document.getElementById('f-consulta_estudios').value = registro.consulta_estudios || "";
         window.gestionarCategorias(); 
@@ -846,6 +865,9 @@ table {
             });
         }
         
+        // Forzamos el costo guardado en lugar de recalcular al editar un registro viejo
+        document.getElementById('f-costo').value = registro.costo || 0;
+        document.getElementById('f-lugar').value = registro.lugar || "";
         document.getElementById('f-servicio').value = registro.servicio || "";
         document.getElementById('f-nom_trabajador').value = registro.nom_trabajador || "";
         document.getElementById('f-area-titular').value = registro.area_titular || "";
@@ -899,7 +921,7 @@ table {
                 fecha_cap: document.getElementById('f-fecha-captura').value,
                 nombre: nombre.toUpperCase(),
                 edad: document.getElementById('f-edad').value,
-                genero: genero, // Actualiza el género en Firestore
+                genero: genero, 
                 tipo_pob: document.getElementById('f-tipo_pob').value,
                 lugar: document.getElementById('f-lugar').value.toUpperCase(),
                 costo: parseFloat(document.getElementById('f-costo').value || 0),
@@ -922,6 +944,8 @@ table {
     };
 
     document.getElementById('f-fecha-captura').value = new Date().toISOString().split('T')[0];
+    // Se fuerza la visibilidad inicial del folio al cargar el script
+    window.evaluarVisibilidadFolio();
     window.validarCostoPorPoblacion();
 </script>
 </body>
