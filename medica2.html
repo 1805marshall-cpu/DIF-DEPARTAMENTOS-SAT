@@ -8,10 +8,14 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
-    
     :root { 
-        --primary: #991b1b; --primary-dark: #7f1d1d; --success: #059669; --warning: #f59e0b; --danger: #dc2626; --bg: #f8fafc; 
-        --border: #e2e8f0;
+        --primary: #991b1b; 
+        --primary-dark: #7f1d1d; 
+        --success: #059669; 
+        --warning: #f59e0b; 
+        --danger: #dc2626; 
+        --bg: #f1f5f9; 
+        --border: #cbd5e1;
         --user-green: #15803d; 
     }
 
@@ -19,7 +23,7 @@
         font-family: 'Segoe UI', system-ui, sans-serif; 
         background: var(--bg); 
         margin: 0; 
-        color: #1e293b; 
+        color: #334155; 
         font-size: 13px; 
     }
 
@@ -30,110 +34,156 @@
         display: flex; 
         justify-content: space-between; 
         align-items: center; 
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); 
     }
 
     .container { 
         max-width: 1750px; 
-        margin: 20px auto; 
-        padding: 0 20px; 
+        margin: 24px auto; 
+        padding: 0 24px; 
     }
 
     .card { 
         background: #fff; 
-        padding: 25px; 
-        border-radius: 12px; 
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
-        border: 1px solid var(--border); 
-        margin-bottom: 20px; 
+        padding: 30px; 
+        border-radius: 14px; 
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+        border: 1px solid #e2e8f0; 
+        margin-bottom: 24px; 
     }
 
     .form-grid { 
         display: flex; 
         flex-direction: column; 
-        gap: 20px; 
+        gap: 24px; 
+    }
+
+    fieldset {
+        border: 1px solid #e2e8f0; 
+        border-radius: 12px; 
+        padding: 24px;
+        background-color: #ffffff;
+        box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.01);
+    }
+
+    legend {
+        padding: 0 12px; 
+        font-weight: 800; 
+        color: #475569; 
+        font-size: 12px; 
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .form-group { 
         display: flex; 
         flex-direction: column; 
+        gap: 6px;
     }
 
     label { 
-        font-size: 9px; 
-        font-weight: bold; 
-        color: #64748b; 
+        font-size: 11px; 
+        font-weight: 700; 
+        color: #475569; 
         text-transform: uppercase; 
-        margin-bottom: 4px; 
+        letter-spacing: 0.3px;
     }
 
     input, select { 
-        padding: 9px; 
-        border: 1px solid #cbd5e1; 
-        border-radius: 6px; 
-        font-size: 12px; 
+        height: 42px;
+        padding: 0 14px; 
+        border: 1px solid var(--border); 
+        border-radius: 8px; 
+        font-size: 13px; 
+        color: #1e293b;
+        background-color: #fff;
         outline: none; 
-        transition: all 0.3s; 
+        transition: all 0.2s ease-in-out; 
+        box-sizing: border-box;
+        width: 100%;
     }
 
     input:focus, select:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 2px rgba(153, 27, 27, 0.1);
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+        background-color: #fff;
+    }
+
+    input:disabled, select:disabled {
+        background-color: #f1f5f9 !important;
+        color: #64748b;
+        cursor: not-allowed;
+        border-color: #e2e8f0;
     }
 
     /* Checkboxes dinámicos */
     .checkbox-group-container {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 8px;
-        background: #fff;
-        padding: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+        background: #f8fafc;
+        padding: 16px;
         border-radius: 8px;
-        border: 1px solid #cbd5e1;
-        min-height: 40px;
+        border: 1px solid var(--border);
+        min-height: 44px;
+        box-sizing: border-box;
     }
 
     .checkbox-item {
         display: flex;
         align-items: center;
-        gap: 6px;
-        font-size: 11px;
+        gap: 8px;
+        font-size: 12px;
         font-weight: 600;
         cursor: pointer;
         color: #334155;
+        padding: 6px 10px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        transition: all 0.2s;
+    }
+
+    .checkbox-item:hover {
+        border-color: #cbd5e1;
+        background: #f8fafc;
     }
 
     .checkbox-item input {
         cursor: pointer;
-        width: 14px;
-        height: 14px;
+        width: 16px;
+        height: 16px;
         margin: 0;
     }
 
     .btn-box { 
         display: flex; 
-        gap: 8px; 
-        margin-top: 20px; 
+        gap: 12px; 
+        margin-top: 24px; 
         flex-wrap: wrap; 
     }
 
     .btn { 
-        padding: 10px 16px; 
+        padding: 12px 24px; 
         border: none; 
-        border-radius: 6px; 
-        font-weight: bold; 
+        border-radius: 8px; 
+        font-weight: 700; 
         cursor: pointer; 
-        font-size: 10px; 
+        font-size: 11px; 
         color: white; 
         display: flex; 
         align-items: center; 
-        gap: 6px; 
+        gap: 8px; 
         text-transform: uppercase; 
-        transition: opacity 0.2s;
+        letter-spacing: 0.5px;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgb(0 0 0 / 0.05);
     }
 
     .btn:hover {
-        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
+        opacity: 0.95;
     }
 
     .btn-salir {
@@ -141,7 +191,7 @@
         color: white; 
         border: none; 
         padding: 10px 18px; 
-        border-radius: 10px;
+        border-radius: 8px;
         font-size: 11px; 
         font-weight: bold; 
         cursor: pointer; 
@@ -158,32 +208,34 @@
         box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); 
     }
 
-.table-wrap {
-    width: 100%;
-    overflow-x: auto; /* Permite scroll horizontal si los datos exceden el ancho */
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-table {
-    width: 100%;
-    border-collapse: collapse;
-    white-space: nowrap; /* Evita que los textos largos hagan saltos de línea raros */
-}
+    .table-wrap {
+        width: 100%;
+        overflow-x: auto; 
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+        border: 1px solid #e2e8f0;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        white-space: nowrap; 
+    }
 
     th { 
         background: #f8fafc; 
-        padding: 8px 10px; 
+        padding: 12px 14px; 
         text-align: left; 
-        font-size: 10px; 
+        font-size: 11px; 
         color: #475569; 
-        border-bottom: 2px solid var(--border); 
+        border-bottom: 2px solid #e2e8f0; 
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
     td { 
-        padding: 8px 10px; 
+        padding: 12px 14px; 
         border-bottom: 1px solid #f1f5f9; 
         line-height: 1.4;
     }
@@ -191,14 +243,14 @@ table {
     .badge-folio {
         background-color: #e0f2fe;
         color: #0369a1;
-        padding: 2px 6px;
-        border-radius: 4px;
+        padding: 4px 8px;
+        border-radius: 6px;
         font-weight: bold;
-        font-size: 10px;
+        font-size: 11px;
     }
 
     .user-welcome { 
-        font-size: 11px; 
+        font-size: 12px; 
         font-weight: 600; 
         margin-right: 15px; 
         color: #64748b; 
@@ -214,14 +266,13 @@ table {
         border: 1px solid #dcfce7;
     }
 
-    /* Paginación */
     .pagination-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 12px 20px;
+        padding: 14px 20px;
         background: #f8fafc;
-        border-top: 1px solid var(--border);
+        border-top: 1px solid #e2e8f0;
         flex-wrap: wrap;
         gap: 10px;
     }
@@ -266,7 +317,6 @@ table {
         font-weight: 500;
     }
 
-    /* Vistas para Tablet y Móviles */
     @media (max-width: 768px) {
         header {
             padding: 15px 20px;
@@ -275,20 +325,16 @@ table {
             text-align: center;
         }
 
-        header style {
-            text-align: center;
-        }
-
         .container {
-            padding: 0 10px;
-            margin: 10px auto;
+            padding: 0 12px;
+            margin: 12px auto;
         }
 
         .card {
-            padding: 15px;
+            padding: 20px;
         }
 
-        fieldset div[style*="grid-template-columns"] {
+        fieldset div {
             grid-template-columns: 1fr !important;
             max-width: 100% !important;
         }
@@ -303,7 +349,6 @@ table {
         }
     }
 
-    /* Impresión */
     @media print { 
         .no-print { display: none !important; } 
     }
@@ -311,7 +356,7 @@ table {
 </head>
 <body>
 <header>
-    <div style="color: #1e40af; font-weight: 800; font-size: 14px; letter-spacing: 0.5px;">
+    <div style="color: #1e40af; font-weight: 800; font-size: 15px; letter-spacing: 0.5px;">
         <i class="fas fa-file-medical"></i> RECEPCIÓN MÉDICA | DIF 2026
     </div>
 
@@ -325,76 +370,99 @@ table {
 
 <div class="container">
    <div class="card no-print">
-    <h3 style="margin-bottom: 25px; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+    <h3 style="margin-top: 0; margin-bottom: 25px; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; font-size: 16px;">
         <i class="fas fa-file-medical"></i> Registro Único de Atención Médica
     </h3>
     <input type="hidden" id="f-id">
     
-    <div class="form-grid" style="display: flex; flex-direction: column; gap: 20px;">
-        <fieldset style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
-            <legend style="padding: 0 15px; font-weight: 800; color: var(--primary); font-size: 11px; text-transform: uppercase;">Información de Registro</legend>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 450px;">
+    <div class="form-grid">
+        <!-- SECCIÓN 1 -->
+        <fieldset style="border-color: #cbd5e1;">
+            <legend style="color: var(--primary);">Información de Registro</legend>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 500px;">
                 <div class="form-group">
                     <label>Fecha de Captura</label>
                     <input type="date" id="f-fecha-captura">
                 </div>
                 <div class="form-group" id="contenedor-folio-manual" style="display: none;">
                     <label style="color:#0369a1;"><i class="fas fa-hashtag"></i> Número de Folio (Manual)</label>
-                    <input type="text" id="f-folio-manual" placeholder="Escriba el folio..." style="border: 1px solid #0369a1; font-weight: bold; color: #0369a1;">
+                    <input type="text" id="f-folio-manual" placeholder="Escriba el folio..." style="border-color: #0369a1; font-weight: bold; color: #0369a1;">
                 </div>
             </div>
         </fieldset>
 
-        <fieldset style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #f8fafc;">
-    <legend style="padding: 0 15px; font-weight: 800; color: #0369a1; font-size: 11px; text-transform: uppercase;">Identificación del Beneficiario</legend>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-        <div class="form-group" style="grid-column: span 2;">
-            <label>Nombre Completo</label>
-            <input type="text" id="f-nombre" placeholder="Nombre completo">
-        </div>
-        <div class="form-group">
-            <label>Edad</label>
-            <input type="number" id="f-edad">
-        </div>
-        <div class="form-group">
-            <label>Género</label>
-            <select id="f-genero">
-                <option value="">-- SELECCIONE --</option>
-                <option value="HOMBRE">HOMBRE</option>
-                <option value="MUJER">MUJER</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Tipo de Población</label>
-            <select id="f-tipo_pob" onchange="validarCostoPorPoblacion()">
-                <option value="POBLACION EN GENERAL">POBLACIÓN EN GENERAL</option>
-                <option value="TRABAJADOR DE CONFIANZA">TRABAJADOR DE CONFIANZA</option>
-                <option value="FAM. TRAB. DE CONFIANZA">FAM. TRAB. DE CONFIANZA</option>
-                <option value="SINDICALIZADOS">SINDICALIZADOS</option>
-                <option value="FAM. SINDICALIZADO">FAM. DEL SINDICALIZADO</option>
-                <option value="POLICIAS">POLICÍAS</option>
-                <option value="FAM. POLICIAS">FAM. POLICÍAS</option>
-                <option value="TRANSITO">TRÁNSITO</option>
-                <option value="FAM. TRANSITOS">FAM. TRÁNSITO</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>Área</label> 
-            <input type="text" id="f-area-beneficiario" value="MÉDICA">
-        </div>
-        <div class="form-group">
-            <label>Lugar / Procedencia</label>
-            <input type="text" id="f-lugar">
-        </div>
-        <div class="form-group">
-            <label>Costo de Atención ($)</label>
-            <input type="number" id="f-costo" value="0" style="font-weight: bold; color: var(--success); font-size: 14px;">
-        </div>
-    </div>
-</fieldset>
-        <fieldset style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px;">
-            <legend style="padding: 0 15px; font-weight: 800; color: #64748b; font-size: 11px; text-transform: uppercase;">Información Laboral</legend>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+        <!-- SECCIÓN 2 -->
+        <fieldset style="background-color: #f8fafc; border-color: #cbd5e1;">
+            <legend style="color: #0369a1;">Identificación del Beneficiario</legend>
+            
+            <div style="display: grid; grid-template-columns: repeat(12, 1fr); gap: 20px;">
+                
+                <div class="form-group" style="grid-column: span 7;">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="f-nombre" placeholder="Nombre completo del beneficiario">
+                </div>
+
+                <div class="form-group" style="grid-column: span 3; display: flex; flex-direction: row; gap: 8px; align-items: flex-end;">
+                    <div style="flex: 1;">
+                        <label>Edad</label>
+                        <input type="number" id="f-edad" min="1" placeholder="Ej. 5">
+                    </div>
+                    <div style="width: 95px;">
+                        <label>Unidad</label>
+                        <select id="f-unidad-edad" style="font-size: 12px;">
+                            <option value="AÑOS">Años</option>
+                            <option value="MESES">Meses</option>
+                            <option value="DÍAS">Días</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Género</label>
+                    <select id="f-genero">
+                        <option value="">-- SELECCIONE --</option>
+                        <option value="HOMBRE">HOMBRE</option>
+                        <option value="MUJER">MUJER</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="grid-column: span 5;">
+                    <label>Tipo de Población</label>
+                    <select id="f-tipo_pob" onchange="validarCostoPorPoblacion()">
+                        <option value="POBLACION EN GENERAL">POBLACIÓN EN GENERAL</option>
+                        <option value="TRABAJADOR DE CONFIANZA">TRABAJADOR DE CONFIANZA</option>
+                        <option value="FAM. TRAB. DE CONFIANZA">FAM. TRAB. DE CONFIANZA</option>
+                        <option value="SINDICALIZADOS">SINDICALIZADOS</option>
+                        <option value="FAM. SINDICALIZADO">FAM. DEL SINDICALIZADO</option>
+                        <option value="POLICIAS">POLICÍAS</option>
+                        <option value="FAM. POLICIAS">FAM. POLICÍAS</option>
+                        <option value="TRANSITO">TRÁNSITO</option>
+                        <option value="FAM. TRANSITOS">FAM. TRÁNSITO</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="grid-column: span 3;">
+                    <label>Área</label> 
+                    <input type="text" id="f-area-beneficiario" value="MÉDICA" style="background-color: #f1f5f9; font-weight: 600; color: #475569;" readonly>
+                </div>
+
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Lugar / Procedencia</label>
+                    <input type="text" id="f-lugar" placeholder="Ej. Centro">
+                </div>
+
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Costo de Atención</label>
+                    <input type="number" id="f-costo" value="0" style="font-weight: 800; color: #10b981; font-size: 15px; background-color: #f1f5f9; text-align: center;" readonly>
+                </div>
+
+            </div>
+        </fieldset>
+
+        <!-- SECCIÓN 3 -->
+        <fieldset style="border-color: #cbd5e1;">
+            <legend style="color: #475569;">Información Laboral</legend>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
                 <div class="form-group">
                     <label>Nombre del Trabajador Titular</label> 
                     <input type="text" id="f-nom_trabajador" placeholder="Nombre completo del titular">
