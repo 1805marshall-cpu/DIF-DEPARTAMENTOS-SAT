@@ -5,15 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SISTEMA DIF 2026 - 2029 | Admin Global</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         
 :root { 
     /* Color único para todos los módulos */
     --primary: #8a1538;       /* Guinda Institucional */
-    --sidebar-bg: #2d1e22;    /* Fondo oscuro para sidebar */
     --secondary: #c5a059;     /* Dorado/Arena Institucional */
     
-    /* Aplicamos el color institucional a todos los departamentos */
+    /* Nuevo color de acento (Verde DIF/Institucional) */
+    --accent: #5a7d65;        /* Verde Olivo Profundo (Muy elegante) */
+    --accent-light: #eef2ef;  /* Fondo suave para tarjetas de acento */
+    
+    --sidebar-bg: #2d1e22;    
+    
+    /* Aplicamos el color institucional */
     --vulnerable-color: var(--primary);
     --psico-color: var(--primary);
     --procu-color: var(--primary);
@@ -224,6 +230,24 @@
     justify-content: center;
     padding: 15px 0;
 }
+#chart-genero, #chart-edades {
+    display: block !important;
+    width: 100% !important;
+    height: 200px !important; /* Fuerza una altura mínima */
+}
+<style>
+    .panel {
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        padding: 15px;
+    }
+    canvas {
+        flex-grow: 1; /* Hace que el gráfico ocupe todo el espacio disponible */
+    }
+</style>
     </style>
 </head>
 <body>
@@ -438,8 +462,8 @@
     </b>
     <div id="social-pastel-contenedor" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
         </div>
-</div>
-</div>
+        </div>
+    </div>
 
         <div id="view-procuraduria" class="view-container" style="display:none;">
             <div class="access-card" style="background: var(--procu-color);"><div><b>Procuraduría</b></div><a href="procuraduria.html" class="btn-open">Módulo</a></div>
@@ -475,36 +499,50 @@
     </div>
 </div>
 
-<div id="view-medica" class="view-container" style="display:none;">
-    <!-- Tarjetas de Dashboard -->
-    <div class="dash" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px;">
-        <div class="card money"><h3>Ingreso en Periodo</h3><span class="monto" id="t-caja">$0.00</span></div>
-        <div class="card valid"><h3>Ingreso Validado</h3><span class="monto" id="t-validado">$0.00</span></div>
-        <div class="card"><h3>Total Atenciones</h3><span class="monto" id="t-pacientes">0</span></div>
+<div id="view-medica" class="view-container" style="display:none; padding: 20px;">
+ <!-- Encabezado -->
+    <div class="access-card" style="background: var(--procu-color);"><div><i class="fas fa-stethoscope"></i> <b>Área Médica</b></div><a href="medica2.html" class="btn-open">Módulo</a></div>
+    <!-- KPIs -->
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0;">
+        <div class="stat-box" style="border-top:4px solid #0ea5e9; padding:15px; background:#fff; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <small style="color:#64748b; font-weight:bold;">TOTAL ATENCIONES</small>
+            <div id="m-total" style="font-size:2rem; font-weight:800; color:#0f172a;">0</div>
+        </div>
+        <div class="stat-box" style="border-top:4px solid #10b981; padding:15px; background:#fff; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <small style="color:#64748b; font-weight:bold;">INGRESO ESTIMADO</small>
+            <div id="m-ingreso" style="font-size:2rem; font-weight:800; color:#10b981;">$0</div>
+        </div>
+        <div class="stat-box" style="border-top:4px solid #f59e0b; padding:15px; background:#fff; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <small style="color:#64748b; font-weight:bold;">PENDIENTES (ENF)</small>
+            <div id="m-pendientes" style="font-size:2rem; font-weight:800; color:#f59e0b;">0</div>
+        </div>
+        <div class="stat-box" style="border-top:4px solid #8b5cf6; padding:15px; background:#fff; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <small style="color:#64748b; font-weight:bold;">POBLACIÓN MÁS ACTIVA</small>
+            <div id="m-pob-top" style="font-size:0.9rem; font-weight:800; color:#475569; margin-top:10px;">-</div>
+        </div>
     </div>
-
-    <!-- Panel de Resumen -->
-    <div class="resumen-detallado" style="background: white; padding: 20px; border-radius: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
-        <div class="resumen-item"><h4>Tipo de Población</h4><ul class="resumen-list" id="res-poblacion"></ul></div>
-        <div class="resumen-item"><h4>Categoría</h4><ul class="resumen-list" id="res-categorias"></ul></div>
-        <div class="resumen-item"><h4>Servicio</h4><ul class="resumen-list" id="res-servicios"></ul></div>
+<!--paneles-->
+<div class="panel" style="padding: 15px; background: #fff; margin-top: 20px;">
+    <b><i class="fas fa-user-injured"></i> Registro Detallado de Pacientes</b>
+    <div id="m-tabla-datos" style="margin-top: 15px;">
+        </div>
+</div>
+    <!-- Analítica Combinada -->
+<div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:15px; margin-top: 15px;">
+    <!-- Gráficas existentes -->
+    <div class="panel" style="padding:15px; background:#fff; height: 220px;"><b>Género</b><canvas id="chart-genero"></canvas></div>
+    <div class="panel" style="padding:15px; background:#fff; height: 220px;"><b>Edades</b><canvas id="chart-edades"></canvas></div>
+    <div class="panel" style="padding:15px; background:#fff; height: 220px;"><b>Tipo Población</b><canvas id="chart-poblacion"></canvas></div>
+    <div class="panel" style="padding:15px; background:#fff; height: 220px;"><b>Zonas Principales</b><canvas id="chart-zonas"></canvas></div>
+    
+    <!-- Gráficas de Ganancias -->
+    <div class="panel" style="padding:15px; background:#fff; height: 220px;">
+        <b>Ganancias por Semana</b><canvas id="chart-ingresos"></canvas>
     </div>
-
-    <!-- Tabla -->
-    <div class="tabla-box" style="background: white; border-radius: 15px; border: 1px solid #e2e8f0; overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse;">
-            <thead>
-                <tr style="background: #f8fafc;">
-                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">FECHA / FOLIO</th>
-                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">PACIENTE</th>
-                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">SERVICIO</th>
-                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">ESTADO</th>
-                    <th style="padding: 15px; text-align: left; font-size: 10px; color: #64748b;">COSTO</th>
-                </tr>
-            </thead>
-            <tbody id="tbody-medica"></tbody>
-        </table>
+    <div class="panel" style="padding:15px; background:#fff; height: 220px;">
+        <b>Incremento Semanal ($)</b><canvas id="chart-incremento"></canvas>
     </div>
+</div>
 </div>
 
 <div id="view-psicologia" class="view-container" style="display:none;">
@@ -1147,46 +1185,99 @@ window.descargarPadronCelda = function(idCeldaClave) {
 };
 /////////////////////////////////////////////
 // Función específica de Area Medica
+///////////////////////////////////////////
+let chartGen, chartEdad, chartPob, chartZonas, chartIngresos, chartIncremento;
 
 window.reprocesarMedica = function() {
-    const tbody = document.getElementById('tbody-medica');
-    if (!tbody) return;
-
-    // 1. FILTRADO DE SEGURIDAD
-    // Ignoramos registros donde el nombre sea undefined o vacío
-    const registrosValidos = store.medica.filter(p => p.nombre && p.nombre !== "undefined");
-
-    // Calcular estadísticas usando SOLO los registros válidos
-    let totalCaja = 0;
-    let totalValidado = 0;
+    const data = store.medica;
     
-    tbody.innerHTML = registrosValidos.map(p => {
-        const esValido = p.validado_dir === 'SI';
-        const costo = parseFloat(p.costo || 0);
-        totalCaja += costo;
-        if(esValido) totalValidado += costo;
+    const stats = {
+        genero: { 'HOMBRE': 0, 'MUJER': 0, 'SIN ESPECIFICAR': 0 },
+        edades: { "0-17": 0, "18-35": 0, "36-55": 0, "56+": 0 },
+        poblacion: {}, zonas: {}, ingresosSemanales: {}
+    };
 
-        return `
-            <tr style="border-bottom: 1px solid #f1f5f9;">
-                <td style="padding: 15px;"><b>${p.fecha_cap}</b><br><small>${p.folio || ''}</small></td>
-                <td style="padding: 15px;"><b>${p.nombre}</b></td>
-                <td style="padding: 15px;">${p.estudio_servicio || 'N/A'}</td>
-                <td style="padding: 15px;">
-                    <span class="badge" style="background:${esValido ? '#16a34a' : '#ea580c'}; color:white; padding:4px 8px; border-radius:5px; font-size:10px;">
-                        ${esValido ? 'VALIDADO' : 'PENDIENTE'}
-                    </span>
-                </td>
-                <td style="padding: 15px; font-weight:bold;">$${costo.toFixed(2)}</td>
-                <td style="padding: 15px;">
-                </td>
-            </tr>
-        `;
-    }).join('');
+    data.forEach(d => {
+        const g = (d.genero || "").toUpperCase().trim();
+        if (g === 'MASCULINO' || g === 'HOMBRE') stats.genero['HOMBRE']++;
+        else if (g === 'FEMENINO' || g === 'MUJER') stats.genero['MUJER']++;
+        else stats.genero['SIN ESPECIFICAR']++;
 
-    // Actualizar Dashboards con los datos limpios
-    document.getElementById('t-caja').innerText = '$' + totalCaja.toFixed(2);
-    document.getElementById('t-validado').innerText = '$' + totalValidado.toFixed(2);
-    document.getElementById('t-pacientes').innerText = registrosValidos.length; // Usa registrosValidos
+        const age = parseInt(d.edad);
+        if (!isNaN(age)) {
+            const r = age < 18 ? "0-17" : age <= 35 ? "18-35" : age <= 55 ? "36-55" : "56+";
+            stats.edades[r]++;
+        }
+        stats.poblacion[d.tipo_pob || "N/A"] = (stats.poblacion[d.tipo_pob || "N/A"] || 0) + 1;
+        stats.zonas[d.lugar || "SIN ZONA"] = (stats.zonas[d.lugar || "SIN ZONA"] || 0) + 1;
+
+        if (d.fecha_cap) {
+    const date = new Date(d.fecha_cap);
+    if (!isNaN(date)) {
+        // Obtenemos el número de semana del año
+        const start = new Date(date.getFullYear(), 0, 1);
+        const dayOfYear = (date - start) / 86400000;
+        const week = Math.ceil((dayOfYear + start.getDay() + 1) / 7);
+        
+        const label = `Sem ${week}`;
+        
+        // Acumulamos el costo
+        stats.ingresosSemanales[label] = (stats.ingresosSemanales[label] || 0) + (parseFloat(d.costo) || 0);
+    }
+}
+    });
+
+    const semanasOrdenadas = Object.keys(stats.ingresosSemanales).sort((a, b) => {
+    return parseInt(a.split(' ')[1]) - parseInt(b.split(' ')[1]);
+});
+
+    const incrementos = semanasOrdenadas.map((sem, i) => {
+        if (i === 0) return 0;
+        return stats.ingresosSemanales[sem] - stats.ingresosSemanales[semanasOrdenadas[i-1]];
+    });
+
+    // 2. Renderizar KPIs
+    document.getElementById('m-total').innerText = data.length;
+    document.getElementById('m-ingreso').innerText = `$${data.reduce((acc, d) => acc + (parseFloat(d.costo) || 0), 0).toLocaleString()}`;
+    document.getElementById('m-pendientes').innerText = data.filter(d => d.estado === 'PENDIENTE_ENFERMERIA').length;
+    const topPob = Object.entries(stats.poblacion).sort((a,b) => b[1] - a[1])[0];
+    document.getElementById('m-pob-top').innerText = topPob ? `${topPob[0]} (${topPob[1]})` : "-";
+
+    // 3. Renderizar Tabla de Detalle (Doble Columna)
+    document.getElementById('m-tabla-datos').innerHTML = data.map(d => `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 12px;">
+            <div>
+                <div style="font-weight: bold; color: #0ea5e9;">${d.nombre || 'Sin nombre'}</div>
+                <div style="color: #64748b;">Edad: ${d.edad || '-'} | Género: ${d.genero || '-'}</div>
+                <div style="font-size: 11px;">Pob: ${d.tipo_pob || '-'}</div>
+            </div>
+            <div style="border-left: 1px solid #f1f5f9; padding-left: 10px;">
+                <div style="font-weight: 600;">Cat: ${d.consulta_estudios || '-'}</div>
+                <div style="font-size: 11px;">Atención: ${d.tipo_estudio || '-'}</div>
+                <div style="font-size: 11px; color: #64748b;">Dep: ${d.dependencia || '-'}</div>
+                <div style="font-size: 11px;">Fecha: ${d.fecha_cap || '-'}</div>
+                <div style="font-size: 11px; color: #64748b;">$: ${d.costo || 'NA'}</div>
+            </div>
+        </div>
+    `).join('');
+
+    const configs = [
+        { id: 'chart-genero', var: 'chartGen', type: 'doughnut', labels: Object.keys(stats.genero), values: Object.values(stats.genero), color: ['#3b82f6', '#ec4899', '#94a3b8'] },
+        { id: 'chart-edades', var: 'chartEdad', type: 'bar', labels: Object.keys(stats.edades), values: Object.values(stats.edades), color: '#f59e0b' },
+        { id: 'chart-poblacion', var: 'chartPob', type: 'bar', labels: Object.keys(stats.poblacion), values: Object.values(stats.poblacion), color: '#10b981', axis: 'y' },
+        { id: 'chart-zonas', var: 'chartZonas', type: 'bar', labels: Object.keys(stats.zonas).slice(0, 5), values: Object.values(stats.zonas).slice(0, 5), color: '#8b5cf6', axis: 'y' },
+        { id: 'chart-ingresos', var: 'chartIngresos', type: 'line', labels: semanasOrdenadas, values: semanasOrdenadas.map(s => stats.ingresosSemanales[s]), color: '#06b6d4' },
+        { id: 'chart-incremento', var: 'chartIncremento', type: 'bar', labels: semanasOrdenadas, values: incrementos, color: incrementos.map(v => v >= 0 ? '#10b981' : '#f43f5e') }
+    ];
+
+    configs.forEach(cfg => {
+        if (window[cfg.var]) window[cfg.var].destroy();
+        window[cfg.var] = new Chart(document.getElementById(cfg.id), {
+            type: cfg.type,
+            data: { labels: cfg.labels, datasets: [{ data: cfg.values, backgroundColor: cfg.color, borderColor: cfg.color, fill: cfg.type === 'line', tension: 0.3, borderRadius: cfg.type === 'bar' ? 6 : 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, indexAxis: cfg.axis || 'x', scales: { x: { grid: { display: false } }, y: { grid: { display: false } } } }
+        });
+    });
 };
 
 /////////////////////////////////////////////
@@ -1276,6 +1367,7 @@ window.reprocesarPsico = function() {
             `).join('')}
         </div>`).join('');
 };
+
 /////////////////////////////////////////////
 // Función específica de JefaturaPsicología
     window.reprocesarJefatura = function() {
@@ -1325,9 +1417,9 @@ window.reprocesarPsico = function() {
         </div>
     `).join('');
 };
-
         ///////////////////////////////////////////////
         // --- PROCESAMIENTO PROCURADURIA ---
+
 window.reprocesarProcuraduria = function() {
     const busqueda = document.getElementById('global-search-input').value.toLowerCase();
     const zona = document.getElementById('global-zone-search').value.toLowerCase();
@@ -1380,6 +1472,7 @@ window.reprocesarProcuraduria = function() {
             </div>
         </div>`).join('');
 };
+
        ///////////////////////////////////////////////
         // --- PROCESAMIENTO TRABAJO SOCIAL ---
 window.reprocesarTrabSoc = function() {
