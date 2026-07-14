@@ -8,69 +8,18 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
-    :root { 
-        --primary: #991b1b; 
-        --primary-dark: #7f1d1d; 
-        --success: #059669; 
-        --warning: #f59e0b; 
-        --danger: #dc2626; 
-        --bg: #f1f5f9; 
-        --border: #cbd5e1;
-        --user-green: #15803d; 
-    }
-
-    body { 
-        font-family: 'Segoe UI', system-ui, sans-serif; 
-        background: var(--bg); 
-        margin: 0; 
-        color: #334155; 
-        font-size: 13px; 
-    }
-
-    header { 
-        background: #fff; 
-        padding: 15px 40px; 
-        border-bottom: 3px solid var(--primary); 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); 
-    }
-
-    .container { 
-        max-width: 1750px; 
-        margin: 24px auto; 
-        padding: 0 24px; 
-    }
-
-    .card { 
-        background: #fff; 
-        padding: 30px; 
-        border-radius: 14px; 
-        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
-        border: 1px solid #e2e8f0; 
-        margin-bottom: 24px; 
-    }
-
-    .form-grid { 
-        display: flex; 
-        flex-direction: column; 
-        gap: 24px; 
-    }
-
-    fieldset {
-        border: 1px solid #e2e8f0; 
-        border-radius: 12px; 
-        padding: 24px;
-        background-color: #ffffff;
-        box-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.01);
-    }
-
+    :root { --primary: #991b1b; --primary-dark: #7f1d1d; --success: #059669; --warning: #f59e0b; --danger: #dc2626; --bg: #f1f5f9; --border: #cbd5e1; --user-green: #15803d; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: #334155; font-size: 12px; }
+    header {  background: #fff;  padding: 10px 30px; border-bottom: 3px solid var(--primary);  display: flex;  justify-content: space-between; align-items: center; box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.05);  }
+    .container { max-width: 1750px; margin: 16px auto; padding: 0 16px; }
+    .card { background: #fff; padding: 18px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05); border: 1px solid #e2e8f0; margin-bottom: 16px; }
+    .form-grid { display: flex; flex-direction: column; gap: 14px; }
+    fieldset {border: 1px solid #cbd5e1; border-radius: 8px; padding: 14px 18px 18px 18px; background-color: #ffffff; }
     legend {
-        padding: 0 12px; 
+        padding: 0 8px; 
         font-weight: 800; 
         color: #475569; 
-        font-size: 12px; 
+        font-size: 11px; 
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
@@ -78,35 +27,35 @@
     .form-group { 
         display: flex; 
         flex-direction: column; 
-        gap: 6px;
+        gap: 4px;
     }
 
     label { 
-        font-size: 11px; 
+        font-size: 10px; 
         font-weight: 700; 
         color: #475569; 
         text-transform: uppercase; 
         letter-spacing: 0.3px;
     }
 
+    /* Cajas de captura compactas */
     input, select { 
-        height: 42px;
-        padding: 0 14px; 
+        height: 34px;
+        padding: 0 10px; 
         border: 1px solid var(--border); 
-        border-radius: 8px; 
-        font-size: 13px; 
+        border-radius: 6px; 
+        font-size: 12px; 
         color: #1e293b;
         background-color: #fff;
         outline: none; 
-        transition: all 0.2s ease-in-out; 
+        transition: all 0.15s ease-in-out; 
         box-sizing: border-box;
         width: 100%;
     }
 
     input:focus, select:focus {
         border-color: #2563eb;
-        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
-        background-color: #fff;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
     }
 
     input:disabled, select:disabled {
@@ -119,29 +68,29 @@
     /* Checkboxes dinámicos */
     .checkbox-group-container {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 10px;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 8px;
         background: #f8fafc;
-        padding: 16px;
-        border-radius: 8px;
+        padding: 12px;
+        border-radius: 6px;
         border: 1px solid var(--border);
-        min-height: 44px;
+        min-height: 38px;
         box-sizing: border-box;
     }
 
     .checkbox-item {
         display: flex;
         align-items: center;
-        gap: 8px;
-        font-size: 12px;
+        gap: 6px;
+        font-size: 11px;
         font-weight: 600;
         cursor: pointer;
         color: #334155;
-        padding: 6px 10px;
+        padding: 4px 8px;
         background: #fff;
         border: 1px solid #e2e8f0;
-        border-radius: 6px;
-        transition: all 0.2s;
+        border-radius: 4px;
+        transition: all 0.15s;
     }
 
     .checkbox-item:hover {
@@ -151,38 +100,36 @@
 
     .checkbox-item input {
         cursor: pointer;
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         margin: 0;
     }
 
     .btn-box { 
         display: flex; 
-        gap: 12px; 
-        margin-top: 24px; 
+        gap: 8px; 
+        margin-top: 14px; 
         flex-wrap: wrap; 
     }
 
     .btn { 
-        padding: 12px 24px; 
+        padding: 8px 16px; 
         border: none; 
-        border-radius: 8px; 
+        border-radius: 6px; 
         font-weight: 700; 
         cursor: pointer; 
-        font-size: 11px; 
+        font-size: 10px; 
         color: white; 
         display: flex; 
         align-items: center; 
-        gap: 8px; 
+        gap: 6px; 
         text-transform: uppercase; 
         letter-spacing: 0.5px;
-        transition: all 0.2s;
-        box-shadow: 0 2px 4px rgb(0 0 0 / 0.05);
+        transition: all 0.15s;
     }
 
     .btn:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 6px rgb(0 0 0 / 0.1);
         opacity: 0.95;
     }
 
@@ -190,30 +137,28 @@
         background-color: #ef4444; 
         color: white; 
         border: none; 
-        padding: 10px 18px; 
-        border-radius: 8px;
-        font-size: 11px; 
+        padding: 6px 14px; 
+        border-radius: 6px;
+        font-size: 10px; 
         font-weight: bold; 
         cursor: pointer; 
         display: flex; 
         align-items: center; 
-        gap: 8px;
-        transition: all 0.2s ease; 
+        gap: 6px;
+        transition: all 0.15s ease; 
         text-transform: uppercase;
     }
 
     .btn-salir:hover { 
         background-color: #b91c1c; 
-        transform: translateY(-2px); 
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); 
     }
 
     .table-wrap {
         width: 100%;
         overflow-x: auto; 
         background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+        border-radius: 8px;
+        box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.05);
         border: 1px solid #e2e8f0;
     }
 
@@ -225,9 +170,9 @@
 
     th { 
         background: #f8fafc; 
-        padding: 12px 14px; 
+        padding: 8px 10px; 
         text-align: left; 
-        font-size: 11px; 
+        font-size: 10px; 
         color: #475569; 
         border-bottom: 2px solid #e2e8f0; 
         text-transform: uppercase;
@@ -235,122 +180,54 @@
     }
 
     td { 
-        padding: 12px 14px; 
+        padding: 8px 10px; 
         border-bottom: 1px solid #f1f5f9; 
         line-height: 1.4;
+        font-size: 11px;
     }
 
     .badge-folio {
         background-color: #e0f2fe;
         color: #0369a1;
-        padding: 4px 8px;
-        border-radius: 6px;
+        padding: 2px 6px;
+        border-radius: 4px;
         font-weight: bold;
-        font-size: 11px;
+        font-size: 10px;
     }
 
     .user-welcome { 
-        font-size: 12px; 
+        font-size: 11px; 
         font-weight: 600; 
-        margin-right: 15px; 
+        margin-right: 12px; 
         color: #64748b; 
-    }
-    
-    .user-special { 
-        color: var(--user-green) !important; 
-        font-weight: 900 !important; 
-        font-size: 13px;
-        background: #f0fdf4; 
-        padding: 5px 10px; 
-        border-radius: 6px; 
-        border: 1px solid #dcfce7;
     }
 
     .pagination-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 14px 20px;
+        padding: 10px 16px;
         background: #f8fafc;
         border-top: 1px solid #e2e8f0;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 8px;
     }
 
     .pagination-controls {
         display: flex;
         align-items: center;
-        gap: 5px;
+        gap: 4px;
     }
 
     .btn-page {
-        padding: 6px 12px;
+        padding: 4px 8px;
         border: 1px solid #cbd5e1;
         background: #fff;
         border-radius: 4px;
         cursor: pointer;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 600;
         color: #475569;
-        transition: all 0.2s;
-    }
-
-    .btn-page:hover:not(:disabled) {
-        background: #f1f5f9;
-        border-color: #94a3b8;
-    }
-
-    .btn-page:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    .btn-page.active {
-        background: var(--primary);
-        color: #fff;
-        border-color: var(--primary);
-    }
-
-    .page-info {
-        font-size: 11px;
-        color: #64748b;
-        font-weight: 500;
-    }
-
-    @media (max-width: 768px) {
-        header {
-            padding: 15px 20px;
-            flex-direction: column;
-            gap: 12px;
-            text-align: center;
-        }
-
-        .container {
-            padding: 0 12px;
-            margin: 12px auto;
-        }
-
-        .card {
-            padding: 20px;
-        }
-
-        fieldset div {
-            grid-template-columns: 1fr !important;
-            max-width: 100% !important;
-        }
-
-        .btn-box {
-            flex-direction: column;
-        }
-
-        .btn {
-            width: 100%;
-            justify-content: center;
-        }
-    }
-
-    @media print { 
-        .no-print { display: none !important; } 
     }
 </style>
 </head>
@@ -453,8 +330,7 @@
 
                 <div class="form-group" style="grid-column: span 2;">
                     <label>Costo de Atención</label>
-                    <input type="number" id="f-costo" value="0" style="font-weight: 800; color: #10b981; font-size: 15px; background-color: #f1f5f9; text-align: center;" readonly>
-                </div>
+                    <input type="number" id="f-costo" value="0" style="font-weight: 800; color: #10b981; font-size: 15px; background-color: #fff; text-align: center;">                </div>
 
             </div>
         </fieldset>
@@ -608,17 +484,16 @@
     let paginaActual = 1;
     let registrosPorPagina = 10;
     
-    // NUEVA VARIABLE: Guarda el catálogo de trabajadores indexados por tipo de población
     let baseTrabajadores = {};
 
-    // Ajusta costos base por exenciones, respetando si la población tiene costo $0
+    // Ajusta costos base por exenciones y controla los estados de los campos adicionales
     window.validarCostoPorPoblacion = () => {
         const tipoPob = document.getElementById('f-tipo_pob').value;
         const campoCosto = document.getElementById('f-costo');
         const campoNombreTitular = document.getElementById('f-nom_trabajador');
         const campoAreaTitular = document.getElementById('f-area-titular');
+        const campoAreaBeneficiario = document.getElementById('f-area-beneficiario'); // OPTIMIZACIÓN: Control preventivo
 
-        // Reiniciar el datalist asignado al campo
         campoNombreTitular.removeAttribute('list');
 
         if (tipoPob === "POBLACION EN GENERAL") {
@@ -626,31 +501,41 @@
             campoCosto.style.backgroundColor = "#fff";
             window.calcularCostoDinamico();
             [campoNombreTitular, campoAreaTitular].forEach(el => {
-                el.value = "N/A"; el.disabled = true; el.style.backgroundColor = "#f1f5f9";
+                if (el) { el.value = "N/A"; el.disabled = true; el.style.backgroundColor = "#f1f5f9"; }
             });
+            if (campoAreaBeneficiario) {
+                campoAreaBeneficiario.value = "N/A"; campoAreaBeneficiario.disabled = true; campoAreaBeneficiario.style.backgroundColor = "#f1f5f9";
+            }
         } 
         else if (["TRABAJADOR DE CONFIANZA", "SINDICALIZADOS", "POLICIAS", "TRANSITO"].includes(tipoPob)) {
             campoCosto.value = 0; campoCosto.disabled = true; campoCosto.style.backgroundColor = "#f1f5f9";
             [campoNombreTitular, campoAreaTitular].forEach(el => {
-                el.value = "TITULAR DIRECTO"; el.disabled = true; el.style.backgroundColor = "#f1f5f9";
+                if (el) { el.value = "TITULAR DIRECTO"; el.disabled = true; el.style.backgroundColor = "#f1f5f9"; }
             });
+            if (campoAreaBeneficiario) {
+                campoAreaBeneficiario.disabled = false; campoAreaBeneficiario.style.backgroundColor = "#fff";
+                if (campoAreaBeneficiario.value === "N/A") campoAreaBeneficiario.value = "";
+            }
         }
         else if (tipoPob.includes("FAM.")) {
             campoCosto.value = 0; campoCosto.disabled = true; campoCosto.style.backgroundColor = "#f1f5f9";
             [campoNombreTitular, campoAreaTitular].forEach(el => {
-                el.disabled = false; el.style.backgroundColor = "#fff";
-                if(el.value === "N/A" || el.value === "TITULAR DIRECTO") el.value = "";
+                if (el) {
+                    el.disabled = false; el.style.backgroundColor = "#fff";
+                    if(el.value === "N/A" || el.value === "TITULAR DIRECTO") el.value = "";
+                }
             });
+            if (campoAreaBeneficiario) {
+                campoAreaBeneficiario.disabled = false; campoAreaBeneficiario.style.backgroundColor = "#fff";
+                if (campoAreaBeneficiario.value === "N/A") campoAreaBeneficiario.value = "";
+            }
 
-            // NUEVO: Asigna el contenedor de sugerencias dinámicas al campo de texto
             campoNombreTitular.setAttribute('list', 'datalist-trabajadores');
             actualizarSugerenciasTrabajadores(tipoPob);
         }
     };
 
-    // NUEVO: Crea o actualiza las opciones del menú de autocompletado en base a la población seleccionada
     const actualizarSugerenciasTrabajadores = (tipoPob) => {
-        // Mapea la población del familiar a la población del titular
         let tipoTitular = "";
         if (tipoPob.includes("CONFIANZA")) tipoTitular = "TRABAJADOR DE CONFIANZA";
         else if (tipoPob.includes("SINDICALIZADO")) tipoTitular = "SINDICALIZADOS";
@@ -665,7 +550,6 @@
         }
         datalist.innerHTML = "";
 
-        // Si tenemos registros guardados de ese tipo de titular, los añade como sugerencias
         if (baseTrabajadores[tipoTitular]) {
             baseTrabajadores[tipoTitular].forEach(nombreTrabajador => {
                 let option = document.createElement('option');
@@ -675,58 +559,67 @@
         }
     };
 
-    // NUEVO: Alimenta la memoria local del sistema leyendo de los datos existentes en Firebase
     const indexarTrabajadoresExistentes = (registros) => {
         baseTrabajadores = {};
         registros.forEach(d => {
-            // Buscamos registros donde el campo nombre tenga valor y pertenezca a los titulares directos
+            // OPTIMIZACIÓN: Añadido .trim() para evitar duplicados por espacios fantasmas
             if (d.nombre && ["TRABAJADOR DE CONFIANZA", "SINDICALIZADOS", "POLICIAS", "TRANSITO"].includes(d.tipo_pob)) {
                 if (!baseTrabajadores[d.tipo_pob]) {
                     baseTrabajadores[d.tipo_pob] = new Set();
                 }
-                baseTrabajadores[d.tipo_pob].add(d.nombre.toUpperCase());
+                baseTrabajadores[d.tipo_pob].add(d.nombre.trim().toUpperCase());
             }
         });
         
-        // Convertimos los Sets a Arrays para manejarlos más fácil
         for (let key in baseTrabajadores) {
             baseTrabajadores[key] = Array.from(baseTrabajadores[key]).sort();
         }
 
-        // Actualizar sugerencias si el usuario ya tiene seleccionado un familiar en pantalla
         const tipoPobActual = document.getElementById('f-tipo_pob').value;
         if (tipoPobActual.includes("FAM.")) {
             actualizarSugerenciasTrabajadores(tipoPobActual);
         }
     };
 
-    // Calcula la suma acumulada de los servicios seleccionados
-    window.calcularCostoDinamico = () => {
-        const tipoPob = document.getElementById('f-tipo_pob').value;
-        if (tipoPob !== "POBLACION EN GENERAL") return;
+window.calcularCostoDinamico = () => {
+    const tipoPob = document.getElementById('f-tipo_pob').value;
+    const categoria = document.getElementById('f-consulta_estudios').value;
+    const campoCosto = document.getElementById('f-costo');
+    
+    // Si NO es población general, el costo es 0 y se queda bloqueado por política
+    if (tipoPob !== "POBLACION EN GENERAL") {
+        campoCosto.value = 0;
+        campoCosto.disabled = true;
+        campoCosto.style.backgroundColor = "#f1f5f9";
+        return;
+    }
 
-        const tiposSeleccionados = obtenerSeleccionAtencion();
-        let costoTotal = 0;
+    // SI es población general, habilitamos el campo SIEMPRE
+    campoCosto.disabled = false;
+    campoCosto.style.backgroundColor = "#fff";
 
-        if (tiposSeleccionados.length === 0) {
-            document.getElementById('f-costo').value = 30;
-            return;
-        }
+    // Si es ESTUDIOS_APOYOS, ponemos 0 automáticamente, pero el usuario puede cambiarlo inmediatamente
+    if (categoria === "ESTUDIOS_APOYOS") {
+        // Solo cambiamos a 0 si el campo está vacío para no borrar lo que el usuario ya escribió
+        if (campoCosto.value === "") campoCosto.value = 0;
+        return;
+    }
 
+    // Cálculo automático para CONSULTAS
+    const tiposSeleccionados = obtenerSeleccionAtencion();
+    let costoTotal = 0;
+
+    if (tiposSeleccionados.length > 0) {
         tiposSeleccionados.forEach(servicio => {
             if (["OCULISTA", "GLUCOSA", "MEDICA", "INYECCION"].includes(servicio)) {
                 costoTotal += 30;
             } else if (["CERTIFICADO MEDICO", "CERTIFICADO DE DISCAPACIDAD", "CURACION"].includes(servicio)) {
                 costoTotal += 50;
-            } else if (servicio === "DENTAL") {
-                costoTotal += 0; 
-            } else {
-                costoTotal += 30; 
             }
         });
-
-        document.getElementById('f-costo').value = costoTotal;
-    };
+        campoCosto.value = costoTotal;
+    }
+};
 
     window.evaluarVisibilidadFolio = () => {
         const contenedorFolio = document.getElementById('contenedor-folio-manual');
@@ -753,9 +646,9 @@
                 check.type = "checkbox";
                 check.name = "chk_atencion";
                 check.value = opt;
-                check.onchange = () => {
-                    window.calcularCostoDinamico();
-                };
+                check.onchange = () => { window.calcularCostoDinamico(); };
+
+                window.calcularCostoDinamico();
                 
                 label.appendChild(check);
                 label.appendChild(document.createTextNode(" " + opt));
@@ -792,14 +685,18 @@
         const serviciosEnf = ["MEDICA", "OCULISTA", "DENTAL", "GLUCOSA", "CURACION", "CERTIFICADO MEDICO", "CERTIFICADO DE DISCAPACIDAD"];
         let estado = tiposSeleccionados.some(tipo => serviciosEnf.includes(tipo)) ? "PENDIENTE_ENFERMERIA" : "ATENDIDO";
 
+        // CORRECCIÓN: Operador ternario seguro por si el nodo 'f-area-beneficiario' no existe en el DOM
+        const elAreaBeneficiario = document.getElementById('f-area-beneficiario');
+        const areaBeneficiarioTxt = elAreaBeneficiario ? elAreaBeneficiario.value.toUpperCase() : "N/A";
+
         try {
             await addDoc(mainRef, {
                 fecha_cap: document.getElementById('f-fecha-captura').value,
-                nombre: nombre.toUpperCase(),
+                nombre: nombre.toUpperCase().trim(),
                 edad: document.getElementById('f-edad').value,
                 genero: genero, 
                 tipo_pob: document.getElementById('f-tipo_pob').value,
-                area_beneficiario: document.getElementById('f-area-beneficiario').value.toUpperCase(),
+                area_beneficiario: areaBeneficiarioTxt,
                 area_titular: document.getElementById('f-area-titular').value.toUpperCase(),
                 lugar: document.getElementById('f-lugar').value.toUpperCase(),
                 costo: parseFloat(document.getElementById('f-costo').value || 0),
@@ -941,7 +838,6 @@
 
     onSnapshot(query(mainRef, orderBy("t", "desc")), (snap) => {
         dataList = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        // NUEVO: Cada que Firebase detecte un cambio o nueva inserción, se re-indexan los trabajadores
         indexarTrabajadoresExistentes(dataList);
         window.filtrarTabla(); 
     });
@@ -956,6 +852,11 @@
         document.getElementById('f-servicio').value = "";
         document.getElementById('f-nom_trabajador').value = "";
         document.getElementById('f-area-titular').value = "";
+        
+        // CORRECCIÓN: Limpieza segura del campo área beneficiario si existe
+        const elAreaBeneficiario = document.getElementById('f-area-beneficiario');
+        if (elAreaBeneficiario) elAreaBeneficiario.value = "";
+
         document.getElementById('f-consulta_estudios').value = "";
         window.gestionarCategorias();
         document.getElementById('f-costo').value = "30";
@@ -999,6 +900,12 @@
         document.getElementById('f-nom_trabajador').value = registro.nom_trabajador || "";
         document.getElementById('f-area-titular').value = registro.area_titular || "";
 
+        // CORRECCIÓN: Carga la información de vuelta al input al editar para evitar vacíos accidentales
+        const elAreaBeneficiario = document.getElementById('f-area-beneficiario');
+        if (elAreaBeneficiario) {
+            elAreaBeneficiario.value = registro.area_beneficiario || "";
+        }
+
         window.evaluarVisibilidadFolio();
         document.getElementById('f-folio-manual').value = registro.folio_str || "";
 
@@ -1041,15 +948,20 @@
         const serviciosEnf = ["MEDICA", "OCULISTA", "DENTAL", "GLUCOSA", "CURACION", "CERTIFICADO MEDICO", "CERTIFICADO DE DISCAPACIDAD"];
         let estado = tiposSeleccionados.some(tipo => serviciosEnf.includes(tipo)) ? "PENDIENTE_ENFERMERIA" : "ATENDIDO";
 
+        // CORRECCIÓN: Operador ternario preventivo al actualizar
+        const elAreaBeneficiario = document.getElementById('f-area-beneficiario');
+        const areaBeneficiarioTxt = elAreaBeneficiario ? elAreaBeneficiario.value.toUpperCase() : "N/A";
+
         const docRef = doc(db, "area_medica_v2", id);
         
         try {
             await updateDoc(docRef, {
                 fecha_cap: document.getElementById('f-fecha-captura').value,
-                nombre: nombre.toUpperCase(),
+                nombre: nombre.toUpperCase().trim(),
                 edad: document.getElementById('f-edad').value,
                 genero: genero, 
                 tipo_pob: document.getElementById('f-tipo_pob').value,
+                area_beneficiario: areaBeneficiarioTxt,
                 lugar: document.getElementById('f-lugar').value.toUpperCase(),
                 costo: parseFloat(document.getElementById('f-costo').value || 0),
                 consulta_estudios: catPrincipal,
