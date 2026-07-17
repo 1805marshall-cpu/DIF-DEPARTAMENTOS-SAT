@@ -8,39 +8,312 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        :root { 
-            --primary: #1e40af; --success: #059669; --warning: #f59e0b; 
-            --danger: #dc2626; --bg: #f8fafc; --social: #1e40af; --excel: #1d6f42;
+    :root { 
+        --primary: #1e40af; --success: #059669; --warning: #f59e0b; 
+        --danger: #dc2626; --bg: #f8fafc; --social: #1e40af; --excel: #1d6f42;
+    }
+    
+    body { 
+        font-family: 'Segoe UI', system-ui, sans-serif; 
+        background: var(--bg); 
+        margin: 0; 
+        color: #1e293b; 
+        font-size: 13px; 
+    }
+    
+    /* HEADER RESPONSIVO */
+    header { 
+        background: #fff; 
+        padding: 15px 20px; 
+        border-bottom: 3px solid var(--social); 
+        display: flex; 
+        flex-direction: row;
+        justify-content: space-between; 
+        align-items: center; 
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+    }
+    
+    .container { 
+        max-width: 1850px; 
+        margin: 10px auto; 
+        padding: 0 15px; 
+    }
+    
+    .card { 
+        background: #fff; 
+        padding: 20px; 
+        border-radius: 12px; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+        border: 1px solid #e2e8f0; 
+        margin-bottom: 20px; 
+    }
+    
+    h3 { 
+        margin: 0 0 15px 0; 
+        font-size: 11px; 
+        color: var(--social); 
+        text-transform: uppercase; 
+        border-bottom: 1px solid #f1f5f9; 
+        padding-bottom: 8px; 
+        letter-spacing: 1px; 
+    }
+    
+    /* REJILLA FORMULARIO AUTOMÁTICA */
+    .form-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+        gap: 12px; 
+    }
+    
+    .form-group { 
+        display: flex; 
+        flex-direction: column; 
+    }
+    
+    label { 
+        font-size: 9px; 
+        font-weight: bold; 
+        color: #64748b; 
+        text-transform: uppercase; 
+        margin-bottom: 3px; 
+    }
+    
+    input, select, textarea { 
+        padding: 9px; 
+        border: 1px solid #cbd5e1; 
+        border-radius: 6px; 
+        font-size: 12px; 
+        outline: none; 
+        transition: 0.2s; 
+        width: 100%;
+        box-sizing: border-box;
+    }
+    
+    input:focus { 
+        border-color: var(--social); 
+        box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.1); 
+    }
+    
+    /* BOTONES RESPONSIVOS */
+    .btn-box { 
+        display: flex; 
+        gap: 8px; 
+        margin-top: 20px; 
+        flex-wrap: wrap; 
+    }
+    
+    .btn { 
+        padding: 10px 16px; 
+        border: none; 
+        border-radius: 6px; 
+        font-weight: bold; 
+        cursor: pointer; 
+        font-size: 10px; 
+        color: white; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        gap: 6px; 
+        text-transform: uppercase; 
+        transition: 0.3s; 
+        flex: 1 1 auto; /* Permite que los botones se acomoden al ancho en pantallas chicas */
+        min-width: 120px;
+    }
+    
+    .btn:hover { 
+        opacity: 0.9; 
+        transform: translateY(-1px); 
+    }
+    
+    /* CAJA DE BÚSQUEDA RESPONSIVA */
+    .search-box { 
+        background: #f1f5f9; 
+        padding: 15px; 
+        border-radius: 10px; 
+        border: 1px solid #e2e8f0; 
+        margin-bottom: 15px; 
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px; 
+        align-items: flex-end; 
+    }
+    
+    /* CONTENEDOR DE TABLAS */
+    .table-wrap { 
+        background: #fff; 
+        border-radius: 12px; 
+        border: 1px solid #e2e8f0; 
+        overflow-x: auto; 
+        width: 100%;
+    }
+    
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+    }
+    
+    th { 
+        background: #f8fafc; 
+        padding: 12px; 
+        text-align: left; 
+        font-size: 10px; 
+        color: #475569; 
+        border-bottom: 2px solid #e2e8f0; 
+        text-transform: uppercase; 
+    }
+    
+    td { 
+        padding: 12px; 
+        border-bottom: 1px solid #f1f5f9; 
+        vertical-align: middle; 
+    }
+    
+    tr:hover { 
+        background-color: #fcfcfc; 
+    }
+    
+    /* BADGES */
+    .status-badge { 
+        padding: 4px 10px; 
+        border-radius: 20px; 
+        font-size: 10px; 
+        font-weight: 800; 
+        text-transform: uppercase; 
+        display: inline-block;
+    }
+    
+    .bg-atendido, .bg-realizado, .bg-validado { background: #dcfce7; color: #15803d; }
+    .bg-entregado, .bg-en-proceso { background: #e0f2fe; color: #0369a1; }
+    .bg-pendiente { background: #ff9849; color: #b45309; }
+    .bg-cancelado { background: #f77979; color: #b40909; }
+    
+    /* PAGINACIÓN RESPONSIVA */
+    .paginacion-bar { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        background: #fff; 
+        padding: 12px 20px; 
+        border-radius: 10px; 
+        margin-bottom: 10px; 
+        border: 1px solid #e2e8f0; 
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .btn-pag { 
+        padding: 6px 12px; 
+        border: 1px solid #cbd5e1; 
+        background: white; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        font-size: 11px; 
+    }
+    
+    .btn-pag:disabled { 
+        background: #e2e8f0; 
+        cursor: not-allowed; 
+        color: #94a3b8; 
+    }
+    
+    /* =========================================================================
+       MEDIA QUERIES PARA RESPONSIVIDAD EXTREMA (MÓVILES Y TABLETS)
+       ========================================================================= */
+    @media (max-width: 768px) {
+        header {
+            flex-direction: column;
+            gap: 10px;
+            text-align: center;
+            padding: 15px;
         }
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
-        header { background: #fff; padding: 15px 40px; border-bottom: 3px solid var(--social); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .container { max-width: 1850px; margin: 20px auto; padding: 0 20px; }
-        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; margin-bottom: 20px; }
-        h3 { margin: 0 0 15px 0; font-size: 11px; color: var(--social); text-transform: uppercase; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; letter-spacing: 1px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
-        .form-group { display: flex; flex-direction: column; }
-        label { font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 3px; }
-        input, select, textarea { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; transition: 0.2s; }
-        input:focus { border-color: var(--social); box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.1); }
-        .btn-box { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
-        .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 10px; color: white; display: flex; align-items: center; gap: 6px; text-transform: uppercase; transition: 0.3s; }
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
-        .search-box { background: #f1f5f9; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 15px; display: flex; gap: 15px; align-items: flex-end; }
-        .table-wrap { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1700px; }
-        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 10px; color: #475569; border-bottom: 2px solid #e2e8f0; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-        tr:hover { background-color: #fcfcfc; }
-        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
-        .bg-atendido, .bg-realizado, .bg-validado { background: #dcfce7; color: #15803d; }
-        .bg-entregado, .bg-en-proceso { background: #e0f2fe; color: #0369a1; }
-        .bg-pendiente { background: #ff9849; color: #b45309; }
-        .bg-cancelado { background: #f77979; color: #b40909; }
-        .paginacion-bar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 20px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
-        .btn-pag { padding: 6px 12px; border: 1px solid #cbd5e1; background: white; border-radius: 4px; cursor: pointer; font-size: 11px; }
-        .btn-pag:disabled { background: #e2e8f0; cursor: not-allowed; color: #94a3b8; }
-        @media print { .no-print { display: none !important; } }
-    </style>
+
+        .container {
+            padding: 0 8px;
+        }
+
+        .card {
+            padding: 15px;
+        }
+
+        /* TRANSFORMACIÓN DE TABLA A MODO TARJETA (CELULARES) */
+        .table-wrap {
+            border: none;
+            background: transparent;
+        }
+
+        table, thead, tbody, th, td, tr { 
+            display: block; 
+        }
+
+        thead tr { 
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
+
+        tr { 
+            background: #ffffff;
+            border: 1px solid #e2e8f0; 
+            border-radius: 10px;
+            margin-bottom: 15px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        tr:hover {
+            background-color: #ffffff;
+        }
+
+        td { 
+            border: none;
+            border-bottom: 1px solid #f1f5f9; 
+            position: relative;
+            padding-left: 45% !important; 
+            text-align: right;
+            font-size: 12px;
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        td:last-child {
+            border-bottom: 0;
+        }
+
+        /* INYECTA LOS NOMBRE DE LAS COLUMNAS EN DISPOSITIVOS MÓVILES */
+        td:before { 
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            transform: translateY(-50%);
+            width: 40%; 
+            padding-right: 10px; 
+            white-space: nowrap;
+            text-align: left;
+            font-weight: bold;
+            color: #64748b;
+            font-size: 9px;
+            text-transform: uppercase;
+            content: attr(data-label); /* Utiliza el atributo data-label de tus celdas */
+        }
+        
+        /* Ajustador para los formularios interactivos en línea */
+        td .btn-admin, td button, td input, td select {
+            width: auto;
+            max-width: 100%;
+        }
+        
+        .paginacion-bar {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+
+    @media print { 
+        .no-print { display: none !important; } 
+    }
+</style>
 </head>
 <body>
 
@@ -254,32 +527,29 @@
     });
 
 // 1. COMPROBACIÓN TOTAL CONTRA TODAS LAS FECHAS REGISTRADAS
-    window.verificarApoyoActivo = (nombreActual, idActual = null) => {
-        if (!nombreActual) return null;
-        const nombreLimpio = nombreActual.trim().toUpperCase();
+window.verificarApoyoActivo = (nombreActual, idActual = null) => {
+    if (!nombreActual) return null;
+    const nombreLimpio = nombreActual.trim().toUpperCase();
+    
+    const coincidencias = todosLosDatos.filter(reg => {
+        // Excluimos el registro que estamos editando
+        const esMismoRegistro = idActual && reg.id === idActual;
+        const nombreCoincide = reg.nombre && reg.nombre.trim().toUpperCase() === nombreLimpio;
         
-        // Buscamos TODOS los registros que coincidan con este nombre (excluyendo el que se está editando)
-        const coincidencias = todosLosDatos.filter(reg => 
-            reg.id !== idActual && 
-            reg.nombre && 
-            reg.nombre.trim().toUpperCase() === nombreLimpio
-        );
+        return !esMismoRegistro && nombreCoincide;
+    });
 
-        if (coincidencias.length > 0) {
-            // Ordenamos el historial de la fecha más reciente a la más antigua
-            coincidencias.sort((a, b) => new Date(b.fecha_registro) - new Date(a.fecha_registro));
-            return coincidencias;
-        }
-
-        return null; // Sin antecedentes
-    };
+    return coincidencias.length > 0 ? coincidencias : null;
+};
 
     // 2. LANZAR ALERTA EN TIEMPO REAL CON EL HISTORIAL COMPLETO DE FECHAS
-    window.revisarNombreDuplicado = async () => {
-    const nombreInput = document.getElementById('nombre');
-    if (!nombreInput) return;
+let ultimoNombreVerificado = "";
 
-    const nombreActual = nombreInput.value;
+window.revisarNombreDuplicado = async () => {
+    const nombreInput = document.getElementById('nombre');
+    if (!nombreInput || nombreInput.value === ultimoNombreVerificado) return;
+    
+    ultimoNombreVerificado = nombreInput.value;
     const idActual = document.getElementById('edit-id').value || null;
 
     const historial = window.verificarApoyoActivo(nombreActual, idActual);
@@ -354,38 +624,68 @@
         }
     };
 
-    // 4. ADAPTACIÓN DE BOTÓN ACTUALIZAR CON REVISIÓN GLOBAL
-    window.actualizar = async () => {
-        const id = document.getElementById('edit-id').value;
-        const data = obtenerValoresForm();
+window.actualizar = async () => {
+    const id = document.getElementById('edit-id').value;
+    const data = obtenerValoresForm();
 
-        const historial = window.verificarApoyoActivo(data.nombre, id);
-        if (historial) {
-            const mensaje = `⚠️ ATENCIÓN: Estás modificando el nombre a "${data.nombre}", el cual ya cuenta con ${historial.length} registro(s) previo(s) en el sistema.\n\n¿Deseas continuar con la ACTUALIZACIÓN de todos modos?`;
-            if (!confirm(mensaje)) return;
+    const historial = window.verificarApoyoActivo(data.nombre, id);
+
+    // Alerta de advertencia estilizada antes de continuar
+    if (historial && historial.length > 0) {
+        const result = await Swal.fire({
+            title: '⚠️ ¿Continuar con la actualización?',
+            text: `El nombre "${data.nombre}" ya tiene ${historial.length} registro(s) previo(s).`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, actualizar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#3085d6'
+        });
+        if (!result.isConfirmed) return;
+    }
+
+    // Alerta de "Cargando" mientras se procesa
+    Swal.fire({
+        title: 'Procesando...',
+        text: 'Por favor, espera un momento.',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    const fileInput = document.getElementById('input_file');
+    const file = fileInput.files[0];
+    const borrarFotoFlag = document.getElementById('eliminar-foto-flag').value === "true";
+
+    try {
+        if (file) {
+            data.url_evidencia = await comprimirImagen(file);
+        } else if (borrarFotoFlag) {
+            data.url_evidencia = "";
+        } else {
+            const regOriginal = todosLosDatos.find(r => r.id === id);
+            data.url_evidencia = (regOriginal && regOriginal.url_evidencia) ? regOriginal.url_evidencia : "";
         }
-
-        const fileInput = document.getElementById('input_file');
-        const file = fileInput.files[0];
-        const borrarFotoFlag = document.getElementById('eliminar-foto-flag').value === "true";
-
-        try {
-            if (file) {
-                data.url_evidencia = await comprimirImagen(file);
-            } else if (borrarFotoFlag) {
-                data.url_evidencia = "";
-            } else {
-                const regOriginal = todosLosDatos.find(r => r.id === id);
-                data.url_evidencia = (regOriginal && regOriginal.url_evidencia) ? regOriginal.url_evidencia : "";
-            }
-            
-            await updateDoc(doc(db, "trabajo_social", id), data);
-            alert("✅ Registro actualizado correctamente.");
-            limpiarForm();
-        } catch (e) { 
-            alert("Error al actualizar: " + e.message); 
-        }
-    };
+        
+        await updateDoc(doc(db, "trabajo_social", id), data);
+        
+        // Alerta de éxito
+        Swal.fire({
+            icon: 'success',
+            title: '¡Éxito!',
+            text: 'Registro actualizado correctamente.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        limpiarForm();
+    } catch (e) { 
+        // Alerta de error
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo actualizar: ' + e.message
+        });
+    }
+};
     
     window.editarLocal = (id) => {
         const reg = todosLosDatos.find(r => r.id === id);
@@ -480,10 +780,10 @@
 
         const dataAsuntos = {
             "SOLICITUD": ["APOYOS FUNCIONALES", "GESTION DE CITAS"],
+            "V.D./E. SOCIOECONOMICO": ["ASILO", "ADOPCIÓN"],
             "VISITA DOMICILIARIA": ["INVESTIGACION", "CERCIORAMIENTO DE TUTOR", "ASILO"],
             "ATENCION CIUDADANA": ["ENTREGA DE APOYOS FUNCIONALES ESTATALES", "ENTREGA DE APOYOS FUNCIONALES MUNICIPALES", "TRASLADO Y ACOMPAÑAMIENTO A CRISVER", "PLATICAS PREVENTIVAS"],
-            "ESTUDIO SOCIOECONOMICO": ["ASILO", "DESCUENTO TRANSPORTE", "DESCUENTO CMAPS", "APOYO ATAUD", "APOYO FUNCIONAL", "ESTUDIOS CLINICOS", "TRASLADO DE CUERPO", "REGISTRO CIVIL", "TERAPIAS CRISAT", "APOYO AL INMIGRANTE", "CONDONACIÓN DE LENTES"],
-            "V.D./E. SOCIOECONOMICO": ["ASILO", "ADOPCIÓN"]
+            "ESTUDIO SOCIOECONOMICO": ["ASILO", "DESCUENTO TRANSPORTE", "DESCUENTO CMAPS", "APOYO ATAUD", "APOYO FUNCIONAL", "ESTUDIOS CLINICOS", "TRASLADO DE CUERPO", "REGISTRO CIVIL", "TERAPIAS CRISAT", "APOYO AL INMIGRANTE", "CONDONACIÓN DE LENTES"]
         };
 
         if(dataAsuntos[prog]) {
@@ -501,12 +801,10 @@
         const contDet = document.getElementById('container-detalle-especifico');
         const asu = asuSelect.value;
 
-        const dataAsuntos = {
-            "SOLICITUD": ["APOYOS FUNCIONALES", "GESTION DE CITAS"],
-            "VISITA DOMICILIARIA": ["INVESTIGACION", "CERCIORAMIENTO DE TUTOR", "ASILO"],
-            "ATENCION CIUDADANA": ["ENTREGA DE APOYOS FUNCIONALES ESTATALES", "ENTREGA DE APOYOS FUNCIONALES MUNICIPALES", "TRASLADO Y ACOMPAÑAMIENTO A CRISVER", "PLATICAS PREVENTIVAS"],
-            "ESTUDIO SOCIOECONOMICO": ["ASILO", "DESCUENTO TRANSPORTE", "DESCUENTO CMAPS", "APOYO ATAUD", "APOYO FUNCIONAL", "ESTUDIOS CLINICOS", "TRASLADO DE CUERPO", "REGISTRO CIVIL", "TERAPIAS CRISAT", "APOYO AL INMIGRANTE", "CONDONACIÓN DE LENTES"],
-            "V.D./E. SOCIOECONOMICO": ["ASILO", "ADOPCIÓN"]
+        const subData = {
+            "APOYOS FUNCIONALES": ["SILLA DE RUEDAS ESTANDAR ADULTO", "SILLA DE RUEDAS SOBREPESO", "SILLA DE RUEDAS PCI", "SILLA DE RUEDAS PCA", "SILLA DE RUEDAS JUVENIL", "SILLA DE RUEDAS INFANTIL", "BASTÓN PUÑO ALEMÁN", "BASTÓN 4 PUNTOS", "MULETAS", "ANDADERA"],
+            "APOYO FUNCIONAL": ["SILLA DE RUEDAS ESTANDAR ADULTO", "SILLA DE RUEDAS SOBREPESO", "SILLA DE RUEDAS PCI", "SILLA DE RUEDAS PCA", "SILLA DE RUEDAS JUVENIL", "SILLA DE RUEDAS INFANTIL", "BASTÓN PUÑO ALEMÁN", "BASTÓN 4 PUNTOS", "MULETAS", "ANDADERA"],
+            "GESTION DE CITAS": ["TDH", "AUTISMO", "AUX. AUDITIVO", "PROTESIS", "CRISVER (DIVERSOS)", "SINDROME DE DOWN"]
         };
 
         if(subData[asu]) {
