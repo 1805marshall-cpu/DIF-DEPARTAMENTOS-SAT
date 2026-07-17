@@ -595,34 +595,66 @@ window.revisarNombreDuplicado = async () => {
 };
 
     // 3. ADAPTACIÓN DE BOTÓN GUARDAR CON REVISIÓN GLOBAL
-    window.subirYGuardar = async () => {
-        const data = obtenerValoresForm(); 
-        
-        const historial = window.verificarApoyoActivo(data.nombre);
-        if (historial) {
-            const mensaje = `⚠️ ATENCIÓN: El beneficiario "${data.nombre}" ya tiene ${historial.length} antecedente(s) en diferentes fechas.\n\n¿Estás seguro de que deseas saltarte la advertencia y GUARDAR este NUEVO registro de todos modos?`;
-            if (!confirm(mensaje)) return;
-        }
+window.subirYGuardar = async () => {
+    const data = obtenerValoresForm();
+    
+    // 1. Verificación de duplicados con SweetAlert2
+    const historial = window.verificarApoyoActivo(data.nombre);
+    if (historial) {
+        const result = await Swal.fire({
+            title: '⚠️ Antecedentes Detectados',
+            text: `El beneficiario "${data.nombre}" ya tiene ${historial.length} registro(s) previo(s). ¿Deseas continuar y guardar de todos modos?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, guardar',
+            cancelButtonText: 'Cancelar'
+        });
 
-        const fileInput = document.getElementById('input_file');
-        const file = fileInput.files[0];
-        let base64Data = ""; 
+        if (!result.isConfirmed) return;
+    }
 
+    // 2. Alerta de procesamiento (Cargando)
+    Swal.fire({
+        title: 'Guardando...',
+        text: 'Optimizando imagen y subiendo a la base de datos.',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    const fileInput = document.getElementById('input_file');
+    const file = fileInput.files[0];
+    let base64Data = ""; 
+
+    try {
+        // 3. Procesamiento de imagen
         if (file) {
-            document.getElementById('txt-compresion').style.display = 'inline-block';
-            document.getElementById('txt-compresion').innerText = "⏳ Optimizando imagen...";
             base64Data = await comprimirImagen(file);
         }
+        
+        data.url_evidencia = base64Data;
+        await addDoc(apoyosRef, data);
 
-        try {
-            data.url_evidencia = base64Data;
-            await addDoc(apoyosRef, data);
-            alert("✅ Registro guardado con éxito.");
-            limpiarForm();
-        } catch (e) {
-            alert("Error al guardar: " + e.message);
-        }
-    };
+        // 4. Éxito
+        Swal.fire({
+            icon: 'success',
+            title: '¡Registro Exitoso!',
+            text: 'El nuevo apoyo ha sido guardado correctamente.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        
+        limpiarForm();
+    } catch (e) {
+        // 5. Error
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al guardar',
+            text: e.message
+        });
+    }
+};
 
 window.actualizar = async () => {
     const id = document.getElementById('edit-id').value;
@@ -802,6 +834,7 @@ window.actualizar = async () => {
         const asu = asuSelect.value;
 
         const subData = {
+            "DESCUENTO TRANSPORTE":["TRANSPORTE LOS TUXTLA", "AUTOBUSES DE ORIENTE (ADO)"],
             "APOYOS FUNCIONALES": ["SILLA DE RUEDAS ESTANDAR ADULTO", "SILLA DE RUEDAS SOBREPESO", "SILLA DE RUEDAS PCI", "SILLA DE RUEDAS PCA", "SILLA DE RUEDAS JUVENIL", "SILLA DE RUEDAS INFANTIL", "BASTÓN PUÑO ALEMÁN", "BASTÓN 4 PUNTOS", "MULETAS", "ANDADERA"],
             "APOYO FUNCIONAL": ["SILLA DE RUEDAS ESTANDAR ADULTO", "SILLA DE RUEDAS SOBREPESO", "SILLA DE RUEDAS PCI", "SILLA DE RUEDAS PCA", "SILLA DE RUEDAS JUVENIL", "SILLA DE RUEDAS INFANTIL", "BASTÓN PUÑO ALEMÁN", "BASTÓN 4 PUNTOS", "MULETAS", "ANDADERA"],
             "GESTION DE CITAS": ["TDH", "AUTISMO", "AUX. AUDITIVO", "PROTESIS", "CRISVER (DIVERSOS)", "SINDROME DE DOWN"]
