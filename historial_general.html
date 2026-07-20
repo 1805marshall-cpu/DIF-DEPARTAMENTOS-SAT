@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Historial Maestro | DIF Dirección</title>
+    <title>Historial Maestro | DIF Dirección Área Médica</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* ==========================================================================
@@ -255,6 +255,58 @@
         }
         .btn-nav:hover { opacity: 0.9; transform: translateY(-1px); }
 
+        /* Componentes de Control de Cancelaciones y Dirección */
+        .badge-cancelado {
+            background-color: #fef2f2;
+            color: #991b1b; /* Usando tu color --p */
+            border: 1px solid #fee2e2;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .badge-validada {
+            background-color: #f0fdf4;
+            color: #166534; /* Mismo tono de .b-ok */
+            border: 1px solid #dcfce7;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .btn-validar-director {
+            background-color: var(--s);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .btn-validar-director:hover {
+            background-color: #0284c7;
+            transform: translateY(-1px);
+        }
+
+        /* Atenuación visual para filas canceladas en el reporte global */
+        tr.fila-cancelada {
+            background-color: #fff5f5 !important;
+        }
+        
+        tr.fila-cancelada td {
+            color: #64748b;
+        }
+
         /* ==========================================================================
            6. RESPONSIVE Y CONFIGURACIÓN DE IMPRESIÓN
            ========================================================================== */
@@ -288,6 +340,19 @@
         }
 
         @media print { .no-print { display: none !important; } }
+        @media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        background: white !important;
+        padding: 0 !important;
+    }
+    .tabla-box {
+        box-shadow: none !important;
+        border: none !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -307,6 +372,10 @@
     </div>
 
     <h2 style="color: var(--p); margin-bottom: 25px;"><i class="fas fa-chart-pie"></i> Análisis y Corte Operativo</h2>
+    <!-- Este título se actualizará solo al cambiar los filtros -->
+<h4 id="titulo-reporte-print" style="color: #475569; margin-top: -15px; margin-bottom: 25px; font-weight: 600; font-size: 16px;">
+    Reporte Operativo: Todo el año
+</h4>
 
     <div class="dash">
         <div class="card money"><h3><i class="fas fa-cash-register"></i> Ingreso en Periodo</h3><span class="monto" id="t-caja">$0.00</span></div>
@@ -335,9 +404,15 @@
                         <option value="SINDICALIZADOS">SINDICALIZADOS</option>
                         <option value="POLICIAS">POLICÍAS</option>
                         <option value="TRANSITO">TRÁNSITO</option>
+                        <option value="FAM. TRABAJADOR DE CONFIANZA">FAM. TRABAJADOR DE CONFIANZA</option>
+                        <option value="FAM. SINDICALIZADO">FAM. SINDICALIZADO</option>
+                        <option value="FAM. POLICIA">FAM. POLICÍA</option>
+                        <option value="FAM. TRANSITO">FAM. TRÁNSITO</option>
                     </select>
                 </div>
                 <div class="f-group"><label>Lugar / Procedencia</label><input type="text" id="reg-procedencia"></div>
+                
+                <input type="hidden" id="f-area-beneficiario" value="N/A">
             </div>
         </fieldset>
 
@@ -345,9 +420,11 @@
             <legend><i class="fas fa-file-medical"></i> Detalles del Servicio y Vinculación</legend>
             <div class="grid-form">
                 <div class="f-group">
-                    <label>Tipo de Trámite</label>
+                    <label>Tipo de Trámite / Categoría</label>
                     <select id="reg-categoria" onchange="actualizarOpciones()">
                         <option value="">-- SELECCIONE CATEGORÍA --</option>
+                        <option value="CONSULTA">CONSULTAS (RECEPCIÓN)</option>
+                        <option value="ESTUDIOS">ESTUDIOS (RECEPCIÓN)</option>
                         <option value="GABINETE">ESTUDIOS DE GABINETE</option>
                         <option value="VINCULACION">VINCULACIONES</option>
                     </select>
@@ -391,27 +468,66 @@
                 <option value="5">Semana 5</option>
             </select>
         </div>
+        <!-- NUEVO FILTRO DE AUDITORÍA PARA EL DIRECTOR -->
+        <div>
+            <label>Auditoría de Cancelados</label>
+            <select id="f-auditoria" onchange="run()">
+                <option value="all">-- VER TODOS --</option>
+                <option value="activos">Solo Folios Activos</option>
+                <option value="cancelados_todos">Todos los Cancelados</option>
+                <option value="pendientes_validar">⚠️ Cancelados por Validar</option>
+                <option value="validados">✓ Cancelaciones Validadas</option>
+            </select>
+        </div>
         <div style="flex-grow: 1;"><label>Buscador</label><input type="text" id="f-search" placeholder="Nombre o Folio..." onkeyup="run()" style="width: 100%;"></div>
+        <!-- Coloca esto justo antes del cierre </div> de la clase "filtros" -->
+<div class="no-print">
+    <label>&nbsp;</label>
+    <button onclick="window.print()" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; height: 38px; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);">
+        <i class="fas fa-print"></i> Imprimir
+    </button>
+</div>
+    </div>
+    
+    <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; background: #f8fafc; padding: 10px; border-radius: 8px;">
+        <div>
+            <label style="font-size: 13px; color: #475569; font-weight: bold; margin-right: 5px;">Mostrar:</label>
+            <select id="f-por-pagina" onchange="cambiarTamañoPagina()" style="padding: 5px 10px; border-radius: 6px; border: 1px solid #cbd5e1; outline: none;">
+                <option value="10">10 registros</option>
+                <option value="20">20 registros</option>
+                <option value="30">30 registros</option>
+                <option value="40">40 registros</option>
+                <option value="50">50 registros</option>
+                <option value="500">500 registros</option>
+            </select>
+        </div>
+        <div id="info-paginacion" style="font-size: 13px; color: #64748b; font-weight: 500;">
+            Mostrando 0 - 0 de 0 registros
+        </div>
+        <div id="controles-paginacion" style="display: flex; gap: 5px;"></div>
     </div>
 
     <div class="tabla-box">
         <table>
             <thead>
                 <tr>
-                    <th>Fecha</th>
-                    <th>Folio</th>
+                    <th style="width: 90px;">Fecha</th>
+                    <th style="width: 80px;">Folio</th>
                     <th>Paciente / Población</th>
-                    <th>Edad</th>
+                    <th style="width: 50px;">Edad</th>
+                    <th>Procedencia</th>
+                    <th>Categoría</th>
                     <th>Servicio / Estudio</th>
-                    <th>Estado</th>
-                    <th>Costo</th>
-                    <th>Acción</th>
+                    <th>Dependencia</th>
+                    <th style="width: 100px;">Estado</th>
+                    <th style="width: 120px;">Auditoría Dir.</th> <!-- NUEVA COLUMNA -->
+                    <th style="width: 70px;">Costo</th>
+                    <th class="no-print" style="width: 90px;">Acción</th>
                 </tr>
             </thead>
             <tbody id="tbody"></tbody>
         </table>
     </div>
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, onSnapshot, query, orderBy, doc, updateDoc, addDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -423,13 +539,19 @@
     let esAdmin = false;
     const usuarioActual = (sessionStorage.getItem("nombre_usuario") || "").toLowerCase().trim();
     
+    // Variables de Control para la Paginación
+    let currentFilteredList = []; 
+    let paginaActual = 1;
+    let registrosPorPagina = 10;
+    
     // --- INICIALIZACIÓN ---
     function verificarPrivilegios() {
         const contenedorFlotante = document.getElementById('contenedor-flotante');
         document.getElementById('nombre-admin-span').innerText = usuarioActual || "Invitado";
-        esAdmin = ["director.medico", "ronaldo.bencomo"].includes(usuarioActual);
-        if (esAdmin) contenedorFlotante.style.display = "flex";
-        else {
+        esAdmin = ["director.medico", "ronaldo.bencomo", "olga", "sonia"].includes(usuarioActual);
+        if (esAdmin) {
+            if(contenedorFlotante) contenedorFlotante.style.display = "flex";
+        } else {
             const btnG = document.getElementById('btn-guardar-maestro');
             if(btnG) { btnG.disabled = true; btnG.style.opacity = "0.5"; btnG.innerText = "SÓLO LECTURA"; }
         }
@@ -442,7 +564,9 @@
         const sel = document.getElementById('reg-estudio');
         sel.innerHTML = '<option value="">-- SELECCIONE --</option>';
         const ops = { 
+            'CONSULTA': ["MEDICA", "OCULISTA", "GLUCOSA", "CURACION", "CERTIFICADO MEDICO", "CERTIFICADO DE DISCAPACIDAD", "INYECCION"],
             'GABINETE': ["MASTOGRAFÍA", "TOMOGRAFÍA", "ELECTROCARDIOGRAMA", "RESONANCIAS MAGNÉTICAS", "ULTRASONIDOS", "RAYOS X", "ESTUDIO DE LABORATORIO CLÍNICO"], 
+            'ESTUDIOS': ["RADIOGRAFIAS", "ULTRASONIDOS", "ANALISIS", "ELECTROCARDIOGRAMAS", "DENTAL", "OTROS"],
             'VINCULACION': ["SERVICIOS MÉBICOS DE 2° NIVEL", "SERVICIOS MÉDICOS DE 3° NIVEL"] 
         };
         if (ops[cat]) {
@@ -454,8 +578,9 @@
     document.getElementById('reg-estudio').addEventListener('change', function() {
         const servicio = this.value;
         const dataListDep = document.getElementById('lista-dependencias');
+        if(!dataListDep) return;
         dataListDep.innerHTML = ""; 
-        const mapa = { "MASTOGRAFÍA": ["CRUZ ROJA"], "TOMOGRAFÍA": ["TOMOGRAFIA DE LOS TUXTLAS", "CRUZ ROJA", "SALUD DIGNA", "COVADONGA"], "ELECTROCARDIOGRAMA": ["CRUZ ROJA"], "RESONANCIAS MAGNÉTICAS": ["TOMOGRAFIA DE LOS TUXTLA", "COVADONGA", "SALUD DIGNA"], "ULTRASONIDOS": ["CRUZ ROJA"], "RAYOS X": ["CRUZ ROJA"], "ESTUDIO DE LABORATORIO CLÍNICO": ["LABO-MEDIC", "CRUZ ROJA"], "SERVICIOS MÉDICOS DE 2° NIVEL": ["IMSS", "ISSSTE", "HOSP. DR. BERNARDO PEÑA"], "SERVICIOS MÉDICOS DE 3° NIVEL": ["CECAN (CENTRO DE CANCEROLOGÍA)", "CAEV (CENTRO DE ALTA ESPECIALIDAD DE VERACRUZ)"] };
+        const mapa = { "MASTOGRAFÍA": ["CRUZ ROJA"], "TOMOGRAFÍA": ["TOMOGRAFIA DE LOS TUXTLAS", "CRUZ ROJA", "SALUD DIGNA", "COVADONGA"], "ELECTROCARDIOGRAMA": ["CRUZ ROJA"], "RESONANCIAS MAGNÉTICAS": ["TOMOGRAFIA DE LOS TUXTLA", "COVADONGA", "SALUD DIGNA"], "ULTRASONIDOS": ["CRUZ ROJA"], "RAYOS X": ["CRUZ ROJA"], "ESTUDIO DE LABORATORIO CLÍNICO": ["LABO-MEDIC", "CRUZ ROJA"], "SERVICIOS MÉBICOS DE 2° NIVEL": ["IMSS", "ISSSTE", "HOSP. DR. BERNARDO PEÑA"], "SERVICIOS MÉDICOS DE 3° NIVEL": ["CECAN (CENTRO DE CANCEROLOGÍA)", "CAEV (CENTRO DE ALTA ESPECIALIDAD DE VERACRUZ)"] };
         (mapa[servicio] || []).forEach(dep => { let opt = document.createElement('option'); opt.value = dep; dataListDep.appendChild(opt); });
     });
 
@@ -465,13 +590,11 @@
         run();
     });
 
-    // --- FUNCIÓN CORREGIDA PARA CALCULAR LA SEMANA SIN DESFASES ---
     const getW = (dStr) => {
         const p = dStr.split('-');
         const anio = parseInt(p[0]);
         const mes = parseInt(p[1]) - 1;
         const dia = parseInt(p[2]);
-        // Usamos UTC para evitar que la zona horaria local altere el día
         const d = new Date(Date.UTC(anio, mes, dia));
         const primerDiaMes = new Date(Date.UTC(anio, mes, 1)).getUTCDay();
         return Math.ceil((d.getUTCDate() + primerDiaMes) / 7);
@@ -482,10 +605,27 @@
         const sY = parseInt(document.getElementById('f-year').value);
         const sM = document.getElementById('f-month').value;
         const sW = document.getElementById('f-week').value;
+        const sAud = document.getElementById('f-auditoria') ? document.getElementById('f-auditoria').value : "all";
         const sS = document.getElementById('f-search').value.toLowerCase().trim();
-        const tbody = document.getElementById('tbody');
 
-        // Inicializamos los acumuladores limpios para el periodo seleccionado
+        // --- ACTUALIZACIÓN DINÁMICA DEL TÍTULO DE REPORTE (Ubicación Correcta) ---
+        const comboMes = document.getElementById('f-month');
+        const comboSem = document.getElementById('f-week');
+        const comboAud = document.getElementById('f-auditoria');
+
+        const nombreMes = comboMes.options[comboMes.selectedIndex].text;
+        const nombreSem = comboSem.options[comboSem.selectedIndex].text;
+        const nombreAud = comboAud ? comboAud.options[comboAud.selectedIndex].text : "";
+
+        let txtReporte = `Reporte Operativo: AÑO ${sY}`;
+        if (sM !== "all") txtReporte += ` | MES: ${nombreMes.toUpperCase()}`;
+        if (sW !== "all") txtReporte += ` | ${nombreSem.toUpperCase()}`;
+        if (sAud !== "all" && sAud !== "activos") txtReporte += ` (${nombreAud})`;
+
+        const labelPrint = document.getElementById('titulo-reporte-print');
+        if (labelPrint) labelPrint.innerText = txtReporte;
+        // ------------------------------------------------------------------------
+
         let stats = { 
             caja: 0, 
             valid: 0, 
@@ -503,34 +643,58 @@
             const fStr = p.fecha_cap || "";
             if(!fStr) return;
             
-            // Extracción directa de texto para evitar errores de zona horaria local
-            const parts = fStr.split('-');
-            const regYear = parseInt(parts[0]);
-            const regMonth = parseInt(parts[1]) - 1; // Base 0 para alinearse con selectores
+            const pAnio = fStr.split('-');
+            const regYear = parseInt(pAnio[0]);
+            const regMonth = parseInt(pAnio[1]) - 1; 
             const wNum = getW(fStr);
 
-            // Validamos contra los filtros seleccionados en la interfaz
+            const tipoPoblacionNormalizado = p.tipo_poblacion || p.tipo_pob || 'POBLACION EN GENERAL';
+            let servicioNormalizado = p.estudio_servicio || p.servicio || 'GENERAL';
+            if (p.tipo_estudio) {
+                servicioNormalizado = Array.isArray(p.tipo_estudio) ? p.tipo_estudio.join(', ') : p.tipo_estudio;
+            }
+            const procedenciaNormalizada = p.procedencia || p.lugar || 'NO REGISTRADO';
+            const estadoReg = (p.estado || "").toUpperCase().trim();
+            const isValidado = p.validado_dir === "SI";
+
             const matchesYear = (regYear === sY);
             const matchesMonth = (sM === "all" || regMonth === parseInt(sM));
             const matchesWeek = (sW === "all" || wNum.toString() === sW);
-            const matchesSearch = ((p.nombre || "").toLowerCase().includes(sS) || (p.folio_str || "").toLowerCase().includes(sS));
+            const matchesSearch = (
+                (p.nombre || "").toLowerCase().includes(sS) || 
+                (p.folio_str || "").toLowerCase().includes(sS) || 
+                procedenciaNormalizada.toLowerCase().includes(sS)
+            );
 
-            if (matchesYear && matchesMonth && matchesWeek && matchesSearch) {
-                // Definir título del separador visual en la tabla
+            // Filtro de Auditoría de la Dirección
+            let matchesAuditoria = true;
+            if (sAud === "activos") {
+                matchesAuditoria = (estadoReg !== "CANCELADO");
+            } else if (sAud === "cancelados_todos") {
+                matchesAuditoria = (estadoReg === "CANCELADO");
+            } else if (sAud === "pendientes_validar") {
+                matchesAuditoria = (estadoReg === "CANCELADO" && !isValidado);
+            } else if (sAud === "validados") {
+                matchesAuditoria = (estadoReg === "CANCELADO" && isValidado);
+            }
+
+            if (matchesYear && matchesMonth && matchesWeek && matchesSearch && matchesAuditoria) {
                 const titulo = (sM === "all") ? mesesNombres[regMonth] : `SEMANA ${wNum}`;
                 if(!grupos[titulo]) grupos[titulo] = [];
-                grupos[titulo].push(p);
+                
+                grupos[titulo].push({
+                    ...p,
+                    _poblacion: tipoPoblacionNormalizado,
+                    _servicio: servicioNormalizado,
+                    _procedencia: procedenciaNormalizada
+                });
 
-                // --- PROCESAMIENTO ECONÓMICO (Aquí se realiza la magia del periodo) ---
                 const costo = parseFloat(p.costo || 0);
                 stats.caja += costo; 
                 stats.total++;
                 
-                if(p.validado_dir === "SI") {
-                    stats.valid += costo;
-                }
+                if(p.validado_dir === "SI" || p.estado === "ATENDIDO") stats.valid += costo;
 
-                // --- ESTADÍSTICAS COMPLEMENTARIAS ---
                 const edad = parseInt(p.edad || 0);
                 if(edad > 0) {
                     if(edad <= 12) stats.poblacion["Niños"]++; 
@@ -539,39 +703,18 @@
                 }
                 
                 stats.cats[p.consulta_estudios || "Otros"] = (stats.cats[p.consulta_estudios || "Otros"] || 0) + 1;
-                stats.servs[p.estudio_servicio || "Gral"] = (stats.servs[p.estudio_servicio || "Gral"] || 0) + 1;
+                stats.servs[p.estudio_servicio || p.servicio || "Otros"] = (stats.servs[p.estudio_servicio || p.servicio || "Otros"] || 0) + 1;
                 costo > 0 ? stats.econ["Con Cuota"]++ : stats.econ["Gratuitos"]++;
             }
         });
 
-        // Generar las filas de la tabla de manera reactiva
-        tbody.innerHTML = Object.keys(grupos).map(nombreGrupo => {
-            let filas = `<tr><td colspan="8" class="sem-label">${nombreGrupo}</td></tr>`;
-            filas += grupos[nombreGrupo].map(p => {
-                const isV = p.validado_dir === "SI";
-                return `<tr>
-                    <td><b>${p.fecha_cap}</b></td>
-                    <td><span class="badge-folio">${p.folio_str || 'S/F'}</span></td>
-                    <td><span style="font-weight: 600; color: #0f172a; text-transform:uppercase;">${p.nombre}</span><br><span style="font-size:10px; color:#64748b;">${p.tipo_poblacion || 'GENERAL'}</span></td>
-                    <td><small>${p.edad || '-'}</small></td>
-                    <td><b>${p.estudio_servicio || 'SERVICIO'}</b></td>
-                    <td><span class="badge ${isV?'b-ok':'b-pend'}">${isV?'VALIDADO':'PENDIENTE'}</span></td>
-                    <td style="font-weight:800;">$${parseFloat(p.costo||0).toFixed(2)}</td>
-                    <td>
-                        <div style="display:flex; gap:10px;">
-                            ${esAdmin ? `
-                                ${isV ? '<span style="color:var(--g)"><i class="fas fa-check-circle"></i></span>' : `<button onclick="firmarEntrega('${p.id}')" style="color:var(--s); border:none; background:none; cursor:pointer;"><i class="fas fa-pen-fancy"></i></button>`}
-                                <button onclick="prepararEdicion('${p.id}')" style="color:var(--warn); border:none; background:none; cursor:pointer;"><i class="fas fa-edit"></i></button>
-                                <button onclick="borrarRegistro('${p.id}')" style="color:var(--p); border:none; background:none; cursor:pointer;"><i class="fas fa-trash"></i></button>
-                            ` : '<i class="fas fa-lock" style="color:#cbd5e1"></i>'}
-                        </div>
-                    </td>
-                </tr>`;
-            }).join('');
-            return filas;
-        }).join('');
+        currentFilteredList = [];
+        Object.keys(grupos).forEach(nombreGrupo => {
+            grupos[nombreGrupo].forEach(p => {
+                currentFilteredList.push({ ...p, _grupoAsignado: nombreGrupo });
+            });
+        });
 
-        // Inyección de los totales actualizados dinámicamente en los Cards superiores
         document.getElementById('t-caja').innerText = `$${stats.caja.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         document.getElementById('t-validado').innerText = `$${stats.valid.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         document.getElementById('t-pacientes').innerText = stats.total;
@@ -580,24 +723,220 @@
         renderList('res-categorias', stats.cats);
         renderList('res-servicios', stats.servs);
         renderList('res-economico', stats.econ);
+
+        renderizarTablaPaginada();
     };
 
     const renderList = (id, obj) => { const el = document.getElementById(id); if (el) el.innerHTML = Object.entries(obj).map(([k, v]) => `<li><span>${k}</span><b>${v}</b></li>`).join(''); };
+
+    // --- LÓGICA EXCLUSIVA DE PAGINACIÓN ---
+    window.cambiarTamañoPagina = () => {
+        registrosPorPagina = parseInt(document.getElementById('f-por-pagina').value);
+        paginaActual = 1; 
+        renderizarTablaPaginada();
+    };
+
+const renderizarTablaPaginada = () => {
+        const totalRegistros = currentFilteredList.length;
+        const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina) || 1;
+
+        if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+
+        const indiceInicial = (paginaActual - 1) * registrosPorPagina;
+        const indiceFinal = Math.min(indiceInicial + registrosPorPagina, totalRegistros);
+        
+        const registrosPaginaActual = currentFilteredList.slice(indiceInicial, indiceFinal);
+
+        const gruposPaginados = {};
+        registrosPaginaActual.forEach(p => {
+            if (!gruposPaginados[p._grupoAsignado]) gruposPaginados[p._grupoAsignado] = [];
+            gruposPaginados[p._grupoAsignado].push(p);
+        });
+
+        const tbody = document.getElementById('tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = Object.keys(gruposPaginados).map(nombreGrupo => {
+            let filas = `<tr><td colspan="12" class="sem-label" style="background:#e2e8f0; font-weight:bold; padding:8px;">${nombreGrupo}</td></tr>`;
+            filas += gruposPaginados[nombreGrupo].map(p => {
+                const isV = p.validado_dir === "SI" || p.estado === "ATENDIDO";
+                const estadoReg = (p.estado || "").toUpperCase().trim();
+                
+                // Separamos correctamente la clase y los estilos inline en variables distintas
+                let badgeClass = "badge b-pend";
+                let badgeStyle = "";
+                let textoEstado = "PENDIENTE";
+                
+                if(estadoReg === "CANCELADO") {
+                    badgeClass = "badge";
+                    badgeStyle = 'style="background-color: #ef4444; color: white;"';
+                    textoEstado = "CANCELADO";
+                } else if(isV) {
+                    badgeClass = "badge b-ok";
+                    textoEstado = "VALIDADO";
+                }
+
+                return `<tr>
+                    <td><b>${p.fecha_cap}</b></td>
+                    <td><span class="badge-folio">${p.folio_str || 'S/F'}</span></td>
+                    <td>
+                        <span style="font-weight: 600; color: #0f172a; text-transform:uppercase;">${p.nombre}</span><br>
+                        <span style="font-size:10px; color:#64748b;">${p._poblacion}</span>
+                    </td>
+                    <td><small>${p.edad || '-'}</small></td>
+                    <td><span style="text-transform:uppercase; font-size:12px;">${p._procedencia}</span></td>
+                    <td><small class="badge-categoria" style="font-size:11px; color:#475569;">${p.consulta_estudios || '-'}</small></td>
+                    <td><b style="font-size:12px;">${p._servicio}</b></td>
+                    <td><span style="text-transform:uppercase; font-size:12px; color:#0369a1; font-weight:500;">${p.dependencia || 'NINGUNA'}</span></td>
+                    <td><span class="${badgeClass}" ${badgeStyle}>${textoEstado}</span></td>
+                    
+                    <!-- COLUMNA AUDITORÍA DIRECCIÓN -->
+                    <td style="text-align: center;">
+                        ${p.validado_dir === "SI" 
+                            ? '<span style="color:#059669; font-weight:bold; font-size:11px;"><i class="fas fa-check-circle"></i> FIRMADO</span>' 
+                            : (esAdmin ? `<button onclick="firmarEntrega('${p.id}')" style="color:var(--s); border:none; background:none; cursor:pointer; font-size:13px;" title="Firmar Validación de Dirección"><i class="fas fa-pen-fancy"></i></button>` : '<span style="color:#94a3b8; font-size:11px;">-</span>')}
+                    </td>
+
+                    <td style="font-weight:800; color:#1e293b;">$${parseFloat(p.costo||0).toFixed(2)}</td>
+                    <td>
+                        <div style="display:flex; gap:10px; justify-content: center;">
+                            ${esAdmin ? `
+                                <button onclick="prepararEdicion('${p.id}')" style="color:var(--warn); border:none; background:none; cursor:pointer;" title="Editar"><i class="fas fa-edit"></i></button>
+                                <button onclick="borrarRegistro('${p.id}')" style="color:var(--p); border:none; background:none; cursor:pointer;" title="Eliminar"><i class="fas fa-trash"></i></button>
+                            ` : '<i class="fas fa-lock" style="color:#cbd5e1"></i>'}
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+            return filas;
+        }).join('');
+
+        const infoPag = document.getElementById('info-paginacion');
+        if (infoPag) {
+            infoPag.innerText = totalRegistros > 0 
+                ? `Mostrando ${indiceInicial + 1} - ${indiceFinal} de ${totalRegistros} registros`
+                : `Mostrando 0 - 0 de 0 registros`;
+        }
+
+        construirControlesPaginacion(totalPaginas);
+    };
+
+    const construirControlesPaginacion = (totalPaginas) => {
+        const contenedor = document.getElementById('controles-paginacion');
+        if (!contenedor) return;
+        contenedor.innerHTML = '';
+
+        if (totalPaginas <= 1) return;
+
+        const btnAnt = document.createElement('button');
+        btnAnt.style = "padding: 5px 10px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; border-radius: 4px;";
+        btnAnt.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        btnAnt.disabled = paginaActual === 1;
+        btnAnt.onclick = () => { paginaActual--; renderizarTablaPaginada(); };
+        contenedor.appendChild(btnAnt);
+
+        for (let i = 1; i <= totalPaginas; i++) {
+            if (i === 1 || i === totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1)) {
+                const btnNum = document.createElement('button');
+                btnNum.style = `padding: 5px 10px; border: 1px solid #cbd5e1; cursor: pointer; border-radius: 4px; ${i === paginaActual ? 'background: #3b82f6; color: white; font-weight: bold;' : 'background: #fff;'}`;
+                btnNum.innerText = i;
+                btnNum.onclick = () => { paginaActual = i; renderizarTablaPaginada(); };
+                contenedor.appendChild(btnNum);
+            } else if (i === 2 || i === totalPaginas - 1) {
+                const elipsis = document.createElement('span');
+                elipsis.innerText = '...';
+                elipsis.style.padding = '0 5px';
+                elipsis.style.color = '#94a3b8';
+                contenedor.appendChild(elipsis);
+            }
+        }
+
+        const btnSig = document.createElement('button');
+        btnSig.style = "padding: 5px 10px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer; border-radius: 4px;";
+        btnSig.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        btnSig.disabled = paginaActual === totalPaginas;
+        btnSig.onclick = () => { paginaActual++; renderizarTablaPaginada(); };
+        contenedor.appendChild(btnSig);
+    };
 
     // --- ACCIONES DE DATOS ---
     let editandoID = null;
     window.guardarRegistro = async () => {
         if(!esAdmin) return;
-        const datos = { nombre: document.getElementById('reg-nombre').value.toUpperCase(), edad: document.getElementById('reg-edad').value, tipo_poblacion: document.getElementById('reg-poblacion').value, procedencia: document.getElementById('reg-procedencia').value.toUpperCase(), consulta_estudios: document.getElementById('reg-categoria').value, estudio_servicio: document.getElementById('reg-estudio').value, dependencia: document.getElementById('reg-dependencia').value.toUpperCase(), costo: parseFloat(document.getElementById('reg-costo').value || 0), fecha_cap: new Date().toISOString().split('T')[0], t: new Date().toISOString() };
-        try { editandoID ? await updateDoc(doc(db, "area_medica_v2", editandoID), datos) : await addDoc(collection(db, "area_medica_v2"), { ...datos, folio: "HM-"+Math.floor(Math.random()*10000), validado_dir: "NO" }); alert("Listo"); document.getElementById('form-registro').reset(); editandoID = null; } catch (e) { alert(e.message); }
+        
+        const shortId = Math.floor(1000 + Math.random() * 9000);
+        const nuevoFolio = `HM-${shortId}`;
+
+        const datos = { 
+            nombre: document.getElementById('reg-nombre').value.toUpperCase().trim(), 
+            edad: document.getElementById('reg-edad').value, 
+            tipo_poblacion: document.getElementById('reg-poblacion').value, 
+            procedencia: document.getElementById('reg-procedencia').value.toUpperCase(), 
+            consulta_estudios: document.getElementById('reg-categoria').value, 
+            estudio_servicio: document.getElementById('reg-estudio').value, 
+            dependencia: document.getElementById('reg-dependencia').value.toUpperCase(), 
+            costo: parseFloat(document.getElementById('reg-costo').value || 0), 
+            fecha_cap: new Date().toISOString().split('T')[0], 
+            t: new Date().getTime() 
+        };
+
+        try { 
+            if(editandoID) {
+                await updateDoc(doc(db, "area_medica_v2", editandoID), datos);
+            } else {
+                await addDoc(collection(db, "area_medica_v2"), { 
+                    ...datos, 
+                    folio_str: nuevoFolio, 
+                    validado_dir: "NO",
+                    estado: "ATENDIDO"
+                });
+            }
+            alert("Registro guardado con éxito"); 
+            document.getElementById('form-registro').reset(); 
+            actualizarOpciones(); 
+            editandoID = null; 
+        } catch (e) { 
+            alert("Error al guardar: " + e.message); 
+        }
     };
-    window.firmarEntrega = async (id) => { if(prompt("PIN:") === "1234") await updateDoc(doc(db, "area_medica_v2", id), { validado_dir: "SI" }); };
-    window.borrarRegistro = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "area_medica_v2", id)); };
-    window.prepararEdicion = (id) => { const p = DB_RAW.find(i => i.id === id); if(!p) return; document.getElementById('reg-nombre').value = p.nombre; document.getElementById('reg-categoria').value = p.consulta_estudios; actualizarOpciones(); document.getElementById('reg-estudio').value = p.estudio_servicio; document.getElementById('reg-dependencia').value = p.dependencia || ""; document.getElementById('reg-costo').value = p.costo; document.getElementById('reg-edad').value = p.edad; editandoID = id; window.scrollTo(0,0); };
+
+    window.firmarEntrega = async (id) => { 
+        if(prompt("PIN DE DIRECCIÓN:") === "1234") {
+            await updateDoc(doc(db, "area_medica_v2", id), { validado_dir: "SI", estado: "ATENDIDO" }); 
+        } 
+    };
+    
+    window.borrarRegistro = async (id) => { if(confirm("¿Eliminar de forma permanente este registro?")) await deleteDoc(doc(db, "area_medica_v2", id)); };
+    
+    window.prepararEdicion = (id) => { 
+        const p = DB_RAW.find(i => i.id === id); 
+        if(!p) return; 
+        document.getElementById('reg-nombre').value = p.nombre; 
+        document.getElementById('reg-edad').value = p.edad; 
+        document.getElementById('reg-poblacion').value = p.tipo_poblacion || p.tipo_pob || "POBLACION EN GENERAL"; 
+        document.getElementById('reg-procedencia').value = p.procedencia || p.lugar || ""; 
+        document.getElementById('reg-categoria').value = p.consulta_estudios || ""; 
+        actualizarOpciones(); 
+        
+        let valorServicio = p.estudio_servicio || p.servicio || "";
+        if(p.tipo_estudio) {
+            valorServicio = Array.isArray(p.tipo_estudio) ? p.tipo_estudio[0] : p.tipo_estudio;
+        }
+        document.getElementById('reg-estudio').value = valorServicio; 
+        
+        document.getElementById('reg-dependencia').value = p.dependencia || ""; 
+        document.getElementById('reg-costo').value = p.costo || 0; 
+        editandoID = id; 
+        window.scrollTo({ top: 0, behavior: 'smooth' }); 
+    };
+    
     window.cerrarSesion = () => { sessionStorage.clear(); window.location.href = "index.html"; };
     
     const sy = document.getElementById('f-year');
-    for(let i=new Date().getFullYear(); i>=2024; i--) { let o = document.createElement('option'); o.value=i; o.innerText=i; sy.appendChild(o); }
+    if(sy) {
+        sy.innerHTML = "";
+        for(let i=new Date().getFullYear(); i>=2024; i--) { let o = document.createElement('option'); o.value=i; o.innerText=i; sy.appendChild(o); }
+    }
 </script>
 </body>
 </html>
