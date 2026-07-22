@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SISTEMA CRISAT - Gestión Clínica Pro</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { 
+            --primary: #0284c7; 
+            --accent: #0ea5e9; 
+            --bg: #f1f5f9; 
+            --text: #334155; 
+            --border: #cbd5e1; 
+            --crisat: #0891b2;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --warning: #ca8a04;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 20px; color: var(--text); }
+        
+        .form-container, .table-container { 
+            background: white; padding: 30px; border-radius: 15px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 1300px; margin: 0 auto 30px auto; 
+        }
+
+        .header-crisat { text-align: center; margin-bottom: 30px; border-bottom: 3px solid var(--crisat); padding-bottom: 10px; }
+        
+        fieldset { 
+            border: 1px solid var(--border); border-radius: 10px; padding: 20px; 
+            margin-bottom: 25px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; 
+        }
+        legend { font-weight: 800; color: var(--crisat); padding: 0 12px; font-size: 0.85rem; text-transform: uppercase; }
+
+        .field { display: flex; flex-direction: column; gap: 5px; }
+        .field input, .field select, .field textarea { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-family: inherit; }
+        .field label { font-size: 0.8rem; font-weight: 700; margin-bottom: 2px; }
+
+        .full-width { grid-column: span 4; }
+        .span-2 { grid-column: span 2; }
+
+        .services-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; grid-column: span 4; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.8rem; }
+
+        .btn-save { 
+            background: var(--crisat); color: white; border: none; padding: 16px; border-radius: 8px; 
+            font-weight: 800; cursor: pointer; width: 100%; text-transform: uppercase; 
+            display: flex; justify-content: center; gap: 10px; font-size: 1rem; transition: 0.3s;
+        }
+        .btn-save:hover { background: #0e7490; transform: translateY(-2px); }
+
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; table-layout: fixed; }
+        th { background-color: var(--crisat); color: white; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #e2e8f0; vertical-align: top; word-wrap: break-word; }
+        
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; display: inline-block; margin-top: 5px; }
+        .asistencia-ok { background: #dcfce7; color: #166534; }
+        .alerta-roja { background: #fee2e2; color: #991b1b; }
+        
+        .btn-action { border: none; padding: 8px 10px; margin: 0 2px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .btn-edit { background: #fef3c7; color: #92400e; }
+        .btn-delete { background: #fee2e2; color: #991b1b; }
+        .btn-alert { background: #dc2626; color: white; font-weight: bold; animation: pulse 1.5s infinite; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        
+        input[type="radio"], input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
+
+        /* Semáforos */
+        .pill { padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; display: inline-block; margin: 4px 0; }
+        .pill-hoy { background: #0284c7; color: white; }
+        .pill-proxima { background: #eab308; color: white; }
+        .pill-tiempo { background: #22c55e; color: white; }
+        .pill-alta { background: #0284c7; color: white; }
+        .pill-baja { background: #991b1b; color: white; }
+
+        .cita-hoy-destacada { background-color: #e0f2fe !important; border-left: 5px solid #0284c7 !important; }
+        .cita-proxima { background-color: #fefce8 !important; border-left: 5px solid #eab308 !important; }
+        .alerta-4faltas { background-color: #fef2f2 !important; border-left: 5px solid #dc2626 !important; }
+
+        .dias-box { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; }
+        .dias-box label { display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer; }
+
+        /* MODALES ESTILIZADOS */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); justify-content: center; align-items: center; }
+        .modal-content { background-color: white; padding: 25px; border-radius: 16px; width: 90%; max-width: 520px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); animation: modalIn 0.25s ease-out; }
+        @keyframes modalIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        .modal-header { display: flex; align-items: center; gap: 12px; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; }
+        .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .modal-btn-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn-modal { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; transition: 0.2s; }
+        .btn-modal:hover { filter: brightness(0.95); }
+
+        /* NOTIFICACIONES TOAST ESTILIZADAS */
+        #toastContainer { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-radius: 10px; color: white; font-weight: 600; font-size: 0.9rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); min-width: 280px; }
+        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast-success { background: #10b981; }
+        .toast-danger { background: #ef4444; }
+        .toast-warning { background: #f59e0b; }
+        .toast-info { background: #3b82f6; }
+
+        /* ESTILOS DE BARRA DE HERRAMIENTAS Y PAGINACIÓN */
+        .table-tools { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; }
+        .search-box { flex-grow: 1; max-width: 450px; position: relative; }
+        .search-box input { width: 100%; padding: 10px 12px 10px 38px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; outline: none; }
+        .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; }
+        
+        .pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px; }
+        .pagination-btns { display: flex; gap: 6px; align-items: center; }
+        .btn-page { padding: 6px 14px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--text); }
+        .btn-page:disabled { opacity: 0.4; cursor: not-allowed; }
+        .btn-page.active { background: var(--crisat); color: white; border-color: var(--crisat); }
+
+        .btn-print { background: #0284c7; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-print:hover { background: #0369a1; }
+
+        /* ESTILOS DE IMPRESIÓN EXCLUSIVA */
+        @media print {
+            body { background: white; color: black; padding: 0; margin: 0; }
+            .form-container, .header-crisat, .no-print, .modal, #toastContainer, .pagination-container, .btn-action, fieldset { display: none !important; }
+            .table-container { box-shadow: none; padding: 0; margin: 0; max-width: 100%; width: 100%; }
+            table { width: 100%; font-size: 9pt; border-collapse: collapse; }
+            th, td { border: 1px solid #cbd5e1 !important; padding: 6px !important; color: black !important; background: transparent !important; }
+            .pill, .badge { border: 1px solid #94a3b8; color: black !important; background: transparent !important; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- CONTENEDOR DE NOTIFICACIONES TOAST -->
+<div id="toastContainer"></div>
+
+<div class="form-container no-print">
+    <div class="header-crisat">
+        <h2>SISTEMA CRISAT - REHABILITACIÓN</h2>
+        <small>Módulo de Control Clínico y Citas Recurrentes</small>
+    </div>
+
+    <form id="formCrisat">
+    <input type="hidden" id="editId" value="">
+    
+    <fieldset>
+        <legend><i class="fas fa-calendar-plus"></i> Carga Masiva de Fechas</legend>
+        <div class="field full-width">
+            <label>Pegar fechas (formato AAAA-MM-DD, una por línea):</label>
+            <textarea id="masiva_fechas" rows="2" placeholder="2026-06-02&#10;2026-06-09&#10;2026-06-16"></textarea>
+            <small style="color: #64748b;">* Si está vacío, solo se guardará la fecha individual seleccionada abajo.</small>
+        </div>
+    </fieldset> 
+
+    <fieldset>
+        <legend><i class="fas fa-calendar-check"></i> Control de Cita y Frecuencia</legend>
+        <div class="field"><label>Fecha Captura</label><input type="date" id="fecha_captura" readonly></div>
+        <div class="field"><label>Fecha Cita *</label><input type="date" id="fecha_cita" required></div>
+        <div class="field"><label>Hora Cita *</label><input type="time" id="hora_cita" required></div>
+        <div class="field"><label>No. Expediente *</label><input type="text" id="expediente" placeholder="CR-000"></div>
+        <div class="field">
+            <label>Estatus Cita</label>
+            <select id="estatus" onchange="window.toggleCamposEspeciales()">
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="ASISTIÓ">Asistió</option>
+                <option value="FALTÓ">Faltó</option>
+            </select>
+        </div>
+        <div class="field"><label>Cuota ($)</label><input type="number" id="cuota" value="0" step="0.01"></div>
+        <div class="field">
+            <label>Terapeuta</label>
+            <select id="nombre_terapeuta">
+                <option value="">-- SELECCIONE --</option>
+                <option value="Nelly">Nelly</option>
+                <option value="Pamela">Pamela</option>
+                <option value="Oscar">Oscar</option>
+                <option value="Gena">Gena</option>
+                <option value="Luis">Luis</option>
+                <option value="Javier">Javier</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Estatus Expediente</label>
+            <select id="estatus_expediente">
+                <option value="EN TRATAMIENTO">🟢 En Tratamiento</option>
+                <option value="ALTA MÉDICA">🔵 Alta Médica</option>
+                <option value="BAJA POR INASISTENCIA">🔴 Baja por Inasistencia</option>
+            </select>
+        </div>
+
+        <div class="field span-2">
+            <label>Días Habituales de Atención:</label>
+            <div class="dias-box">
+                <label><input type="checkbox" class="chk-dia" value="1"> Lun</label>
+                <label><input type="checkbox" class="chk-dia" value="2"> Mar</label>
+                <label><input type="checkbox" class="chk-dia" value="3"> Mié</label>
+                <label><input type="checkbox" class="chk-dia" value="4"> Jue</label>
+                <label><input type="checkbox" class="chk-dia" value="5"> Vie</label>
+            </div>
+        </div>
+
+        <div class="field span-2" id="box_justificante" style="display: none;">
+            <label style="color: var(--danger);">Justificación de Falta:</label>
+            <input type="text" id="motivo_justificacion" placeholder="Escriba la causa de la inasistencia...">
+        </div>
+    </fieldset>
+    
+    <fieldset>
+        <legend><i class="fas fa-user-injured"></i> Datos Personales</legend>
+        
+        <div class="field span-2"><label>CURP</label><input type="text" id="curp" style="text-transform:uppercase;"></div>
+        <div class="field span-2"><label>Nombre del Paciente *</label><input type="text" id="nombre" required></div>
+        
+        <div class="field"><label>Sexo</label><select id="sexo"><option value="H">Hombre</option><option value="M">Mujer</option></select></div>
+        <div class="field"><label>F. Nacimiento</label><input type="date" id="fecha_nacimiento" onchange="window.calcularEdad()"></div>
+        <div class="field"><label>Edad</label><input type="number" id="edad" readonly></div>
+        <div class="field"><label>Municipio</label><input type="text" id="municipio" value="SAN ANDRÉS TUXTLA"></div>
+        
+        <div class="field span-2">
+            <label>Ubicación</label>
+            <div style="display: flex; gap: 20px; align-items: center;">
+                <div style="display: flex; flex-direction: column; gap: 8px; min-width: 100px;">
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <input type="radio" name="tipo_ubicacion" value="COLONIA" checked> Colonia
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 8px;">
+                        <input type="radio" name="tipo_ubicacion" value="LOCALIDAD"> Localidad
+                    </label>
+                </div>
+                <input type="text" id="col_loc" placeholder="Nombre de la colonia o localidad..." style="flex-grow: 1;">
+            </div>
+        </div>
+        
+        <div class="field span-2"><label>Dirección</label><input type="text" id="direccion"></div>
+        <div class="field"><label>Teléfono</label><input type="tel" id="telefono"></div>
+    </fieldset>
+
+    <fieldset>
+        <legend><i class="fas fa-file-medical"></i> Valoración Clínica</legend>
+        <div class="field full-width"><label>Diagnóstico Médico</label><textarea id="diagnostico" rows="2"></textarea></div>
+        <div class="field"><label>¿Discapacidad?</label><select id="discapacidad"><option value="no">No</option><option value="si">Sí</option></select></div>
+        <div class="field"><label>Tipo Limitación</label><select id="tipo_discapacidad"><option value="MOTORA">Motora</option><option value="AUDITIVO">Auditivo</option><option value="INTELECTUAL">Intelectual</option><option value="LENGUAJE">Lenguaje</option></select></div>
+        <div class="field"><label>Grado</label><select id="grado"><option value="LEVE">Leve</option><option value="MODERADO">Moderado</option><option value="SEVERO">Severo</option></select></div>
+        <div class="field"><label>Duración</label><select id="duracion"><option value="TEMPORAL">Temporal</option><option value="PERMANENTE">Permanente</option></select></div>
+    </fieldset>
+
+    <fieldset>
+        <legend><i class="fas fa-hand-holding-medical"></i> Plan de Tratamiento (Evolución Clinica)</legend>
+        <div class="services-container">
+            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="HIDROTERAPIA"><label>Hidroterapia</label></div>
+            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="MECANOTERAPIA"><label>Mecanoterapia</label></div>
+            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="COMPRESAS"><label>Compresas</label></div>
+            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="PARAFINA"><label>Parafina</label></div>
+            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="ELECTROTERAPIA"><label>Electroterapia</label></div>
+            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="ULTRASONIDO"><label>Ultrasonido</label></div>
+            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="LASER"><label>Laser</label></div>
+            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="TERAPIA OCUPACIONAL"><label>T. Ocupacional</label></div>
+            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="PROGRAMA DE CASA"><label>Prog. Casa</label></div>
+            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="TERAPIA LENGUAJE"><label>T. Lenguaje</label></div>
+            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="INFRAROJO"><label>Infrarrojo</label></div>
+            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="CRIOTERAPIA"><label>Crioterapia</label></div>
+            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="MASAJE"><label>Masaje</label></div>
+        </div>
+    </fieldset>
+
+    <button type="button" class="btn-save" id="btnGuardar">
+        <i class="fas fa-save"></i> Guardar y Sincronizar
+    </button>
+</form>
+</div>
+
+<!-- MODAL CONFIRMACIÓN GENÉRICA -->
+<div id="modalConfirm" class="modal">
+    <div class="modal-content">
+        <div class="modal-header" id="modalConfirmTitulo" style="color: var(--primary);">
+            <i class="fas fa-question-circle"></i> Confirmación
+        </div>
+        <div id="modalConfirmMensaje" style="font-size:0.95rem; line-height: 1.5; color: var(--text);"></div>
+        <div class="modal-btn-row">
+            <button class="btn-modal" style="background:#e2e8f0; color:#334155;" id="btnConfirmCancelar">Cancelar</button>
+            <button class="btn-modal" style="background:var(--crisat); color:white;" id="btnConfirmAceptar">Aceptar</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PROGRAMAR PRÓXIMA CITA (CON OPCIÓN A CAMBIAR TERAPEUTA) -->
+<div id="modalReprogramar" class="modal">
+    <div class="modal-content">
+        <div class="modal-header" style="color: var(--crisat);">
+            <i class="fas fa-calendar-alt"></i> Programar Próxima Cita
+        </div>
+        <p id="txtReprogramarInfo" style="font-size:0.9rem; margin-bottom:15px;"></p>
+        
+        <div class="field" style="margin-bottom: 12px;">
+            <label>Fecha de la Nueva Cita:</label>
+            <input type="date" id="reprog_fecha">
+        </div>
+
+        <div class="field" style="margin-bottom: 12px;">
+            <label>Terapeuta Asignado para la Próxima Cita:</label>
+            <select id="reprog_terapeuta">
+                <option value="">-- SELECCIONE --</option>
+                <option value="Nelly">Nelly</option>
+                <option value="Pamela">Pamela</option>
+                <option value="Oscar">Oscar</option>
+                <option value="Gena">Gena</option>
+                <option value="Luis">Luis</option>
+                <option value="Javier">Javier</option>
+            </select>
+            <small style="color:#64748b;">* Puedes cambiar el terapeuta si asistirá con otro especialista.</small>
+        </div>
+
+        <div class="modal-btn-row">
+            <button class="btn-modal" style="background:#e2e8f0; color:#334155;" id="btnReprogNo">No Agendar</button>
+            <button class="btn-modal" style="background:var(--crisat); color:white;" id="btnReprogSi">
+                <i class="fas fa-check-circle"></i> Agendar Próxima Cita
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PARA GESTIÓN DE 4 FALTAS CONSECUTIVAS -->
+<div id="modalFaltas" class="modal">
+    <div class="modal-content">
+        <h3 style="color: var(--danger); margin-bottom: 10px;"><i class="fas fa-exclamation-triangle"></i> Alerta: 4 Faltas Consecutivas</h3>
+        <p>El paciente <b id="nombreModal"></b> acumula 4 o más faltas seguidas sin asistencias intermedias.</p>
+        <p>¿Qué acción requiere aplicar en su expediente?</p>
+        
+        <div class="modal-actions">
+            <button class="btn-modal" style="background:#fef3c7; color:#92400e;" onclick="window.resolverFaltas('JUSTIFICAR')">
+                <i class="fas fa-file-signature"></i> 📝 Justificar Faltas y Mantener Activo
+            </button>
+            <button class="btn-modal" style="background:#dcfce7; color:#166534;" onclick="window.resolverFaltas('REINGRESAR')">
+                <i class="fas fa-redo"></i> 🔄 Reingresar Paciente (Reiniciar Conteo)
+            </button>
+            <button class="btn-modal" style="background:#fee2e2; color:#991b1b;" onclick="window.resolverFaltas('DAR_BAJA')">
+                <i class="fas fa-user-slash"></i> 🔴 Dar de Baja por Inasistencia
+            </button>
+            <button class="btn-modal" style="background:#e2e8f0; color:#334155; margin-top: 5px;" onclick="window.cerrarModal()">
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    <!-- BARRA DE HERRAMIENTAS: BÚSQUEDA, FILAS E IMPRESIÓN -->
+    <div class="table-tools no-print">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="inputBuscar" placeholder="Buscar por nombre, expediente, CURP, terapeuta..." oninput="window.filtrarYRenderizar()">
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <label style="font-weight: 600; font-size: 0.85rem;">Mostrar:</label>
+            <select id="selectFilas" onchange="window.cambiarFilasPorPagina(this.value)" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); font-weight: bold;">
+                <option value="10">10 filas</option>
+                <option value="20">20 filas</option>
+                <option value="30">30 filas</option>
+                <option value="40">40 filas</option>
+                <option value="50">50 filas</option>
+                <option value="500">500 filas</option>
+            </select>
+        </div>
+
+        <button type="button" class="btn-print" onclick="window.print()">
+            <i class="fas fa-print"></i> Imprimir Búsqueda
+        </button>
+    </div>
+
+    <table id="tablaGeneral">
+        <thead>
+            <tr>
+                <th style="width: 85px;">Cita</th>
+                <th style="width: 80px;">Expediente</th>
+                <th>Paciente / Diagnóstico</th>
+                <th>Dirección</th>
+                <th style="width: 80px;">Terapeuta</th>
+                <th style="width: 150px;">Terapias</th>
+                <th style="width: 110px;">Cuota / Est.</th>
+                <th style="width: 110px;" class="no-print">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="cuerpoTabla"></tbody>
+    </table>
+
+    <!-- PAGINACIÓN -->
+    <div class="pagination-container no-print">
+        <div id="txtInfoPaginacion" style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Mostrando 0 de 0 registros</div>
+        <div class="pagination-btns" id="contenedorPaginas"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", 
+        projectId: "poblacion-vulnerable---dif" 
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let cacheRegistros = [];
+    let expedienteSeleccionadoModal = null;
+
+    // Estado de paginación y filtro
+    let paginaActual = 1;
+    let filasPorPagina = 10;
+
+    // --- NOTIFICACIONES Y DIÁLOGOS ESTILIZADOS ---
+    window.mostrarToast = (mensaje, tipo = 'info') => {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast toast-${tipo}`;
+        
+        let icono = 'fa-info-circle';
+        if (tipo === 'success') icono = 'fa-check-circle';
+        if (tipo === 'danger') icono = 'fa-exclamation-circle';
+        if (tipo === 'warning') icono = 'fa-exclamation-triangle';
+
+        toast.innerHTML = `<i class="fas ${icono}"></i> <span>${mensaje}</span>`;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            toast.style.transition = '0.3s forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    };
+
+    window.mostrarConfirmacion = (titulo, mensaje) => {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('modalConfirm');
+            document.getElementById('modalConfirmTitulo').innerHTML = `<i class="fas fa-question-circle"></i> ${titulo}`;
+            document.getElementById('modalConfirmMensaje').innerText = mensaje;
+            
+            modal.style.display = 'flex';
+
+            const btnAceptar = document.getElementById('btnConfirmAceptar');
+            const btnCancelar = document.getElementById('btnConfirmCancelar');
+
+            const limpiar = () => {
+                modal.style.display = 'none';
+                btnAceptar.removeEventListener('click', onAceptar);
+                btnCancelar.removeEventListener('click', onCancelar);
+            };
+
+            const onAceptar = () => { limpiar(); resolve(true); };
+            const onCancelar = () => { limpiar(); resolve(false); };
+
+            btnAceptar.addEventListener('click', onAceptar);
+            btnCancelar.addEventListener('click', onCancelar);
+        });
+    };
+
+    window.solicitarReprogramacionModal = (proximaFecha, terapeutaActual, textoAccion, nombrePaciente) => {
+        return new Promise((resolve) => {
+            const modal = document.getElementById('modalReprogramar');
+            document.getElementById('txtReprogramarInfo').innerText = `El paciente ${nombrePaciente} ${textoAccion} su cita.`;
+            document.getElementById('reprog_fecha').value = proximaFecha;
+
+            const selectTerapeuta = document.getElementById('reprog_terapeuta');
+            let encontrada = false;
+            for (let i = 0; i < selectTerapeuta.options.length; i++) {
+                if (selectTerapeuta.options[i].value.toUpperCase() === (terapeutaActual || '').toUpperCase()) {
+                    selectTerapeuta.value = selectTerapeuta.options[i].value;
+                    encontrada = true;
+                    break;
+                }
+            }
+            if (!encontrada) selectTerapeuta.value = "";
+
+            modal.style.display = 'flex';
+
+            const btnSi = document.getElementById('btnReprogSi');
+            const btnNo = document.getElementById('btnReprogNo');
+
+            const limpiar = () => {
+                modal.style.display = 'none';
+                btnSi.removeEventListener('click', onSi);
+                btnNo.removeEventListener('click', onNo);
+            };
+
+            const onSi = () => {
+                const nuevaFecha = document.getElementById('reprog_fecha').value;
+                const nuevoTerapeuta = document.getElementById('reprog_terapeuta').value;
+                limpiar();
+                resolve({ agendar: true, fecha: nuevaFecha, terapeuta: nuevoTerapeuta });
+            };
+
+            const onNo = () => { limpiar(); resolve({ agendar: false }); };
+
+            btnSi.addEventListener('click', onSi);
+            btnNo.addEventListener('click', onNo);
+        });
+    };
+
+    // --- FUNCIONES UTILITARIAS ---
+    window.obtenerFechaLocal = () => new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
+    window.calcularEdad = () => {
+        const f = document.getElementById("fecha_nacimiento")?.value;
+        if (!f) return;
+        const hoy = new Date();
+        const cumple = new Date(f);
+        let edad = hoy.getFullYear() - cumple.getFullYear();
+        if (hoy.getMonth() < cumple.getMonth() || (hoy.getMonth() === cumple.getMonth() && hoy.getDate() < cumple.getDate())) edad--;
+        document.getElementById("edad").value = edad;
+    };
+
+    window.toggleCamposEspeciales = () => {
+        const box = document.getElementById("box_justificante");
+        if (box) box.style.display = (document.getElementById("estatus")?.value === "FALTÓ") ? "block" : "none";
+    };
+
+    function calcularProximaFechaCita(fechaBaseStr, diasSeleccionados) {
+        if (!fechaBaseStr) fechaBaseStr = window.obtenerFechaLocal();
+        let partes = fechaBaseStr.split('-');
+        if (partes.length !== 3) partes = window.obtenerFechaLocal().split('-');
+
+        let fecha = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+        if (isNaN(fecha.getTime())) fecha = new Date();
+
+        if (!diasSeleccionados || diasSeleccionados.length === 0) {
+            fecha.setDate(fecha.getDate() + 7);
+        } else {
+            let diaActualSemana = fecha.getDay();
+            let diaNormalizado = diaActualSemana === 0 ? 7 : diaActualSemana;
+
+            let diasNumeros = diasSeleccionados.map(Number).sort((a,b) => a - b);
+            let diasASumar = 0;
+
+            let siguienteDia = diasNumeros.find(d => d > diaNormalizado);
+            if (siguienteDia) {
+                diasASumar = siguienteDia - diaNormalizado;
+            } else {
+                diasASumar = (7 - diaNormalizado) + diasNumeros[0];
+            }
+            fecha.setDate(fecha.getDate() + diasASumar);
+        }
+
+        let yyyy = fecha.getFullYear();
+        let mm = String(fecha.getMonth() + 1).padStart(2, '0');
+        let dd = String(fecha.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    // --- FORMULARIO Y PROCESAMIENTO ---
+    function obtenerDatosFormulario() {
+        const servicios = [...document.querySelectorAll('.check-serv:checked')].map(c => c.value).join(', ');
+        const dias = [...document.querySelectorAll('.chk-dia:checked')].map(c => c.value);
+        const radioUbicacion = document.querySelector('input[name="tipo_ubicacion"]:checked');
+
+        return {
+            tipo_ubicacion: radioUbicacion ? radioUbicacion.value : "COLONIA",
+            col_loc: (document.getElementById('col_loc')?.value || "").toUpperCase(),
+            fecha_captura: document.getElementById('fecha_captura')?.value || window.obtenerFechaLocal(),
+            curp: (document.getElementById('curp')?.value || "").toUpperCase(),
+            nombre_terapeuta: (document.getElementById('nombre_terapeuta')?.value || "").toUpperCase(),
+            telefono: document.getElementById('telefono')?.value || "",
+            nombre_paciente: (document.getElementById('nombre')?.value || "").toUpperCase(),
+            hora: document.getElementById('hora_cita')?.value || "",
+            estatus: document.getElementById('estatus')?.value || "PENDIENTE",
+            estatus_expediente: document.getElementById('estatus_expediente')?.value || "EN TRATAMIENTO",
+            dias_atencion: dias,
+            justificacion: (document.getElementById('motivo_justificacion')?.value || "").toUpperCase(),
+            expediente: (document.getElementById('expediente')?.value || "").toUpperCase(),
+            monto: parseFloat(document.getElementById('cuota')?.value || 0),
+            servicio: servicios,
+            diagnostico: (document.getElementById('diagnostico')?.value || "").toUpperCase(),
+            departamento: "CRISAT",
+            localidad: (document.getElementById('municipio')?.value || "SAN ANDRÉS TUXTLA").toUpperCase(),
+            sexo: document.getElementById('sexo')?.value || "H",
+            fecha_nacimiento: document.getElementById('fecha_nacimiento')?.value || "",
+            edad: document.getElementById('edad')?.value || "",
+            direccion: (document.getElementById('direccion')?.value || "").toUpperCase(),
+            discapacidad: document.getElementById('discapacidad')?.value || "no",
+            tipo_discapacidad: document.getElementById('tipo_discapacidad')?.value || "MOTORA",
+            grado: document.getElementById('grado')?.value || "LEVE",
+            duracion: document.getElementById('duracion')?.value || "TEMPORAL",
+            timestamp: serverTimestamp()
+        };
+    }
+
+    async function procesarFormulario() {
+        document.getElementById('fecha_captura').value = window.obtenerFechaLocal();
+        
+        const camposRequeridos = {
+            'fecha_cita': 'Fecha de la Cita',
+            'nombre': 'Nombre del Paciente',
+            'expediente': 'No. Expediente',
+            'hora_cita': 'Hora de la Cita'
+        };
+
+        for (const [id, nombreCampo] of Object.entries(camposRequeridos)) {
+            const el = document.getElementById(id);
+            const valor = el ? el.value.trim() : '';
+            if (!valor) {
+                window.mostrarToast(`Por favor, llene el campo: ${nombreCampo}`, 'warning');
+                if (el) el.focus();
+                return;
+            }
+        }
+
+        const btn = document.getElementById('btnGuardar');
+        const idActual = document.getElementById('editId').value;
+        const fechaCitaIndividual = document.getElementById('fecha_cita').value;
+        const textoFechas = document.getElementById('masiva_fechas').value.trim();
+        const listaFechas = textoFechas ? textoFechas.split('\n').filter(f => f.trim() !== "") : [fechaCitaIndividual];
+
+        let datos = obtenerDatosFormulario();
+
+        if (datos.servicio === "" && datos.estatus_expediente === "EN TRATAMIENTO") {
+            const confirmarAlta = await window.mostrarConfirmacion(
+                "Plan de Tratamiento Vacío", 
+                "El paciente no tiene terapias seleccionadas. ¿Deseas dar de ALTA MÉDICA al paciente?"
+            );
+            if (confirmarAlta) {
+                datos.estatus_expediente = "ALTA MÉDICA";
+                document.getElementById('estatus_expediente').value = "ALTA MÉDICA";
+            }
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sincronizando...';
+
+        try {
+            if (idActual) {
+                await updateDoc(doc(db, "registros_generales", idActual), { ...datos, fecha_ISO: fechaCitaIndividual });
+                window.mostrarToast("Registro actualizado correctamente.", "success");
+            } else {
+                const batch = writeBatch(db);
+                listaFechas.forEach(f => {
+                    const docRef = doc(collection(db, "registros_generales"));
+                    batch.set(docRef, { ...datos, fecha_ISO: f.trim() });
+                });
+                await batch.commit();
+                window.mostrarToast(`¡Éxito! Se registraron ${listaFechas.length} cita(s).`, "success");
+            }
+
+            // REPROGRAMACIÓN AUTOMÁTICA CON SELECCIÓN DE TERAPEUTA
+            if ((datos.estatus === "ASISTIÓ" || datos.estatus === "FALTÓ") && datos.estatus_expediente === "EN TRATAMIENTO") {
+                const proximaFechaCalculada = calcularProximaFechaCita(fechaCitaIndividual, datos.dias_atencion);
+                const textoAccion = datos.estatus === "ASISTIÓ" ? "ASISTIÓ a" : "FALTÓ a";
+
+                const resReprog = await window.solicitarReprogramacionModal(
+                    proximaFechaCalculada, 
+                    datos.nombre_terapeuta, 
+                    textoAccion, 
+                    datos.nombre_paciente
+                );
+
+                if (resReprog.agendar) {
+                    await addDoc(collection(db, "registros_generales"), {
+                        ...datos,
+                        fecha_ISO: resReprog.fecha,
+                        nombre_terapeuta: (resReprog.terapeuta || datos.nombre_terapeuta).toUpperCase(),
+                        estatus: "PENDIENTE",
+                        justificacion: "",
+                        timestamp: serverTimestamp()
+                    });
+                    window.mostrarToast(`✅ Próxima cita agendada para el ${resReprog.fecha}.`, "success");
+                }
+            }
+
+            document.getElementById('formCrisat').reset();
+            document.getElementById('editId').value = "";
+            document.getElementById('fecha_captura').value = window.obtenerFechaLocal();
+            window.toggleCamposEspeciales();
+        } catch (e) { 
+            console.error(e);
+            window.mostrarToast("Error al procesar: " + e.message, "danger"); 
+        } finally { 
+            btn.disabled = false; 
+            btn.innerHTML = '<i class="fas fa-save"></i> Guardar y Sincronizar'; 
+        }
+    }
+
+    // --- ACCIONES Y EDICIÓN ---
+    window.prepararEdicion = (id) => {
+        const r = cacheRegistros.find(item => item.id === id);
+        if (!r) return;
+
+        document.getElementById('editId').value = id;
+        document.getElementById('nombre').value = r.nombre_paciente || "";
+        document.getElementById('curp').value = r.curp || "";
+        document.getElementById('fecha_cita').value = r.fecha_ISO || "";
+        document.getElementById('hora_cita').value = r.hora || "";
+        document.getElementById('estatus').value = r.estatus || "PENDIENTE";
+        document.getElementById('estatus_expediente').value = r.estatus_expediente || "EN TRATAMIENTO";
+        document.getElementById('expediente').value = r.expediente || "";
+        document.getElementById('cuota').value = r.monto || 0;
+        document.getElementById('diagnostico').value = r.diagnostico || "";
+        document.getElementById('municipio').value = r.localidad || "SAN ANDRÉS TUXTLA";
+        document.getElementById('sexo').value = r.sexo || "H";
+        document.getElementById('fecha_nacimiento').value = r.fecha_nacimiento || "";
+        document.getElementById('edad').value = r.edad || "";
+        document.getElementById('direccion').value = r.direccion || "";
+        document.getElementById('telefono').value = r.telefono || "";
+        document.getElementById('col_loc').value = r.col_loc || "";
+        document.getElementById('motivo_justificacion').value = r.justificacion || "";
+
+        const tSelect = document.getElementById('nombre_terapeuta');
+        const tGuardado = (r.nombre_terapeuta || "").toUpperCase();
+        let encontrada = false;
+        for (let i = 0; i < tSelect.options.length; i++) {
+            if (tSelect.options[i].value.toUpperCase() === tGuardado) {
+                tSelect.value = tSelect.options[i].value;
+                encontrada = true;
+                break;
+            }
+        }
+        if (!encontrada) tSelect.value = ""; 
+
+        const radio = document.querySelector(`input[name="tipo_ubicacion"][value="${r.tipo_ubicacion || 'COLONIA'}"]`);
+        if(radio) radio.checked = true;
+
+        const serviciosActivos = r.servicio ? r.servicio.split(', ') : [];
+        document.querySelectorAll('.check-serv').forEach(cb => cb.checked = serviciosActivos.includes(cb.value));
+
+        const diasActivos = r.dias_atencion || [];
+        document.querySelectorAll('.chk-dia').forEach(cb => cb.checked = diasActivos.includes(cb.value));
+
+        window.toggleCamposEspeciales();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.eliminarRegistro = async (id) => {
+        const confirmar = await window.mostrarConfirmacion("Eliminar Registro", "¿Estás seguro de eliminar este registro permanentemente?");
+        if(confirmar) {
+            try {
+                await deleteDoc(doc(db, "registros_generales", id));
+                window.mostrarToast("Registro eliminado con éxito.", "success");
+            } catch (error) {
+                window.mostrarToast("Error al eliminar: " + error.message, "danger");
+            }
+        }
+    };
+
+    window.autocompletarPorCurp = (curp) => {
+        if(curp.length < 18) return;
+        const p = cacheRegistros.find(r => r.curp === curp.toUpperCase());
+        if(p) {
+            document.getElementById('nombre').value = p.nombre_paciente || "";
+            document.getElementById('sexo').value = p.sexo || "H";
+            document.getElementById('fecha_nacimiento').value = p.fecha_nacimiento || "";
+            document.getElementById('direccion').value = p.direccion || "";
+            document.getElementById('col_loc').value = p.col_loc || "";
+            document.getElementById('telefono').value = p.telefono || "";
+            document.getElementById('expediente').value = p.expediente || "";
+            window.calcularEdad();
+        }
+    };
+
+    function calcularFaltasConsecutivas(expediente) {
+        if (!expediente) return 0;
+        const historial = cacheRegistros
+            .filter(r => r.expediente === expediente)
+            .sort((a, b) => new Date(b.fecha_ISO + 'T' + (b.hora || '00:00')) - new Date(a.fecha_ISO + 'T' + (a.hora || '00:00')));
+
+        let racha = 0;
+        for (let r of historial) {
+            if (r.estatus === "FALTÓ") {
+                racha++;
+            } else if (r.estatus === "ASISTIÓ") {
+                break;
+            }
+        }
+        return racha;
+    }
+
+    window.abrirModalFaltas = (expediente, nombre) => {
+        expedienteSeleccionadoModal = expediente;
+        document.getElementById('nombreModal').innerText = nombre;
+        document.getElementById('modalFaltas').style.display = 'flex';
+    };
+
+    window.cerrarModal = () => {
+        document.getElementById('modalFaltas').style.display = 'none';
+        expedienteSeleccionadoModal = null;
+    };
+
+    window.resolverFaltas = async (accion) => {
+        if (!expedienteSeleccionadoModal) return;
+        const registrosPaciente = cacheRegistros.filter(r => r.expediente === expedienteSeleccionadoModal);
+
+        try {
+            const batch = writeBatch(db);
+
+            if (accion === 'JUSTIFICAR') {
+                registrosPaciente.forEach(r => {
+                    if (r.estatus === "FALTÓ") {
+                        const docRef = doc(db, "registros_generales", r.id);
+                        batch.update(docRef, { justificacion: "FALTAS JUSTIFICADAS POR ADMINISTRACIÓN" });
+                    }
+                });
+                window.mostrarToast("Faltas justificadas correctamente.", "success");
+            } else if (accion === 'REINGRESAR') {
+                registrosPaciente.forEach(r => {
+                    const docRef = doc(db, "registros_generales", r.id);
+                    batch.update(docRef, { estatus_expediente: "EN TRATAMIENTO" });
+                });
+                window.mostrarToast("Paciente reingresado. Expediente reactivado.", "success");
+            } else if (accion === 'DAR_BAJA') {
+                registrosPaciente.forEach(r => {
+                    const docRef = doc(db, "registros_generales", r.id);
+                    batch.update(docRef, { estatus_expediente: "BAJA POR INASISTENCIA" });
+                });
+                window.mostrarToast("Paciente dado de baja por inasistencia.", "warning");
+            }
+
+            await batch.commit();
+            window.cerrarModal();
+        } catch (e) {
+            window.mostrarToast("Error al resolver faltas: " + e.message, "danger");
+        }
+    };
+
+    // --- BÚSQUEDA, PAGINACIÓN Y RENDERIZADO (CON ORDENAMIENTO DE FECHAS) ---
+    window.cambiarFilasPorPagina = (valor) => {
+        filasPorPagina = parseInt(valor);
+        paginaActual = 1;
+        window.filtrarYRenderizar();
+    };
+
+    window.cambiarPagina = (nuevaPagina) => {
+        paginaActual = nuevaPagina;
+        window.filtrarYRenderizar();
+    };
+
+    window.filtrarYRenderizar = () => {
+        const termino = document.getElementById('inputBuscar').value.toLowerCase().trim();
+        const cuerpo = document.getElementById('cuerpoTabla');
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        // 1. Filtrar registros por Nombre, Folio (Expediente), CURP, Terapeuta o Diagnóstico
+        let registrosFiltrados = cacheRegistros.filter(r => {
+            if (!termino) return true;
+            return (r.nombre_paciente || '').toLowerCase().includes(termino) ||
+                   (r.expediente || '').toLowerCase().includes(termino) ||
+                   (r.curp || '').toLowerCase().includes(termino) ||
+                   (r.nombre_terapeuta || '').toLowerCase().includes(termino) ||
+                   (r.diagnostico || '').toLowerCase().includes(termino);
+        });
+
+        // 2. ORDENAR REGISTROS POR FECHA Y HORA (De la fecha más reciente a la más antigua)
+        registrosFiltrados.sort((a, b) => {
+            const fechaA = a.fecha_ISO || '';
+            const fechaB = b.fecha_ISO || '';
+            
+            // Comparar por fecha (descendente: las más recientes/próximas primero)
+            if (fechaA !== fechaB) {
+                return fechaB.localeCompare(fechaA);
+            }
+            
+            // Si la fecha es igual, comparar por hora
+            const horaA = a.hora || '';
+            const horaB = b.hora || '';
+            return horaA.localeCompare(horaB);
+        });
+
+        // 3. Cálculo de paginación
+        const totalRegistros = registrosFiltrados.length;
+        const totalPaginas = Math.ceil(totalRegistros / filasPorPagina) || 1;
+
+        if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+        if (paginaActual < 1) paginaActual = 1;
+
+        const inicio = (paginaActual - 1) * filasPorPagina;
+        const fin = inicio + filasPorPagina;
+        const registrosPagina = registrosFiltrados.slice(inicio, fin);
+
+        // 4. Generar HTML de la Tabla
+        cuerpo.innerHTML = "";
+
+        if (registrosPagina.length === 0) {
+            cuerpo.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 25px; color:#64748b;">No se encontraron registros coincidentes.</td></tr>`;
+        } else {
+            registrosPagina.forEach((r) => {
+                const fechaCita = new Date((r.fecha_ISO || window.obtenerFechaLocal()) + "T00:00:00");
+                const diferenciaDias = (fechaCita - hoy) / (1000 * 60 * 60 * 24);
+                const faltasRacha = calcularFaltasConsecutivas(r.expediente);
+                
+                let pillClass = "pill-tiempo";
+                let pillTexto = "A TIEMPO";
+                let claseFila = "";
+
+                if (r.estatus === "PENDIENTE") {
+                    if (diferenciaDias === 0) {
+                        pillClass = "pill-hoy";
+                        pillTexto = "¡HOY!";
+                        claseFila = 'class="cita-hoy-destacada"';
+                    } else if (diferenciaDias > 0 && diferenciaDias <= 3) {
+                        pillClass = "pill-proxima";
+                        pillTexto = "PRÓXIMA";
+                        claseFila = 'class="cita-proxima"';
+                    }
+                }
+
+                let botonAlertaFaltas = "";
+                if (faltasRacha >= 4 && r.estatus_expediente === "EN TRATAMIENTO") {
+                    claseFila = 'class="alerta-4faltas"';
+                    botonAlertaFaltas = `<button class="btn-action btn-alert no-print" title="4 Faltas Consecutivas" onclick="window.abrirModalFaltas('${r.expediente}', '${r.nombre_paciente}')">⚠️ 4 FALTAS</button>`;
+                }
+
+                let badgeClass = r.estatus === "ASISTIÓ" ? "asistencia-ok" : (r.estatus === "FALTÓ" ? "alerta-roja" : "");
+                
+                let badgeExpediente = "";
+                if (r.estatus_expediente === "ALTA MÉDICA") badgeExpediente = `<span class="pill pill-alta">ALTA MÉDICA</span>`;
+                if (r.estatus_expediente === "BAJA POR INASISTENCIA") badgeExpediente = `<span class="pill pill-baja">BAJA</span>`;
+
+                cuerpo.innerHTML += `<tr ${claseFila}>
+                    <td>
+                        <b>${r.fecha_ISO || '--'}</b><br>
+                        <span class="pill ${pillClass}">${pillTexto}</span>
+                        <br><small>${r.hora || ''}</small>
+                    </td>
+                    <td>${r.expediente || 'S/N'}<br>${badgeExpediente}</td>
+                    <td>
+                        <b>${r.nombre_paciente || 'SIN NOMBRE'}</b><br>
+                        <small>${r.diagnostico || 'Sin diagnóstico'}</small>
+                        ${r.justificacion ? `<br><small style="color:var(--danger)"><b>Justificó:</b> ${r.justificacion}</small>` : ''}
+                    </td>
+                    <td><b>${r.direccion || 'N/A'}</b><br><small>${r.col_loc || 'Sin ubicación'}</small></td>
+                    <td>
+                        <div style="font-weight:600; color:var(--crisat); font-size:0.75rem;">
+                            <i class="fas fa-user-md"></i> ${r.nombre_terapeuta || 'SIN ASIGNAR'}
+                        </div>
+                    </td>
+                    <td>${r.servicio || '--'}</td>
+                    <td>$${parseFloat(r.monto || 0).toFixed(2)}<br><span class="badge ${badgeClass}">${r.estatus}</span></td>
+                    <td class="no-print">
+                        ${botonAlertaFaltas}
+                        <button class="btn-action btn-edit" onclick="window.prepararEdicion('${r.id}')" title="Editar">✏️</button>
+                        <button class="btn-action btn-delete" onclick="window.eliminarRegistro('${r.id}')" title="Eliminar">🗑️</button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        // 5. Renderizar Controles de Paginación
+        const txtInfo = document.getElementById('txtInfoPaginacion');
+        const contPaginas = document.getElementById('contenedorPaginas');
+        
+        txtInfo.innerText = `Mostrando ${totalRegistros > 0 ? inicio + 1 : 0} a ${Math.min(fin, totalRegistros)} de ${totalRegistros} registros`;
+        
+        let htmlPaginas = `<button class="btn-page" ${paginaActual === 1 ? 'disabled' : ''} onclick="window.cambiarPagina(${paginaActual - 1})">Anterior</button>`;
+        
+        for (let i = 1; i <= totalPaginas; i++) {
+            if (i === 1 || i === totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1)) {
+                htmlPaginas += `<button class="btn-page ${i === paginaActual ? 'active' : ''}" onclick="window.cambiarPagina(${i})">${i}</button>`;
+            } else if (i === paginaActual - 2 || i === paginaActual + 2) {
+                htmlPaginas += `<span style="padding: 0 4px; color: #94a3b8;">...</span>`;
+            }
+        }
+
+        htmlPaginas += `<button class="btn-page" ${paginaActual === totalPaginas || totalPaginas === 0 ? 'disabled' : ''} onclick="window.cambiarPagina(${paginaActual + 1})">Siguiente</button>`;
+        contPaginas.innerHTML = htmlPaginas;
+    };
+
+    // --- INICIALIZACIÓN Y EVENTOS ---
+    document.getElementById('btnGuardar').addEventListener('click', procesarFormulario);
+    document.getElementById('curp').addEventListener('input', (e) => window.autocompletarPorCurp(e.target.value));
+    document.getElementById('fecha_captura').value = window.obtenerFechaLocal();
+
+    onSnapshot(query(collection(db, "registros_generales"), where("departamento", "==", "CRISAT")), (snapshot) => {
+        cacheRegistros = [];
+        snapshot.forEach((docSnap) => {
+            cacheRegistros.push({ ...docSnap.data(), id: docSnap.id });
+        });
+        window.filtrarYRenderizar();
+    });
+</script>
+</body>
+</html>
