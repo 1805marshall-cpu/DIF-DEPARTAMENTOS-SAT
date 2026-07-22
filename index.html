@@ -234,6 +234,12 @@
         "admin": { p: "master2026", url: "admin_global.html", dep: "GLOBAL" },
         "lorena.gonzalez": { p: "logoke.15", url: "admin_global.html", dep: "GLOBAL" }, 
         "angel.vidal": { p: "Angel123..", url: "admin_global.html", dep: "GLOBAL" }, 
+        
+        /* CUENTAS AGREGADAS PARA CRISAT */
+        "crisat": { p: "crisat2026", url: "crisat.html", dep: "CRISAT" },
+        "monica.delaparra": { p: "Monica123..", url: "crisat.html", dep: "CRISAT" },
+        "terapia.crisat": { p: "rehab2026", url: "crisat.html", dep: "CRISAT" },
+
         "vulnerable": { p: "vul123", url: "vulnerable.html", dep: "VULNERABLE" }, 
         "ramon.guapillo": { p: "Fatima20", url: "vulnerable.html", dep: "VULNERABLE" },
         "social": { p: "soc123", url: "social.html", dep: "SOCIAL" },
@@ -242,7 +248,7 @@
         "procuraduria": { p: "pro123", url: "procuraduria.html", dep: "PROCURADURIA" },
         "edmundo.pechi": { p: "Edmundo123..", url: "procuraduria.html", dep: "PROCURADURIA" },
         "recepcion": { p: "medica2026", url: "medica2.html", dep: "MEDICA" },
-        "andrea.serrano": { p: "Andy123..", url: "recepcion.html", dep: "RECEPCION" }, // Nueva cuenta agregada
+        "andrea.serrano": { p: "Andy123..", url: "recepcion.html", dep: "RECEPCION" },
         "olga.perez": { p: "Olga123..", url: "medica2.html", dep: "MEDICA" },
         "sonia.xala": { p: "Sonia123..", url: "medica2.html", dep: "MEDICA" },
         "enfermeria": { p: "enf123", url: "enfermeria.html", dep: "MEDICA" },
@@ -272,7 +278,6 @@
         "oscar.perrotin": "DR. OSCAR ALEXIS PERROTIN ORTEGA" 
     };
 
-    // Datos detallados del personal para Recepción / Trabajo Social u otros módulos
     const datosPersonalStaff = {
         "andre.serrano": { nombre: "ANDREA SERRANO SALAZAR", titulo: "BIENVENIDA" },
         "juanita.campechano": { nombre: "JUANITA C. CAMPECHANO QUEZADA", titulo: "LICDA." },
@@ -306,12 +311,9 @@
                 sessionStorage.removeItem('nombre_medico');
             }
 
-            // Manejo dinámico para personal registrado (Andrea, Juanita, Monse)
             if (datosPersonalStaff[user]) {
                 sessionStorage.setItem('social_nombre', datosPersonalStaff[user].nombre);
                 sessionStorage.setItem('social_titulo', datosPersonalStaff[user].titulo);
-                
-                // Llave dedicada por si el header de recepcion.html lee directamente una variable de bienvenida limpia
                 sessionStorage.setItem('nombre_completo_saludo', datosPersonalStaff[user].nombre);
             } else {
                 sessionStorage.removeItem('social_nombre');
