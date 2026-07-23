@@ -247,7 +247,99 @@
     canvas {
         flex-grow: 1; /* Hace que el gráfico ocupe todo el espacio disponible */
     }
-</style>
+
+    /* =============================================================================
+   ESTRUCTURA RESPONSIVA GLOBAL
+   ============================================================================= */
+
+/* Contenedor principal de tu app */
+.app-container {
+    display: flex;
+    flex-direction: column; /* Por defecto en móvil: uno abajo del otro */
+    min-height: 100vh;
+}
+
+/* El área donde se renderizan tus reportes y formularios */
+.main-content {
+    flex: 1;
+    padding: 15px;
+    width: 100%;
+}
+
+/* --- DISPOSITIVOS MÓVILES Y TABLETAS (Pantallas menores a 768px) --- */
+@media (max-width: 767px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -250px; /* Escondido por defecto a la izquierda */
+        width: 250px;
+        height: 100vh;
+        z-index: 999;
+        transition: left 0.3s ease;
+    }
+
+    /* Cuando haces clic en tu btn-toggle, en móvil el comportamiento se invierte: se muestra */
+    .sidebar.collapsed {
+        left: 0; 
+    }
+    
+    /* El contenedor maestro de las zonas en móvil para que use todo el ancho */
+    #territorial-master-list {
+        display: grid;
+        grid-template-columns: 1fr; /* Una sola columna de tarjetas */
+        gap: 15px;
+    }
+}
+
+/* --- PANTALLAS GRANDES / ESCRITORIO (A partir de 768px) --- */
+@media (min-width: 768px) {
+    .app-container {
+        flex-direction: row; /* Sidebar a la izquierda, contenido a la derecha */
+    }
+
+    .sidebar {
+        width: 260px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+        transition: width 0.3s ease;
+    }
+
+    /* Tu lógica nativa de escritorio: si está colapsado, se encoge */
+    .sidebar.collapsed {
+        width: 70px;
+    }
+
+    .main-content {
+        padding: 30px;
+    }
+
+    /* Grid de tarjetas en escritorio: ¡2 columnas si hay espacio para aprovechar el monitor! */
+    #territorial-master-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 20px;
+        align-items: start;
+    }
+}
+.filter-bar {
+    display: flex;
+    flex-direction: column; /* Móvil primero */
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+    .filter-bar {
+        flex-direction: row; /* En escritorio se alinean horizontalmente */
+        align-items: center;
+    }
+    
+    .filter-bar input, 
+    .filter-bar select {
+        flex: 1; /* Distribuye el espacio equitativamente */
+    }
+}
     </style>
 </head>
 <body>
@@ -256,18 +348,20 @@
             <h3>DIF GLOBAL</h3>
             <small id="role-tag" style="color:var(--warning); font-size: 10px;"></small>
         </div>
-        <nav class="nav-menu">
+
+<nav class="nav-menu">
             <div id="nav-medica" class="nav-item" onclick="showView('medica', this)"><i class="fas fa-notes-medical"></i> <span>Área Médica</span></div>
             <div id="nav-social" class="nav-item" onclick="showView('social', this)"><i class="fa-solid fa-users"></i> <span>Trabajo Social</span></div>
             <div id="nav-psicologia" class="nav-item" onclick="showView('psicologia', this)"><i class="fas fa-brain"></i> <span>Psicología</span></div>
             <div id="nav-jefatura-psicologia" class="nav-item" onclick="showView('jefatura-psicologia', this)"><i class="fas fa-user-shield"></i> <span>Jefatura Psicología</span></div>
             <div id="nav-vulnerable" class="nav-item" onclick="showView('vulnerable', this)"><i class="fas fa-hand-holding-heart"></i> <span>Pob. Vulnerable</span></div>
             <div id="nav-procuraduria" class="nav-item" onclick="showView('procuraduria', this)"><i class="fas fa-balance-scale"></i> <span>Procuraduría</span></div>
+            <div id="nav-crisat" class="nav-item" onclick="showView('crisat', this)"><i class="fas fa-diagnoses"></i> <span>Crisat</span></div>
             <div id="nav-escolar" class="nav-item" onclick="showView('escolar', this)"><i class="fas fa-school"></i> <span>Req. Escolares</span></div>
             <div id="nav-civis" class="nav-item" onclick="showView('civis', this)"><i class="fas fa-folder-open"></i> <span>Reportes CIVIS</span></div>
             <div id="nav-territorial" class="nav-item" onclick="showView('territorial', this)"><i class="fas fa-city"></i> <span>Resumen Territorial</span></div>
-
         </nav>
+
         <!-- Agrega este bloque antes del nav-exit -->
 <div class="user-profile-box">
 <i class="fas fa-user-circle" style="font-size: 20px;"></i> <div> <b style="display:block; font-size:11px;">Admin_Global</b>
@@ -626,6 +720,80 @@
 </div>
 
 <!-- ========================================== -->
+<!-- PANEL DE PREVISUALIZACIÓN Y CONTROL: CRISAT -->
+<!-- ========================================== -->
+
+<div id="view-crisat" class="view-container" style="display:none;">
+    <!-- Encabezado del Módulo -->
+    <div class="access-card" style="background: #701a27;">
+        <div><b>CRISAT</b> - Centro de Rehabilitación Integral</div>
+        <a href="crisat.html" class="btn-open">Ir al Módulo</a>
+    </div>
+
+    <div class="filter-bar"></div>
+
+    <!-- Rejilla de Indicadores (KPIs) -->
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 20px;">
+        <!-- Total Registros -->
+        <div class="stat-box" style="border-top:3px solid #701a27; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04);">
+            <small style="color:#64748b; font-weight:700; font-size:0.75rem;">REGISTROS / ATENCIONES</small>
+            <div id="crisat-total" style="font-size:1.4rem; font-weight:800; color:#701a27; margin-top:4px;">0</div>
+        </div>
+        
+        <!-- Total Pacientes -->
+        <div class="stat-box" style="border-top:3px solid #0284c7; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04);">
+            <small style="color:#64748b; font-weight:700; font-size:0.75rem;">TOTAL PACIENTES</small>
+            <div id="crisat-ent" style="font-size:1.4rem; font-weight:800; color:#0284c7; margin-top:4px;">0</div>
+        </div>
+
+        <!-- Pacientes de Alta / Tratamiento Terminado -->
+        <div class="stat-box" style="border-top:3px solid #16a34a; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04);">
+            <small style="color:#64748b; font-weight:700; font-size:0.75rem;">TRATAMIENTO TERMINADO</small>
+            <div id="crisat-altas" style="font-size:1.4rem; font-weight:800; color:#16a34a; margin-top:4px;">0</div>
+        </div>
+
+        <!-- Distribución por Género -->
+        <div class="stat-box" style="border-top:3px solid #db2777; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04);">
+            <small style="color:#64748b; font-weight:700; font-size:0.75rem;">GÉNERO (M / H)</small>
+            <div style="font-size:1.1rem; font-weight:800; margin-top:6px; display:flex; gap:10px; align-items:center;">
+                <span style="color:#db2777;"><i class="fas fa-venus"></i> <span id="crisat-mujeres">0</span></span>
+                <span style="color:#cbd5e1;">|</span>
+                <span style="color:#2563eb;"><i class="fas fa-mars"></i> <span id="crisat-hombres">0</span></span>
+            </div>
+        </div>
+
+        <!-- Distribución por Edades -->
+        <div class="stat-box" style="border-top:3px solid #b45309; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04);">
+            <small style="color:#64748b; font-weight:700; font-size:0.75rem;">RANGO DE EDADES</small>
+            <div style="font-size:0.78rem; font-weight:700; color:#334155; margin-top:6px; line-height:1.4;">
+                <div>0-17 años: <b id="crisat-ninos" style="color:#b45309;">0</b></div>
+                <div>18-59 años: <b id="crisat-adultos" style="color:#b45309;">0</b></div>
+                <div>60+ años: <b id="crisat-mayores" style="color:#b45309;">0</b></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido de Listas -->
+    <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px;">
+        <!-- Lista 1: Pacientes, Diagnóstico, Terapeuta y Sesiones/Terapias -->
+        <div class="panel" style="background:#fff; padding:18px; border-radius:12px; border:1px solid #e2e8f0;">
+            <b style="color:#701a27; font-size:1rem; display:block; margin-bottom:12px;">
+                <i class="fas fa-user-injured"></i> Lista de Pacientes, Diagnóstico y Terapias
+            </b>
+            <div id="crisat-list-pacientes" style="max-height:480px; overflow-y:auto; padding-right:5px;"></div>
+        </div>
+
+        <!-- Lista 2: Zonas (Colonias / Localidades) y Contabilidad de Terapias -->
+        <div class="panel" style="background:#fff; padding:18px; border-radius:12px; border:1px solid #e2e8f0;">
+            <b style="color:#701a27; font-size:1rem; display:block; margin-bottom:12px;">
+                <i class="fas fa-map-marked-alt"></i> Terapias por Zonas (Colonias y Localidades)
+            </b>
+            <div id="crisat-list-geo" style="max-height:480px; overflow-y:auto; padding-right:5px;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================== -->
 <!-- PANEL DE PREVISUALIZACIÓN Y CONTROL: CIVIS -->
 <!-- ========================================== -->
 <div id="view-civis" class="view-container" style="display:none;">
@@ -633,7 +801,7 @@
     <!-- Tarjeta de Acceso Directo con Estilo Institucional -->
     <div class="access-card" style="background: linear-gradient(135deg, #1e293b, #334155); color: white;">
         <div><b>Control Institucional CIVIS</b></div>
-        <a href="reporte_civis.html" class="btn-open" style="background: white; color: #1e293b; font-weight: bold; padding: 6px 12px; rounded: 6px;">Ir al Módulo</a>
+        <a href="reporte_civis.html" class="btn-open" style="background: white; color: #1e293b; font-weight: bold; padding: 6px 12px; border-radius: 6px;">Ir al Módulo</a>
     </div>
     
     <!-- Estadísticas Operativas Principales -->
@@ -717,67 +885,108 @@
     </div>
 
 </div> <!-- Cierre del main-content -->
-</div>
-</div>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, doc, onSnapshot, query, orderBy, setDoc, deleteDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-document.addEventListener("DOMContentLoaded", () => {
+const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const store = { medica: [], social: [], psicologia: [], jefatura: [], procuraduria: [], general_localidades: [], civis: [], vulnerable: [], crisat: [] };
+window.store = store; 
+
+// --- FUNCIÓN GLOBAL PARA CAMBIAR DE VISTA ---
+window.mostrarVista = function(idVista) {
+    document.querySelectorAll('.view-container').forEach(view => {
+        view.style.display = 'none';
+    });
+
+    let vistaDestino = document.getElementById(idVista);
+    
+    // Si la vista solicitada no existe, se busca la vista correspondiente
+    if (!vistaDestino) {
+        vistaDestino = document.getElementById('view-crisat');
+    }
+
+    if (vistaDestino) {
+        vistaDestino.style.display = 'block';
+        
+        // Si entra a CRISAT, forzar refresco de métricas
+        if (vistaDestino.id === 'view-crisat') {
+            window.reprocesarCrisat();
+        }
+    }
+};
+
+// --- PUENTE DE COMPATIBILIDAD CON onclick="showView('modulo', this)" ---
+window.showView = function(modulo, elem) {
+    const idVista = modulo.startsWith('view-') ? modulo : 'view-' + modulo;
+    window.mostrarVista(idVista);
+};
+
+// --- INICIALIZACIÓN SEGURA DE LA SESIÓN ---
+function iniciarSistema() {
     const usuario = localStorage.getItem('activeUser');
     const departamento = localStorage.getItem('userDep');
     
     if (usuario) {
-        document.getElementById("user-name-display").innerText = usuario.toUpperCase();
-        document.getElementById("user-role-display").innerText = departamento || "SISTEMA DIF";
+        const elemUser = document.getElementById("user-name-display");
+        const elemRole = document.getElementById("user-role-display");
         
-        // 1. Ocultar los botones que no debe ver
+        if (elemUser) elemUser.innerText = usuario.toUpperCase();
+        if (elemRole) elemRole.innerText = departamento || "SISTEMA DIF";
+        
+        // 1. Ocultar botones no permitidos
         aplicarRestriccionesDeDepartamento();
         
-        // 2. NUEVA LÓGICA: En lugar de hacer .click(), mostramos una bienvenida
-        // Primero ocultamos todas las vistas activas
-        document.querySelectorAll('.view-container').forEach(view => {
-            view.style.display = 'none';
-        });
+        // 2. Asignar clics a los elementos de navegación (.nav-item)
+        conectarNavegacion();
 
-        // Mostramos la carátula institucional (asegúrate de tener este ID en tu HTML)
-        const vistaBienvenida = document.getElementById('view-bienvenida');
-        if (vistaBienvenida) {
-            vistaBienvenida.style.display = 'flex';
-        }
+        // 3. Vista inicial
+        window.mostrarVista('view-bienvenida');
 
     } else {
         window.location.href = "index.html";
     }
-});
-    // --- FUNCIÓN DE SEGURIDAD PARA OCULTAR VISTAS ---
+}
+
+// Vincular dinámicamente botones nav-item con sus vistas correspondientes
+function conectarNavegacion() {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const idNav = item.id; // Ej: nav-crisat
+            const idVista = idNav.replace('nav-', 'view-'); // Genera view-crisat
+            window.mostrarVista(idVista);
+        });
+    });
+}
+
+// --- FUNCIÓN DE SEGURIDAD PARA OCULTAR VISTAS ---
 function aplicarRestriccionesDeDepartamento() {
     const depUsuario = localStorage.getItem('userDep');
     
-    // Si es GLOBAL, acceso total
     if (depUsuario === "GLOBAL") return;
 
-    // Definimos qué módulos ve cada quién
-    // Para ver múltiples, simplemente agregamos los IDs al array
     const permisos = {
         "PSICOLOGIA": ["nav-psicologia", "nav-jefatura-psicologia", "view-psicologia", "view-jefatura-psicologia"],
         "SOCIAL": ["nav-social", "view-social"],
         "PROCURADURIA": ["nav-procuraduria", "view-procuraduria"],
         "MEDICA": ["nav-medica", "view-medica"],
-        "VULNERABLE": ["nav-vulnerable", "view-vulnerable"]
+        "VULNERABLE": ["nav-vulnerable", "view-vulnerable"],
+        "CRISAT": ["nav-crisat", "view-crisat", "view-estadisticas-crisat"]
     };
 
-    // Obtenemos los elementos permitidos para el usuario actual
-    const permitidos = permisos[depUsuario] || ["nav-territorial"]; // Si no tiene permiso, al menos ve el resumen
+    const permitidos = permisos[depUsuario] || ["nav-territorial", "nav-crisat"];
 
-    // Ocultar botones de navegación no permitidos
     document.querySelectorAll('.nav-item').forEach(item => {
         if (!permitidos.includes(item.id) && item.id !== "nav-territorial") {
             item.style.display = 'none';
         }
     });
 
-    // Ocultar vistas no permitidas
     document.querySelectorAll('.view-container').forEach(view => {
         if (!permitidos.includes(view.id) && view.id !== "view-territorial") {
             view.style.display = 'none';
@@ -785,11 +994,12 @@ function aplicarRestriccionesDeDepartamento() {
     });
 }
 
-    const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const store = { medica: [], social: [], psicologia: [], jefatura: [], procuraduria: [], general_localidades: [], civis: [], vulnerable: [] };
+// Ejecución segura de DOM
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', iniciarSistema);
+} else {
+    iniciarSistema();
+}
 
 window.reprocesarTodo = function() {
     if (typeof window.reprocesarPsico === 'function') window.reprocesarPsico();
@@ -797,90 +1007,205 @@ window.reprocesarTodo = function() {
     if (typeof window.reprocesarJefatura === 'function') window.reprocesarJefatura();
     if (typeof window.reprocesarTrabSoc === 'function') window.reprocesarTrabSoc();
     if (typeof window.reprocesarMedica === 'function') window.reprocesarMedica();
-    if (typeof window.reprocesarCivis === 'function') window.reprocesarCivis(); // <-- Nueva línea CIVIS
+    if (typeof window.reprocesarCivis === 'function') window.reprocesarCivis();
     if (typeof window.renderReporteJerarquico === 'function') window.renderReporteJerarquico();
     if (typeof window.reprocesarVulnerable === 'function') window.reprocesarVulnerable();
+    if (typeof window.reprocesarCrisat === 'function') window.reprocesarCrisat();
 };
 
-// Función UNIFICADA para eliminar (Solo necesitas esta)
 window.borrarRegistro = async (coleccion, id) => {
     if (confirm("¿Eliminar este registro?")) {
         await deleteDoc(doc(db, coleccion, id));
-        // No hace falta llamar a nada, el onSnapshot abajo detectará el cambio y refrescará todo
     }
 };
 
-// --- LISTENERS (Aquí ocurre la magia de la unificación) ---
-onSnapshot(collection(db, "trabajo_social"), (s) => { store.social = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarTrabSoc(); });
-onSnapshot(collection(db, "psicologia"), (s) => { store.psicologia = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarPsico(); });
-onSnapshot(collection(db, "jefatura_psicologia"), (s) => { store.jefatura = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarJefatura(); });
-onSnapshot(collection(db, "procuraduria"), (s) => { store.procuraduria = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarProcuraduria(); });
-onSnapshot(collection(db, "area_medica_v2"), (s) => { store.medica = s.docs.map(d => ({id: d.id, ...d.data()})); window.reprocesarMedica(); window.renderReporteJerarquico();});
-onSnapshot(collection(db, "proyetos_pv"), (s) => {store.proyectos = s.docs.map(d => ({id: d.id, ...d.data()}));console.log("Datos cargados de proyetos_pv:", store.proyectos.length);window.reprocesarVulnerable(); });
-onSnapshot(collection(db, "reporte_civis"), (snap) => {store.civis = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));if (typeof window.reprocesarCivis === 'function') window.reprocesarCivis();});
-/////////////////////////////////////////////
-// Función específica de Poblacion Vulnerable
+// --- LISTENERS EN TIEMPO REAL ---
+onSnapshot(collection(db, "trabajo_social"), (s) => { store.social = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarTrabSoc === 'function') window.reprocesarTrabSoc(); });
+onSnapshot(collection(db, "psicologia"), (s) => { store.psicologia = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarPsico === 'function') window.reprocesarPsico(); });
+onSnapshot(collection(db, "jefatura_psicologia"), (s) => { store.jefatura = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarJefatura === 'function') window.reprocesarJefatura(); });
+onSnapshot(collection(db, "procuraduria"), (s) => { store.procuraduria = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarProcuraduria === 'function') window.reprocesarProcuraduria(); });
+onSnapshot(collection(db, "area_medica_v2"), (s) => { store.medica = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarMedica === 'function') window.reprocesarMedica(); if (typeof window.renderReporteJerarquico === 'function') window.renderReporteJerarquico(); });
+onSnapshot(collection(db, "proyetos_pv"), (s) => { store.proyectos = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarVulnerable === 'function') window.reprocesarVulnerable(); });
+onSnapshot(collection(db, "reporte_civis"), (snap) => { store.civis = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); if (typeof window.reprocesarCivis === 'function') window.reprocesarCivis(); });
+
+// Listener directo para CRISAT
+onSnapshot(collection(db, "registros_generales"), (s) => { 
+    store.crisat = s.docs.map(d => ({id: d.id, ...d.data()})); 
+    window.reprocesarCrisat(); 
+});
+
+// --- RENDERIZADO DE METRICAS Y TABLAS DE CRISAT ---
+window.reprocesarCrisat = function() {
+    const datos = store.crisat || [];
+
+    let totalActividades = datos.length;
+    let totalAltas = 0;
+    let mujeres = 0;
+    let hombres = 0;
+    let ninos = 0;     // 0 a 17
+    let adultos = 0;   // 18 a 59
+    let mayores = 0;   // 60+
+
+    const porZona = {};
+    const pacientesUnicosSet = new Set();
+
+    datos.forEach(d => {
+        // Registro de Pacientes Únicos
+        const nombrePac = (d.paciente || d.nombre || d.nombre_paciente || d.pacienteNombre || '').trim().toLowerCase();
+        if (nombrePac) pacientesUnicosSet.add(nombrePac);
+
+        // Estatus / Altas
+        const estatus = String(d.estatus || d.estado || d.alta || '').toLowerCase();
+        if (estatus.includes('alta') || estatus.includes('terminad') || estatus.includes('concluid') || estatus.includes('finaliz')) {
+            totalAltas++;
+        }
+
+        // Género
+        const sexo = String(d.sexo || d.genero || '').toUpperCase();
+        if (sexo.startsWith('M') || sexo.includes('MUJER') || sexo.includes('FEMENIN')) {
+            mujeres++;
+        } else if (sexo.startsWith('H') || sexo.includes('HOMBRE') || sexo.includes('MASCULIN')) {
+            hombres++;
+        }
+
+        // Edades
+        const edad = Number(d.edad);
+        if (!isNaN(edad) && edad > 0) {
+            if (edad < 18) ninos++;
+            else if (edad < 60) adultos++;
+            else mayores++;
+        }
+
+        // Zonas
+        const zona = (d.col_loc || d.colonia || d.localidad || d.zona || d.comunidad || d.domicilio || 'CABECERA MUNICIPAL').trim().toUpperCase();
+        const numTerapias = Number(d.terapias || d.sesiones || d.total_terapias || d.numTerapias || 1);
+        porZona[zona] = (porZona[zona] || 0) + (isNaN(numTerapias) ? 1 : numTerapias);
+    });
+
+    const setInner = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = val;
+    };
+
+    const totalPacientesUnicos = pacientesUnicosSet.size || totalActividades;
+
+    setInner('crisat-total', totalActividades.toLocaleString());
+    setInner('crisat-ent', totalPacientesUnicos.toLocaleString());
+    setInner('crisat-altas', totalAltas.toLocaleString());
+    setInner('crisat-mujeres', mujeres.toLocaleString());
+    setInner('crisat-hombres', hombres.toLocaleString());
+    setInner('crisat-ninos', ninos.toLocaleString());
+    setInner('crisat-adultos', adultos.toLocaleString());
+    setInner('crisat-mayores', mayores.toLocaleString());
+
+    // 1. Renderizar Lista de Pacientes
+    const elemListPacientes = document.getElementById('crisat-list-pacientes');
+    if (elemListPacientes) {
+        if (datos.length === 0) {
+            elemListPacientes.innerHTML = '<div style="padding:15px; color:#64748b; font-size:13px; text-align:center;">No hay pacientes registrados</div>';
+        } else {
+            let htmlPacientes = '<div style="display:flex; flex-direction:column; gap:10px;">';
+            datos.forEach(d => {
+                const paciente = d.paciente || d.nombre || d.nombre_paciente || d.pacienteNombre || 'PACIENTE SIN NOMBRE';
+                const diagnostico = d.diagnostico || d.diag || d.diagnosticoMedico || d.servicio || 'Sin diagnóstico asignado';
+                const terapeuta = d.nombre_terapeuta || d.doctor || d.atendio || d.personal || 'No asignado';
+                const terapias = d.terapias || d.sesiones || d.total_terapias || d.numTerapias || 1;
+                const estatusText = d.estatus || d.estado || 'En Tratamiento';
+
+                htmlPacientes += `
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-left:4px solid #701a27; padding:10px 14px; border-radius:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-weight:700; color:#1e293b; font-size:13.5px;">${paciente.toUpperCase()}</span>
+                            <span style="background:#701a27; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px;">
+                                ${terapias} ${Number(terapias) === 1 ? 'Terapia' : 'Terapias'}
+                            </span>
+                        </div>
+                        <div style="font-size:12px; color:#475569; margin-top:4px;">
+                            <i class="fas fa-notes-medical" style="color:#701a27; margin-right:4px;"></i><b>Diag:</b> ${diagnostico}
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:11.5px; color:#64748b; margin-top:5px; border-top:1px dashed #cbd5e1; padding-top:4px;">
+                            <span><i class="fas fa-user-md" style="margin-right:4px;"></i><b>Terapeuta:</b> ${terapeuta}</span>
+                            <span style="font-weight:600; color:#0284c7;">${estatusText}</span>
+                        </div>
+                    </div>`;
+            });
+            htmlPacientes += '</div>';
+            elemListPacientes.innerHTML = htmlPacientes;
+        }
+    }
+
+    // 2. Renderizar Zonas
+    const elemListGeo = document.getElementById('crisat-list-geo');
+    if (elemListGeo) {
+        if (Object.keys(porZona).length === 0) {
+            elemListGeo.innerHTML = '<div style="padding:15px; color:#64748b; font-size:13px; text-align:center;">No hay zonas registradas</div>';
+        } else {
+            let htmlGeo = '<div style="display:flex; flex-direction:column; gap:8px;">';
+            for (const [zona, totalTerapias] of Object.entries(porZona)) {
+                htmlGeo += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0; font-size:13px;">
+                        <span style="font-weight:600; color:#1e293b;">
+                            <i class="fas fa-map-marker-alt" style="color:#701a27; margin-right:6px;"></i>${zona}
+                        </span>
+                        <span style="font-weight:800; color:#701a27; background:#fdf2f2; padding:3px 10px; border-radius:12px; font-size:12px; border:1px solid #fecdd3;">
+                            ${totalTerapias.toLocaleString()} ${totalTerapias === 1 ? 'terapia' : 'terapias'}
+                        </span>
+                    </div>`;
+            }
+            htmlGeo += '</div>';
+            elemListGeo.innerHTML = htmlGeo;
+        }
+    }
+};
+
+// =============================================================================
+// FUNCIÓN PRINCIPAL DE PROCESAMIENTO RECOLECTOR
+// =============================================================================
 window.reprocesarVulnerable = () => {
+    // 🌟 Recuerda verificar si lo unificaste como store.vulnerable en tu listener central
     const data = store.proyectos; 
     
-    // Si la colección está vacía en Firestore, reseteamos de forma segura la UI
     if (!data || data.length === 0) {
-        console.warn("Módulo Vulnerable: No se detectaron registros en proyetos_pv.");
+        console.warn("Módulo Vulnerable: No se detectaron registros.");
         document.querySelectorAll("[id^='v-']").forEach(el => { if(el.tagName !== "TBODY") el.innerText = "0"; });
         const tabla = document.getElementById('v-tabla-registros');
         if (tabla) tabla.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:15px; color:#64748b;">Sin registros en la base de datos central.</td></tr>';
         return;
     }
 
-// ==========================================
-    // 1. MÉTRICAS OPERATIVAS (LLAVES RAÍZ EN CRUZ)
-    // ==========================================
+    // 1. MÉTRICAS OPERATIVAS
     const totalRegistros = data.length;
     const entregados = data.filter(item => item.estatus === "ENTREGADO").length;
     const pendientes = data.filter(item => item.estatus === "PENDIENTE").length;
-    
-    // Sincronizados y No Sincronizados con el DIF Estatal (Totales)
     const difEstatal = data.filter(item => item.capturado_dif_estatal === "SI").length;
     const noEstatal = data.filter(item => item.capturado_dif_estatal !== "SI").length;
 
-    // 🌟 NUEVOS CRUCES: Entregados vs Pendientes por tipo de Sincronización
     const difEstatalEntregados = data.filter(item => item.capturado_dif_estatal === "SI" && item.estatus === "ENTREGADO").length;
     const difEstatalPendientes = data.filter(item => item.capturado_dif_estatal === "SI" && item.estatus === "PENDIENTE").length;
-    
     const noEstatalEntregados  = data.filter(item => item.capturado_dif_estatal !== "SI" && item.estatus === "ENTREGADO").length;
     const noEstatalPendientes  = data.filter(item => item.capturado_dif_estatal !== "SI" && item.estatus === "PENDIENTE").length;
 
-    // Inyecciones base en el DOM
     if(document.getElementById('v-total')) document.getElementById('v-total').innerText = totalRegistros;
     if(document.getElementById('v-ent')) document.getElementById('v-ent').innerText = entregados;
     if(document.getElementById('v-pen')) document.getElementById('v-pen').innerText = pendientes;
     if(document.getElementById('v-estatal-stats')) document.getElementById('v-estatal-stats').innerText = difEstatal;
     if(document.getElementById('v-estatal-no-stats')) document.getElementById('v-estatal-no-stats').innerText = noEstatal;
-
-    // 🌟 INYECCIÓN EN EL DOM DE LAS NUEVAS MÉTRICAS CRUZADAS
     if(document.getElementById('v-estatal-ent')) document.getElementById('v-estatal-ent').innerText = difEstatalEntregados;
     if(document.getElementById('v-estatal-pen')) document.getElementById('v-estatal-pen').innerText = difEstatalPendientes;
     if(document.getElementById('v-no-estatal-ent')) document.getElementById('v-no-estatal-ent').innerText = noEstatalEntregados;
     if(document.getElementById('v-no-estatal-pen')) document.getElementById('v-no-estatal-pen').innerText = noEstatalPendientes;
-// =============================================================================
-    // 2. CONTEO Y CUANTIFICACIÓN GEOGRÁFICA (ZONAS Y SUBGRUPOS)
-    // =============================================================================
-    let mujeres = 0;
-    let hombres = 0;
-    let indigenas = 0;
-    let discapacidad = 0;
 
-    // Objeto para agrupar todo el árbol territorial, sus apoyos y modalidades
+    // 2. CUANTIFICACIÓN GEOGRÁFICA Y DEMOGRÁFICA
+    let mujeres = 0, hombres = 0, indigenas = 0, discapacidad = 0;
     const mapeoTerritorial = {};
 
     data.forEach(item => {
-        // Normalizamos los nombres geográficos y metadatos para evitar duplicados
         const localidad = (item.localidad || item.col_loc || 'LOCALIDAD NO REGISTRADA').trim().toUpperCase();
         const colonia = (item.vul_colonia || 'CENTRO / GENERAL').trim().toUpperCase();
         const programa = (item.programa || 'SIN ESPECIFICAR').trim().toUpperCase();
-        const subgrupo = (item.subgrupo || 'GENERAL').trim().toUpperCase(); // 🌟 CAMPO ADICIONADO
+        const subgrupo = (item.subgrupo || 'GENERAL').trim().toUpperCase();
 
-        // 1. Conteo Demográfico Base
+        // Conteo Demográfico con Optional Chaining preventivo 🌟
         if (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) {
             item.integrantes.forEach(integ => {
                 if (integ.sexo === "MUJER") mujeres++;
@@ -889,27 +1214,17 @@ window.reprocesarVulnerable = () => {
                 if (integ.discapacidad === "SI") discapacidad++;
             });
         } else if (item.beneficiario) {
-            if (item.beneficiario.sexo === "MUJER") mujeres++;
-            if (item.beneficiario.sexo === "HOMBRE") hombres++;
-            if (item.beneficiario.indigena === "SI") indigenas++;
-            if (item.beneficiario.discapacidad === "SI") discapacidad++;
+            if (item.beneficiario?.sexo === "MUJER") mujeres++;
+            if (item.beneficiario?.sexo === "HOMBRE") hombres++;
+            if (item.beneficiario?.indigena === "SI") indigenas++;
+            if (item.beneficiario?.discapacidad === "SI") discapacidad++;
         }
 
-        // 2. Estructuración del árbol extendido: Localidad -> Colonia -> Programa -> Subgrupo
-        if (!mapeoTerritorial[localidad]) {
-            mapeoTerritorial[localidad] = {};
-        }
-        if (!mapeoTerritorial[localidad][colonia]) {
-            mapeoTerritorial[localidad][colonia] = {};
-        }
-        if (!mapeoTerritorial[localidad][colonia][programa]) {
-            mapeoTerritorial[localidad][colonia][programa] = {}; // 🌟 Cambiado a objeto para meter subgrupos
-        }
-        if (!mapeoTerritorial[localidad][colonia][programa][subgrupo]) {
-            mapeoTerritorial[localidad][colonia][programa][subgrupo] = 0;
-        }
+        if (!mapeoTerritorial[localidad]) mapeoTerritorial[localidad] = {};
+        if (!mapeoTerritorial[localidad][colonia]) mapeoTerritorial[localidad][colonia] = {};
+        if (!mapeoTerritorial[localidad][colonia][programa]) mapeoTerritorial[localidad][colonia][programa] = {};
+        if (!mapeoTerritorial[localidad][colonia][programa][subgrupo]) mapeoTerritorial[localidad][colonia][programa][subgrupo] = 0;
 
-        // Conteo del volumen (taller grupal cuenta integrantes, individual cuenta como 1)
         const cantidadApoyos = (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) 
             ? item.integrantes.length 
             : 1;
@@ -917,18 +1232,15 @@ window.reprocesarVulnerable = () => {
         mapeoTerritorial[localidad][colonia][programa][subgrupo] += cantidadApoyos;
     });
 
-    // Inyección de indicadores demográficos globales en el DOM
     if(document.getElementById('v-mujeres')) document.getElementById('v-mujeres').innerText = mujeres;
     if(document.getElementById('v-hombres')) document.getElementById('v-hombres').innerText = hombres;
     if(document.getElementById('v-indigena')) document.getElementById('v-indigena').innerText = indigenas;
     if(document.getElementById('v-discapacidad')) document.getElementById('v-discapacidad').innerText = discapacidad;
 
-    // Pintar el nuevo desglose geográfico en el Grid Territorial (CON ACORDEONES DESPLEGABLES)
+    // Pintar Grid Territorial
     const territorialGrid = document.getElementById('v-cobertura-territorial-grid');
     if (territorialGrid) {
         territorialGrid.innerHTML = '';
-
-        // Iteramos las localidades ordenadas alfabéticamente
         Object.keys(mapeoTerritorial).sort().forEach(loc => {
             const tarjetaLoc = document.createElement('div');
             tarjetaLoc.className = 'stat-box';
@@ -936,20 +1248,16 @@ window.reprocesarVulnerable = () => {
             
             let htmlContenido = `<div style="font-size: 14px; font-weight: bold; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;"><i class="fas fa-map-marked-alt"></i> ${loc}</div>`;
             
-            // Desglosamos las colonias
             Object.keys(mapeoTerritorial[loc]).forEach(col => {
                 htmlContenido += `<div style="margin-top: 5px; padding-left: 5px;">
                     <span style="font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase;">📍 Col. ${col}</span>
                     <div style="margin-top: 4px; display: flex; flex-direction: column; gap: 4px;">`;
                 
-                // Desglosamos los programas usando <details> interactivos
                 Object.keys(mapeoTerritorial[loc][col]).forEach(prog => {
                     const subgruposDelPrograma = mapeoTerritorial[loc][col][prog];
-                    
                     let totalProgramaEnColonia = 0;
                     Object.values(subgruposDelPrograma).forEach(cant => totalProgramaEnColonia += cant);
 
-                    // 🌟 TRANSFORMADO A ACORDEÓN DESPLEGABLE NATIVO
                     htmlContenido += `
                         <details style="background: white; border: 1px solid #e2e8f0; border-radius: 4px; overflow: hidden; font-size: 12px;">
                             <summary style="padding: 6px 8px; font-weight: bold; color: #334155; cursor: pointer; background: #f1f5f9; display: flex; align-items: center; justify-content: space-between; user-select: none;">
@@ -958,45 +1266,33 @@ window.reprocesarVulnerable = () => {
                                 </span>
                                 <span style="background: #e0e7ff; color: #4338ca; padding: 1px 6px; border-radius: 10px; font-weight: bold; font-size: 10px;">${totalProgramaEnColonia} tot.</span>
                             </summary>
-                            
                             <div style="padding: 6px 10px; background: #ffffff; display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #e2e8f0;">`;
                     
                     Object.keys(subgruposDelPrograma).sort().forEach(sub => {
-                        const cantSub = subgruposDelPrograma[sub];
                         htmlContenido += `
                             <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #4b5563; padding: 2px 0;">
                                 <span style="display: inline-flex; align-items: center; gap: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 75%;">
                                     <i class="fas fa-tag" style="font-size: 8px; color: #9ca3af;"></i> 
                                     <span>${sub}</span>
                                 </span>
-                                <span style="color: #1e293b; font-family: monospace; font-weight: bold; background: #f8fafc; padding: 1px 4px; border-radius: 3px; border: 1px dashed #cbd5e1;">${cantSub} pza</span>
+                                <span style="color: #1e293b; font-family: monospace; font-weight: bold; background: #f8fafc; padding: 1px 4px; border-radius: 3px; border: 1px dashed #cbd5e1;">${subgruposDelPrograma[sub]} pza</span>
                             </div>`;
                     });
 
                     htmlContenido += `</div></details>`;
                 });
-
                 htmlContenido += `</div></div>`;
             });
 
             tarjetaLoc.innerHTML = htmlContenido;
             territorialGrid.appendChild(tarjetaLoc);
         });
-
-        if (Object.keys(mapeoTerritorial).length === 0) {
-            territorialGrid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding: 20px; color: #64748b;">No hay datos geográficos disponibles.</div>';
-        }
     }
 
-// ==========================================
-    // 3. RENDERIZADO DE LAS 3 LISTAS DE ANÁLISIS (CON BARRAS EN LISTA 3)
-    // ==========================================
-
+    // 3. RENDERIZADO DE GRÁFICAS DE PASTEL PURE CSS
     const contenedorTerritorio = document.getElementById('v-lista-territorio');
-
     if (contenedorTerritorio) {
         contenedorTerritorio.innerHTML = '';
-        
         const coloresPaleta = ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#6366f1', '#ef4444', '#14b8a6', '#f43f5e', '#a855f7'];
         const acumPorApoyo = {};
         const documentosPorCelda = {}; 
@@ -1006,8 +1302,6 @@ window.reprocesarVulnerable = () => {
             const subgrupo = (item.subgrupo || 'GENERAL').trim().toUpperCase();
             const localidad = (item.localidad || item.col_loc || 'LOCALIDAD NO REGISTRADA').trim().toUpperCase();
             const coloniaRef = (item.vul_colonia || 'S/C').trim().toUpperCase();
-            
-            // Mantenemos la clave extendida para la separación interna de datos
             const claveZona = `${localidad} (COL. ${coloniaRef}) [MOD: ${subgrupo}]`;
 
             if (!acumPorApoyo[programa]) acumPorApoyo[programa] = {};
@@ -1017,15 +1311,12 @@ window.reprocesarVulnerable = () => {
             if (!documentosPorCelda[idCelda]) documentosPorCelda[idCelda] = [];
             documentosPorCelda[idCelda].push(item);
 
-            const incremento = (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) 
-                ? item.integrantes.length 
-                : 1;
-
+            const incremento = (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) ? item.integrantes.length : 1;
             acumPorApoyo[programa][claveZona] += incremento;
         });
 
+        // Compartimos los datos estructurados al scope global para que la función de descarga los lea 🌟
         window.documentosPorCeldaActuales = documentosPorCelda;
-
         const apoyosOrdenados = Object.keys(acumPorApoyo).sort();
 
         if (apoyosOrdenados.length > 0) {
@@ -1050,14 +1341,10 @@ window.reprocesarVulnerable = () => {
                     gradienteEstilo += `${colorAsignado} ${inicioAngulo}deg ${finAngulo}deg${indice < Object.keys(zonasAsociadas).length - 1 ? ', ' : ''}`;
 
                     const idCeldaClave = `${apoyo}|||${zona}`;
-
-                    // --- EXTRACCIÓN DE TEXTOS PARA EL DISEÑO JERÁRQUICO ---
-                    // Separamos "LOCALIDAD (COL. X)" de "[MOD: SUBGRUPO]" para acomodarlo abajo
                     const partesFiltro = zona.split(" [MOD: ");
                     const textoUbicacion = partesFiltro[0] || 'N/A';
                     const textoSubgrupo = partesFiltro[1] ? partesFiltro[1].replace(']', '') : 'GENERAL';
 
-                    // Renglón con la leyenda adaptada (Ubicación arriba, Subgrupo abajo)
                     htmlLeyenda += `
                         <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; padding: 6px 0; border-bottom: 1px dotted #e2e8f0;">
                             <div style="display: flex; align-items: flex-start; gap: 8px; max-width: 65%; overflow: hidden;">
@@ -1067,20 +1354,15 @@ window.reprocesarVulnerable = () => {
                                     <span title="Subgrupo/Modalidad" style="font-size: 10px; color: #64748b; font-weight: 500;"><i class="fas fa-tags" style="font-size: 8px; margin-right: 2px;"></i> ${textoSubgrupo}</span>
                                 </div>
                             </div>
-                            
                             <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
                                 <span style="font-weight: bold; color: #1e293b; font-family: monospace;">${cantidad} pza(s)</span>
-                                
                                 <button onclick="descargarPadronCelda('${idCeldaClave}')" 
-                                        title="Descargar Excel de este subgrupo y zona" 
-                                        style="background: #137333; color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: bold; display: inline-flex; align-items: center; gap: 3px; transition: background 0.2s;"
-                                        onmouseover="this.style.background='#0f5b28';" 
-                                        onmouseout="this.style.background='#137333';">
+                                        title="Descargar Excel" 
+                                        style="background: #137333; color: white; border: none; padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 9px; font-weight: bold; display: inline-flex; align-items: center; gap: 3px;">
                                     📊 EXCEL
                                 </button>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
                 
                 gradienteEstilo += ")";
@@ -1088,7 +1370,6 @@ window.reprocesarVulnerable = () => {
 
                 const tarjetaPastel = document.createElement('div');
                 tarjetaPastel.style.cssText = "background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.05); height: fit-content;";
-                
                 tarjetaPastel.innerHTML = `
                     <div style="font-weight: bold; color: #1e293b; font-size: 13px; margin-bottom: 15px; border-bottom: 2px solid #10b981; padding-bottom: 6px; text-transform: uppercase;">
                         <i class="fas fa-box" style="color:#10b981; margin-right: 5px;"></i> ${apoyo} 
@@ -1097,22 +1378,19 @@ window.reprocesarVulnerable = () => {
                     <div style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
                         <div style="width: 130px; height: 130px; border-radius: 50%; background: ${gradienteEstilo}; flex-shrink: 0;"></div>
                         ${htmlLeyenda}
-                    </div>
-                `;
+                    </div>`;
 
                 contenedorTerritorio.appendChild(tarjetaPastel);
             });
         } else {
             contenedorTerritorio.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:30px; color:#64748b; font-size:13px;">No hay registros de apoyos para generar gráficos.</div>';
         }
-    
-    
-
-        // ==========================================
-        // FUNCIÓN GLOBAL INYECTADA PARA LA DESCARGA INDIVIDUAL POR FILAS
-        // ==========================================
+    }
+};
+       // =============================================================================
+// FUNCIÓN GLOBAL PARA LA DESCARGA INDIVIDUAL (SÁCADA DEL FLUJO REACTIVO)
+// =============================================================================
 window.descargarPadronCelda = function(idCeldaClave) {
-    // 1. Validamos y extraemos los registros precargados de la celda actual
     const coleccionItems = window.documentosPorCeldaActuales?.[idCeldaClave] || [];
     
     if (coleccionItems.length === 0) {
@@ -1120,7 +1398,6 @@ window.descargarPadronCelda = function(idCeldaClave) {
         return;
     }
 
-    // 2. Extraemos el programa y la zona desde el separador único '|||'
     let progNombre = "PROGRAMA", zonaNombre = "ZONA";
     if (idCeldaClave.includes('|||')) {
         const partes = idCeldaClave.split('|||');
@@ -1128,14 +1405,12 @@ window.descargarPadronCelda = function(idCeldaClave) {
         zonaNombre = partes[1] || "ZONA";
     }
 
-    // 3. Encabezados estándar del CSV administrativo (🌟 Añadido: SUBPROGRAMA)
-    let contenidoCsv = "\uFEFF"; // BOM para forzar UTF-8 correcto en Excel
+    let contenidoCsv = "\uFEFF"; // BOM para UTF-8 en Excel
     contenidoCsv += "PROGRAMA,SUBPROGRAMA,LOCALIDAD/COLONIA,BENEFICIARIO,CURP,SEXO,TELEFONO,DIRECCION,TIPO PADRON\n";
 
-    // 4. Procesamos documento por documento desglosando integrantes en líneas independientes
     coleccionItems.forEach(item => {
         const programa = item.programa || 'SIN ESPECIFICAR';
-        const subgrupo = item.subgrupo || 'GENERAL'; // 🌟 Extraemos la modalidad o subgrupo
+        const subgrupo = item.subgrupo || 'GENERAL'; 
         const colLoc = item.localidad || item.col_loc || 'NO REGISTRADA';
         const colRef = item.vul_colonia || 'S/C';
         const zonaString = `"${colLoc} (COL. ${colRef})"`;
@@ -1143,7 +1418,6 @@ window.descargarPadronCelda = function(idCeldaClave) {
         const direccion = `"${(item.direccion || 'CONOCIDA').replace(/"/g, '""')}"`;
 
         if (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) {
-            // Caso Colectivo: Una fila individual por cada integrante
             item.integrantes.forEach(int => {
                 const nombreCompleto = `"${(`${int.nombre || ''} ${int.paterno || ''} ${int.materno || ''}`).trim().toUpperCase()}"`;
                 const curp = int.curp || 'SIN CURP';
@@ -1151,45 +1425,43 @@ window.descargarPadronCelda = function(idCeldaClave) {
                 contenidoCsv += `"${programa}","${subgrupo}",${zonaString},${nombreCompleto},${curp},${sexo},${telefono},${direccion},"COLECTIVO (TALLER)"\n`;
             });
         } else if (item.beneficiario) {
-            // Caso Individual: Fila única ordinaria
-            const nombreCompleto = `"${(item.beneficiario.nombre_completo_cache || `${item.beneficiario.nombre || ''} ${item.beneficiario.paterno || ''} ${item.beneficiario.materno || ''}`).trim().toUpperCase()}"`;
-            const curp = item.beneficiario.curp || 'SIN CURP';
-            const sexo = item.beneficiario.sexo || 'MUJER';
+            // 🌟 Protegido contra objetos beneficiario vacíos o corruptos
+            const b = item.beneficiario;
+            const nombreCompleto = `"${(b.nombre_completo_cache || `${b.nombre || ''} ${b.paterno || ''} ${b.materno || ''}`).trim().toUpperCase()}"`;
+            const curp = b.curp || 'SIN CURP';
+            const sexo = b.sexo || 'MUJER';
             contenidoCsv += `"${programa}","${subgrupo}",${zonaString},${nombreCompleto},${curp},${sexo},${telefono},${direccion},"INDIVIDUAL"\n`;
         } else {
-            // Respaldo Institucional (Escuelas / Grupos sin estructurar)
             const nombreEscuela = `"${(item.pae_escuela || 'INSTITUCIÓN / ESCUELA').replace(/"/g, '""')}"`;
             const cct = item.pae_clave_escuela || 'SIN CCT';
             contenidoCsv += `"${programa}","${subgrupo}",${zonaString},${nombreEscuela},${cct},"N/A",${telefono},${direccion},"INSTITUCIONAL"\n`;
         }
     });
 
-    // 5. Generación y disparo del archivo descargable .csv
     const blob = new Blob([contenidoCsv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
-    
-    // Limpiamos caracteres raros o espacios del nombre del archivo resultante
     const nombreArchivo = `PADRON_${progNombre.replace(/\s+/g, '_')}_${zonaNombre.replace(/[\s\(\)\.]+/g, '_')}.csv`;
     
-    if (navigator.msSaveBlob) { 
-        navigator.msSaveBlob(blob, nombreArchivo);
-    } else {
-        link.href = URL.createObjectURL(blob);
-        link.setAttribute("download", nombreArchivo);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", nombreArchivo);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 };
-    }
-};
-/////////////////////////////////////////////
-// Función específica de Area Medica
-///////////////////////////////////////////
-let chartGen, chartEdad, chartPob, chartZonas, chartIngresos, chartIncremento;
+// =============================================================================
+// CONTENEDOR GLOBAL PARA INSTANCIAS DE CHART.JS (Previene fugas de memoria)
+// =============================================================================
+window.medicaCharts = {};
 
+// =============================================================================
+// MÓDULO: ÁREA MÉDICA
+// =============================================================================
 window.reprocesarMedica = function() {
-    const data = store.medica;
+    // Guarda defensiva: si el contenedor principal no existe en el DOM, no procesamos
+    const tablaDatos = document.getElementById('m-tabla-datos');
+    if (!tablaDatos) return;
+
+    const data = store.medica || [];
     
     const stats = {
         genero: { 'HOMBRE': 0, 'MUJER': 0, 'SIN ESPECIFICAR': 0 },
@@ -1208,43 +1480,50 @@ window.reprocesarMedica = function() {
             const r = age < 18 ? "0-17" : age <= 35 ? "18-35" : age <= 55 ? "36-55" : "56+";
             stats.edades[r]++;
         }
-        stats.poblacion[d.tipo_pob || "N/A"] = (stats.poblacion[d.tipo_pob || "N/A"] || 0) + 1;
-        stats.zonas[d.lugar || "SIN ZONA"] = (stats.zonas[d.lugar || "SIN ZONA"] || 0) + 1;
+        
+        const tipoPob = d.tipo_pob || "N/A";
+        stats.poblacion[tipoPob] = (stats.poblacion[tipoPob] || 0) + 1;
+        
+        const lugarRef = d.lugar || "SIN ZONA";
+        stats.zonas[lugarRef] = (stats.zonas[lugarRef] || 0) + 1;
 
         if (d.fecha_cap) {
-    const date = new Date(d.fecha_cap);
-    if (!isNaN(date)) {
-        // Obtenemos el número de semana del año
-        const start = new Date(date.getFullYear(), 0, 1);
-        const dayOfYear = (date - start) / 86400000;
-        const week = Math.ceil((dayOfYear + start.getDay() + 1) / 7);
-        
-        const label = `Sem ${week}`;
-        
-        // Acumulamos el costo
-        stats.ingresosSemanales[label] = (stats.ingresosSemanales[label] || 0) + (parseFloat(d.costo) || 0);
-    }
-}
+            const date = new Date(d.fecha_cap);
+            if (!isNaN(date)) {
+                const start = new Date(date.getFullYear(), 0, 1);
+                const dayOfYear = (date - start) / 86400000;
+                const week = Math.ceil((dayOfYear + start.getDay() + 1) / 7);
+                const label = `Sem ${week}`;
+                stats.ingresosSemanales[label] = (stats.ingresosSemanales[label] || 0) + (parseFloat(d.costo) || 0);
+            }
+        }
     });
 
     const semanasOrdenadas = Object.keys(stats.ingresosSemanales).sort((a, b) => {
-    return parseInt(a.split(' ')[1]) - parseInt(b.split(' ')[1]);
-});
+        return parseInt(a.split(' ')[1] || 0) - parseInt(b.split(' ')[1] || 0);
+    });
 
     const incrementos = semanasOrdenadas.map((sem, i) => {
         if (i === 0) return 0;
         return stats.ingresosSemanales[sem] - stats.ingresosSemanales[semanasOrdenadas[i-1]];
     });
 
-    // 2. Renderizar KPIs
-    document.getElementById('m-total').innerText = data.length;
-    document.getElementById('m-ingreso').innerText = `$${data.reduce((acc, d) => acc + (parseFloat(d.costo) || 0), 0).toLocaleString()}`;
-    document.getElementById('m-pendientes').innerText = data.filter(d => d.estado === 'PENDIENTE_ENFERMERIA').length;
-    const topPob = Object.entries(stats.poblacion).sort((a,b) => b[1] - a[1])[0];
-    document.getElementById('m-pob-top').innerText = topPob ? `${topPob[0]} (${topPob[1]})` : "-";
+    // Inyección segura de KPIs
+    if (document.getElementById('m-total')) document.getElementById('m-total').innerText = data.length;
+    if (document.getElementById('m-ingreso')) {
+        const totalCosto = data.reduce((acc, d) => acc + (parseFloat(d.costo) || 0), 0);
+        document.getElementById('m-ingreso').innerText = `$${totalCosto.toLocaleString()}`;
+    }
+    if (document.getElementById('m-pendientes')) {
+        document.getElementById('m-pendientes').innerText = data.filter(d => d.estado === 'PENDIENTE_ENFERMERIA').length;
+    }
+    if (document.getElementById('m-pob-top')) {
+        const topPob = Object.entries(stats.poblacion).sort((a,b) => b[1] - a[1])[0];
+        document.getElementById('m-pob-top').innerText = topPob ? `${topPob[0]} (${topPob[1]})` : "-";
+    }
 
-    // 3. Renderizar Tabla de Detalle (Doble Columna)
-    document.getElementById('m-tabla-datos').innerHTML = data.map(d => `
+    // Renderizar Tabla de Detalle
+    tablaDatos.innerHTML = data.map(d => `
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 12px;">
             <div>
                 <div style="font-weight: bold; color: #0ea5e9;">${d.nombre || 'Sin nombre'}</div>
@@ -1261,18 +1540,25 @@ window.reprocesarMedica = function() {
         </div>
     `).join('');
 
+    // Configuración y Renderizado de Gráficos usando el mapa global seguro
     const configs = [
-        { id: 'chart-genero', var: 'chartGen', type: 'doughnut', labels: Object.keys(stats.genero), values: Object.values(stats.genero), color: ['#3b82f6', '#ec4899', '#94a3b8'] },
-        { id: 'chart-edades', var: 'chartEdad', type: 'bar', labels: Object.keys(stats.edades), values: Object.values(stats.edades), color: '#f59e0b' },
-        { id: 'chart-poblacion', var: 'chartPob', type: 'bar', labels: Object.keys(stats.poblacion), values: Object.values(stats.poblacion), color: '#10b981', axis: 'y' },
-        { id: 'chart-zonas', var: 'chartZonas', type: 'bar', labels: Object.keys(stats.zonas).slice(0, 5), values: Object.values(stats.zonas).slice(0, 5), color: '#8b5cf6', axis: 'y' },
-        { id: 'chart-ingresos', var: 'chartIngresos', type: 'line', labels: semanasOrdenadas, values: semanasOrdenadas.map(s => stats.ingresosSemanales[s]), color: '#06b6d4' },
-        { id: 'chart-incremento', var: 'chartIncremento', type: 'bar', labels: semanasOrdenadas, values: incrementos, color: incrementos.map(v => v >= 0 ? '#10b981' : '#f43f5e') }
+        { id: 'chart-genero', key: 'chartGen', type: 'doughnut', labels: Object.keys(stats.genero), values: Object.values(stats.genero), color: ['#3b82f6', '#ec4899', '#94a3b8'] },
+        { id: 'chart-edades', key: 'chartEdad', type: 'bar', labels: Object.keys(stats.edades), values: Object.values(stats.edades), color: '#f59e0b' },
+        { id: 'chart-poblacion', key: 'chartPob', type: 'bar', labels: Object.keys(stats.poblacion), values: Object.values(stats.poblacion), color: '#10b981', axis: 'y' },
+        { id: 'chart-zonas', key: 'chartZonas', type: 'bar', labels: Object.keys(stats.zonas).slice(0, 5), values: Object.values(stats.zonas).slice(0, 5), color: '#8b5cf6', axis: 'y' },
+        { id: 'chart-ingresos', key: 'chartIngresos', type: 'line', labels: semanasOrdenadas, values: semanasOrdenadas.map(s => stats.ingresosSemanales[s]), color: '#06b6d4' },
+        { id: 'chart-incremento', key: 'chartIncremento', type: 'bar', labels: semanasOrdenadas, values: incrementos, color: incrementos.map(v => v >= 0 ? '#10b981' : '#f43f5e') }
     ];
 
     configs.forEach(cfg => {
-        if (window[cfg.var]) window[cfg.var].destroy();
-        window[cfg.var] = new Chart(document.getElementById(cfg.id), {
+        const canvas = document.getElementById(cfg.id);
+        if (!canvas) return; // Si el canvas no está en el DOM actual, saltamos de forma segura
+
+        if (window.medicaCharts[cfg.key]) {
+            window.medicaCharts[cfg.key].destroy();
+        }
+        
+        window.medicaCharts[cfg.key] = new Chart(canvas, {
             type: cfg.type,
             data: { labels: cfg.labels, datasets: [{ data: cfg.values, backgroundColor: cfg.color, borderColor: cfg.color, fill: cfg.type === 'line', tension: 0.3, borderRadius: cfg.type === 'bar' ? 6 : 0 }] },
             options: { responsive: true, maintainAspectRatio: false, indexAxis: cfg.axis || 'x', scales: { x: { grid: { display: false } }, y: { grid: { display: false } } } }
@@ -1280,41 +1566,44 @@ window.reprocesarMedica = function() {
     });
 };
 
-/////////////////////////////////////////////
-// Función específica de Psicología
+// =============================================================================
+// MÓDULO: PSICOLOGÍA
+// =============================================================================
 window.reprocesarPsico = function() {
-    const busqueda = document.getElementById('global-search-input').value.toLowerCase();
-    const zona = document.getElementById('global-zone-search').value.toLowerCase();
-    const mes = document.getElementById('global-month-filter').value;
+    const contenedorPrincipal = document.getElementById('p-list-pacientes');
+    if (!contenedorPrincipal) return;
 
-    const filtrados = store.psicologia.filter(item => {
+    // Elementos de filtrado global (con fallbacks si no se encuentran)
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
+    const zona = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
+    const mes = document.getElementById('global-month-filter')?.value || "all";
+
+    const filtrados = (store.psicologia || []).filter(item => {
         const paciente = (item.paciente || "").toLowerCase();
         const z = (item.col_loc || "").toLowerCase();
         const fecha = item.fecha || ""; 
-        const mesRegistro = fecha ? fecha.split('-')[1] : null;
+        const mesRegistro = fecha.includes('-') ? fecha.split('-')[1] : null;
         
         return paciente.includes(busqueda) && 
                z.includes(zona) && 
                (mes === 'all' || mesRegistro === mes);
     });
 
-    // 1. Estadísticas Superiores
-    document.getElementById('p-total').innerText = filtrados.length;
-    document.getElementById('p-total-a').innerText = filtrados.filter(d => d.nombre_a && d.nombre_a !== "").length;
-    document.getElementById('p-ses').innerText = filtrados.length;
+    // Actualización segura de KPIs superiores
+    if (document.getElementById('p-total')) document.getElementById('p-total').innerText = filtrados.length;
+    if (document.getElementById('p-total-a')) document.getElementById('p-total-a').innerText = filtrados.filter(d => d.nombre_a && d.nombre_a !== "").length;
+    if (document.getElementById('p-ses')) document.getElementById('p-ses').innerText = filtrados.length;
 
-    // 2. Estadísticas de Pacientes/Acompañantes
-    document.getElementById('p-hombres').innerText = filtrados.filter(d => d.genero_p === 'MASCULINO').length;
-    document.getElementById('p-mujeres').innerText = filtrados.filter(d => d.genero_p === 'FEMENINO').length;
-    document.getElementById('p-menores').innerText = filtrados.filter(d => parseInt(d.edad_p) < 18).length;
-    document.getElementById('p-hombres-a').innerText = filtrados.filter(d => d.genero_a === 'MASCULINO').length;
-    document.getElementById('p-mujeres-a').innerText = filtrados.filter(d => d.genero_a === 'FEMENINO').length;
-    document.getElementById('p-menores-a').innerText = filtrados.filter(d => parseInt(d.edad_a) < 18).length;
+    if (document.getElementById('p-hombres')) document.getElementById('p-hombres').innerText = filtrados.filter(d => d.genero_p === 'MASCULINO').length;
+    if (document.getElementById('p-mujeres')) document.getElementById('p-mujeres').innerText = filtrados.filter(d => d.genero_p === 'FEMENINO').length;
+    if (document.getElementById('p-menores')) document.getElementById('p-menores').innerText = filtrados.filter(d => parseInt(d.edad_p) < 18).length;
+    if (document.getElementById('p-hombres-a')) document.getElementById('p-hombres-a').innerText = filtrados.filter(d => d.genero_a === 'MASCULINO').length;
+    if (document.getElementById('p-mujeres-a')) document.getElementById('p-mujeres-a').innerText = filtrados.filter(d => d.genero_a === 'FEMENINO').length;
+    if (document.getElementById('p-menores-a')) document.getElementById('p-menores-a').innerText = filtrados.filter(d => parseInt(d.edad_a) < 18).length;
 
-    // --- LÓGICA DE PROCESAMIENTO ---
-
-    // Agrupación para Lista 2 (Edades + Temas)
     const edadTemas = { "0-17": {}, "18-35": {}, "36-55": {}, "56+": {} };
+    const localTemas = {};
+
     filtrados.forEach(d => {
         const edad = parseInt(d.edad_p);
         const tema = d.tema || "SIN MOTIVO";
@@ -1322,77 +1611,76 @@ window.reprocesarPsico = function() {
             let r = edad < 18 ? "0-17" : edad <= 35 ? "18-35" : edad <= 55 ? "36-55" : "56+";
             edadTemas[r][tema] = (edadTemas[r][tema] || 0) + 1;
         }
-    });
 
-    // Agrupación para Lista 3: Localidades -> Asuntos
-    const localTemas = {};
-    filtrados.forEach(d => {
         const loc = d.col_loc || "SIN LOCALIDAD";
-        const tema = d.tema || "SIN MOTIVO";
         if (!localTemas[loc]) localTemas[loc] = {};
         localTemas[loc][tema] = (localTemas[loc][tema] || 0) + 1;
     });
 
-    // --- RENDERIZADO ---
-
-    // Lista 1: Pacientes Recientes
-    document.getElementById('p-list-pacientes').innerHTML = filtrados.slice(-15).reverse().map(d => `
+    // Inyección en Listas
+    contenedorPrincipal.innerHTML = filtrados.slice(-15).reverse().map(d => `
         <div style="border-bottom:1px solid #f1f5f9; padding:6px 0;">
             <div style="font-weight:800; font-size:11px; color:#0f172a;">${d.paciente || 'S/N'}</div>
             <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.tema || 'SIN MOTIVO'}</div>
             <div style="font-size:9px; color:#94a3b8; font-weight:bold;">Sesión: ${d.n_sesion || '1'} | ${d.fecha || ''}</div>
         </div>`).join('');
 
-    // Lista 2: Edades con Temas abajo
-    document.getElementById('p-list-edades').innerHTML = Object.entries(edadTemas).map(([rango, temas]) => `
-        <div style="margin-bottom:10px;">
-            <div style="font-weight:800; font-size:11px; background:#f1f5f9; padding:2px 5px; border-radius:3px;">${rango} años</div>
-            ${Object.entries(temas).map(([tema, count]) => `
-                <div style="display:flex; justify-content:space-between; font-size:9px; padding-left:8px; margin-top:1px;">
-                    <span style="color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${tema}</span>
-                    <b style="color:#0f172a;">${count}</b>
-                </div>
-            `).join('')}
-        </div>`).join('');
+    if (document.getElementById('p-list-edades')) {
+        document.getElementById('p-list-edades').innerHTML = Object.entries(edadTemas).map(([rango, temas]) => `
+            <div style="margin-bottom:10px;">
+                <div style="font-weight:800; font-size:11px; background:#f1f5f9; padding:2px 5px; border-radius:3px;">${rango} años</div>
+                ${Object.entries(temas).map(([tema, count]) => `
+                    <div style="display:flex; justify-content:space-between; font-size:9px; padding-left:8px; margin-top:1px;">
+                        <span style="color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${tema}</span>
+                        <b style="color:#0f172a;">${count}</b>
+                    </div>
+                `).join('')}
+            </div>`).join('');
+    }
 
-    // Lista 3: Localidades y sus Asuntos
-    document.getElementById('p-list-asuntos').innerHTML = Object.entries(localTemas).map(([loc, temas]) => `
-        <div style="margin-bottom:12px;">
-            <div style="font-weight:800; font-size:11px; background:#e2e8f0; padding:3px 6px; border-radius:3px;">${loc}</div>
-            ${Object.entries(temas).map(([tema, count]) => `
-                <div style="display:flex; justify-content:space-between; font-size:9px; padding-left:8px; margin-top:2px;">
-                    <span style="color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${tema}</span>
-                    <b style="color:#0f172a;">${count}</b>
-                </div>
-            `).join('')}
-        </div>`).join('');
+    if (document.getElementById('p-list-asuntos')) {
+        document.getElementById('p-list-asuntos').innerHTML = Object.entries(localTemas).map(([loc, temas]) => `
+            <div style="margin-bottom:12px;">
+                <div style="font-weight:800; font-size:11px; background:#e2e8f0; padding:3px 6px; border-radius:3px;">${loc}</div>
+                ${Object.entries(temas).map(([tema, count]) => `
+                    <div style="display:flex; justify-content:space-between; font-size:9px; padding-left:8px; margin-top:2px;">
+                        <span style="color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${tema}</span>
+                        <b style="color:#0f172a;">${count}</b>
+                    </div>
+                `).join('')}
+            </div>`).join('');
+    }
 };
 
-/////////////////////////////////////////////
-// Función específica de JefaturaPsicología
-    window.reprocesarJefatura = function() {
-    const busqueda = document.getElementById('global-search-input').value.toLowerCase();
-    const zona = document.getElementById('global-zone-search').value.toLowerCase();
-    const mes = document.getElementById('global-month-filter').value;
+// =============================================================================
+// MÓDULO: JEFATURA DE PSICOLOGÍA
+// =============================================================================
+window.reprocesarJefatura = function() {
+    const contenedorActividades = document.getElementById('jp-list-actividades');
+    if (!contenedorActividades) return;
 
-    const filtrados = store.jefatura.filter(item => {
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
+    const zona = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
+    const mes = document.getElementById('global-month-filter')?.value || "all";
+
+    const filtrados = (store.jefatura || []).filter(item => {
         const paciente = (item.paciente || "").toLowerCase();
         const z = (item.colonia || "").toLowerCase();
         const fecha = item.fecha || ""; 
-        const mesRegistro = fecha ? fecha.split('-')[1] : null;
+        const mesRegistro = fecha.includes('-') ? fecha.split('-')[1] : null;
         
         return paciente.includes(busqueda) && 
                z.includes(zona) && 
                (mes === 'all' || mesRegistro === mes);
     });
 
-    // Estadísticas
-    document.getElementById('jp-total').innerText = filtrados.length;
-    document.getElementById('jp-ent').innerText = filtrados.reduce((sum, d) => sum + (parseInt(d.personas) || 0), 0);
+    if (document.getElementById('jp-total')) document.getElementById('jp-total').innerText = filtrados.length;
+    if (document.getElementById('jp-ent')) {
+        const totalPersonas = filtrados.reduce((sum, d) => sum + (parseInt(d.personas) || 0), 0);
+        document.getElementById('jp-ent').innerText = totalPersonas;
+    }
 
-    // 1. Resumen por Dependencia (Lista detallada)
-    // Mostramos los 15 más recientes
-    document.getElementById('jp-list-actividades').innerHTML = filtrados.slice(-15).reverse().map(d => `
+    contenedorActividades.innerHTML = filtrados.slice(-15).reverse().map(d => `
         <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
             <div style="flex:1;">
                 <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.dependencia || 'N/A'}</div>
@@ -1404,83 +1692,97 @@ window.reprocesarPsico = function() {
         </div>
     `).join('');
 
-    // 2. Zonas de Intervención (Lista detallada)
-    document.getElementById('jp-list-geo').innerHTML = filtrados.slice(-15).reverse().map(d => `
-        <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
-            <div style="flex:1;">
-                <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.colonia || 'SIN ZONA'}</div>
-                <div style="font-size:9px; color:#64748b; font-weight:700;">${d.actividad || ''}</div>
+    if (document.getElementById('jp-list-geo')) {
+        document.getElementById('jp-list-geo').innerHTML = filtrados.slice(-15).reverse().map(d => `
+            <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+                <div style="flex:1;">
+                    <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.colonia || 'SIN ZONA'}</div>
+                    <div style="font-size:9px; color:#64748b; font-weight:700;">${d.actividad || ''}</div>
+                </div>
+                <div style="font-size:9px; font-weight:bold; color:var(--accent); text-align:right;">
+                    ${d.oficio || 'S/N'}
+                </div>
             </div>
-            <div style="font-size:9px; font-weight:bold; color:var(--accent); text-align:right;">
-                ${d.oficio || 'S/N'}
-            </div>
-        </div>
-    `).join('');
+        `).join('');
+    }
 };
-        ///////////////////////////////////////////////
-        // --- PROCESAMIENTO PROCURADURIA ---
-
+// =============================================================================
+// MÓDULO: PROCURADURÍA
+// =============================================================================
 window.reprocesarProcuraduria = function() {
-    const busqueda = document.getElementById('global-search-input').value.toLowerCase();
-    const zona = document.getElementById('global-zone-search').value.toLowerCase();
-    const mes = document.getElementById('global-month-filter').value;
+    const contenedorCasos = document.getElementById('pr-list-casos');
+    if (!contenedorCasos) return;
 
-    const filtrados = store.procuraduria.filter(item => {
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
+    const zona = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
+    const mes = document.getElementById('global-month-filter')?.value || "all";
+
+    const filtrados = (store.procuraduria || []).filter(item => {
         const nombre = (item.nombre || "").toLowerCase();
         const z = (item.lugar || "").toLowerCase();
         const fecha = item.fecha || ""; 
-        const mesRegistro = fecha ? fecha.split('-')[1] : null;
+        const mesRegistro = fecha.includes('-') ? fecha.split('-')[1] : null;
         
         return nombre.includes(busqueda) && 
                z.includes(zona) && 
                (mes === 'all' || mesRegistro === mes);
     });
 
-    // Estadísticas superiores
-    document.getElementById('pr-total').innerText = filtrados.length;
-    document.getElementById('pr-mixtos').innerText = filtrados.filter(d => d.horarios_mixtos === 'Si').length;
+    if (document.getElementById('pr-total')) document.getElementById('pr-total').innerText = filtrados.length;
+    if (document.getElementById('pr-mixtos')) document.getElementById('pr-mixtos').innerText = filtrados.filter(d => d.horarios_mixtos === 'Si').length;
 
-    // 1. Panel: ASESORÍA (Agrupación y conteo)
     const conteoAsuntos = {};
-    filtrados.forEach(d => { const a = d.asuntos || "S/ASUNTO"; conteoAsuntos[a] = (conteoAsuntos[a] || 0) + 1; });
+    filtrados.forEach(d => { 
+        const a = d.asuntos || "S/ASUNTO"; 
+        conteoAsuntos[a] = (conteoAsuntos[a] || 0) + 1; 
+    });
     
-    document.getElementById('pr-conteo-tabla').innerHTML = Object.entries(conteoAsuntos)
-        .sort((a,b) => b[1] - a[1])
-        .map(([asunto, count]) => `
-        <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
-            <div style="flex:1;">
-                <div style="font-weight:800; font-size:11px; color:#1e293b; text-transform: uppercase;">${asunto}</div>
-                <div style="font-size:10px; color:var(--primary); font-weight:700;">TOTAL: ${count}</div>
-            </div>
-        </div>`).join('');
+    if (document.getElementById('pr-conteo-tabla')) {
+        document.getElementById('pr-conteo-tabla').innerHTML = Object.entries(conteoAsuntos)
+            .sort((a,b) => b[1] - a[1])
+            .map(([asunto, count]) => `
+            <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+                <div style="flex:1;">
+                    <div style="font-weight:800; font-size:11px; color:#1e293b; text-transform: uppercase;">${asunto}</div>
+                    <div style="font-size:10px; color:var(--primary); font-weight:700;">TOTAL: ${count}</div>
+                </div>
+            </div>`).join('');
+    }
 
-    // 2. Panel: NOMBRE (Nombre + Asuntos)
-    document.getElementById('pr-list-casos').innerHTML = filtrados.slice(-15).reverse().map(d => `
-      <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+    contenedorCasos.innerHTML = filtrados.slice(-15).reverse().map(d => `
+        <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
             <div style="flex:1;">
                 <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.nombre || 'SIN NOMBRE'}</div>
                 <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.asuntos || 'S/A'}</div>
             </div>
         </div>`).join('');
 
-    // 3. Panel: LUGAR (Lugar + Domicilio)
-    document.getElementById('pr-list-geo').innerHTML = filtrados.slice(-15).reverse().map(d => `
-          <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
-            <div style="flex:1;">
-                <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.lugar || 'SIN LUGAR'}</div>
-                <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.domicilio || 'SIN DOMICILIO'}</div>
-            </div>
-        </div>`).join('');
+    if (document.getElementById('pr-list-geo')) {
+        document.getElementById('pr-list-geo').innerHTML = filtrados.slice(-15).reverse().map(d => `
+            <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+                <div style="flex:1;">
+                    <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.lugar || 'SIN LUGAR'}</div>
+                    <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.domicilio || 'SIN DOMICILIO'}</div>
+                </div>
+            </div>`).join('');
+    }
 };
-
-       ///////////////////////////////////////////////
-        // --- PROCESAMIENTO TRABAJO SOCIAL ---
+       // =============================================================================
+// MÓDULO: TRABAJO SOCIAL
+// =============================================================================
 window.reprocesarTrabSoc = function() {
-    const busqueda = document.getElementById('global-search-input').value.toLowerCase();
-    const zona = document.getElementById('global-zone-search').value.toLowerCase();
-    const mes = document.getElementById('global-month-filter').value;
+    // Guarda defensiva: Evita procesar si las columnas de este módulo no están montadas
+    const col1 = document.getElementById('col-1');
+    if (!col1) return;
 
-    const filtrados = store.social.filter(item => {
+    // Lectura segura de inputs de filtrado global
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
+    const zona = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
+    const mes = document.getElementById('global-month-filter')?.value || "all";
+
+    const dataSocial = store.social || [];
+
+    const filtrados = dataSocial.filter(item => {
         const nombre = (item.nombre || "").toLowerCase();
         const programa = (item.programa || "").toLowerCase();
         const asunto = (item.asunto || "").toLowerCase();
@@ -1493,32 +1795,30 @@ window.reprocesarTrabSoc = function() {
         return coincideBusqueda && z.includes(zona) && (mes === 'all' || mesRegistro === mes);
     });
 
-    // Cálculo de conteos globales y por Personal que Atendió
+    // Conteo global y por personal operativo
     const contPrograma = {}, contAsunto = {}, contDetalle = {}, contPersonal = {};
     
     filtrados.forEach(i => {
         const p = i.programa || "SIN PROG.";
         const a = i.asunto || "SIN ASUNTO";
         const d = i.detalle_asunto || "SIN DETALLE";
-        
-        // CAMBIO AQUÍ: Captura el usuario del sistema que atendió el caso 
-        // (Ajusta 'usuario_atendio' por el campo exacto que tengas en tu Firestore, ej: 'usuario' o 'atendido_por')
         const trabajador = (i.usuario_atendio || i.usuario || i.atendido_por || "NO ASIGNADO").trim().toUpperCase();
 
         contPrograma[p] = (contPrograma[p] || 0) + 1;
         contAsunto[a] = (contAsunto[a] || 0) + 1;
         contDetalle[d] = (contDetalle[d] || 0) + 1;
-        
-        // Acumulación para el gráfico de pastel del personal
         contPersonal[trabajador] = (contPersonal[trabajador] || 0) + 1;
     });
 
-    // Actualizar Stats principales
-    document.getElementById('s-total').innerText = filtrados.length;
-    document.getElementById('s-atendidos').innerText = filtrados.filter(d => ['ATENDIDO', 'ENTREGADO', 'REALIZADO', 'VALIDADO'].includes(d.estatus)).length;
-    document.getElementById('s-pendientes').innerText = filtrados.filter(d => ['PENDIENTE', 'EN PROCESO'].includes(d.estatus)).length;
+    // Actualización segura de marcadores KPIs principales
+    if (document.getElementById('s-total')) document.getElementById('s-total').innerText = filtrados.length;
+    if (document.getElementById('s-atendidos')) {
+        document.getElementById('s-atendidos').innerText = filtrados.filter(d => ['ATENDIDO', 'ENTREGADO', 'REALIZADO', 'VALIDADO'].includes(d.estatus)).length;
+    }
+    if (document.getElementById('s-pendientes')) {
+        document.getElementById('s-pendientes').innerText = filtrados.filter(d => ['PENDIENTE', 'EN PROCESO'].includes(d.estatus)).length;
+    }
     
-    // Función de color para estatus
     const getColor = (e) => {
         const colores = {
             'ATENDIDO': '#16a34a', 'ENTREGADO': '#16a34a', 'REALIZADO': '#16a34a', 'VALIDADO': '#16a34a',
@@ -1527,7 +1827,7 @@ window.reprocesarTrabSoc = function() {
         return colores[e] || '#64748b';
     };
 
-    // Renderizado Stats
+    // Renderizado dinámico de estadísticas secundarias
     const renderStatCompleto = (id, titulo, objetoConteo) => {
         const container = document.getElementById(id);
         if (!container) return;
@@ -1550,54 +1850,54 @@ window.reprocesarTrabSoc = function() {
     renderStatCompleto('stat-asunto', 'ASUNTOS', contAsunto);
     renderStatCompleto('stat-detalle', 'DETALLES', contDetalle);
 
-    // Agrupación para Columna 2
-    const cont = {};
+    // Agrupación cruzada para Columna 2
+    const contCruzado = {};
     filtrados.forEach(i => {
         const key = `${i.asunto || "SIN ASUNTO"}|${i.programa || "SIN PROG."}|${i.detalle_asunto || "SIN DETALLE"}`;
-        cont[key] = (cont[key] || 0) + 1;
+        contCruzado[key] = (contCruzado[key] || 0) + 1;
     });
-    const ordenado = Object.entries(cont).sort((a, b) => b[1] - a[1]);
+    const ordenadoCruzado = Object.entries(contCruzado).sort((a, b) => b[1] - a[1]);
 
-    // 1. Renderizado Columna 1
-    document.getElementById('col-1').innerHTML = filtrados.slice(-15).reverse().map(i => `
+    // Inyección en Columnas 1, 2 y 3
+    col1.innerHTML = filtrados.slice(-15).reverse().map(i => `
         <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
-        <div style="flex-grow:1; overflow:hidden;">
-            <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.nombre||'N/A'}</div>
-            <div style="font-size:9px; color:#64748b;">${i.fecha_registro||''}</div>
-            <div style="font-size:9px; color:var(--primary); font-weight:700;">${i.asunto||''}</div>
-            <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus||'SIN ESTADO'}</div>
+            <div style="flex-grow:1; overflow:hidden;">
+                <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.nombre || 'N/A'}</div>
+                <div style="font-size:9px; color:#64748b;">${i.fecha_registro || ''}</div>
+                <div style="font-size:9px; color:var(--primary); font-weight:700;">${i.asunto || ''}</div>
+                <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus || 'SIN ESTADO'}</div>
             </div>
         </div>
     `).join('');
     
-    // 2. Renderizado Columna 2
-    document.getElementById('col-2').innerHTML = ordenado.map(([key, count]) => {
-        const [asunto, programa, detalle] = key.split('|');
-        return `
-            <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+    if (document.getElementById('col-2')) {
+        document.getElementById('col-2').innerHTML = ordenadoCruzado.map(([key, count]) => {
+            const [asunto, programa, detalle] = key.split('|');
+            return `
+                <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+                    <div style="flex-grow:1; overflow:hidden;">
+                        <div style="font-weight:800; font-size:11px; color:#1e293b; white-space:nowrap; text-overflow:ellipsis;">${asunto}</div>
+                        <div style="font-size:9px; color:var(--primary); font-weight:700;">${programa}</div>
+                        <div style="font-size:9px; color:#64748b; font-style:italic;">${detalle}</div>
+                    </div>
+                    <div style="background:#f8fafc; padding:2px 8px; border-radius:10px; font-weight:800; font-size:12px; border:1px solid #e2e8f0; margin-left:10px;">${count}</div>
+                </div>`;
+        }).join('');
+    }
+
+    if (document.getElementById('col-3')) {
+        document.getElementById('col-3').innerHTML = filtrados.slice(-15).reverse().map(i => `
+            <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
                 <div style="flex-grow:1; overflow:hidden;">
-                    <div style="font-weight:800; font-size:11px; color:#1e293b; white-space:nowrap; text-overflow:ellipsis;">${asunto}</div>
-                    <div style="font-size:9px; color:var(--primary); font-weight:700;">${programa}</div>
-                    <div style="font-size:9px; color:#64748b; font-style:italic;">${detalle}</div>
+                    <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.col_loc || 'N/A'}</div>
+                    <div style="font-size:9px; color:#64748b;">${i.direccion || ''}</div>
+                    <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus || 'SIN ESTADO'}</div>
                 </div>
-                <div style="background:#f8fafc; padding:2px 8px; border-radius:10px; font-weight:800; font-size:12px; border:1px solid #e2e8f0; margin-left:10px;">${count}</div>
-            </div>`;
-    }).join('');
-
-    // 3. Renderizado Columna 3
-    document.getElementById('col-3').innerHTML = filtrados.slice(-15).reverse().map(i => `
-        <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
-        <div style="flex-grow:1; overflow:hidden;">
-            <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.col_loc||'N/A'}</div>
-            <div style="font-size:9px; color:#64748b;">${i.direccion||''}</div>
-            <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus||'SIN ESTADO'}</div>
             </div>
-        </div>
-    `).join('');
+        `).join('');
+    }
 
-    // ==========================================
-    // RENDERIZADO DEL GRÁFICO DE PASTEL (PERSONAL OPERATIVO) - DISEÑO HORIZONTAL
-    // ==========================================
+    // Gráfico de pastel CSS Puro (Personal Operativo)
     const contenedorPastel = document.getElementById('social-pastel-contenedor');
     if (contenedorPastel) {
         contenedorPastel.innerHTML = '';
@@ -1609,7 +1909,6 @@ window.reprocesarTrabSoc = function() {
             let gradienteEstilo = "conic-gradient(";
             let acumuladoPorcentaje = 0;
             
-            // Contenedor de la leyenda con scroll interno por si son muchos usuarios
             let htmlLeyenda = `<div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1; max-height: 160px; overflow-y: auto; padding-right: 5px; width: 60%;">`;
 
             personalOrdenado.forEach(([trabajador, cantidad], indice) => {
@@ -1628,7 +1927,7 @@ window.reprocesarTrabSoc = function() {
                             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${colorAsignado}; flex-shrink: 0;"></span>
                             <span title="${trabajador}" style="overflow: hidden; text-overflow: ellipsis; font-weight: 700;">${trabajador}</span>
                         </div>
-                        <span style="font-family: monospace; color: #1e293b; font-weight: bold; flex-shrink: 0; margin-left: 10px;">${cantidad} ({${porcentaje.toFixed(1)}%})</span>
+                        <span style="font-family: monospace; color: #1e293b; font-weight: bold; flex-shrink: 0; margin-left: 10px;">${cantidad} (${porcentaje.toFixed(1)}%)</span>
                     </div>
                 `;
             });
@@ -1636,12 +1935,9 @@ window.reprocesarTrabSoc = function() {
             gradienteEstilo += ")";
             htmlLeyenda += `</div>`;
 
-            // Aplicamos flex-direction: row para poner la gráfica a la izquierda y leyendas a la derecha
             contenedorPastel.style.cssText = "display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 20px; width: 100%;";
-
             contenedorPastel.innerHTML = `
                 <div style="width: 160px; height: 160px; border-radius: 50%; background: ${gradienteEstilo}; box-shadow: inset 0 0 5px rgba(0,0,0,0.05), 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0;"></div>
-                
                 ${htmlLeyenda}
             `;
         } else {
@@ -1650,57 +1946,49 @@ window.reprocesarTrabSoc = function() {
         }
     }
 };
-        ///////////////////////////////////////////////
-        // --- PROCESAMIENTO civis ---
+
+        // =============================================================================
+// MÓDULO: CIVIS
+// =============================================================================
 window.reprocesarCivis = function() {
-    // Si la vista de CIVIS no existe en el HTML, detenemos la ejecución para evitar errores
     const vistaContenedora = document.getElementById('view-civis');
     if (!vistaContenedora) return;
 
-    // 1. OBTENER DATOS DEL STORE Y CONTEOS BÁSICOS
-    const total = store.civis.length;
-    const realizados = store.civis.filter(e => e.ejecucion === "REALIZADO").length;
+    const dataCivis = store.civis || [];
+    const total = dataCivis.length;
+    const realizados = dataCivis.filter(e => e.ejecucion === "REALIZADO").length;
     const pendientes = total - realizados;
-    const fueraJurisdiccion = store.civis.filter(e => e.fuera_de_jurisdiccion === true).length;
+    const fueraJurisdiccion = dataCivis.filter(e => e.fuera_de_jurisdiccion === true).length;
     
     let totalFotos = 0;
     const conteoAreas = {};
     const conteoEstatus = {};
     const zonasMapa = {};
 
-    let htmlCol1 = ""; // Aquí se acumulará la lista completa de folios con sus asuntos
+    let htmlCol1 = "";
 
-    // Ordenamos los registros por número progresivo de mayor a menor (más recientes primero)
-    const registrosOrdenados = [...store.civis].sort((a, b) => (b.no_progresivo || 0) - (a.no_progresivo || 0));
+    // Clonamos de forma segura para ordenar sin mutar el store original
+    const registrosOrdenados = [...dataCivis].sort((a, b) => (b.no_progresivo || 0) - (a.no_progresivo || 0));
 
     registrosOrdenados.forEach((item) => {
-        // Contar imágenes totales del módulo
         if (item.fotos) totalFotos += item.fotos.length;
+        if (item.area) conteoAreas[item.area] = (conteoAreas[item.area] || 0) + 1;
+        if (item.estatus) conteoEstatus[item.estatus] = (conteoEstatus[item.estatus] || 0) + 1;
 
-        // Agrupar por Área Responsable (Columna 2)
-        if (item.area) {
-            conteoAreas[item.area] = (conteoAreas[item.area] || 0) + 1;
-        }
-
-        // Agrupar por Estatus (Bloque contable inferior)
-        if (item.estatus) {
-            conteoEstatus[item.estatus] = (conteoEstatus[item.estatus] || 0) + 1;
-        }
-
-        // Agrupar por Ubicación/Domicilio (Columna 3)
         const zona = item.ubicacion?.domicilio_completo || "No Especificado";
         zonasMapa[zona] = (zonasMapa[zona] || 0) + 1;
+    });
 
-        // 2. CONSTRUIR LA LISTA DE FOLIOS CON ASUNTOS (COLUMNA 1)
+    // OPTIMIZACIÓN: Capped en los 30 más recientes para evitar UI Freeze en producción
+    registrosOrdenados.slice(0, 30).forEach((item) => {
         const icono = item.ejecucion === "REALIZADO" ? "🟢" : "🟡";
-        
-        // Extraemos el asunto/problema o descripción del reporte
         const asuntoReporte = item.problema || item.descripcion || "Sin asunto especificado";
 
+        // NOTA: Se corrige 'border-b' por la propiedad nativa real 'border-bottom'
         htmlCol1 += `
-            <div style="padding: 10px; border-b: 1px solid #f1f5f9; font-size: 11px; display: flex; flex-direction: column; gap: 3px;">
+            <div style="padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 11px; display: flex; flex-direction: column; gap: 3px;">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>${icono} <b style="color: #1e293b;">${item.folio}</b></span>
+                    <span>${icono} <b style="color: #1e293b;">${item.folio || 'S/F'}</b></span>
                     <span style="color: #94a3b8; font-size: 10px; font-weight: bold;">#${item.no_progresivo || '-'}</span>
                 </div>
                 <div style="color: #0284c7; font-weight: bold; font-size: 11px; line-height: 1.2;">
@@ -1715,7 +2003,7 @@ window.reprocesarCivis = function() {
             </div>`;
     });
 
-    // 3. INYECTAR DATOS EN LOS CUADRITOS DE MÉTRICAS (STAT BOXES)
+    // Inyección segura de KPIs
     if (document.getElementById("civis-total")) document.getElementById("civis-total").innerText = total;
     if (document.getElementById("civis-realizados")) document.getElementById("civis-realizados").innerText = realizados;
     if (document.getElementById("civis-pendientes")) document.getElementById("civis-pendientes").innerText = pendientes;
@@ -1723,7 +2011,7 @@ window.reprocesarCivis = function() {
     if (document.getElementById("civis-stat-fotos")) document.getElementById("civis-stat-fotos").innerText = totalFotos;
     if (document.getElementById("civis-stat-jurisdiccion")) document.getElementById("civis-stat-jurisdiccion").innerText = fueraJurisdiccion;
 
-    // 4. INYECTAR LA LISTA COMPLETA EN LA COLUMNA 1
+    // Inyección en Columna 1 (Scroll Limpio)
     const col1Container = document.getElementById("civis-col-1");
     if (col1Container) {
         col1Container.innerHTML = htmlCol1 || "<div style='padding:10px; color:#94a3b8; font-style:italic;'>Sin reportes registrados</div>";
@@ -1731,7 +2019,7 @@ window.reprocesarCivis = function() {
         col1Container.style.overflowY = "auto";
     }
 
-    // 5. INYECTAR DISTRIBUCIÓN POR ÁREA (COLUMNA 2)
+    // Inyección en Columna 2
     let htmlCol2 = "";
     Object.keys(conteoAreas).sort((a,b) => conteoAreas[b] - conteoAreas[a]).forEach(area => {
         htmlCol2 += `
@@ -1747,7 +2035,7 @@ window.reprocesarCivis = function() {
         col2Container.style.overflowY = "auto";
     }
 
-    // 6. INYECTAR ZONAS DE INCIDENCIA (COLUMNA 3)
+    // Inyección en Columna 3
     let htmlCol3 = "";
     Object.keys(zonasMapa).sort((a,b) => zonasMapa[b] - zonasMapa[a]).forEach(zona => {
         htmlCol3 += `
@@ -1763,7 +2051,7 @@ window.reprocesarCivis = function() {
         col3Container.style.overflowY = "auto";
     }
 
-    // 7. INYECTAR EL REPORTE CONTABLE INFERIOR DE ESTATUS
+    // Reporte contable inferior
     let htmlContable = "";
     Object.keys(conteoEstatus).forEach(estatus => {
         htmlContable += `
@@ -1777,7 +2065,6 @@ window.reprocesarCivis = function() {
         reporteContableContainer.innerHTML = htmlContable;
     }
 };
-
 ///////////////////////////////////////////////
 // --- PROCESAMIENTO TODAS LAS COLONIAS Y LOCALIDADES ---
 window.renderReporteJerarquico = function() {
