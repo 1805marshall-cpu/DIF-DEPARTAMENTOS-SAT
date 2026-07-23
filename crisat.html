@@ -125,25 +125,223 @@
             th, td { border: 1px solid #cbd5e1 !important; padding: 6px !important; color: black !important; background: transparent !important; }
             .pill, .badge { border: 1px solid #94a3b8; color: black !important; background: transparent !important; }
         }
+        /* Contenedor que permite el desplazamiento en pantallas pequeñas */
+.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1rem; }
+
+/* Ajustes para móviles */
+@media (max-width: 992px) {
+        #tablaGeneral {
+        /* Asegura un ancho mínimo para que las celdas con anchos fijos no se encamen */
+        min-width: 900px; 
+        table-layout: auto; 
+    }
+}
+
+/* =========================================================
+   REGLAS RESPONSIVAS (MÓVILES, TABLETAS Y ESCRITORIO)
+   ========================================================= */
+
+/* Tablets y pantallas medianas (<= 1024px) */
+@media (max-width: 1024px) {
+    .form-container, .table-container, .user-session-bar {
+        max-width: 100% !important;
+        margin-left: 10px !important;
+        margin-right: 10px !important;
+    }
+
+    fieldset {
+        grid-template-columns: repeat(2, 1fr) !important; /* Pasa de 4 a 2 columnas */
+    }
+
+    .full-width, .span-2 {
+        grid-column: span 2 !important;
+    }
+}
+
+/* Celulares y pantallas pequeñas (<= 768px) */
+@media (max-width: 768px) {
+    body {
+        padding: 10px !important;
+    }
+
+    /* 1. Barra de Sesión */
+    .user-session-bar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        text-align: center;
+    }
+
+    .user-session-bar-info {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .user-session-bar button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* 2. Formulario y Secciones */
+    .form-container, .table-container {
+        padding: 15px !important;
+        border-radius: 12px !important;
+    }
+
+    .header-crisat h2 {
+        font-size: 1.3rem;
+    }
+
+    fieldset {
+        grid-template-columns: 1fr !important; /* Pasa a 1 columna vertical */
+        padding: 15px 10px !important;
+    }
+
+    .full-width, .span-2 {
+        grid-column: span 1 !important;
+    }
+
+    /* Ajuste de contenedor de radios (Ubicación) */
+    .ubicacion-container {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+    }
+
+    /* Ajuste de Días Habituales */
+    .dias-box {
+        justify-content: space-between;
+    }
+
+    /* Grilla de Servicios / Tratamiento */
+    .services-container {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+        gap: 8px !important;
+    }
+
+    .checkbox-item {
+        font-size: 0.75rem !important;
+        padding: 6px !important;
+    }
+
+    /* 3. Herramientas de la Tabla (Búsqueda e Impresión) */
+    .table-tools {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    .search-box {
+        max-width: 100% !important;
+    }
+
+    .table-tools-select {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .btn-print {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* 4. Tabla Responsiva con Scroll Suave */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+    }
+
+    #tablaGeneral {
+        min-width: 850px; /* Ancho mínimo para mantener legibles todas las columnas */
+    }
+
+    /* 5. Paginación y Modales */
+    .pagination-container {
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 12px !important;
+        text-align: center;
+    }
+
+    .pagination-btns {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .modal-content {
+        width: 95% !important;
+        padding: 18px !important;
+    }
+
+    .modal-btn-row {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .modal-btn-row button {
+        width: 100% !important;
+    }
+}
+
+/* --- BARRA DE SESIÓN DE USUARIO --- */
+.user-session-bar {
+    max-width: 1300px; margin: 0 auto 15px auto; display: flex;
+    justify-content: space-between; /* Mantiene izquierda y derecha alineados */
+    align-items: center; background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); gap: 15px; }
+
+.user-session-bar-info { display: flex; align-items: center; gap: 10px; }
+.badge-sesion { background: #e0f2fe; color: #0284c7; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; }
+.lbl-modulo { color: #64748b; font-weight: 600; }
+.btn-cerrar-sesion { background: #fee2e2; color: #991b1b;border: 1px solid #fecaca;padding: 8px 16px;border-radius: 8px;font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; transition: 0.2s; white-space: nowrap;}
+.btn-cerrar-sesion:hover { background: #fca5a5; }
+
+/* --- ADAPTACIÓN RESPONSIVA (MÓVILES <= 640px) --- */
+@media (max-width: 640px) {
+    .user-session-bar {
+        flex-direction: column; /* Coloca la información arriba y el botón abajo */
+        align-items: stretch;
+        text-align: center;
+        padding: 15px;
+        gap: 12px;
+    }
+
+    .user-session-bar-info {
+        flex-direction: column; /* Apila el badge de usuario y la etiqueta del módulo */
+        justify-content: center;
+        gap: 6px;
+    }
+
+    .btn-cerrar-sesion {
+        width: 100%; /* El botón se expande a todo el ancho en celulares */
+        padding: 10px;
+    }
+}
     </style>
 </head>
 <body>
-
-<!-- CONTENEDOR DE NOTIFICACIONES TOAST -->
-<div id="toastContainer"></div>
 <!-- BARRA DE SESIÓN DE USUARIO EN CRISAT -->
-<div class="user-session-bar no-print" style="max-width: 1300px; margin: 0 auto 15px auto; display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="background: #e0f2fe; color: #0284c7; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 800;">
+<div class="user-session-bar no-print">
+    <div class="user-session-bar-info">
+        <span class="badge-sesion">
             <i class="fas fa-user-circle"></i> SESIÓN ACTIVA: <span id="lblUsuarioSesion">CARGANDO...</span>
         </span>
-        <small style="color: #64748b; font-weight: 600;">(Módulo CRISAT)</small>
+        <small class="lbl-modulo">(Módulo CRISAT)</small>
     </div>
-    <button onclick="window.cerrarSesion()" style="background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 6px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 0.8rem; transition: 0.2s;">
+    
+    <button onclick="window.cerrarSesion()" class="btn-cerrar-sesion">
         <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
     </button>
 </div>
+
 <div class="form-container no-print">
+
+<!-- CONTENEDOR DE NOTIFICACIONES TOAST -->
+<div id="toastContainer"></div>
+
     <div class="header-crisat">
         <h2>SISTEMA CRISAT - REHABILITACIÓN</h2>
         <small>Módulo de Control Clínico y Citas Recurrentes</small>
@@ -152,15 +350,6 @@
     <form id="formCrisat">
     <input type="hidden" id="editId" value="">
     
-    <fieldset>
-        <legend><i class="fas fa-calendar-plus"></i> Carga Masiva de Fechas</legend>
-        <div class="field full-width">
-            <label>Pegar fechas (formato AAAA-MM-DD, una por línea):</label>
-            <textarea id="masiva_fechas" rows="2" placeholder="2026-06-02&#10;2026-06-09&#10;2026-06-16"></textarea>
-            <small style="color: #64748b;">* Si está vacío, solo se guardará la fecha individual seleccionada abajo.</small>
-        </div>
-    </fieldset> 
-
     <fieldset>
         <legend><i class="fas fa-calendar-check"></i> Control de Cita y Frecuencia</legend>
         <div class="field"><label>Fecha Captura</label><input type="date" id="fecha_captura" readonly></div>
@@ -227,12 +416,12 @@
         
         <div class="field span-2">
             <label>Ubicación</label>
-            <div style="display: flex; gap: 20px; align-items: center;">
-                <div style="display: flex; flex-direction: column; gap: 8px; min-width: 100px;">
-                    <label style="display: flex; align-items: center; gap: 8px;">
+            <div class="ubicacion-container" style="display: flex; gap: 20px; align-items: center;">
+                <div style="display: flex; gap: 15px;">
+                    <label style="display: flex; align-items: center; gap: 6px;">
                         <input type="radio" name="tipo_ubicacion" value="COLONIA" checked> Colonia
                     </label>
-                    <label style="display: flex; align-items: center; gap: 8px;">
+                    <label style="display: flex; align-items: center; gap: 6px;">
                         <input type="radio" name="tipo_ubicacion" value="LOCALIDAD"> Localidad
                     </label>
                 </div>
@@ -241,7 +430,7 @@
         </div>
         
         <div class="field span-2"><label>Dirección</label><input type="text" id="direccion"></div>
-        <div class="field"><label>Teléfono</label><input type="tel" id="telefono"></div>
+        <div class="field span-2"><label>Teléfono</label><input type="tel" id="telefono"></div>
     </fieldset>
 
     <fieldset>
@@ -292,7 +481,7 @@
     </div>
 </div>
 
-<!-- MODAL PROGRAMAR PRÓXIMA CITA (CON OPCIÓN A CAMBIAR TERAPEUTA) -->
+<!-- MODAL PROGRAMAR PRÓXIMA CITA -->
 <div id="modalReprogramar" class="modal">
     <div class="modal-content">
         <div class="modal-header" style="color: var(--crisat);">
@@ -360,7 +549,7 @@
             <input type="text" id="inputBuscar" placeholder="Buscar por nombre, expediente, CURP, terapeuta..." oninput="window.filtrarYRenderizar()">
         </div>
 
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="table-tools-select" style="display: flex; align-items: center; gap: 8px;">
             <label style="font-weight: 600; font-size: 0.85rem;">Mostrar:</label>
             <select id="selectFilas" onchange="window.cambiarFilasPorPagina(this.value)" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); font-weight: bold;">
                 <option value="10">10 filas</option>
@@ -377,21 +566,24 @@
         </button>
     </div>
 
-    <table id="tablaGeneral">
-        <thead>
-            <tr>
-                <th style="width: 85px;">Cita</th>
-                <th style="width: 80px;">Expediente</th>
-                <th>Paciente / Diagnóstico</th>
-                <th>Dirección</th>
-                <th style="width: 80px;">Terapeuta</th>
-                <th style="width: 150px;">Terapias</th>
-                <th style="width: 110px;">Cuota / Est.</th>
-                <th style="width: 110px;" class="no-print">Acciones</th>
-            </tr>
-        </thead>
-        <tbody id="cuerpoTabla"></tbody>
-    </table>
+    <!-- TABLA RESPONSIVA -->
+    <div class="table-responsive">
+        <table id="tablaGeneral">
+            <thead>
+                <tr>
+                    <th style="width: 85px;">Cita</th>
+                    <th style="width: 80px;">Expediente</th>
+                    <th>Paciente / Diagnóstico</th>
+                    <th>Dirección</th>
+                    <th style="width: 80px;">Terapeuta</th>
+                    <th style="width: 150px;">Terapias</th>
+                    <th style="width: 110px;">Cuota / Est.</th>
+                    <th style="width: 110px;" class="no-print">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="cuerpoTabla"></tbody>
+        </table>
+    </div>
 
     <!-- PAGINACIÓN -->
     <div class="pagination-container no-print">
@@ -399,6 +591,8 @@
         <div class="pagination-btns" id="contenedorPaginas"></div>
     </div>
 </div>
+
+</body>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
