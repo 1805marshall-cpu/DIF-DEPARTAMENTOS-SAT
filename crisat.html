@@ -126,11 +126,16 @@
             .pill, .badge { border: 1px solid #94a3b8; color: black !important; background: transparent !important; }
         }
         /* Contenedor que permite el desplazamiento en pantallas pequeñas */
-.table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1rem; }
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Desplazamiento fluido en iOS */
+    margin-bottom: 1rem;
+}
 
 /* Ajustes para móviles */
 @media (max-width: 992px) {
-        #tablaGeneral {
+    #tablaGeneral {
         /* Asegura un ancho mínimo para que las celdas con anchos fijos no se encamen */
         min-width: 900px; 
         table-layout: auto; 
@@ -289,15 +294,61 @@
 
 /* --- BARRA DE SESIÓN DE USUARIO --- */
 .user-session-bar {
-    max-width: 1300px; margin: 0 auto 15px auto; display: flex;
+    max-width: 1300px;
+    margin: 0 auto 15px auto;
+    display: flex;
     justify-content: space-between; /* Mantiene izquierda y derecha alineados */
-    align-items: center; background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); gap: 15px; }
+    align-items: center;
+    background: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    gap: 15px;
+}
 
-.user-session-bar-info { display: flex; align-items: center; gap: 10px; }
-.badge-sesion { background: #e0f2fe; color: #0284c7; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; }
-.lbl-modulo { color: #64748b; font-weight: 600; }
-.btn-cerrar-sesion { background: #fee2e2; color: #991b1b;border: 1px solid #fecaca;padding: 8px 16px;border-radius: 8px;font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; transition: 0.2s; white-space: nowrap;}
-.btn-cerrar-sesion:hover { background: #fca5a5; }
+.user-session-bar-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.badge-sesion {
+    background: #e0f2fe;
+    color: #0284c7;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.lbl-modulo {
+    color: #64748b;
+    font-weight: 600;
+}
+
+.btn-cerrar-sesion {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+
+.btn-cerrar-sesion:hover {
+    background: #fca5a5;
+}
 
 /* --- ADAPTACIÓN RESPONSIVA (MÓVILES <= 640px) --- */
 @media (max-width: 640px) {
@@ -461,9 +512,14 @@
         </div>
     </fieldset>
 
-    <button type="button" class="btn-save" id="btnGuardar">
+   <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+    <button type="button" class="btn-save" id="btnGuardar" style="flex: 2; min-width: 200px;">
         <i class="fas fa-save"></i> Guardar y Sincronizar
     </button>
+    <button type="button" onclick="window.limpiarFormulario()" style="flex: 1; min-width: 150px; background: #64748b; color: white; border: none; padding: 16px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s;" onmouseover="this.style.background='#475569'" onmouseout="this.style.background='#64748b'">
+        <i class="fas fa-eraser"></i> Limpiar / Nuevo
+    </button>
+</div>
 </form>
 </div>
 
@@ -896,6 +952,7 @@ window.cerrarSesion = () => {
             document.getElementById('editId').value = "";
             document.getElementById('fecha_captura').value = window.obtenerFechaLocal();
             window.toggleCamposEspeciales();
+
         } catch (e) { 
             console.error(e);
             window.mostrarToast("Error al procesar: " + e.message, "danger"); 
@@ -903,7 +960,11 @@ window.cerrarSesion = () => {
             btn.disabled = false; 
             btn.innerHTML = '<i class="fas fa-save"></i> Guardar y Sincronizar'; 
         }
+
+        
     }
+
+
 
     // --- ACCIONES Y EDICIÓN ---
     window.prepararEdicion = (id) => {
@@ -1200,6 +1261,35 @@ window.cerrarSesion = () => {
         });
         window.filtrarYRenderizar();
     });
+
+    // --- FUNCIÓN PARA LIMPIAR CAMPOS Y CANCELAR EDICIÓN ---
+window.limpiarFormulario = () => {
+    // 1. Resetea los campos básicos del formulario
+    document.getElementById('formCrisat').reset();
+
+    // 2. Limpia el ID de edición para asegurar que el sistema sepa que es un REGISTRO NUEVO
+    document.getElementById('editId').value = "";
+
+    // 3. Restablece valores por defecto
+    document.getElementById('fecha_captura').value = window.obtenerFechaLocal();
+    document.getElementById('municipio').value = "SAN ANDRÉS TUXTLA";
+    document.getElementById('cuota').value = "0";
+    document.getElementById('edad').value = "";
+
+    // 4. Desmarca casillas de selección (Servicios y Días)
+    document.querySelectorAll('.check-serv').forEach(cb => cb.checked = false);
+    document.querySelectorAll('.chk-dia').forEach(cb => cb.checked = false);
+
+    // 5. Restablece la ubicación a 'Colonia'
+    const radioCol = document.querySelector('input[name="tipo_ubicacion"][value="COLONIA"]');
+    if (radioCol) radioCol.checked = true;
+
+    // 6. Oculta el campo de justificación de falta si estaba visible
+    window.toggleCamposEspeciales();
+
+    // 7. Notifica al usuario
+    window.mostrarToast("Formulario restablecido. Listo para un nuevo paciente.", "info");
+};
 </script>
 </body>
 </html>
