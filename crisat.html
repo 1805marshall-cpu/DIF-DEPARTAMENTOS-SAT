@@ -6,93 +6,52 @@
     <title>SISTEMA CRISAT - Gestión Clínica Pro</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { 
-            --primary: #0284c7; 
-            --accent: #0ea5e9; 
-            --bg: #f1f5f9; 
-            --text: #334155; 
-            --border: #cbd5e1; 
-            --crisat: #0891b2;
-            --danger: #dc2626;
-            --success: #16a34a;
-            --warning: #ca8a04;
-        }
+        :root { --primary: #0284c7; --accent: #0ea5e9; --bg: #f1f5f9; --text: #334155; --border: #cbd5e1; --crisat: #0891b2; --danger: #dc2626; --success: #16a34a; --warning: #ca8a04; }
         body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); padding: 20px; color: var(--text); }
-        
-        .form-container, .table-container { 
-            background: white; padding: 30px; border-radius: 15px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 1300px; margin: 0 auto 30px auto; 
-        }
-
+        .form-container, .table-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 1300px; margin: 0 auto 30px auto; }
         .header-crisat { text-align: center; margin-bottom: 30px; border-bottom: 3px solid var(--crisat); padding-bottom: 10px; }
-        
-        fieldset { 
-            border: 1px solid var(--border); border-radius: 10px; padding: 20px; 
-            margin-bottom: 25px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; 
-        }
+        fieldset { border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 25px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         legend { font-weight: 800; color: var(--crisat); padding: 0 12px; font-size: 0.85rem; text-transform: uppercase; }
-
         .field { display: flex; flex-direction: column; gap: 5px; }
         .field input, .field select, .field textarea { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-family: inherit; }
         .field label { font-size: 0.8rem; font-weight: 700; margin-bottom: 2px; }
-
         .full-width { grid-column: span 4; }
         .span-2 { grid-column: span 2; }
-
         .services-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; grid-column: span 4; }
         .checkbox-item { display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 8px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 0.8rem; }
-
-        .btn-save { 
-            background: var(--crisat); color: white; border: none; padding: 16px; border-radius: 8px; 
-            font-weight: 800; cursor: pointer; width: 100%; text-transform: uppercase; 
-            display: flex; justify-content: center; gap: 10px; font-size: 1rem; transition: 0.3s;
-        }
+        .btn-save { background: var(--crisat); color: white; border: none; padding: 16px; border-radius: 8px; font-weight: 800; cursor: pointer; width: 100%; text-transform: uppercase; display: flex; justify-content: center; gap: 10px; font-size: 1rem; transition: 0.3s; }
         .btn-save:hover { background: #0e7490; transform: translateY(-2px); }
-
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; table-layout: fixed; }
         th { background-color: var(--crisat); color: white; padding: 12px; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid #e2e8f0; vertical-align: top; word-wrap: break-word; }
-        
         .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; display: inline-block; margin-top: 5px; }
         .asistencia-ok { background: #dcfce7; color: #166534; }
         .alerta-roja { background: #fee2e2; color: #991b1b; }
-        
         .btn-action { border: none; padding: 8px 10px; margin: 0 2px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
         .btn-edit { background: #fef3c7; color: #92400e; }
         .btn-delete { background: #fee2e2; color: #991b1b; }
         .btn-alert { background: #dc2626; color: white; font-weight: bold; animation: pulse 1.5s infinite; }
-
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        
         input[type="radio"], input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; }
-
-        /* Semáforos */
         .pill { padding: 2px 8px; border-radius: 12px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; display: inline-block; margin: 4px 0; }
         .pill-hoy { background: #0284c7; color: white; }
         .pill-proxima { background: #eab308; color: white; }
         .pill-tiempo { background: #22c55e; color: white; }
         .pill-alta { background: #0284c7; color: white; }
         .pill-baja { background: #991b1b; color: white; }
-
         .cita-hoy-destacada { background-color: #e0f2fe !important; border-left: 5px solid #0284c7 !important; }
         .cita-proxima { background-color: #fefce8 !important; border-left: 5px solid #eab308 !important; }
         .alerta-4faltas { background-color: #fef2f2 !important; border-left: 5px solid #dc2626 !important; }
-
         .dias-box { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; }
         .dias-box label { display: flex; align-items: center; gap: 4px; font-weight: normal; cursor: pointer; }
-
-        /* MODALES ESTILIZADOS */
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); justify-content: center; align-items: center; }
         .modal-content { background-color: white; padding: 25px; border-radius: 16px; width: 90%; max-width: 520px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); animation: modalIn 0.25s ease-out; }
         @keyframes modalIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
         .modal-header { display: flex; align-items: center; gap: 12px; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; }
         .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
         .modal-btn-row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
         .btn-modal { padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; transition: 0.2s; }
         .btn-modal:hover { filter: brightness(0.95); }
-
-        /* NOTIFICACIONES TOAST ESTILIZADAS */
         #toastContainer { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
         .toast { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-radius: 10px; color: white; font-weight: 600; font-size: 0.9rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); animation: toastIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); min-width: 280px; }
         @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -100,281 +59,34 @@
         .toast-danger { background: #ef4444; }
         .toast-warning { background: #f59e0b; }
         .toast-info { background: #3b82f6; }
-
-        /* ESTILOS DE BARRA DE HERRAMIENTAS Y PAGINACIÓN */
         .table-tools { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; }
         .search-box { flex-grow: 1; max-width: 450px; position: relative; }
         .search-box input { width: 100%; padding: 10px 12px 10px 38px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; outline: none; }
         .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; }
-        
         .pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px; }
         .pagination-btns { display: flex; gap: 6px; align-items: center; }
         .btn-page { padding: 6px 14px; border: 1px solid var(--border); background: white; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--text); }
         .btn-page:disabled { opacity: 0.4; cursor: not-allowed; }
         .btn-page.active { background: var(--crisat); color: white; border-color: var(--crisat); }
-
         .btn-print { background: #0284c7; color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
         .btn-print:hover { background: #0369a1; }
-
-        /* ESTILOS DE IMPRESIÓN EXCLUSIVA */
-        @media print {
-            body { background: white; color: black; padding: 0; margin: 0; }
-            .form-container, .header-crisat, .no-print, .modal, #toastContainer, .pagination-container, .btn-action, fieldset { display: none !important; }
-            .table-container { box-shadow: none; padding: 0; margin: 0; max-width: 100%; width: 100%; }
-            table { width: 100%; font-size: 9pt; border-collapse: collapse; }
-            th, td { border: 1px solid #cbd5e1 !important; padding: 6px !important; color: black !important; background: transparent !important; }
-            .pill, .badge { border: 1px solid #94a3b8; color: black !important; background: transparent !important; }
-        }
-        /* Contenedor que permite el desplazamiento en pantallas pequeñas */
-.table-responsive {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch; /* Desplazamiento fluido en iOS */
-    margin-bottom: 1rem;
-}
-
-/* Ajustes para móviles */
-@media (max-width: 992px) {
-    #tablaGeneral {
-        /* Asegura un ancho mínimo para que las celdas con anchos fijos no se encamen */
-        min-width: 900px; 
-        table-layout: auto; 
-    }
-}
-
-/* =========================================================
-   REGLAS RESPONSIVAS (MÓVILES, TABLETAS Y ESCRITORIO)
-   ========================================================= */
-
-/* Tablets y pantallas medianas (<= 1024px) */
-@media (max-width: 1024px) {
-    .form-container, .table-container, .user-session-bar {
-        max-width: 100% !important;
-        margin-left: 10px !important;
-        margin-right: 10px !important;
-    }
-
-    fieldset {
-        grid-template-columns: repeat(2, 1fr) !important; /* Pasa de 4 a 2 columnas */
-    }
-
-    .full-width, .span-2 {
-        grid-column: span 2 !important;
-    }
-}
-
-/* Celulares y pantallas pequeñas (<= 768px) */
-@media (max-width: 768px) {
-    body {
-        padding: 10px !important;
-    }
-
-    /* 1. Barra de Sesión */
-    .user-session-bar {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 12px !important;
-        text-align: center;
-    }
-
-    .user-session-bar-info {
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .user-session-bar button {
-        width: 100%;
-        justify-content: center;
-    }
-
-    /* 2. Formulario y Secciones */
-    .form-container, .table-container {
-        padding: 15px !important;
-        border-radius: 12px !important;
-    }
-
-    .header-crisat h2 {
-        font-size: 1.3rem;
-    }
-
-    fieldset {
-        grid-template-columns: 1fr !important; /* Pasa a 1 columna vertical */
-        padding: 15px 10px !important;
-    }
-
-    .full-width, .span-2 {
-        grid-column: span 1 !important;
-    }
-
-    /* Ajuste de contenedor de radios (Ubicación) */
-    .ubicacion-container {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 10px !important;
-    }
-
-    /* Ajuste de Días Habituales */
-    .dias-box {
-        justify-content: space-between;
-    }
-
-    /* Grilla de Servicios / Tratamiento */
-    .services-container {
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
-        gap: 8px !important;
-    }
-
-    .checkbox-item {
-        font-size: 0.75rem !important;
-        padding: 6px !important;
-    }
-
-    /* 3. Herramientas de la Tabla (Búsqueda e Impresión) */
-    .table-tools {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 12px !important;
-    }
-
-    .search-box {
-        max-width: 100% !important;
-    }
-
-    .table-tools-select {
-        width: 100%;
-        justify-content: space-between;
-    }
-
-    .btn-print {
-        width: 100%;
-        justify-content: center;
-    }
-
-    /* 4. Tabla Responsiva con Scroll Suave */
-    .table-responsive {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        margin-bottom: 15px;
-        border-radius: 8px;
-        border: 1px solid var(--border);
-    }
-
-    #tablaGeneral {
-        min-width: 850px; /* Ancho mínimo para mantener legibles todas las columnas */
-    }
-
-    /* 5. Paginación y Modales */
-    .pagination-container {
-        flex-direction: column !important;
-        align-items: center !important;
-        gap: 12px !important;
-        text-align: center;
-    }
-
-    .pagination-btns {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .modal-content {
-        width: 95% !important;
-        padding: 18px !important;
-    }
-
-    .modal-btn-row {
-        flex-direction: column !important;
-        gap: 8px !important;
-    }
-
-    .modal-btn-row button {
-        width: 100% !important;
-    }
-}
-
-/* --- BARRA DE SESIÓN DE USUARIO --- */
-.user-session-bar {
-    max-width: 1300px;
-    margin: 0 auto 15px auto;
-    display: flex;
-    justify-content: space-between; /* Mantiene izquierda y derecha alineados */
-    align-items: center;
-    background: white;
-    padding: 12px 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    gap: 15px;
-}
-
-.user-session-bar-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.badge-sesion {
-    background: #e0f2fe;
-    color: #0284c7;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 800;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.lbl-modulo {
-    color: #64748b;
-    font-weight: 600;
-}
-
-.btn-cerrar-sesion {
-    background: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    font-size: 0.8rem;
-    transition: 0.2s;
-    white-space: nowrap;
-}
-
-.btn-cerrar-sesion:hover {
-    background: #fca5a5;
-}
-
-/* --- ADAPTACIÓN RESPONSIVA (MÓVILES <= 640px) --- */
-@media (max-width: 640px) {
-    .user-session-bar {
-        flex-direction: column; /* Coloca la información arriba y el botón abajo */
-        align-items: stretch;
-        text-align: center;
-        padding: 15px;
-        gap: 12px;
-    }
-
-    .user-session-bar-info {
-        flex-direction: column; /* Apila el badge de usuario y la etiqueta del módulo */
-        justify-content: center;
-        gap: 6px;
-    }
-
-    .btn-cerrar-sesion {
-        width: 100%; /* El botón se expande a todo el ancho en celulares */
-        padding: 10px;
-    }
-}
+        @media print { body { background: white; color: black; padding: 0; margin: 0; } .form-container, .header-crisat, .no-print, .modal, #toastContainer, .pagination-container, .btn-action, fieldset { display: none !important; } .table-container { box-shadow: none; padding: 0; margin: 0; max-width: 100%; width: 100%; } table { width: 100%; font-size: 9pt; border-collapse: collapse; } th, td { border: 1px solid #cbd5e1 !important; padding: 6px !important; color: black !important; background: transparent !important; } .pill, .badge { border: 1px solid #94a3b8; color: black !important; background: transparent !important; } }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1rem; }
+        @media (max-width: 992px) { #tablaGeneral { min-width: 900px; table-layout: auto; } }
+        @media (max-width: 1024px) { .form-container, .table-container, .user-session-bar { max-width: 100% !important; margin-left: 10px !important; margin-right: 10px !important; } fieldset { grid-template-columns: repeat(2, 1fr) !important; } .full-width, .span-2 { grid-column: span 2 !important; } }
+        @media (max-width: 768px) { body { padding: 10px !important; } .user-session-bar { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; text-align: center; } .user-session-bar-info { justify-content: center; flex-wrap: wrap; } .user-session-bar button { width: 100%; justify-content: center; } .form-container, .table-container { padding: 15px !important; border-radius: 12px !important; } .header-crisat h2 { font-size: 1.3rem; } fieldset { grid-template-columns: 1fr !important; padding: 15px 10px !important; } .full-width, .span-2 { grid-column: span 1 !important; } .ubicacion-container { flex-direction: column !important; align-items: stretch !important; gap: 10px !important; } .dias-box { justify-content: space-between; } .services-container { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important; gap: 8px !important; } .checkbox-item { font-size: 0.75rem !important; padding: 6px !important; } .table-tools { flex-direction: column !important; align-items: stretch !important; gap: 12px !important; } .search-box { max-width: 100% !important; } .table-tools-select { width: 100%; justify-content: space-between; } .btn-print { width: 100%; justify-content: center; } .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--border); } #tablaGeneral { min-width: 850px; } .pagination-container { flex-direction: column !important; align-items: center !important; gap: 12px !important; text-align: center; } .pagination-btns { flex-wrap: wrap; justify-content: center; } .modal-content { width: 95% !important; padding: 18px !important; } .modal-btn-row { flex-direction: column !important; gap: 8px !important; } .modal-btn-row button { width: 100% !important; } }
+        .user-session-bar { max-width: 1300px; margin: 0 auto 15px auto; display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); gap: 15px; }
+        .user-session-bar-info { display: flex; align-items: center; gap: 10px; }
+        .badge-sesion { background: #e0f2fe; color: #0284c7; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 800; display: inline-flex; align-items: center; gap: 6px; }
+        .lbl-modulo { color: #64748b; font-weight: 600; }
+        .btn-cerrar-sesion { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; transition: 0.2s; white-space: nowrap; }
+        .btn-cerrar-sesion:hover { background: #fca5a5; }
+        @media (max-width: 640px) { .user-session-bar { flex-direction: column; align-items: stretch; text-align: center; padding: 15px; gap: 12px; } .user-session-bar-info { flex-direction: column; justify-content: center; gap: 6px; } .btn-cerrar-sesion { width: 100%; padding: 10px; } }
     </style>
 </head>
 <body>
-<!-- BARRA DE SESIÓN DE USUARIO EN CRISAT -->
+
+<!-- BARRA DE SESIÓN DE USUARIO -->
 <div class="user-session-bar no-print">
     <div class="user-session-bar-info">
         <span class="badge-sesion">
@@ -382,16 +94,13 @@
         </span>
         <small class="lbl-modulo">(Módulo CRISAT)</small>
     </div>
-    
     <button onclick="window.cerrarSesion()" class="btn-cerrar-sesion">
         <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
     </button>
 </div>
 
 <div class="form-container no-print">
-
-<!-- CONTENEDOR DE NOTIFICACIONES TOAST -->
-<div id="toastContainer"></div>
+    <div id="toastContainer"></div>
 
     <div class="header-crisat">
         <h2>SISTEMA CRISAT - REHABILITACIÓN</h2>
@@ -399,128 +108,127 @@
     </div>
 
     <form id="formCrisat">
-    <input type="hidden" id="editId" value="">
-    
-    <fieldset>
-        <legend><i class="fas fa-calendar-check"></i> Control de Cita y Frecuencia</legend>
-        <div class="field"><label>Fecha Captura</label><input type="date" id="fecha_captura" readonly></div>
-        <div class="field"><label>Fecha Cita *</label><input type="date" id="fecha_cita" required></div>
-        <div class="field"><label>Hora Cita *</label><input type="time" id="hora_cita" required></div>
-        <div class="field"><label>No. Expediente *</label><input type="text" id="expediente" placeholder="CR-000"></div>
-        <div class="field">
-            <label>Estatus Cita</label>
-            <select id="estatus" onchange="window.toggleCamposEspeciales()">
-                <option value="PENDIENTE">Pendiente</option>
-                <option value="ASISTIÓ">Asistió</option>
-                <option value="FALTÓ">Faltó</option>
-            </select>
-        </div>
-        <div class="field"><label>Cuota ($)</label><input type="number" id="cuota" value="0" step="0.01"></div>
-        <div class="field">
-            <label>Terapeuta</label>
-            <select id="nombre_terapeuta">
-                <option value="">-- SELECCIONE --</option>
-                <option value="Nelly">Nelly</option>
-                <option value="Pamela">Pamela</option>
-                <option value="Oscar">Oscar</option>
-                <option value="Gena">Gena</option>
-                <option value="Luis">Luis</option>
-                <option value="Javier">Javier</option>
-            </select>
-        </div>
-        <div class="field">
-            <label>Estatus Expediente</label>
-            <select id="estatus_expediente">
-                <option value="EN TRATAMIENTO">🟢 En Tratamiento</option>
-                <option value="ALTA MÉDICA">🔵 Alta Médica</option>
-                <option value="BAJA POR INASISTENCIA">🔴 Baja por Inasistencia</option>
-            </select>
-        </div>
-
-        <div class="field span-2">
-            <label>Días Habituales de Atención:</label>
-            <div class="dias-box">
-                <label><input type="checkbox" class="chk-dia" value="1"> Lun</label>
-                <label><input type="checkbox" class="chk-dia" value="2"> Mar</label>
-                <label><input type="checkbox" class="chk-dia" value="3"> Mié</label>
-                <label><input type="checkbox" class="chk-dia" value="4"> Jue</label>
-                <label><input type="checkbox" class="chk-dia" value="5"> Vie</label>
+        <input type="hidden" id="editId" value="">
+        
+        <fieldset>
+            <legend><i class="fas fa-calendar-check"></i> Control de Cita y Frecuencia</legend>
+            <div class="field"><label>Fecha Captura</label><input type="date" id="fecha_captura" readonly></div>
+            <div class="field"><label>Fecha Cita *</label><input type="date" id="fecha_cita" required></div>
+            <div class="field"><label>Hora Cita *</label><input type="time" id="hora_cita" required></div>
+            <div class="field"><label>No. Expediente *</label><input type="text" id="expediente" placeholder="CR-000"></div>
+            <div class="field">
+                <label>Estatus Cita</label>
+                <select id="estatus" onchange="window.toggleCamposEspeciales()">
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="ASISTIÓ">Asistió</option>
+                    <option value="FALTÓ">Faltó</option>
+                </select>
             </div>
-        </div>
+            <div class="field"><label>Cuota ($)</label><input type="number" id="cuota" value="0" step="0.01"></div>
+            <div class="field">
+                <label>Terapeuta</label>
+                <select id="nombre_terapeuta">
+                    <option value="">-- SELECCIONE --</option>
+                    <option value="Nelly">Nelly</option>
+                    <option value="Pamela">Pamela</option>
+                    <option value="Oscar">Oscar</option>
+                    <option value="Gena">Gena</option>
+                    <option value="Luis">Luis</option>
+                    <option value="Javier">Javier</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Estatus Expediente</label>
+                <select id="estatus_expediente">
+                    <option value="EN TRATAMIENTO">🟢 En Tratamiento</option>
+                    <option value="ALTA MÉDICA">🔵 Alta Médica</option>
+                    <option value="BAJA POR INASISTENCIA">🔴 Baja por Inasistencia</option>
+                </select>
+            </div>
 
-        <div class="field span-2" id="box_justificante" style="display: none;">
-            <label style="color: var(--danger);">Justificación de Falta:</label>
-            <input type="text" id="motivo_justificacion" placeholder="Escriba la causa de la inasistencia...">
-        </div>
-    </fieldset>
-    
-    <fieldset>
-        <legend><i class="fas fa-user-injured"></i> Datos Personales</legend>
-        
-        <div class="field span-2"><label>CURP</label><input type="text" id="curp" style="text-transform:uppercase;"></div>
-        <div class="field span-2"><label>Nombre del Paciente *</label><input type="text" id="nombre" required></div>
-        
-        <div class="field"><label>Sexo</label><select id="sexo"><option value="H">Hombre</option><option value="M">Mujer</option></select></div>
-        <div class="field"><label>F. Nacimiento</label><input type="date" id="fecha_nacimiento" onchange="window.calcularEdad()"></div>
-        <div class="field"><label>Edad</label><input type="number" id="edad" readonly></div>
-        <div class="field"><label>Municipio</label><input type="text" id="municipio" value="SAN ANDRÉS TUXTLA"></div>
-        
-        <div class="field span-2">
-            <label>Ubicación</label>
-            <div class="ubicacion-container" style="display: flex; gap: 20px; align-items: center;">
-                <div style="display: flex; gap: 15px;">
-                    <label style="display: flex; align-items: center; gap: 6px;">
-                        <input type="radio" name="tipo_ubicacion" value="COLONIA" checked> Colonia
-                    </label>
-                    <label style="display: flex; align-items: center; gap: 6px;">
-                        <input type="radio" name="tipo_ubicacion" value="LOCALIDAD"> Localidad
-                    </label>
+            <div class="field span-2">
+                <label>Días Habituales de Atención:</label>
+                <div class="dias-box">
+                    <label><input type="checkbox" class="chk-dia" value="1"> Lun</label>
+                    <label><input type="checkbox" class="chk-dia" value="2"> Mar</label>
+                    <label><input type="checkbox" class="chk-dia" value="3"> Mié</label>
+                    <label><input type="checkbox" class="chk-dia" value="4"> Jue</label>
+                    <label><input type="checkbox" class="chk-dia" value="5"> Vie</label>
                 </div>
-                <input type="text" id="col_loc" placeholder="Nombre de la colonia o localidad..." style="flex-grow: 1;">
             </div>
-        </div>
+
+            <div class="field span-2" id="box_justificante" style="display: none;">
+                <label style="color: var(--danger);">Justificación de Falta:</label>
+                <input type="text" id="motivo_justificacion" placeholder="Escriba la causa de la inasistencia...">
+            </div>
+        </fieldset>
         
-        <div class="field span-2"><label>Dirección</label><input type="text" id="direccion"></div>
-        <div class="field span-2"><label>Teléfono</label><input type="tel" id="telefono"></div>
-    </fieldset>
+        <fieldset>
+            <legend><i class="fas fa-user-injured"></i> Datos Personales</legend>
+            <div class="field span-2"><label>CURP</label><input type="text" id="curp" style="text-transform:uppercase;"></div>
+            <div class="field span-2"><label>Nombre del Paciente *</label><input type="text" id="nombre" required></div>
+            <div class="field"><label>Sexo</label><select id="sexo"><option value="H">Hombre</option><option value="M">Mujer</option></select></div>
+            <div class="field"><label>F. Nacimiento</label><input type="date" id="fecha_nacimiento" onchange="window.calcularEdad()"></div>
+            <div class="field"><label>Edad</label><input type="number" id="edad" readonly></div>
+            <div class="field"><label>Municipio</label><input type="text" id="municipio" value="SAN ANDRÉS TUXTLA"></div>
+            
+            <div class="field span-2">
+                <label>Ubicación</label>
+                <div class="ubicacion-container" style="display: flex; gap: 20px; align-items: center;">
+                    <div style="display: flex; gap: 15px;">
+                        <label style="display: flex; align-items: center; gap: 6px;">
+                            <input type="radio" name="tipo_ubicacion" value="COLONIA" checked> Colonia
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px;">
+                            <input type="radio" name="tipo_ubicacion" value="LOCALIDAD"> Localidad
+                        </label>
+                    </div>
+                    <input type="text" id="col_loc" placeholder="Nombre de la colonia o localidad..." style="flex-grow: 1;">
+                </div>
+            </div>
+            
+            <div class="field span-2"><label>Dirección</label><input type="text" id="direccion"></div>
+            <div class="field span-2"><label>Teléfono</label><input type="tel" id="telefono"></div>
+        </fieldset>
 
-    <fieldset>
-        <legend><i class="fas fa-file-medical"></i> Valoración Clínica</legend>
-        <div class="field full-width"><label>Diagnóstico Médico</label><textarea id="diagnostico" rows="2"></textarea></div>
-        <div class="field"><label>¿Discapacidad?</label><select id="discapacidad"><option value="no">No</option><option value="si">Sí</option></select></div>
-        <div class="field"><label>Tipo Limitación</label><select id="tipo_discapacidad"><option value="MOTORA">Motora</option><option value="AUDITIVO">Auditivo</option><option value="INTELECTUAL">Intelectual</option><option value="LENGUAJE">Lenguaje</option></select></div>
-        <div class="field"><label>Grado</label><select id="grado"><option value="LEVE">Leve</option><option value="MODERADO">Moderado</option><option value="SEVERO">Severo</option></select></div>
-        <div class="field"><label>Duración</label><select id="duracion"><option value="TEMPORAL">Temporal</option><option value="PERMANENTE">Permanente</option></select></div>
-    </fieldset>
+        <fieldset>
+            <legend><i class="fas fa-file-medical"></i> Valoración Clínica</legend>
+            <div class="field full-width"><label>Diagnóstico Médico</label><textarea id="diagnostico" rows="2"></textarea></div>
+            <div class="field"><label>¿Discapacidad?</label><select id="discapacidad"><option value="no">No</option><option value="si">Sí</option></select></div>
+            <div class="field"><label>Tipo Limitación</label><select id="tipo_discapacidad"><option value="MOTORA">Motora</option><option value="AUDITIVO">Auditivo</option><option value="INTELECTUAL">Intelectual</option><option value="LENGUAJE">Lenguaje</option></select></div>
+            <div class="field"><label>Grado</label><select id="grado"><option value="LEVE">Leve</option><option value="MODERADO">Moderado</option><option value="SEVERO">Severo</option></select></div>
+            <div class="field"><label>Duración</label><select id="duracion"><option value="TEMPORAL">Temporal</option><option value="PERMANENTE">Permanente</option></select></div>
+        </fieldset>
 
-    <fieldset>
-        <legend><i class="fas fa-hand-holding-medical"></i> Plan de Tratamiento (Evolución Clinica)</legend>
-        <div class="services-container">
-            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="HIDROTERAPIA"><label>Hidroterapia</label></div>
-            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="MECANOTERAPIA"><label>Mecanoterapia</label></div>
-            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="COMPRESAS"><label>Compresas</label></div>
-            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="PARAFINA"><label>Parafina</label></div>
-            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="ELECTROTERAPIA"><label>Electroterapia</label></div>
-            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="ULTRASONIDO"><label>Ultrasonido</label></div>
-            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="LASER"><label>Laser</label></div>
-            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="TERAPIA OCUPACIONAL"><label>T. Ocupacional</label></div>
-            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="PROGRAMA DE CASA"><label>Prog. Casa</label></div>
-            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="TERAPIA LENGUAJE"><label>T. Lenguaje</label></div>
-            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="INFRAROJO"><label>Infrarrojo</label></div>
-            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="CRIOTERAPIA"><label>Crioterapia</label></div>
-            <div class="checkbox-item"><input type="checkbox" class="check-serv" value="MASAJE"><label>Masaje</label></div>
+        <fieldset>
+            <legend><i class="fas fa-hand-holding-medical"></i> Plan de Tratamiento (Evolución Clinica)</legend>
+            <div class="services-container">
+                <div class="checkbox-item"><input type="checkbox" class="check-serv" value="HIDROTERAPIA"><label>Hidroterapia</label></div>
+                <div class="checkbox-item"><input type="checkbox" class="check-serv" value="MECANOTERAPIA"><label>Mecanoterapia</label></div>
+                <div class="checkbox-item"><input type="checkbox" class="check-serv" value="COMPRESAS"><label>Compresas</label></div>
+                <div class="checkbox-item"><input type="checkbox" class="check-serv" value="PARAFINA"><label>Parafina</label></div>
+                <div class="checkbox-item"><input type="checkbox" class="check-serv" value="ELECTROTERAPIA"><label>Electroterapia</label></div>
+                <div class="checkbox-item"><input type="checkbox" class="check-serv" value="ULTRASONIDO"><label>Ultrasonido</label></div>
+                <div class="checkbox-item"><input type="checkbox" class="check-serv" value="LASER"><label>Laser</label></div>
+                <div class="checkbox-item"><input type="checkbox" class="check-serv" value="TERAPIA OCUPACIONAL"><label>T. Ocupacional</label></div>
+                <div class="checkbox-item"><input type="checkbox" class="check-serv" value="PROGRAMA DE CASA"><label>Prog. Casa</label></div>
+                <div class="checkbox-item"><input type="checkbox" class="check-serv" value="TERAPIA LENGUAJE"><label>T. Lenguaje</label></div>
+                <div class="checkbox-item"><input type="checkbox" class="check-serv" value="INFRAROJO"><label>Infrarrojo</label></div>
+                <div class="checkbox-item"><input type="checkbox" class="check-serv" value="CRIOTERAPIA"><label>Crioterapia</label></div>
+                <div class="checkbox-item"><input type="checkbox" class="check-serv" value="MASAJE"><label>Masaje</label></div>
+            </div>
+        </fieldset>
+
+        <!-- BOTONES: GUARDAR Y LIMPIAR -->
+        <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+            <button type="button" class="btn-save" id="btnGuardar" style="flex: 2; min-width: 200px;">
+                <i class="fas fa-save"></i> Guardar y Sincronizar
+            </button>
+            <button type="button" onclick="window.limpiarFormulario()" style="flex: 1; min-width: 150px; background: #64748b; color: white; border: none; padding: 16px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s;" onmouseover="this.style.background='#475569'" onmouseout="this.style.background='#64748b'">
+                <i class="fas fa-eraser"></i> Limpiar / Nuevo
+            </button>
         </div>
-    </fieldset>
-
-   <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
-    <button type="button" class="btn-save" id="btnGuardar" style="flex: 2; min-width: 200px;">
-        <i class="fas fa-save"></i> Guardar y Sincronizar
-    </button>
-    <button type="button" onclick="window.limpiarFormulario()" style="flex: 1; min-width: 150px; background: #64748b; color: white; border: none; padding: 16px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s;" onmouseover="this.style.background='#475569'" onmouseout="this.style.background='#64748b'">
-        <i class="fas fa-eraser"></i> Limpiar / Nuevo
-    </button>
-</div>
-</form>
+    </form>
 </div>
 
 <!-- MODAL CONFIRMACIÓN GENÉRICA -->
@@ -598,7 +306,6 @@
 </div>
 
 <div class="table-container">
-    <!-- BARRA DE HERRAMIENTAS: BÚSQUEDA, FILAS E IMPRESIÓN -->
     <div class="table-tools no-print">
         <div class="search-box">
             <i class="fas fa-search"></i>
@@ -622,7 +329,6 @@
         </button>
     </div>
 
-    <!-- TABLA RESPONSIVA -->
     <div class="table-responsive">
         <table id="tablaGeneral">
             <thead>
@@ -641,14 +347,11 @@
         </table>
     </div>
 
-    <!-- PAGINACIÓN -->
     <div class="pagination-container no-print">
         <div id="txtInfoPaginacion" style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Mostrando 0 de 0 registros</div>
         <div class="pagination-btns" id="contenedorPaginas"></div>
     </div>
 </div>
-
-</body>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -663,35 +366,30 @@
 
     let cacheRegistros = [];
     let expedienteSeleccionadoModal = null;
-
-    // Estado de paginación y filtro
     let paginaActual = 1;
     let filasPorPagina = 10;
 
-    // --- VERIFICACIÓN DE SESIÓN ---
-const sesionActiva = sessionStorage.getItem('sesion_activa') || localStorage.getItem('activeUser');
-const usuarioActual = sessionStorage.getItem('nombre_usuario') || localStorage.getItem('activeUser');
+    // --- SESIÓN ---
+    const sesionActiva = sessionStorage.getItem('sesion_activa') || localStorage.getItem('activeUser');
+    const usuarioActual = sessionStorage.getItem('nombre_usuario') || localStorage.getItem('activeUser');
 
-if (!sesionActiva) {
-    // Si no inició sesión, redirigir al login
-    window.location.href = 'index.html';
-} else {
-    // Mostrar el nombre del usuario en el indicador
-    document.addEventListener('DOMContentLoaded', () => {
-        const lbl = document.getElementById('lblUsuarioSesion');
-        if (lbl) lbl.innerText = (usuarioActual || 'USUARIO').toUpperCase();
-    });
-}
+    if (!sesionActiva) {
+        window.location.href = 'index.html';
+    } else {
+        document.addEventListener('DOMContentLoaded', () => {
+            const lbl = document.getElementById('lblUsuarioSesion');
+            if (lbl) lbl.innerText = (usuarioActual || 'USUARIO').toUpperCase();
+        });
+    }
 
-// Función global para cerrar sesión
-window.cerrarSesion = () => {
-    sessionStorage.clear();
-    localStorage.removeItem('activeUser');
-    localStorage.removeItem('userDep');
-    window.location.href = 'index.html';
-};
+    window.cerrarSesion = () => {
+        sessionStorage.clear();
+        localStorage.removeItem('activeUser');
+        localStorage.removeItem('userDep');
+        window.location.href = 'index.html';
+    };
 
-    // --- NOTIFICACIONES Y DIÁLOGOS ESTILIZADOS ---
+    // --- NOTIFICACIONES Y MODALES ---
     window.mostrarToast = (mensaje, tipo = 'info') => {
         const container = document.getElementById('toastContainer');
         const toast = document.createElement('div');
@@ -718,7 +416,6 @@ window.cerrarSesion = () => {
             const modal = document.getElementById('modalConfirm');
             document.getElementById('modalConfirmTitulo').innerHTML = `<i class="fas fa-question-circle"></i> ${titulo}`;
             document.getElementById('modalConfirmMensaje').innerText = mensaje;
-            
             modal.style.display = 'flex';
 
             const btnAceptar = document.getElementById('btnConfirmAceptar');
@@ -798,6 +495,21 @@ window.cerrarSesion = () => {
         if (box) box.style.display = (document.getElementById("estatus")?.value === "FALTÓ") ? "block" : "none";
     };
 
+    window.limpiarFormulario = () => {
+        document.getElementById('formCrisat').reset();
+        document.getElementById('editId').value = "";
+        document.getElementById('fecha_captura').value = window.obtenerFechaLocal();
+        document.getElementById('municipio').value = "SAN ANDRÉS TUXTLA";
+        document.getElementById('cuota').value = "0";
+        document.getElementById('edad').value = "";
+        document.querySelectorAll('.check-serv').forEach(cb => cb.checked = false);
+        document.querySelectorAll('.chk-dia').forEach(cb => cb.checked = false);
+        const radioCol = document.querySelector('input[name="tipo_ubicacion"][value="COLONIA"]');
+        if (radioCol) radioCol.checked = true;
+        window.toggleCamposEspeciales();
+        window.mostrarToast("Formulario listo para un nuevo registro.", "info");
+    };
+
     function calcularProximaFechaCita(fechaBaseStr, diasSeleccionados) {
         if (!fechaBaseStr) fechaBaseStr = window.obtenerFechaLocal();
         let partes = fechaBaseStr.split('-');
@@ -830,7 +542,7 @@ window.cerrarSesion = () => {
         return `${yyyy}-${mm}-${dd}`;
     }
 
-    // --- FORMULARIO Y PROCESAMIENTO ---
+    // --- PROCESAMIENTO Y GUARDADO ---
     function obtenerDatosFormulario() {
         const servicios = [...document.querySelectorAll('.check-serv:checked')].map(c => c.value).join(', ');
         const dias = [...document.querySelectorAll('.chk-dia:checked')].map(c => c.value);
@@ -890,7 +602,10 @@ window.cerrarSesion = () => {
         const btn = document.getElementById('btnGuardar');
         const idActual = document.getElementById('editId').value;
         const fechaCitaIndividual = document.getElementById('fecha_cita').value;
-        const textoFechas = document.getElementById('masiva_fechas').value.trim();
+
+        // Comprobación segura de fechas masivas
+        const elMasiva = document.getElementById('masiva_fechas');
+        const textoFechas = elMasiva && elMasiva.value ? elMasiva.value.trim() : "";
         const listaFechas = textoFechas ? textoFechas.split('\n').filter(f => f.trim() !== "") : [fechaCitaIndividual];
 
         let datos = obtenerDatosFormulario();
@@ -923,7 +638,6 @@ window.cerrarSesion = () => {
                 window.mostrarToast(`¡Éxito! Se registraron ${listaFechas.length} cita(s).`, "success");
             }
 
-            // REPROGRAMACIÓN AUTOMÁTICA CON SELECCIÓN DE TERAPEUTA
             if ((datos.estatus === "ASISTIÓ" || datos.estatus === "FALTÓ") && datos.estatus_expediente === "EN TRATAMIENTO") {
                 const proximaFechaCalculada = calcularProximaFechaCita(fechaCitaIndividual, datos.dias_atencion);
                 const textoAccion = datos.estatus === "ASISTIÓ" ? "ASISTIÓ a" : "FALTÓ a";
@@ -948,11 +662,7 @@ window.cerrarSesion = () => {
                 }
             }
 
-            document.getElementById('formCrisat').reset();
-            document.getElementById('editId').value = "";
-            document.getElementById('fecha_captura').value = window.obtenerFechaLocal();
-            window.toggleCamposEspeciales();
-
+            window.limpiarFormulario();
         } catch (e) { 
             console.error(e);
             window.mostrarToast("Error al procesar: " + e.message, "danger"); 
@@ -960,11 +670,7 @@ window.cerrarSesion = () => {
             btn.disabled = false; 
             btn.innerHTML = '<i class="fas fa-save"></i> Guardar y Sincronizar'; 
         }
-
-        
     }
-
-
 
     // --- ACCIONES Y EDICIÓN ---
     window.prepararEdicion = (id) => {
@@ -1106,7 +812,7 @@ window.cerrarSesion = () => {
         }
     };
 
-    // --- BÚSQUEDA, PAGINACIÓN Y RENDERIZADO (CON ORDENAMIENTO DE FECHAS) ---
+    // --- BÚSQUEDA Y PAGINACIÓN ---
     window.cambiarFilasPorPagina = (valor) => {
         filasPorPagina = parseInt(valor);
         paginaActual = 1;
@@ -1124,7 +830,6 @@ window.cerrarSesion = () => {
         const hoy = new Date();
         hoy.setHours(0, 0, 0, 0);
 
-        // 1. Filtrar registros por Nombre, Folio (Expediente), CURP, Terapeuta o Diagnóstico
         let registrosFiltrados = cacheRegistros.filter(r => {
             if (!termino) return true;
             return (r.nombre_paciente || '').toLowerCase().includes(termino) ||
@@ -1134,23 +839,15 @@ window.cerrarSesion = () => {
                    (r.diagnostico || '').toLowerCase().includes(termino);
         });
 
-        // 2. ORDENAR REGISTROS POR FECHA Y HORA (De la fecha más reciente a la más antigua)
         registrosFiltrados.sort((a, b) => {
             const fechaA = a.fecha_ISO || '';
             const fechaB = b.fecha_ISO || '';
-            
-            // Comparar por fecha (descendente: las más recientes/próximas primero)
-            if (fechaA !== fechaB) {
-                return fechaB.localeCompare(fechaA);
-            }
-            
-            // Si la fecha es igual, comparar por hora
+            if (fechaA !== fechaB) return fechaB.localeCompare(fechaA);
             const horaA = a.hora || '';
             const horaB = b.hora || '';
             return horaA.localeCompare(horaB);
         });
 
-        // 3. Cálculo de paginación
         const totalRegistros = registrosFiltrados.length;
         const totalPaginas = Math.ceil(totalRegistros / filasPorPagina) || 1;
 
@@ -1161,7 +858,6 @@ window.cerrarSesion = () => {
         const fin = inicio + filasPorPagina;
         const registrosPagina = registrosFiltrados.slice(inicio, fin);
 
-        // 4. Generar HTML de la Tabla
         cuerpo.innerHTML = "";
 
         if (registrosPagina.length === 0) {
@@ -1195,7 +891,6 @@ window.cerrarSesion = () => {
                 }
 
                 let badgeClass = r.estatus === "ASISTIÓ" ? "asistencia-ok" : (r.estatus === "FALTÓ" ? "alerta-roja" : "");
-                
                 let badgeExpediente = "";
                 if (r.estatus_expediente === "ALTA MÉDICA") badgeExpediente = `<span class="pill pill-alta">ALTA MÉDICA</span>`;
                 if (r.estatus_expediente === "BAJA POR INASISTENCIA") badgeExpediente = `<span class="pill pill-baja">BAJA</span>`;
@@ -1229,7 +924,6 @@ window.cerrarSesion = () => {
             });
         }
 
-        // 5. Renderizar Controles de Paginación
         const txtInfo = document.getElementById('txtInfoPaginacion');
         const contPaginas = document.getElementById('contenedorPaginas');
         
@@ -1249,7 +943,7 @@ window.cerrarSesion = () => {
         contPaginas.innerHTML = htmlPaginas;
     };
 
-    // --- INICIALIZACIÓN Y EVENTOS ---
+    // --- INICIALIZACIÓN ---
     document.getElementById('btnGuardar').addEventListener('click', procesarFormulario);
     document.getElementById('curp').addEventListener('input', (e) => window.autocompletarPorCurp(e.target.value));
     document.getElementById('fecha_captura').value = window.obtenerFechaLocal();
@@ -1261,35 +955,6 @@ window.cerrarSesion = () => {
         });
         window.filtrarYRenderizar();
     });
-
-    // --- FUNCIÓN PARA LIMPIAR CAMPOS Y CANCELAR EDICIÓN ---
-window.limpiarFormulario = () => {
-    // 1. Resetea los campos básicos del formulario
-    document.getElementById('formCrisat').reset();
-
-    // 2. Limpia el ID de edición para asegurar que el sistema sepa que es un REGISTRO NUEVO
-    document.getElementById('editId').value = "";
-
-    // 3. Restablece valores por defecto
-    document.getElementById('fecha_captura').value = window.obtenerFechaLocal();
-    document.getElementById('municipio').value = "SAN ANDRÉS TUXTLA";
-    document.getElementById('cuota').value = "0";
-    document.getElementById('edad').value = "";
-
-    // 4. Desmarca casillas de selección (Servicios y Días)
-    document.querySelectorAll('.check-serv').forEach(cb => cb.checked = false);
-    document.querySelectorAll('.chk-dia').forEach(cb => cb.checked = false);
-
-    // 5. Restablece la ubicación a 'Colonia'
-    const radioCol = document.querySelector('input[name="tipo_ubicacion"][value="COLONIA"]');
-    if (radioCol) radioCol.checked = true;
-
-    // 6. Oculta el campo de justificación de falta si estaba visible
-    window.toggleCamposEspeciales();
-
-    // 7. Notifica al usuario
-    window.mostrarToast("Formulario restablecido. Listo para un nuevo paciente.", "info");
-};
 </script>
 </body>
 </html>
