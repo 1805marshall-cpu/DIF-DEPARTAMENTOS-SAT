@@ -8,337 +8,114 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         
-:root { 
-    /* Color único para todos los módulos */
-    --primary: #8a1538;       /* Guinda Institucional */
-    --secondary: #c5a059;     /* Dorado/Arena Institucional */
-    
-    /* Nuevo color de acento (Verde DIF/Institucional) */
-    --accent: #5a7d65;        /* Verde Olivo Profundo (Muy elegante) */
-    --accent-light: #eef2ef;  /* Fondo suave para tarjetas de acento */
-    
-    --sidebar-bg: #2d1e22;    
-    
-    /* Aplicamos el color institucional */
-    --vulnerable-color: var(--primary);
-    --psico-color: var(--primary);
-    --procu-color: var(--primary);
-    --med-color: var(--primary);
-    --social-color: var(--primary);
-    --genloc-color: var(--primary);
-    --escolar-color: var(--primary);
-}
-        
-        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; height: 100vh; overflow: hidden; color: #1e293b; }
-        
-        /* Sidebar */
-        .sidebar { width: 260px; background: var(--sidebar-bg); color: white; display: flex; flex-direction: column; flex-shrink: 0; transition: all 0.3s; z-index: 1000; }
-        .sidebar.collapsed { width: 80px; }
-        .sidebar-header { padding: 25px 15px; text-align: center; border-bottom: 1px solid #1e293b; }
-        .sidebar-header h3 { font-size: 1.1rem; margin: 0; letter-spacing: 1px; font-weight: 800; }
-        .sidebar.collapsed .sidebar-header h3, .sidebar.collapsed .sidebar-header small { display: none; }
+:root { --primary:#8a1538; --secondary:#c5a059; --accent:#5a7d65; --accent-light:#eef2ef; --bg:#f8fafc; --sidebar-bg:#2d1e22; --vulnerable-color:var(--primary); --psico-color:var(--primary); --procu-color:var(--primary); --med-color:var(--primary); --social-color:var(--primary); --genloc-color:var(--primary); --escolar-color:var(--primary); }
 
-        .nav-menu { flex-grow: 1; padding: 10px 0; overflow-y: auto; }
-        .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 15px; color: #94a3b8; cursor: pointer; transition: 0.3s; font-size: 13px; border-left: 4px solid transparent; }
-        .nav-item:hover, .nav-item.active { background: #1e293b; color: white; border-left-color: var(--primary); }
-        .sidebar.collapsed .nav-item { justify-content: center; padding: 15px 0; }
-        .sidebar.collapsed .nav-item span { display: none; }
+* { box-sizing: border-box; }
+body { font-family:'Inter','Segoe UI',sans-serif; background:var(--bg); margin:0; display:flex; height:100vh; overflow:hidden; color:#1e293b; }
 
-        /* Main Content */
-        .main-content { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; }
-        .top-bar { background: white; padding: 0 30px; height: 70px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 2px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        
-        /* Search Bars Uniformes */
-        .search-container { display: flex; gap: 15px; flex-grow: 1; max-width: 900px; margin: 0 30px; }
-        .search-wrapper { position: relative; flex: 1; }
-        .search-wrapper i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px; }
-        .search-wrapper input { width: 100%; padding: 10px 15px 10px 40px; border-radius: 10px; border: 1px solid #e2e8f0; outline: none; font-size: 12px; font-weight: 600; transition: 0.2s; background: #f8fafc; }
-        .search-wrapper input:focus { border-color: var(--primary); background: white; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+/* Layout Base */
+.app-container { display:flex; flex-direction:column; min-height:100vh; width:100%; }
+.main-content { flex-grow:1; overflow-y:auto; display:flex; flex-direction:column; padding:15px; width:100%; }
+.view-container { padding:25px; display:none; }
+.view-container.active { display:block; animation:fadeIn 0.4s ease; }
 
-        /* View Components */
-        .view-container { padding: 25px; display: none; }
-        .view-container.active { display: block; animation: fadeIn 0.4s ease; }
-        
-        .access-card { padding: 18px 25px; border-radius: 15px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .access-card b { font-size: 16px; letter-spacing: 0.5px; }
-        .btn-open { background: rgba(255,255,255,0.2); color: white; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-size: 11px; font-weight: 800; border: 1px solid rgba(255,255,255,0.4); transition: 0.3s; text-transform: uppercase; }
-        .btn-open:hover { background: white; color: #0f172a; }
-        
-        /* Stats */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .stat-box { background: white; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; }
-        .stat-box small { color: #64748b; font-weight: 800; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
-        .stat-box div { font-size: 22px; font-weight: 800; color: #0f172a; }
-        .stat-box div { transition: color 0.3s ease;} 
-        /* Opcional: una animación de pulso suave cuando el filtro está activo */
-.filter-active-indicator {   animation: pulse-blue 2s infinite; }
+/* Sidebar & Nav */
+.sidebar { width:260px; background:var(--sidebar-bg); color:#fff; display:flex; flex-direction:column; flex-shrink:0; transition:all 0.3s ease; z-index:1000; }
+.sidebar.collapsed { width:80px; }
+.sidebar-header { padding:25px 15px; text-align:center; border-bottom:1px solid #1e293b; }
+.sidebar-header h3 { font-size:1.1rem; margin:0; letter-spacing:1px; font-weight:800; }
+.sidebar.collapsed .sidebar-header h3, .sidebar.collapsed .sidebar-header small { display:none; }
 
-@keyframes pulse-blue {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
-}
+.nav-menu { flex-grow:1; padding:10px 0; overflow-y:auto; }
+.nav-item { padding:12px 20px; display:flex; align-items:center; gap:15px; color:#94a3b8; cursor:pointer; transition:0.3s; font-size:13px; border-left:4px solid transparent; }
+.nav-item:hover, .nav-item.active { background:#1e293b; color:#fff; border-left-color:var(--primary); }
+.sidebar.collapsed .nav-item { justify-content:center; padding:15px 0; }
+.sidebar.collapsed .nav-item span { display:none; }
 
-        /* Panels */
-        .panel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .panel { background: white; border-radius: 15px; padding: 20px; border: 1px solid #e2e8f0; height: 480px; overflow-y: auto; }
-        .panel b { display: block; margin-bottom: 15px; font-size: 10px; text-transform: uppercase; color: #94a3b8; border-bottom: 2px solid #f8fafc; padding-bottom: 10px; letter-spacing: 1px; }
-        
-        .group-container { background: #f8fafc; border-radius: 12px; margin-bottom: 15px; padding: 12px; border-left: 5px solid var(--primary); }
-        .group-header { display: flex; justify-content: space-between; font-weight: 800; font-size: 11px; margin-bottom: 10px; color: #334155; }
-        .member-line { font-size: 11px; padding: 10px; background: white; margin-bottom: 5px; border-radius: 8px; display: flex; justify-content: space-between; border: 1px solid #f1f5f9; align-items: center; font-weight: 500; }
-        
-        #reloj { font-weight: 800; color: #64748b; font-size: 14px; font-variant-numeric: tabular-nums; }
+.user-profile-box { padding:20px; display:flex; align-items:center; gap:12px; background:rgba(0,0,0,0.15); border-top:1px solid #1e293b; color:#fff; margin-top:auto; }
+.sidebar.collapsed .user-profile-box { justify-content:center; padding:15px 0; }
+.sidebar.collapsed .user-profile-box :is(span, div, p) { display:none; }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.nav-exit { padding:15px 25px; display:flex; align-items:center; gap:15px; background:#7f1d1d; color:#f87171; cursor:pointer; transition:all 0.3s ease; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; }
+.nav-exit i { font-size:16px; }
+.nav-exit:hover { background:#ef4444; color:#fff; }
+.sidebar.collapsed .nav-exit { justify-content:center; padding:15px 0; }
+.sidebar.collapsed .nav-exit span { display:none; }
+.sidebar.collapsed .nav-exit i { font-size:18px; }
 
-        /* Contenedor de Salida en la Sidebar */
-        .nav-exit { margin-top: auto; /* Empuja el botón al final del menú */ 
-        padding: 18px 25px;display: flex;align-items: center;gap: 15px;color: #f87171; /* Rojo suave inicial */cursor: pointer;transition: all 0.3s ease;border-top: 1px solid #1e293b;font-size: 13px;font-weight: 700;text-transform: uppercase;letter-spacing: 0.5px;
-}
+/* Header & Filtros */
+.top-bar { background:#fff; padding:0 30px; height:70px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 1px 2px rgba(0,0,0,0.05); position:sticky; top:0; z-index:100; }
+.search-container { display:flex; gap:15px; flex-grow:1; max-width:900px; margin:0 30px; }
+.search-wrapper { position:relative; flex:1; }
+.search-wrapper i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:14px; }
+.search-wrapper input { width:100%; padding:10px 15px 10px 40px; border-radius:10px; border:1px solid #e2e8f0; outline:none; font-size:12px; font-weight:600; transition:0.2s; background:#f8fafc; }
+.search-wrapper input:focus { border-color:var(--primary); background:#fff; box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
+.filter-bar { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+#reloj { font-weight:800; color:#64748b; font-size:14px; font-variant-numeric:tabular-nums; }
 
-        .nav-exit i {
-        font-size: 16px;
-}
+/* Tarjetas, Paneles & Métricas */
+.access-card { padding:18px 25px; border-radius:15px; display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; color:#fff; background:var(--primary); border-bottom:3px solid var(--secondary); box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+.access-card b { font-size:16px; letter-spacing:0.5px; }
+.btn-open { background:rgba(255,255,255,0.2); color:#fff; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:11px; font-weight:800; border:1px solid rgba(255,255,255,0.4); transition:0.3s; text-transform:uppercase; }
+.btn-open:hover { background:#fff; color:#0f172a; }
 
-.nav-exit:hover {background: #ef4444; color: white;}
-/* Ajuste para cuando la Sidebar está colapsada */
-.sidebar.collapsed .nav-exit {justify-content: center;padding: 20px 0;}
-.sidebar.collapsed .nav-exit span { display: none;}
-.sidebar.collapsed .nav-exit i {font-size: 18px;}
+.panel-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:20px; margin-top:20px; }
+.panel { display:flex; flex-direction:column; background:#fff; border-radius:15px; padding:20px; border:1px solid #e2e8f0; height:480px; overflow-y:auto; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
+.panel b { display:block; margin-bottom:15px; font-size:10px; text-transform:uppercase; color:#94a3b8; border-bottom:2px solid #f8fafc; padding-bottom:10px; letter-spacing:1px; }
 
+.card { background:#fff; padding:20px; border-radius:15px; border-top:5px solid #991b1b; box-shadow:0 2px 4px rgba(0,0,0,0.05); }
+.card.money { border-top-color:#059669; }
+.card.valid { border-top-color:#0369a1; }
+.monto { font-size:20px; font-weight:800; display:block; margin-top:5px; }
 
+.stats-grid, #stats-dinamicas { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:20px; }
+.stat-box { background:#fff; padding:15px; border-radius:12px; border:1px solid #e2e8f0; text-align:center; }
+.stat-box small { color:#64748b; font-weight:800; text-transform:uppercase; font-size:9px; letter-spacing:0.5px; margin-bottom:5px; display:block; }
+.stat-box div { font-size:22px; font-weight:800; color:#0f172a; transition:color 0.3s ease; }
+.v-stats-card { background:#fff; padding:15px; border-radius:12px; border:1px solid #e2e8f0; text-align:center; border-top:4px solid var(--primary); }
 
-/* Layout específico para Psicología */
-    .psicos-grid-layout { display: grid;    grid-template-columns: repeat(3, 1fr);  gap: 15px;margin-bottom: 20px;}
+.psicos-grid-layout { display:grid; grid-template-columns:repeat(3, 1fr); gap:15px; margin-bottom:20px; }
+.main-total { background:#fff; padding:15px !important; }
+.main-total div { font-size:1.8rem !important; font-weight:800; }
 
-    /* Hacemos que los cuadros de "Total" resalten un poco más */
-    .main-total {background: #fff; padding: 15px !important;}
-    .main-total div {font-size: 1.8rem !important; font-weight: 800;}
-    /* En dispositivos móviles, podemos bajar a 1 columna si es necesario */
-    @media (max-width: 768px) {
-    .psicos-grid-layout { grid-template-columns: repeat(2, 1fr);}
-    .main-total:last-child {grid-column: span 2;}
-}
-.access-card { 
-    background: var(--primary); 
-    border-bottom: 3px solid var(--secondary); /* Añade un borde dorado */
-}
-/* Ejemplo para asegurar que los paneles se ajusten bien */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-}
+.group-container { background:#f8fafc; border-radius:12px; margin-bottom:15px; padding:12px; border-left:5px solid var(--primary); }
+.group-header { display:flex; justify-content:space-between; font-weight:800; font-size:11px; margin-bottom:10px; color:#334155; }
+.member-line { font-size:11px; padding:10px; background:#fff; margin-bottom:5px; border-radius:8px; display:flex; justify-content:space-between; border:1px solid #f1f5f9; align-items:center; font-weight:500; }
+.desglose-recurso { display:flex; justify-content:space-between; font-size:11px; margin-top:8px; padding-top:8px; border-top:1px dashed #e2e8f0; color:#64748b; }
 
-.view-container {
-    display: none; /* Ocultar todas por defecto */
-    padding: 20px;
-}
+/* Auxiliares, Tablas & Canvas */
+.badge { display:inline-block; padding:2px 8px; border-radius:12px; font-size:10px; font-weight:700; }
+.tabla-box table tbody tr:nth-child(even) { background-color:#f9fafb; }
+.resumen-list { list-style:none; padding:0; font-size:12px; }
+.resumen-list li { display:flex; justify-content:space-between; border-bottom:1px dashed #eee; padding:2px 0; }
+.registro-item { transition:background 0.2s; }
+.registro-item:hover { background:#f8fafc; cursor:pointer; }
 
-.view-container.active {
-    display: block; /* Mostrar solo la activa */
-}
-/* Asegura que el contenedor de usuario tenga margen inferior */
-.user-profile-box {
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: rgba(0,0,0,0.15);
-    border-top: 1px solid #1e293b; /* Borde superior para separar del nav */
-    color: white;
-    margin-top: auto; /* Empuja todo el bloque al final de la sidebar */
-}
+canvas { flex-grow:1; }
+#chart-genero, #chart-edades { display:block !important; width:100% !important; height:200px !important; }
 
-/* El botón de cerrar sesión debe ir debajo */
-.nav-exit {
-    padding: 15px 25px;
-    background: #7f1d1d; /* Un rojo más oscuro que combine con el sidebar */
-    color: #f87171;
-    cursor: pointer;
-    text-transform: uppercase;
-    font-size: 12px;
-    font-weight: 800;
-}
-.badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 10px;
-    font-weight: 700;
-}
-.tabla-box table tbody tr:nth-child(even) {
-    background-color: #f9fafb;
-}
-.card { background: white; padding: 20px; border-radius: 15px; border-top: 5px solid #991b1b; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-.card.money { border-top-color: #059669; }
-.card.valid { border-top-color: #0369a1; }
-.monto { font-size: 20px; font-weight: 800; display: block; margin-top: 5px; }
-.resumen-list { list-style: none; padding: 0; font-size: 12px; }
-.resumen-list li { display: flex; justify-content: space-between; border-bottom: 1px dashed #eee; padding: 2px 0; }
-.registro-item {
-    transition: background 0.2s;
-}
-.registro-item:hover {
-    background: #f1f5f9;
-}
-/* Asegurar que las cajas de PAE Caliente/Grupos se vean igual que tus otros módulos */
-.v-stats-card {
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    text-align: center;
-    border-top: 4px solid var(--primary); /* Resalta la parte superior */
-}
+/* Animaciones */
+@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.filter-active-indicator { animation:pulse-blue 2s infinite; }
+@keyframes pulse-blue { 0%, 100% { opacity:1; } 50% { opacity:0.5; } }
 
-/* Para el desglose Estatal/Municipal */
-.desglose-recurso {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px dashed #e2e8f0;
-    color: #64748b;
-}
-.registro-item:hover { background: #f8fafc; cursor: pointer; }
-#stats-dinamicas { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-.panel-grid { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-    gap: 20px; 
-    margin-top: 20px;
-}
-/* 1. Ocultar el texto de Cerrar Sesión (dejar solo el icono centrado) */
-.sidebar.collapsed .nav-exit span { 
-    display: none; 
-}
-
-/* 2. Ocultar los textos del perfil de usuario (Nombre, Rol, etc.) */
-.sidebar.collapsed .user-profile-box span,
-.sidebar.collapsed .user-profile-box div,
-.sidebar.collapsed .user-profile-box p { 
-    display: none; 
-}
-
-/* 3. Ajustar el centrado de los bloques inferiores al colapsar */
-.sidebar.collapsed .user-profile-box, 
-.sidebar.collapsed .nav-exit {
-    justify-content: center;
-    padding: 15px 0;
-}
-#chart-genero, #chart-edades {
-    display: block !important;
-    width: 100% !important;
-    height: 200px !important; /* Fuerza una altura mínima */
-}
-<style>
-    .panel {
-        display: flex;
-        flex-direction: column;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        padding: 15px;
-    }
-    canvas {
-        flex-grow: 1; /* Hace que el gráfico ocupe todo el espacio disponible */
-    }
-
-    /* =============================================================================
-   ESTRUCTURA RESPONSIVA GLOBAL
-   ============================================================================= */
-
-/* Contenedor principal de tu app */
-.app-container {
-    display: flex;
-    flex-direction: column; /* Por defecto en móvil: uno abajo del otro */
-    min-height: 100vh;
-}
-
-/* El área donde se renderizan tus reportes y formularios */
-.main-content {
-    flex: 1;
-    padding: 15px;
-    width: 100%;
-}
-
-/* --- DISPOSITIVOS MÓVILES Y TABLETAS (Pantallas menores a 768px) --- */
+/* Responsive */
 @media (max-width: 767px) {
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: -250px; /* Escondido por defecto a la izquierda */
-        width: 250px;
-        height: 100vh;
-        z-index: 999;
-        transition: left 0.3s ease;
-    }
-
-    /* Cuando haces clic en tu btn-toggle, en móvil el comportamiento se invierte: se muestra */
-    .sidebar.collapsed {
-        left: 0; 
-    }
-    
-    /* El contenedor maestro de las zonas en móvil para que use todo el ancho */
-    #territorial-master-list {
-        display: grid;
-        grid-template-columns: 1fr; /* Una sola columna de tarjetas */
-        gap: 15px;
-    }
-}
-
-/* --- PANTALLAS GRANDES / ESCRITORIO (A partir de 768px) --- */
-@media (min-width: 768px) {
-    .app-container {
-        flex-direction: row; /* Sidebar a la izquierda, contenido a la derecha */
-    }
-
-    .sidebar {
-        width: 260px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
-        transition: width 0.3s ease;
-    }
-
-    /* Tu lógica nativa de escritorio: si está colapsado, se encoge */
-    .sidebar.collapsed {
-        width: 70px;
-    }
-
-    .main-content {
-        padding: 30px;
-    }
-
-    /* Grid de tarjetas en escritorio: ¡2 columnas si hay espacio para aprovechar el monitor! */
-    #territorial-master-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-        gap: 20px;
-        align-items: start;
-    }
-}
-.filter-bar {
-    display: flex;
-    flex-direction: column; /* Móvil primero */
-    gap: 10px;
-    margin-bottom: 20px;
+    .sidebar { position:fixed; top:0; left:-250px; width:250px; height:100vh; z-index:999; transition:left 0.3s ease; }
+    .sidebar.collapsed { left:0; }
+    #territorial-master-list { display:grid; grid-template-columns:1fr; gap:15px; }
+    .psicos-grid-layout { grid-template-columns:repeat(2, 1fr); }
+    .main-total:last-child { grid-column:span 2; }
 }
 
 @media (min-width: 768px) {
-    .filter-bar {
-        flex-direction: row; /* En escritorio se alinean horizontalmente */
-        align-items: center;
-    }
-    
-    .filter-bar input, 
-    .filter-bar select {
-        flex: 1; /* Distribuye el espacio equitativamente */
-    }
+    .app-container { flex-direction:row; }
+    .sidebar { width:260px; height:100vh; position:sticky; top:0; transition:width 0.3s ease; }
+    .sidebar.collapsed { width:70px; }
+    .main-content { padding:30px; }
+    #territorial-master-list { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:20px; align-items:start; }
+    .filter-bar { flex-direction:row; align-items:center; }
+    .filter-bar input, .filter-bar select { flex:1; }
 }
     </style>
 </head>
@@ -635,7 +412,7 @@
             <small style="color:#64748b; font-weight:bold; font-size:10px;">DE PAGA ($)</small>
             <div id="m-paga" style="font-size:1.8rem; font-weight:800; color:#06b6d4;">0</div>
             <!-- Lista desplegada de costos/tarifas -->
-            <div id="m-paga-desglose" style="margin-top: 6px; font-size: 11px; max-height: 70px; overflow-y: auto; border-top: 1px dashed #e2e8f0; padding-top: 4px;"></div>
+            <div id="m-paga-desglose" style="margin-top: 6px; font-size: 6px; max-height: 70px; overflow-y: auto; border-top: 1px dashed #e2e8f0; padding-top: 4px;"></div>
         </div>
 
         <!-- 6. Gratuitas -->
@@ -796,24 +573,25 @@
         </div>
 
         <!-- Distribución por Género -->
-        <div class="stat-box" style="border-top:3px solid #db2777; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04);">
-            <small style="color:#64748b; font-weight:700; font-size:0.75rem;">GÉNERO (M / H)</small>
-            <div style="font-size:1.1rem; font-weight:800; margin-top:6px; display:flex; gap:10px; align-items:center;">
-                <span style="color:#db2777;"><i class="fas fa-venus"></i> <span id="crisat-mujeres">0</span></span>
-                <span style="color:#cbd5e1;">|</span>
-                <span style="color:#2563eb;"><i class="fas fa-mars"></i> <span id="crisat-hombres">0</span></span>
-            </div>
-        </div>
+        <!-- Género (M / H) -->
+<div class="stat-box" style="border-top:3px solid #db2777; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04); text-align: center;">
+    <small style="color:#64748b; font-weight:700; font-size:0.75rem; display: block;">GÉNERO (M / H)</small>
+    <div style="font-size:1.1rem; font-weight:800; margin-top:6px; display:flex; gap:10px; align-items:center; justify-content: center;">
+        <span style="color:#db2777;"><i class="fas fa-venus"></i> <span id="crisat-mujeres">0</span></span>
+        <span style="color:#cbd5e1;">|</span>
+        <span style="color:#2563eb;"><i class="fas fa-mars"></i> <span id="crisat-hombres">0</span></span>
+    </div>
+</div>
 
-        <!-- Distribución por Edades -->
-        <div class="stat-box" style="border-top:3px solid #b45309; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04);">
-            <small style="color:#64748b; font-weight:700; font-size:0.75rem;">RANGO DE EDADES</small>
-            <div style="font-size:0.78rem; font-weight:700; color:#334155; margin-top:6px; line-height:1.4;">
-                <div>0-17 años: <b id="crisat-ninos" style="color:#b45309;">0</b></div>
-                <div>18-59 años: <b id="crisat-adultos" style="color:#b45309;">0</b></div>
-                <div>60+ años: <b id="crisat-mayores" style="color:#b45309;">0</b></div>
-            </div>
-        </div>
+<!-- Distribución por Edades -->
+<div class="stat-box" style="border-top:3px solid #b45309; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04); text-align: center;">
+    <small style="color:#64748b; font-weight:700; font-size:0.75rem; display: block;">RANGO DE EDADES</small>
+    <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; justify-content: center;">
+        <span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">0-17: <b id="crisat-ninos">0</b></span>
+        <span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">18-59: <b id="crisat-adultos">0</b></span>
+        <span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">60+: <b id="crisat-mayores">0</b></span>
+    </div>
+</div>
     </div>
 
     <!-- Contenido de Listas -->
@@ -1114,7 +892,9 @@ window.reprocesarCrisat = function() {
     let adultos = 0;   // 18 a 59
     let mayores = 0;   // 60+
 
-    const porZona = {};
+    // Objetos separados para Colonias y Localidades
+    const porColonia = {};
+    const porLocalidad = {};
     const pacientesUnicosSet = new Set();
 
     datos.forEach(d => {
@@ -1144,10 +924,24 @@ window.reprocesarCrisat = function() {
             else mayores++;
         }
 
-        // Zonas
+        // ZONAS: Clasificación basada directamente en d.tipo_ubicacion ("COLONIA" / "LOCALIDAD")
         const zona = (d.col_loc || d.colonia || d.localidad || d.zona || d.comunidad || d.domicilio || 'CABECERA MUNICIPAL').trim().toUpperCase();
         const numTerapias = Number(d.terapias || d.sesiones || d.total_terapias || d.numTerapias || 1);
-        porZona[zona] = (porZona[zona] || 0) + (isNaN(numTerapias) ? 1 : numTerapias);
+        const cantidadTerapias = isNaN(numTerapias) ? 1 : numTerapias;
+        const tipoUbicacion = String(d.tipo_ubicacion || '').toUpperCase().trim();
+
+        if (tipoUbicacion === 'LOCALIDAD') {
+            porLocalidad[zona] = (porLocalidad[zona] || 0) + cantidadTerapias;
+        } else if (tipoUbicacion === 'COLONIA') {
+            porColonia[zona] = (porColonia[zona] || 0) + cantidadTerapias;
+        } else {
+            // Respaldos (Fallback) para registros antiguos sin el campo tipo_ubicacion
+            if (zona.includes('COL.') || zona.includes('COLONIA')) {
+                porColonia[zona] = (porColonia[zona] || 0) + cantidadTerapias;
+            } else {
+                porLocalidad[zona] = (porLocalidad[zona] || 0) + cantidadTerapias;
+            }
+        }
     });
 
     const setInner = (id, val) => {
@@ -1202,60 +996,37 @@ window.reprocesarCrisat = function() {
         }
     }
 
-// 2. Renderizar Zonas (Colonias y Localidades)
+    // 2. Renderizar Zonas (Colonias y Localidades)
 
-// Función auxiliar para renderizar cada columna
-function renderizarListaZona(idElemento, datos, icono) {
-    const elem = document.getElementById(idElemento);
-    if (!elem) return;
+    function renderizarListaZona(idElemento, datos, icono) {
+        const elem = document.getElementById(idElemento);
+        if (!elem) return;
 
-    if (!datos || Object.keys(datos).length === 0) {
-        elem.innerHTML = '<div style="padding:15px; color:#64748b; font-size:12px; text-align:center;">Sin registros</div>';
-        return;
-    }
-
-    let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
-    for (const [nombre, totalTerapias] of Object.entries(datos)) {
-        html += `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0; font-size:12px;">
-                <span style="font-weight:600; color:#1e293b;">
-                    <i class="fas ${icono}" style="color:#701a27; margin-right:5px;"></i>${nombre}
-                </span>
-                <span style="font-weight:800; color:#701a27; background:#fdf2f2; padding:2px 8px; border-radius:12px; font-size:11px; border:1px solid #fecdd3;">
-                    ${totalTerapias.toLocaleString()} ${totalTerapias === 1 ? 'terapia' : 'terapias'}
-                </span>
-            </div>`;
-    }
-    html += '</div>';
-    elem.innerHTML = html;
-}
-
-// Clasificación de datos
-let coloniasData = {};
-let localidadesData = {};
-
-// CASO A: Si ya tienes las variables 'porColonia' y 'porLocalidad' en tu script
-if (typeof porColonia !== 'undefined' && typeof porLocalidad !== 'undefined') {
-    coloniasData = porColonia;
-    localidadesData = porLocalidad;
-} 
-// CASO B: Si todo tu catálogo viene dentro de 'porZona', se clasifican automáticamente
-else if (typeof porZona !== 'undefined') {
-    for (const [zona, total] of Object.entries(porZona)) {
-        // Filtra por nombre (si dice "Col." o "Colonia" va a Colonias, de lo contrario a Localidades)
-        if (zona.toLowerCase().includes('col.') || zona.toLowerCase().includes('colonia')) {
-            coloniasData[zona] = total;
-        } else {
-            localidadesData[zona] = total;
+        if (!datos || Object.keys(datos).length === 0) {
+            elem.innerHTML = '<div style="padding:15px; color:#64748b; font-size:12px; text-align:center;">Sin registros</div>';
+            return;
         }
+
+        let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
+        for (const [nombre, totalTerapias] of Object.entries(datos)) {
+            html += `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0; font-size:12px;">
+                    <span style="font-weight:600; color:#1e293b;">
+                        <i class="fas ${icono}" style="color:#701a27; margin-right:5px;"></i>${nombre}
+                    </span>
+                    <span style="font-weight:800; color:#701a27; background:#fdf2f2; padding:2px 8px; border-radius:12px; font-size:11px; border:1px solid #fecdd3;">
+                        ${totalTerapias.toLocaleString()} ${totalTerapias === 1 ? 'terapia' : 'terapias'}
+                    </span>
+                </div>`;
+        }
+        html += '</div>';
+        elem.innerHTML = html;
     }
-}
 
-// Inyectar en cada columna respetando su id
-renderizarListaZona('crisat-list-colonias', coloniasData, 'fa-city');
-renderizarListaZona('crisat-list-localidades', localidadesData, 'fa-map-marker-alt');
+    // Inyectar en las dos columnas
+    renderizarListaZona('crisat-list-colonias', porColonia, 'fa-city');
+    renderizarListaZona('crisat-list-localidades', porLocalidad, 'fa-map-marker-alt');
 };
-
 // =============================================================================
 // FUNCIÓN PRINCIPAL DE PROCESAMIENTO RECOLECTOR
 // =============================================================================
@@ -1681,20 +1452,42 @@ window.reprocesarMedica = function() {
     if (document.getElementById('m-paga')) {
         document.getElementById('m-paga').innerText = contadorDePaga;
     }
-
-    // RENDERIZAR DESGLOSE DENTRO DEL STATBOX DE PAGA
+   // RENDERIZAR DESGLOSE DENTRO DEL STATBOX DE PAGA
     const contenedorDesgloseCosto = document.getElementById('m-paga-desglose');
     if (contenedorDesgloseCosto) {
         const itemsCosto = Object.entries(desglosesCosto).sort((a,b) => b[1] - a[1]);
+        
         if (itemsCosto.length === 0) {
-            contenedorDesgloseCosto.innerHTML = `<span style="color:#94a3b8;">Sin cobros</span>`;
+            contenedorDesgloseCosto.innerHTML = `<span style="color:#94a3b8; font-size:0.75rem; display:block; text-align:center;">Sin cobros</span>`;
         } else {
-            contenedorDesgloseCosto.innerHTML = itemsCosto.map(([costo, cant]) => `
-                <div style="display:flex; justify-content:space-between; align-items:center; color:#334155;">
-                    <span><b>${costo}</b></span>
-                    <span style="background:#e0f2fe; color:#0369a1; padding:0 6px; border-radius:10px; font-weight:bold;">${cant} pagados</span>
+            let sumaTotalGeneral = 0;
+
+            // 1. Generar cada fila multiplicando (cuota * cantidad)
+            const filasHTML = itemsCosto.map(([costo, cant]) => {
+                const valorNumerico = parseFloat(String(costo).replace(/[^0-9.-]+/g, '')) || 0;
+                const subtotal = valorNumerico * cant;
+                
+                sumaTotalGeneral += subtotal;
+
+                return `
+                    <div style="display:flex; justify-content:center; align-items:center; gap:6px; color:#334155; font-size:0.75rem; margin-bottom:2px;">
+                        <span><b>${cant}</b> × $${valorNumerico.toFixed(2)}</span>
+                        <span style="color:#94a3b8;">=</span>
+                        <span style="background:#e0f2fe; color:#0369a1; padding:1px 6px; border-radius:10px; font-weight:bold; font-size:0.70rem;">
+                            $${subtotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+
+            // 2. Fila final con la suma total en VERDE
+            const totalHTML = `
+                <div style="border-top:1px dashed #cbd5e1; margin-top:4px; padding-top:4px; text-align:center; color:#15803d; font-size:0.75rem; font-weight:bold;">
+                    Total: $${sumaTotalGeneral.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                 </div>
-            `).join('');
+            `;
+
+            contenedorDesgloseCosto.innerHTML = filasHTML + totalHTML;
         }
     }
 
