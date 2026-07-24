@@ -594,51 +594,94 @@
 </div>
 
 <div id="view-medica" class="view-container" style="display:none; padding: 20px;">
- <!-- Encabezado -->
-    <div class="access-card" style="background: var(--procu-color);"><div><i class="fas fa-stethoscope"></i> <b>Área Médica</b></div><a href="medica2.html" class="btn-open">Módulo</a></div>
-    <!-- KPIs -->
-    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0;">
-        <div class="stat-box" style="border-top:4px solid #0ea5e9; padding:15px; background:#fff; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-            <small style="color:#64748b; font-weight:bold;">TOTAL ATENCIONES</small>
-            <div id="m-total" style="font-size:2rem; font-weight:800; color:#0f172a;">0</div>
-        </div>
-        <div class="stat-box" style="border-top:4px solid #10b981; padding:15px; background:#fff; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-            <small style="color:#64748b; font-weight:bold;">INGRESO ESTIMADO</small>
-            <div id="m-ingreso" style="font-size:2rem; font-weight:800; color:#10b981;">$0</div>
-        </div>
-        <div class="stat-box" style="border-top:4px solid #f59e0b; padding:15px; background:#fff; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-            <small style="color:#64748b; font-weight:bold;">PENDIENTES (ENF)</small>
-            <div id="m-pendientes" style="font-size:2rem; font-weight:800; color:#f59e0b;">0</div>
-        </div>
-        <div class="stat-box" style="border-top:4px solid #8b5cf6; padding:15px; background:#fff; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-            <small style="color:#64748b; font-weight:bold;">POBLACIÓN MÁS ACTIVA</small>
-            <div id="m-pob-top" style="font-size:0.9rem; font-weight:800; color:#475569; margin-top:10px;">-</div>
-        </div>
+    <!-- Encabezado -->
+    <div class="access-card" style="background: var(--procu-color);">
+        <div><i class="fas fa-stethoscope"></i> <b>Área Médica</b></div>
+        <a href="medica2.html" class="btn-open">Módulo</a>
     </div>
-<!--paneles-->
-<div class="panel" style="padding: 15px; background: #fff; margin-top: 20px;">
-    <b><i class="fas fa-user-injured"></i> Registro Detallado de Pacientes</b>
-    <div id="m-tabla-datos" style="margin-top: 15px;">
-        </div>
-</div>
-    <!-- Analítica Combinada -->
-<div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:15px; margin-top: 15px;">
-    <!-- Gráficas existentes -->
-    <div class="panel" style="padding:15px; background:#fff; height: 220px;"><b>Género</b><canvas id="chart-genero"></canvas></div>
-    <div class="panel" style="padding:15px; background:#fff; height: 220px;"><b>Edades</b><canvas id="chart-edades"></canvas></div>
-    <div class="panel" style="padding:15px; background:#fff; height: 220px;"><b>Tipo Población</b><canvas id="chart-poblacion"></canvas></div>
-    <div class="panel" style="padding:15px; background:#fff; height: 220px;"><b>Zonas Principales</b><canvas id="chart-zonas"></canvas></div>
-    
-    <!-- Gráficas de Ganancias -->
-    <div class="panel" style="padding:15px; background:#fff; height: 220px;">
-        <b>Ganancias por Semana</b><canvas id="chart-ingresos"></canvas>
-    </div>
-    <div class="panel" style="padding:15px; background:#fff; height: 220px;">
-        <b>Incremento Semanal ($)</b><canvas id="chart-incremento"></canvas>
-    </div>
-</div>
-</div>
 
+    <!-- KPIs (7 Statboxes) -->
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 20px 0;">
+        <!-- 1. Total Atenciones -->
+        <div class="stat-box" style="border-top:4px solid #0ea5e9; padding:12px; background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <small style="color:#64748b; font-weight:bold; font-size:10px;">TOTAL ATENCIONES</small>
+            <div id="m-total" style="font-size:1.8rem; font-weight:800; color:#0f172a;">0</div>
+        </div>
+
+        <!-- 2. Ingreso Neto -->
+        <div class="stat-box" style="border-top:4px solid #10b981; padding:12px; background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <small style="color:#64748b; font-weight:bold; font-size:10px;">INGRESO NETO</small>
+            <div id="m-ingreso" style="font-size:1.8rem; font-weight:800; color:#10b981;">$0</div>
+        </div>
+
+        <!-- 3. Pendientes Enfermería -->
+        <div class="stat-box" style="border-top:4px solid #f59e0b; padding:12px; background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <small style="color:#64748b; font-weight:bold; font-size:10px;">PENDIENTES (ENF)</small>
+            <div id="m-pendientes" style="font-size:1.8rem; font-weight:800; color:#f59e0b;">0</div>
+        </div>
+
+        <!-- 4. Canceladas -->
+        <div class="stat-box" style="border-top:4px solid #ef4444; padding:12px; background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <small style="color:#64748b; font-weight:bold; font-size:10px;">CANCELADAS</small>
+            <div id="m-canceladas" style="font-size:1.8rem; font-weight:800; color:#ef4444;">0</div>
+        </div>
+    </div>
+
+        <!-- KPIs (7 Statboxes) -->
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 20px 0;">
+
+        <!-- 5. Statbox de Paga (Con desglose por tarifa) -->
+        <div class="stat-box" style="border-top:4px solid #06b6d4; padding:12px; background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <small style="color:#64748b; font-weight:bold; font-size:10px;">DE PAGA ($)</small>
+            <div id="m-paga" style="font-size:1.8rem; font-weight:800; color:#06b6d4;">0</div>
+            <!-- Lista desplegada de costos/tarifas -->
+            <div id="m-paga-desglose" style="margin-top: 6px; font-size: 11px; max-height: 70px; overflow-y: auto; border-top: 1px dashed #e2e8f0; padding-top: 4px;"></div>
+        </div>
+
+        <!-- 6. Gratuitas -->
+        <div class="stat-box" style="border-top:4px solid #14b8a6; padding:12px; background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <small style="color:#64748b; font-weight:bold; font-size:10px;">GRATUITAS / EXENTAS</small>
+            <div id="m-gratuitos" style="font-size:1.8rem; font-weight:800; color:#14b8a6;">0</div>
+        </div>
+
+        <!-- 7. Población Top -->
+        <div class="stat-box" style="border-top:4px solid #8b5cf6; padding:12px; background:#fff; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+            <small style="color:#64748b; font-weight:bold; font-size:10px;">POBLACIÓN TOP</small>
+            <div id="m-pob-top" style="font-size:0.85rem; font-weight:800; color:#475569; margin-top:8px; line-height:1.2;">-</div>
+        </div>
+    </div>
+
+    <!-- NUEVO: Paneles de Desglose (Categorías vs Tipos de Atención) -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px;">
+        <!-- Lista 1: Categorías Principales -->
+        <div class="panel" style="padding: 15px; background: #fff; border-radius: 6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <b style="color: #1e293b;"><i class="fas fa-layer-group" style="color:#0ea5e9;"></i> Categoría Principal</b>
+            <div id="m-desglose-categorias" style="margin-top: 10px; max-height: 200px; overflow-y: auto;"></div>
+        </div>
+
+        <!-- Lista 2: Tipos de Atención / Estudio -->
+        <div class="panel" style="padding: 15px; background: #fff; border-radius: 6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+            <b style="color: #1e293b;"><i class="fas fa-list-check" style="color:#10b981;"></i> Tipo de Atención / Estudio</b>
+            <div id="m-desglose-estudios" style="margin-top: 10px; max-height: 500px; overflow-y: auto;"></div>
+        </div>
+    </div>
+
+    <!-- Panel de Registro Detallado -->
+    <div class="panel" style="padding: 15px; background: #fff; margin-top: 20px; border-radius:6px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+        <b><i class="fas fa-user-injured" style="color:#0ea5e9;"></i> Registro Detallado de Pacientes</b>
+        <div id="m-tabla-datos" style="margin-top: 15px;"></div>
+    </div>
+
+    <!-- Analítica Combinada (Gráficos) -->
+    <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:15px; margin-top: 15px;">
+        <div class="panel" style="padding:15px; background:#fff; height: 220px; border-radius:6px;"><b>Género</b><canvas id="chart-genero"></canvas></div>
+        <div class="panel" style="padding:15px; background:#fff; height: 220px; border-radius:6px;"><b>Edades</b><canvas id="chart-edades"></canvas></div>
+        <div class="panel" style="padding:15px; background:#fff; height: 220px; border-radius:6px;"><b>Tipo Población</b><canvas id="chart-poblacion"></canvas></div>
+        <div class="panel" style="padding:15px; background:#fff; height: 220px; border-radius:6px;"><b>Zonas Principales</b><canvas id="chart-zonas"></canvas></div>
+        <div class="panel" style="padding:15px; background:#fff; height: 220px; border-radius:6px;"><b>Ganancias por Semana</b><canvas id="chart-ingresos"></canvas></div>
+        <div class="panel" style="padding:15px; background:#fff; height: 220px; border-radius:6px;"><b>Incremento Semanal ($)</b><canvas id="chart-incremento"></canvas></div>
+    </div>
+</div>
 <div id="view-psicologia" class="view-container" style="display:none;">
     <div class="access-card" style="background: var(--psico-color);">
         <div><b>Psicología</b></div>
@@ -686,21 +729,21 @@
     </div>
 </div>
 
-    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:15px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:30px;">
     <!-- Lista 1 -->
     <div class="panel">
         <b><i class="fas fa-user"></i> Pacientes Recientes</b>
-        <div id="p-list-pacientes" style="margin-top:10px;"></div>
+        <div id="p-list-pacientes" style="margin-top:15px;"></div>
     </div>
     <!-- Lista 2: Rangos de Edad -->
     <div class="panel">
         <b><i class="fas fa-list-ul"></i> ZONAS / Temas Frecuentes</b>
-        <div id="p-list-asuntos" style="margin-top:10px;"></div>
+        <div id="p-list-asuntos" style="margin-top:15px;"></div>
     </div>
     <!-- Lista 3: Asuntos (Motivos) y conteo -->
     <div class="panel">
         <b><i class="fas fa-child"></i> Rangos de Edad</b>
-        <div id="p-list-edades" style="margin-top:10px;"></div>
+        <div id="p-list-edades" style="margin-top:15px;"></div>
     </div>
     </div>  
 </div>
@@ -783,13 +826,38 @@
             <div id="crisat-list-pacientes" style="max-height:480px; overflow-y:auto; padding-right:5px;"></div>
         </div>
 
-        <!-- Lista 2: Zonas (Colonias / Localidades) y Contabilidad de Terapias -->
-        <div class="panel" style="background:#fff; padding:18px; border-radius:12px; border:1px solid #e2e8f0;">
-            <b style="color:#701a27; font-size:1rem; display:block; margin-bottom:12px;">
-                <i class="fas fa-map-marked-alt"></i> Terapias por Zonas (Colonias y Localidades)
-            </b>
-            <div id="crisat-list-geo" style="max-height:480px; overflow-y:auto; padding-right:5px;"></div>
+
+<!-- Lista 2: Zonas (Colonias y Localidades) -->
+<div class="panel" style="background:#fff; padding:18px; border-radius:12px; border:1px solid #e2e8f0;">
+    <b style="color:#701a27; font-size:1rem; display:block; margin-bottom:16px;">
+        <i class="fas fa-map-marked-alt"></i> Terapias por Zonas
+    </b>
+
+    <!-- Contenedor en Grid de 2 columnas -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+        
+        <!-- Columna 1: Colonias -->
+        <div>
+            <span style="color:#4a5568; font-weight:700; font-size:0.85rem; display:block; margin-bottom:8px;">
+                <i class="fas fa-city" style="color:#701a27; margin-right:4px;"></i> Colonias
+            </span>
+            <div id="crisat-list-colonias" style="max-height:440px; overflow-y:auto; padding-right:5px;"></div>
         </div>
+
+        <!-- Columna 2: Localidades -->
+        <div>
+            <span style="color:#4a5568; font-weight:700; font-size:0.85rem; display:block; margin-bottom:8px;">
+                <i class="fas fa-map-marker-alt" style="color:#701a27; margin-right:4px;"></i> Localidades
+            </span>
+            <div id="crisat-list-localidades" style="max-height:440px; overflow-y:auto; padding-right:5px;"></div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
     </div>
 </div>
 
@@ -1134,28 +1202,58 @@ window.reprocesarCrisat = function() {
         }
     }
 
-    // 2. Renderizar Zonas
-    const elemListGeo = document.getElementById('crisat-list-geo');
-    if (elemListGeo) {
-        if (Object.keys(porZona).length === 0) {
-            elemListGeo.innerHTML = '<div style="padding:15px; color:#64748b; font-size:13px; text-align:center;">No hay zonas registradas</div>';
+// 2. Renderizar Zonas (Colonias y Localidades)
+
+// Función auxiliar para renderizar cada columna
+function renderizarListaZona(idElemento, datos, icono) {
+    const elem = document.getElementById(idElemento);
+    if (!elem) return;
+
+    if (!datos || Object.keys(datos).length === 0) {
+        elem.innerHTML = '<div style="padding:15px; color:#64748b; font-size:12px; text-align:center;">Sin registros</div>';
+        return;
+    }
+
+    let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
+    for (const [nombre, totalTerapias] of Object.entries(datos)) {
+        html += `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0; font-size:12px;">
+                <span style="font-weight:600; color:#1e293b;">
+                    <i class="fas ${icono}" style="color:#701a27; margin-right:5px;"></i>${nombre}
+                </span>
+                <span style="font-weight:800; color:#701a27; background:#fdf2f2; padding:2px 8px; border-radius:12px; font-size:11px; border:1px solid #fecdd3;">
+                    ${totalTerapias.toLocaleString()} ${totalTerapias === 1 ? 'terapia' : 'terapias'}
+                </span>
+            </div>`;
+    }
+    html += '</div>';
+    elem.innerHTML = html;
+}
+
+// Clasificación de datos
+let coloniasData = {};
+let localidadesData = {};
+
+// CASO A: Si ya tienes las variables 'porColonia' y 'porLocalidad' en tu script
+if (typeof porColonia !== 'undefined' && typeof porLocalidad !== 'undefined') {
+    coloniasData = porColonia;
+    localidadesData = porLocalidad;
+} 
+// CASO B: Si todo tu catálogo viene dentro de 'porZona', se clasifican automáticamente
+else if (typeof porZona !== 'undefined') {
+    for (const [zona, total] of Object.entries(porZona)) {
+        // Filtra por nombre (si dice "Col." o "Colonia" va a Colonias, de lo contrario a Localidades)
+        if (zona.toLowerCase().includes('col.') || zona.toLowerCase().includes('colonia')) {
+            coloniasData[zona] = total;
         } else {
-            let htmlGeo = '<div style="display:flex; flex-direction:column; gap:8px;">';
-            for (const [zona, totalTerapias] of Object.entries(porZona)) {
-                htmlGeo += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0; font-size:13px;">
-                        <span style="font-weight:600; color:#1e293b;">
-                            <i class="fas fa-map-marker-alt" style="color:#701a27; margin-right:6px;"></i>${zona}
-                        </span>
-                        <span style="font-weight:800; color:#701a27; background:#fdf2f2; padding:3px 10px; border-radius:12px; font-size:12px; border:1px solid #fecdd3;">
-                            ${totalTerapias.toLocaleString()} ${totalTerapias === 1 ? 'terapia' : 'terapias'}
-                        </span>
-                    </div>`;
-            }
-            htmlGeo += '</div>';
-            elemListGeo.innerHTML = htmlGeo;
+            localidadesData[zona] = total;
         }
     }
+}
+
+// Inyectar en cada columna respetando su id
+renderizarListaZona('crisat-list-colonias', coloniasData, 'fa-city');
+renderizarListaZona('crisat-list-localidades', localidadesData, 'fa-map-marker-alt');
 };
 
 // =============================================================================
@@ -1457,19 +1555,38 @@ window.medicaCharts = {};
 // MÓDULO: ÁREA MÉDICA
 // =============================================================================
 window.reprocesarMedica = function() {
-    // Guarda defensiva: si el contenedor principal no existe en el DOM, no procesamos
     const tablaDatos = document.getElementById('m-tabla-datos');
     if (!tablaDatos) return;
 
     const data = store.medica || [];
-    
+
+    // Helper para detectar registros cancelados
+    const esCancelado = (d) => {
+        const estatus = (d.estatus || "").toLowerCase().trim();
+        const estado = (d.estado || "").toLowerCase().trim();
+        return estatus === 'cancelado' || estado === 'cancelado' || estado === 'cancelada';
+    };
+
     const stats = {
         genero: { 'HOMBRE': 0, 'MUJER': 0, 'SIN ESPECIFICAR': 0 },
         edades: { "0-17": 0, "18-35": 0, "36-55": 0, "56+": 0 },
-        poblacion: {}, zonas: {}, ingresosSemanales: {}
+        poblacion: {},
+        zonas: {},
+        ingresosSemanales: {}
     };
 
+    let contadorDePaga = 0;
+    let contadorGratuitos = 0;
+    
+    // Contadores para desgloses
+    const desglosesCosto = {};      // { "50": 12, "100": 5 }
+    const statsCategorias = {};     // { "CONSULTA MEDICA": 10 }
+    const statsEstudios = {};       // { "CERTIFICADO MEDICO": 8, "CURACION": 3 }
+
     data.forEach(d => {
+        const cancelado = esCancelado(d);
+
+        // 1. Estadísticas demográficas
         const g = (d.genero || "").toUpperCase().trim();
         if (g === 'MASCULINO' || g === 'HOMBRE') stats.genero['HOMBRE']++;
         else if (g === 'FEMENINO' || g === 'MUJER') stats.genero['MUJER']++;
@@ -1484,17 +1601,51 @@ window.reprocesarMedica = function() {
         const tipoPob = d.tipo_pob || "N/A";
         stats.poblacion[tipoPob] = (stats.poblacion[tipoPob] || 0) + 1;
         
-        const lugarRef = d.lugar || "SIN ZONA";
+        const lugarRef = d.lugar || d.procedencia || "SIN ZONA";
         stats.zonas[lugarRef] = (stats.zonas[lugarRef] || 0) + 1;
 
-        if (d.fecha_cap) {
-            const date = new Date(d.fecha_cap);
-            if (!isNaN(date)) {
-                const start = new Date(date.getFullYear(), 0, 1);
-                const dayOfYear = (date - start) / 86400000;
-                const week = Math.ceil((dayOfYear + start.getDay() + 1) / 7);
-                const label = `Sem ${week}`;
-                stats.ingresosSemanales[label] = (stats.ingresosSemanales[label] || 0) + (parseFloat(d.costo) || 0);
+        // 2. Conteo de Categorías y Tipos de Atención (Solo registros activos)
+        if (!cancelado) {
+            // Categoría Principal
+            const cat = d.consulta_estudios || 'SIN CATEGORÍA';
+            statsCategorias[cat] = (statsCategorias[cat] || 0) + 1;
+
+            // Tipo de Atención / Estudio (Soporta arreglos y texto separado por comas)
+            let estudios = d.tipo_estudio;
+            if (Array.isArray(estudios)) {
+                estudios.forEach(e => {
+                    const estNom = e ? e.trim() : 'SIN ESPECIFICAR';
+                    if (estNom) statsEstudios[estNom] = (statsEstudios[estNom] || 0) + 1;
+                });
+            } else if (typeof estudios === 'string' && estudios.trim() !== '') {
+                estudios.split(',').forEach(e => {
+                    const estNom = e.trim();
+                    if (estNom) statsEstudios[estNom] = (statsEstudios[estNom] || 0) + 1;
+                });
+            } else {
+                statsEstudios['SIN ESPECIFICAR'] = (statsEstudios['SIN ESPECIFICAR'] || 0) + 1;
+            }
+
+            // Costos / Tarifas
+            const costo = parseFloat(d.costo) || 0;
+            if (costo > 0) {
+                contadorDePaga++;
+                const keyCosto = `$${costo}`;
+                desglosesCosto[keyCosto] = (desglosesCosto[keyCosto] || 0) + 1;
+            } else {
+                contadorGratuitos++;
+            }
+
+            // Ingresos Semanales
+            if (d.fecha_cap) {
+                const date = new Date(d.fecha_cap);
+                if (!isNaN(date)) {
+                    const start = new Date(date.getFullYear(), 0, 1);
+                    const dayOfYear = (date - start) / 86400000;
+                    const week = Math.ceil((dayOfYear + start.getDay() + 1) / 7);
+                    const label = `Sem ${week}`;
+                    stats.ingresosSemanales[label] = (stats.ingresosSemanales[label] || 0) + costo;
+                }
             }
         }
     });
@@ -1508,39 +1659,127 @@ window.reprocesarMedica = function() {
         return stats.ingresosSemanales[sem] - stats.ingresosSemanales[semanasOrdenadas[i-1]];
     });
 
-    // Inyección segura de KPIs
-    if (document.getElementById('m-total')) document.getElementById('m-total').innerText = data.length;
+    // --- INYECCIÓN EN STATBOXES (KPIS) ---
+
+    if (document.getElementById('m-total')) {
+        document.getElementById('m-total').innerText = data.length;
+    }
+
     if (document.getElementById('m-ingreso')) {
-        const totalCosto = data.reduce((acc, d) => acc + (parseFloat(d.costo) || 0), 0);
-        document.getElementById('m-ingreso').innerText = `$${totalCosto.toLocaleString()}`;
+        const totalCosto = data.filter(d => !esCancelado(d)).reduce((acc, d) => acc + (parseFloat(d.costo) || 0), 0);
+        document.getElementById('m-ingreso').innerText = `$${totalCosto.toLocaleString('es-MX')}`;
     }
+
     if (document.getElementById('m-pendientes')) {
-        document.getElementById('m-pendientes').innerText = data.filter(d => d.estado === 'PENDIENTE_ENFERMERIA').length;
+        document.getElementById('m-pendientes').innerText = data.filter(d => d.estado === 'PENDIENTE_ENFERMERIA' && !esCancelado(d)).length;
     }
+
+    if (document.getElementById('m-canceladas')) {
+        document.getElementById('m-canceladas').innerText = data.filter(esCancelado).length;
+    }
+
+    if (document.getElementById('m-paga')) {
+        document.getElementById('m-paga').innerText = contadorDePaga;
+    }
+
+    // RENDERIZAR DESGLOSE DENTRO DEL STATBOX DE PAGA
+    const contenedorDesgloseCosto = document.getElementById('m-paga-desglose');
+    if (contenedorDesgloseCosto) {
+        const itemsCosto = Object.entries(desglosesCosto).sort((a,b) => b[1] - a[1]);
+        if (itemsCosto.length === 0) {
+            contenedorDesgloseCosto.innerHTML = `<span style="color:#94a3b8;">Sin cobros</span>`;
+        } else {
+            contenedorDesgloseCosto.innerHTML = itemsCosto.map(([costo, cant]) => `
+                <div style="display:flex; justify-content:space-between; align-items:center; color:#334155;">
+                    <span><b>${costo}</b></span>
+                    <span style="background:#e0f2fe; color:#0369a1; padding:0 6px; border-radius:10px; font-weight:bold;">${cant} pagados</span>
+                </div>
+            `).join('');
+        }
+    }
+
+    if (document.getElementById('m-gratuitos')) {
+        document.getElementById('m-gratuitos').innerText = contadorGratuitos;
+    }
+
     if (document.getElementById('m-pob-top')) {
         const topPob = Object.entries(stats.poblacion).sort((a,b) => b[1] - a[1])[0];
         document.getElementById('m-pob-top').innerText = topPob ? `${topPob[0]} (${topPob[1]})` : "-";
     }
 
-    // Renderizar Tabla de Detalle
-    tablaDatos.innerHTML = data.map(d => `
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 12px;">
-            <div>
-                <div style="font-weight: bold; color: #0ea5e9;">${d.nombre || 'Sin nombre'}</div>
-                <div style="color: #64748b;">Edad: ${d.edad || '-'} | Género: ${d.genero || '-'}</div>
-                <div style="font-size: 11px;">Pob: ${d.tipo_pob || '-'}</div>
-            </div>
-            <div style="border-left: 1px solid #f1f5f9; padding-left: 10px;">
-                <div style="font-weight: 600;">Cat: ${d.consulta_estudios || '-'}</div>
-                <div style="font-size: 11px;">Atención: ${d.tipo_estudio || '-'}</div>
-                <div style="font-size: 11px; color: #64748b;">Dep: ${d.dependencia || '-'}</div>
-                <div style="font-size: 11px;">Fecha: ${d.fecha_cap || '-'}</div>
-                <div style="font-size: 11px; color: #64748b;">$: ${d.costo || 'NA'}</div>
-            </div>
-        </div>
-    `).join('');
+    // --- RENDERIZAR LISTA 1: CATEGORÍAS PRINCIPALES ---
+    const divCategorias = document.getElementById('m-desglose-categorias');
+    if (divCategorias) {
+        const catOrdenadas = Object.entries(statsCategorias).sort((a, b) => b[1] - a[1]);
+        if (catOrdenadas.length === 0) {
+            divCategorias.innerHTML = `<small style="color:#94a3b8;">Sin datos disponibles</small>`;
+        } else {
+            divCategorias.innerHTML = catOrdenadas.map(([cat, total]) => `
+                <div style="display:flex; justify-content:space-between; padding: 6px 0; border-bottom:1px solid #f1f5f9; font-size:12px;">
+                    <span style="color:#334155; font-weight:600;">${cat}</span>
+                    <span style="background:#e0f2fe; color:#0284c7; padding:2px 8px; border-radius:12px; font-weight:bold;">${total}</span>
+                </div>
+            `).join('');
+        }
+    }
 
-    // Configuración y Renderizado de Gráficos usando el mapa global seguro
+    // --- RENDERIZAR LISTA 2: TIPOS DE ATENCIÓN / ESTUDIO ---
+    const divEstudios = document.getElementById('m-desglose-estudios');
+    if (divEstudios) {
+        const estOrdenados = Object.entries(statsEstudios).sort((a, b) => b[1] - a[1]);
+        if (estOrdenados.length === 0) {
+            divEstudios.innerHTML = `<small style="color:#94a3b8;">Sin datos disponibles</small>`;
+        } else {
+            divEstudios.innerHTML = estOrdenados.map(([est, total]) => `
+                <div style="display:flex; justify-content:space-between; padding: 6px 0; border-bottom:1px solid #f1f5f9; font-size:12px;">
+                    <span style="color:#334155;">${est}</span>
+                    <span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:12px; font-weight:bold;">${total}</span>
+                </div>
+            `).join('');
+        }
+    }
+
+    // --- RENDERIZADO DE TABLA DETALLADA ---
+    tablaDatos.innerHTML = data.map(d => {
+        const cancelado = esCancelado(d);
+        const txtAtencion = Array.isArray(d.tipo_estudio) ? d.tipo_estudio.join(', ') : (d.tipo_estudio || '-');
+
+        let badgeEstatus = `<span style="color:#0284c7; font-weight:bold; font-size:10px;">🩺 EN ESPERA</span>`;
+        if (d.estado === 'ATENDIDO') {
+            badgeEstatus = `<span style="color:#16a34a; font-weight:bold; font-size:10px;">✅ ATENDIDO</span>`;
+        }
+        if (cancelado) {
+            badgeEstatus = `<span style="color:#dc3545; font-weight:bold; font-size:10px; background:#fee2e2; padding:2px 6px; border-radius:4px;">⛔ CANCELADO</span>`;
+        }
+
+        return `
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 12px; align-items: start; ${cancelado ? 'background-color: #fff5f5;' : ''}">
+                <div>
+                    <div style="font-weight: bold; color: #0ea5e9;">${d.nombre || 'Sin nombre'}</div>
+                    <div style="color: #64748b;">Edad: ${d.edad || '-'} | Género: ${d.genero || '-'}</div>
+                    <div style="font-size: 11px;">Pob: <b>${d.tipo_pob || '-'}</b></div>
+                </div>
+                
+                <div style="border-left: 1px solid #f1f5f9; padding-left: 10px;">
+                    <div style="font-weight: 600; color: #334155;"><i class="fas fa-map-marker-alt" style="color:#ef4444; font-size:10px;"></i> Procedencia:</div>
+                    <div style="font-size: 11px; font-weight: 700; color: #0f172a;">${d.lugar || d.procedencia || 'Sin especificar'}</div>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 2px;">Dep: ${d.dependencia || '-'}</div>
+                </div>
+
+                <div style="border-left: 1px solid #f1f5f9; padding-left: 10px;">
+                    <div style="margin-bottom: 4px;">${badgeEstatus}</div>
+                    <div style="font-weight: 600;">Cat: ${d.consulta_estudios || '-'}</div>
+                    <div style="font-size: 11px; color: #334155;">Atención: ${txtAtencion}</div>
+                    <div style="font-size: 11px; color: #64748b;">Fecha: ${d.fecha_cap || '-'}</div>
+                    <div style="font-size: 11px; font-weight: bold; color: ${cancelado ? '#dc3545' : '#10b981'}; ${cancelado ? 'text-decoration: line-through;' : ''}">
+                        Monto: $${d.costo || '0'}
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    // --- RENDERIZADO DE GRÁFICOS ---
     const configs = [
         { id: 'chart-genero', key: 'chartGen', type: 'doughnut', labels: Object.keys(stats.genero), values: Object.values(stats.genero), color: ['#3b82f6', '#ec4899', '#94a3b8'] },
         { id: 'chart-edades', key: 'chartEdad', type: 'bar', labels: Object.keys(stats.edades), values: Object.values(stats.edades), color: '#f59e0b' },
@@ -1552,12 +1791,14 @@ window.reprocesarMedica = function() {
 
     configs.forEach(cfg => {
         const canvas = document.getElementById(cfg.id);
-        if (!canvas) return; // Si el canvas no está en el DOM actual, saltamos de forma segura
+        if (!canvas) return;
 
-        if (window.medicaCharts[cfg.key]) {
+        if (window.medicaCharts && window.medicaCharts[cfg.key]) {
             window.medicaCharts[cfg.key].destroy();
         }
         
+        if (!window.medicaCharts) window.medicaCharts = {};
+
         window.medicaCharts[cfg.key] = new Chart(canvas, {
             type: cfg.type,
             data: { labels: cfg.labels, datasets: [{ data: cfg.values, backgroundColor: cfg.color, borderColor: cfg.color, fill: cfg.type === 'line', tension: 0.3, borderRadius: cfg.type === 'bar' ? 6 : 0 }] },
@@ -1565,7 +1806,6 @@ window.reprocesarMedica = function() {
         });
     });
 };
-
 // =============================================================================
 // MÓDULO: PSICOLOGÍA
 // =============================================================================
