@@ -141,9 +141,8 @@
                     <option value="FALTÓ">Faltó</option>
                 </select>
             </div>
-            <div class="field"><label>Cuota ($)</label><input type="number" id="cuota" value="0" step="0.01"></div>
-            <div class="field">
-                <label>Terapeuta</label>
+            <div class="field"><label>Cuota ($) *</label><input type="number" id="cuota" placeholder="0.00" step="0.01" required></div>
+            <div class="field"><label>Terapeuta</label>
                 <select id="nombre_terapeuta">
                     <option value="">-- SELECCIONE --</option>
                     <option value="Nelly">Nelly</option>
@@ -416,6 +415,7 @@
     // --- NOTIFICACIONES Y MODALES ---
     window.mostrarToast = (mensaje, tipo = 'info') => {
         const container = document.getElementById('toastContainer');
+        if (!container) return;
         const toast = document.createElement('div');
         toast.className = `toast toast-${tipo}`;
         
@@ -526,10 +526,16 @@
         document.getElementById('editId').value = "";
         document.getElementById('fecha_captura').value = window.obtenerFechaLocal();
         document.getElementById('municipio').value = "SAN ANDRÉS TUXTLA";
-        document.getElementById('cuota').value = "0";
+        
+        // Dejar cuota vacía para obligar al usuario a ingresarla
+        const inputCuota = document.getElementById('cuota');
+        if (inputCuota) {
+            inputCuota.value = "";
+            inputCuota.style.borderColor = "#d1d5db";
+        }
+        
         document.getElementById('edad').value = "";
 
-        // Reset explícito del campo de fechas masivas
         const elMasiva = document.getElementById('masiva_fechas');
         if (elMasiva) elMasiva.value = "";
 
@@ -628,6 +634,7 @@
         try {
             document.getElementById('fecha_captura').value = window.obtenerFechaLocal();
             
+            // 1. VALIDACIÓN DE CAMPOS TEXTO OBLIGATORIOS
             const camposRequeridos = {
                 'fecha_cita': 'Fecha de la Cita',
                 'nombre': 'Nombre del Paciente',
@@ -643,6 +650,21 @@
                     if (el) el.focus();
                     return;
                 }
+            }
+
+            // 2. VALIDACIÓN DE CUOTA OBLIGATORIA
+            const inputCuota = document.getElementById('cuota');
+            const valorCuota = inputCuota ? inputCuota.value.trim() : '';
+
+            if (valorCuota === "" || isNaN(parseFloat(valorCuota))) {
+                window.mostrarToast("⚠️ El campo 'Cuota ($)' es requerido para continuar.", "danger");
+                if (inputCuota) {
+                    inputCuota.style.borderColor = "var(--danger)";
+                    inputCuota.focus();
+                }
+                return;
+            } else if (inputCuota) {
+                inputCuota.style.borderColor = "#d1d5db";
             }
 
             const idActual = document.getElementById('editId').value;
@@ -728,7 +750,13 @@
         document.getElementById('estatus').value = r.estatus || "PENDIENTE";
         document.getElementById('estatus_expediente').value = r.estatus_expediente || "EN TRATAMIENTO";
         document.getElementById('expediente').value = r.expediente || "";
-        document.getElementById('cuota').value = r.monto || 0;
+        
+        const inputCuota = document.getElementById('cuota');
+        if (inputCuota) {
+            inputCuota.value = r.monto !== undefined ? r.monto : "";
+            inputCuota.style.borderColor = "#d1d5db";
+        }
+
         document.getElementById('diagnostico').value = r.diagnostico || "";
         document.getElementById('municipio').value = r.localidad || "SAN ANDRÉS TUXTLA";
         document.getElementById('sexo').value = r.sexo || "H";
@@ -842,7 +870,7 @@
                 window.mostrarToast("Faltas justificadas correctamente.", "success");
             } else if (accion === 'REINGRESAR') {
                 registrosPaciente.forEach(r => {
-                    const docRef = doc(docRef, "registros_generales", r.id);
+                    const docRef = doc(db, "registros_generales", r.id);
                     batch.update(docRef, { estatus_expediente: "EN TRATAMIENTO" });
                 });
                 window.mostrarToast("Paciente reingresado. Expediente reactivado.", "success");
@@ -912,12 +940,10 @@
         if (registrosPagina.length === 0) {
             cuerpo.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 25px; color:#64748b;">No se encontraron registros coincidentes.</td></tr>`;
         } else {
-            // Acumulación de cadenas para evitar re-renders repetidos en el DOM
             let htmlFilas = "";
 
             registrosPagina.forEach((r) => {
                 const fechaCita = new Date((r.fecha_ISO || window.obtenerFechaLocal()) + "T00:00:00");
-                // Math.round corrige el desfasamiento por horario de verano/zonas horarias
                 const diferenciaDias = Math.round((fechaCita - hoy) / (1000 * 60 * 60 * 24));
                 const faltasRacha = calcularFaltasConsecutivas(r.expediente);
                 
@@ -983,7 +1009,6 @@
                 </tr>`;
             });
 
-            // Inyección única al DOM
             cuerpo.innerHTML = htmlFilas;
         }
 
@@ -1012,7 +1037,6 @@
 
     // --- INICIALIZACIÓN DE EVENTOS ---
     document.addEventListener('DOMContentLoaded', () => {
-        // Asignación al evento SUBMIT del formulario para evitar recargas accidentales con Enter
         const formCrisat = document.getElementById('formCrisat');
         if (formCrisat) {
             formCrisat.addEventListener('submit', procesarFormulario);
