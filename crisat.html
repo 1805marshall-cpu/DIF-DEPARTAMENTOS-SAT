@@ -519,33 +519,62 @@
         if (box) box.style.display = (document.getElementById("estatus")?.value === "FALTÓ") ? "block" : "none";
     };
 
-    window.limpiarFormulario = () => {
-        const form = document.getElementById('formCrisat');
-        if (form) form.reset();
+window.limpiarFormulario = () => {
+    // 1. Reset básico de HTML
+    const form = document.getElementById('formCrisat');
+    if (form) form.reset();
 
-        document.getElementById('editId').value = "";
-        document.getElementById('fecha_captura').value = window.obtenerFechaLocal();
-        document.getElementById('municipio').value = "SAN ANDRÉS TUXTLA";
-        
-        // Dejar cuota vacía para obligar al usuario a ingresarla
-        const inputCuota = document.getElementById('cuota');
-        if (inputCuota) {
-            inputCuota.value = "";
-            inputCuota.style.borderColor = "#d1d5db";
+    // 2. Vaciar explícitamente todos los campos de texto, números y fechas
+    const camposAVaciar = [
+        'editId', 'nombre', 'curp', 'expediente', 'fecha_cita', 'hora_cita', 
+        'cuota', 'diagnostico', 'telefono', 'direccion', 'col_loc', 
+        'fecha_nacimiento', 'lugar_nacimiento', 'escolaridad', 'ocupacion', 
+        'edad', 'motivo_justificacion', 'masiva_fechas'
+    ];
+
+    camposAVaciar.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.value = "";
+            el.style.borderColor = "#d1d5db"; // Restaurar borde normal en caso de haber tenido error
         }
-        
-        document.getElementById('edad').value = "";
+    });
 
-        const elMasiva = document.getElementById('masiva_fechas');
-        if (elMasiva) elMasiva.value = "";
-
-        document.querySelectorAll('.check-serv').forEach(cb => cb.checked = false);
-        document.querySelectorAll('.chk-dia').forEach(cb => cb.checked = false);
-        const radioCol = document.querySelector('input[name="tipo_ubicacion"][value="COLONIA"]');
-        if (radioCol) radioCol.checked = true;
-        window.toggleCamposEspeciales();
-        window.mostrarToast("Formulario listo para un nuevo registro.", "info");
+    // 3. Restablecer Selects a sus valores iniciales/predeterminados
+    const selectsPredeterminados = {
+        'nombre_terapeuta': '',
+        'estatus': 'PENDIENTE',
+        'estatus_expediente': 'EN TRATAMIENTO',
+        'sexo': 'H',
+        'municipio': 'SAN ANDRÉS TUXTLA',
+        'discapacidad': 'no',
+        'tipo_discapacidad': 'MOTORA',
+        'grado': 'LEVE',
+        'duracion': 'TEMPORAL'
     };
+
+    for (const [id, valorDefecto] of Object.entries(selectsPredeterminados)) {
+        const el = document.getElementById(id);
+        if (el) el.value = valorDefecto;
+    }
+
+    // 4. Asegurar la fecha de captura al día actual
+    const elFechaCaptura = document.getElementById('fecha_captura');
+    if (elFechaCaptura) elFechaCaptura.value = window.obtenerFechaLocal();
+
+    // 5. Desmarcar todas las casillas (terapias/servicios y días de atención)
+    document.querySelectorAll('.check-serv, .chk-dia').forEach(cb => cb.checked = false);
+
+    // 6. Restablecer la selección de ubicación a "COLONIA"
+    const radioCol = document.querySelector('input[name="tipo_ubicacion"][value="COLONIA"]');
+    if (radioCol) radioCol.checked = true;
+
+    // 7. Ocultar el cuadro de justificación si estaba visible
+    window.toggleCamposEspeciales();
+
+    // 8. Notificar al usuario
+    window.mostrarToast("Formulario vaciado y listo para una nueva captura.", "info");
+};
 
     function calcularProximaFechaCita(fechaBaseStr, diasSeleccionados) {
         if (!fechaBaseStr) fechaBaseStr = window.obtenerFechaLocal();
@@ -577,46 +606,6 @@
         let mm = String(fecha.getMonth() + 1).padStart(2, '0');
         let dd = String(fecha.getDate()).padStart(2, '0');
         return `${yyyy}-${mm}-${dd}`;
-    }
-
-    // --- PROCESAMIENTO Y GUARDADO ---
-    function obtenerDatosFormulario() {
-        const servicios = [...document.querySelectorAll('.check-serv:checked')].map(c => c.value).join(', ');
-        const dias = [...document.querySelectorAll('.chk-dia:checked')].map(c => c.value);
-        const radioUbicacion = document.querySelector('input[name="tipo_ubicacion"]:checked');
-
-        return {
-            tipo_ubicacion: radioUbicacion ? radioUbicacion.value : "COLONIA",
-            col_loc: (document.getElementById('col_loc')?.value || "").toUpperCase(),
-            fecha_captura: document.getElementById('fecha_captura')?.value || window.obtenerFechaLocal(),
-            curp: (document.getElementById('curp')?.value || "").toUpperCase(),
-            nombre_terapeuta: (document.getElementById('nombre_terapeuta')?.value || "").toUpperCase(),
-            telefono: document.getElementById('telefono')?.value || "",
-            nombre_paciente: (document.getElementById('nombre')?.value || "").toUpperCase(),
-            hora: document.getElementById('hora_cita')?.value || "",
-            estatus: document.getElementById('estatus')?.value || "PENDIENTE",
-            estatus_expediente: document.getElementById('estatus_expediente')?.value || "EN TRATAMIENTO",
-            dias_atencion: dias,
-            justificacion: (document.getElementById('motivo_justificacion')?.value || "").toUpperCase(),
-            expediente: (document.getElementById('expediente')?.value || "").toUpperCase(),
-            monto: parseFloat(document.getElementById('cuota')?.value || 0),
-            servicio: servicios,
-            diagnostico: (document.getElementById('diagnostico')?.value || "").toUpperCase(),
-            departamento: "CRISAT",
-            localidad: (document.getElementById('municipio')?.value || "SAN ANDRÉS TUXTLA").toUpperCase(),
-            sexo: document.getElementById('sexo')?.value || "H",
-            fecha_nacimiento: document.getElementById('fecha_nacimiento')?.value || "",
-            lugar_nacimiento: (document.getElementById('lugar_nacimiento')?.value || "").toUpperCase(),
-            escolaridad: (document.getElementById('escolaridad')?.value || "").toUpperCase(),
-            ocupacion: (document.getElementById('ocupacion')?.value || "").toUpperCase(),
-            edad: document.getElementById('edad')?.value || "",
-            direccion: (document.getElementById('direccion')?.value || "").toUpperCase(),
-            discapacidad: document.getElementById('discapacidad')?.value || "no",
-            tipo_discapacidad: document.getElementById('tipo_discapacidad')?.value || "MOTORA",
-            grado: document.getElementById('grado')?.value || "LEVE",
-            duracion: document.getElementById('duracion')?.value || "TEMPORAL",
-            timestamp: serverTimestamp()
-        };
     }
 
     async function procesarFormulario(e) {
@@ -687,6 +676,7 @@
                 }
             }
 
+            // GUARDAR O ACTUALIZAR
             if (idActual) {
                 await updateDoc(doc(db, "registros_generales", idActual), { ...datos, fecha_ISO: fechaCitaIndividual });
                 window.mostrarToast("Registro actualizado correctamente.", "success");
@@ -700,6 +690,7 @@
                 window.mostrarToast(`¡Éxito! Se registraron ${listaFechas.length} cita(s).`, "success");
             }
 
+            // REPROGRAMACIÓN DE PRÓXIMA CITA (SI APLICA)
             if ((datos.estatus === "ASISTIÓ" || datos.estatus === "FALTÓ") && datos.estatus_expediente === "EN TRATAMIENTO") {
                 const proximaFechaCalculada = calcularProximaFechaCita(fechaCitaIndividual, datos.dias_atencion);
                 const textoAccion = datos.estatus === "ASISTIÓ" ? "ASISTIÓ a" : "FALTÓ a";
@@ -724,15 +715,19 @@
                 }
             }
 
+            // --- AQUÍ VA: LIMPIEZA AUTOMÁTICA DEL FORMULARIO ---
+            // Se ejecuta cuando TODO el proceso guardó correctamente
             window.limpiarFormulario();
+
         } catch (e) { 
             console.error(e);
             window.mostrarToast("Error al procesar: " + e.message, "danger"); 
         } finally { 
+            // Restaurar estado del botón y liberar bandera de guardado
             guardando = false;
             if (btn) {
-                btn.disabled = false; 
-                btn.innerHTML = '<i class="fas fa-save"></i> Guardar y Sincronizar'; 
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save"></i> Guardar y Sincronizar';
             }
         }
     }
