@@ -110,84 +110,83 @@
     <form id="formCrisat">
         <input type="hidden" id="editId" value="">
         
-    <fieldset>
-    <legend><i class="fas fa-calendar-check"></i> Control de Cita y Frecuencia</legend>
-    <div class="field"><label>Fecha Captura</label><input type="date" id="fecha_captura" readonly></div>
-    <div class="field"><label>Fecha Cita *</label><input type="date" id="fecha_cita" required></div>
-    
-    <!-- Selector de hora exacta (08:00 a 16:00) sin minutos ni AM/PM -->
-    <div class="field">
-        <label>Hora Cita *</label>
-        <select id="hora_cita" required>
-            <option value="">-- HORA --</option>
-            <option value="08:00">08:00 hrs</option>
-            <option value="09:00">09:00 hrs</option>
-            <option value="10:00">10:00 hrs</option>
-            <option value="11:00">11:00 hrs</option>
-            <option value="12:00">12:00 hrs</option>
-            <option value="13:00">13:00 hrs</option>
-            <option value="14:00">14:00 hrs</option>
-            <option value="15:00">15:00 hrs</option>
-            <option value="16:00">16:00 hrs</option>
-        </select>
-    </div>
-    
-    <div class="field"><label>No. Expediente *</label><input type="text" id="expediente" placeholder="CR-000"></div>
-    <div class="field">
-        <label>Estatus Cita</label>
-        <select id="estatus" onchange="window.toggleCamposEspeciales()">
-            <option value="PENDIENTE">Pendiente</option>
-            <option value="ASISTIÓ">Asistió</option>
-            <option value="FALTÓ">Faltó</option>
-        </select>
-    </div>
-    <div class="field"><label>Cuota ($)</label><input type="number" id="cuota" value="0" step="0.01"></div>
-    <div class="field">
-        <label>Terapeuta</label>
-        <select id="nombre_terapeuta">
-            <option value="">-- SELECCIONE --</option>
-            <option value="Nelly">Nelly</option>
-            <option value="Pamela">Pamela</option>
-            <option value="Oscar">Oscar</option>
-            <option value="Gena">Gena</option>
-            <option value="Luis">Luis</option>
-            <option value="Javier">Javier</option>
-        </select>
-    </div>
-    <div class="field">
-        <label>Estatus Expediente</label>
-        <select id="estatus_expediente">
-            <option value="EN TRATAMIENTO">🟢 En Tratamiento</option>
-            <option value="ALTA MÉDICA">🔵 Alta Médica</option>
-            <option value="BAJA POR INASISTENCIA">🔴 Baja por Inasistencia</option>
-        </select>
-    </div>
+        <fieldset>
+            <legend><i class="fas fa-calendar-check"></i> Control de Cita y Frecuencia</legend>
+            <div class="field"><label>Fecha Captura</label><input type="date" id="fecha_captura" readonly></div>
+            <div class="field"><label>Fecha Cita *</label><input type="date" id="fecha_cita" required></div>
+            
+            <!-- Selector de hora exacta (08:00 a 16:00) -->
+            <div class="field">
+                <label>Hora Cita *</label>
+                <select id="hora_cita" required>
+                    <option value="">-- HORA --</option>
+                    <option value="08:00">08:00 hrs</option>
+                    <option value="09:00">09:00 hrs</option>
+                    <option value="10:00">10:00 hrs</option>
+                    <option value="11:00">11:00 hrs</option>
+                    <option value="12:00">12:00 hrs</option>
+                    <option value="13:00">13:00 hrs</option>
+                    <option value="14:00">14:00 hrs</option>
+                    <option value="15:00">15:00 hrs</option>
+                    <option value="16:00">16:00 hrs</option>
+                </select>
+            </div>
+            
+            <div class="field"><label>No. Expediente *</label><input type="text" id="expediente" placeholder="CR-000"></div>
+            <div class="field">
+                <label>Estatus Cita</label>
+                <select id="estatus" onchange="window.toggleCamposEspeciales()">
+                    <option value="PENDIENTE">Pendiente</option>
+                    <option value="ASISTIÓ">Asistió</option>
+                    <option value="FALTÓ">Faltó</option>
+                </select>
+            </div>
+            <div class="field"><label>Cuota ($)</label><input type="number" id="cuota" value="0" step="0.01"></div>
+            <div class="field">
+                <label>Terapeuta</label>
+                <select id="nombre_terapeuta">
+                    <option value="">-- SELECCIONE --</option>
+                    <option value="Nelly">Nelly</option>
+                    <option value="Pamela">Pamela</option>
+                    <option value="Oscar">Oscar</option>
+                    <option value="Gena">Gena</option>
+                    <option value="Luis">Luis</option>
+                    <option value="Javier">Javier</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Estatus Expediente</label>
+                <select id="estatus_expediente">
+                    <option value="EN TRATAMIENTO">🟢 En Tratamiento</option>
+                    <option value="ALTA MÉDICA">🔵 Alta Médica</option>
+                    <option value="BAJA POR INASISTENCIA">🔴 Baja por Inasistencia</option>
+                </select>
+            </div>
 
-    <div class="field span-2">
-        <label>Días Habituales de Atención:</label>
-        <div class="dias-box">
-            <label><input type="checkbox" class="chk-dia" value="1"> Lun</label>
-            <label><input type="checkbox" class="chk-dia" value="2"> Mar</label>
-            <label><input type="checkbox" class="chk-dia" value="3"> Mié</label>
-            <label><input type="checkbox" class="chk-dia" value="4"> Jue</label>
-            <label><input type="checkbox" class="chk-dia" value="5"> Vie</label>
-        </div>
-    </div>
+            <div class="field span-2">
+                <label>Días Habituales de Atención:</label>
+                <div class="dias-box">
+                    <label><input type="checkbox" class="chk-dia" value="1"> Lun</label>
+                    <label><input type="checkbox" class="chk-dia" value="2"> Mar</label>
+                    <label><input type="checkbox" class="chk-dia" value="3"> Mié</label>
+                    <label><input type="checkbox" class="chk-dia" value="4"> Jue</label>
+                    <label><input type="checkbox" class="chk-dia" value="5"> Vie</label>
+                </div>
+            </div>
 
-    <div class="field span-2" id="box_justificante" style="display: none;">
-        <label style="color: var(--danger);">Justificación de Falta:</label>
-        <input type="text" id="motivo_justificacion" placeholder="Escriba la causa de la inasistencia...">
-    </div>
+            <div class="field span-2" id="box_justificante" style="display: none;">
+                <label style="color: var(--danger);">Justificación de Falta:</label>
+                <input type="text" id="motivo_justificacion" placeholder="Escriba la causa de la inasistencia...">
+            </div>
         </fieldset>
         
-<fieldset>
+        <fieldset>
             <legend><i class="fas fa-user-injured"></i> Datos Personales</legend>
             <div class="field span-2"><label>CURP</label><input type="text" id="curp" style="text-transform:uppercase;"></div>
             <div class="field span-2"><label>Nombre del Paciente *</label><input type="text" id="nombre" required></div>
             <div class="field"><label>Sexo</label><select id="sexo"><option value="H">Hombre</option><option value="M">Mujer</option></select></div>
             <div class="field"><label>F. Nacimiento</label><input type="date" id="fecha_nacimiento" onchange="window.calcularEdad()"></div>
             
-            <!-- NUEVOS CAMPOS AGREGADOS -->
             <div class="field"><label>Lugar de Nacimiento</label><input type="text" id="lugar_nacimiento" style="text-transform:uppercase;"></div>
             <div class="field"><label>Escolaridad</label><input type="text" id="escolaridad" style="text-transform:uppercase;"></div>
             <div class="field"><label>Ocupación</label><input type="text" id="ocupacion" style="text-transform:uppercase;"></div>
@@ -224,7 +223,7 @@
         </fieldset>
 
         <fieldset>
-            <legend><i class="fas fa-hand-holding-medical"></i> Plan de Tratamiento (Evolución Clinica)</legend>
+            <legend><i class="fas fa-hand-holding-medical"></i> Plan de Tratamiento (Evolución Clínica)</legend>
             <div class="services-container">
                 <div class="checkbox-item"><input type="checkbox" class="check-serv" value="HIDROTERAPIA"><label>Hidroterapia</label></div>
                 <div class="checkbox-item"><input type="checkbox" class="check-serv" value="MECANOTERAPIA"><label>Mecanoterapia</label></div>
@@ -244,7 +243,8 @@
 
         <!-- BOTONES: GUARDAR Y LIMPIAR -->
         <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
-            <button type="button" class="btn-save" id="btnGuardar" style="flex: 2; min-width: 200px;">
+            <!-- type="submit" para activar la validación y el evento submit del JS -->
+            <button type="submit" class="btn-save" id="btnGuardar" style="flex: 2; min-width: 200px;">
                 <i class="fas fa-save"></i> Guardar y Sincronizar
             </button>
             <button type="button" onclick="window.limpiarFormulario()" style="flex: 1; min-width: 150px; background: #64748b; color: white; border: none; padding: 16px; border-radius: 8px; font-weight: 800; cursor: pointer; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s;" onmouseover="this.style.background='#475569'" onmouseout="this.style.background='#64748b'">
