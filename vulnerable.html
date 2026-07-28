@@ -52,7 +52,104 @@
         { background: #e2e8f0 !important; color: #475569 !important; border-color: #94a3b8 !important; }
         #cuerpo_tabla td button:hover 
         { filter: brightness(0.9); }
-        
+
+/* Ocultar el encabezado impreso en la pantalla web normal */
+        .print-header {display: none;}
+
+/* ==========================================
+   IMPRESIÓN EXACTA CON ESTILOS DEL SISTEMA
+   ========================================== */
+        @media print {
+    /* Hoja horizontal con margen cómodo */
+    @page {
+        size: landscape;
+        margin: 8mm;
+    }
+
+    /* Garantiza que los colores, fondos y badges se impriman tal cual */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    /* 1. OCULTAR ÚNICAMENTE FORMULARIO Y NAVEGACIÓN */
+    #form_unificado,
+    .header-form,
+    fieldset,
+    .session-bar,
+    .paginacion-container,
+    .admin-actions,
+    button,
+    .no-print {
+        display: none !important;
+    }
+
+    /* 2. MOSTRAR ENCABEZADO INSTITUCIONAL */
+    .print-header {
+        display: block !important;
+        text-align: center;
+        margin-bottom: 15px;
+        border-bottom: 2px solid var(--primary, #1e3a8a);
+        padding-bottom: 6px;
+    }
+
+    .print-header h2 {
+        margin: 0;
+        color: var(--primary, #1e3a8a) !important;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    .print-header p {
+        margin: 4px 0 0 0;
+        font-size: 13px;
+        color: #475569;
+    }
+
+    .print-meta {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 4px;
+    }
+
+    /* 3. CONSERVAR DISEÑO Y TAMAÑO REAL DEL SISTEMA */
+    body {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .container, .card, #contenedor_tabla {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* La tabla usará la tipografía, tamaños y paddings nativos de tu sistema */
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        table-layout: auto !important;
+    }
+
+    /* Repetir encabezados si el reporte abarca varias hojas */
+    thead {
+        display: table-header-group;
+    }
+
+    tr {
+        page-break-inside: avoid;
+    }
+
+    /* Ocultar solo la columna de botones "Acciones" (Editar/Eliminar) si existe */
+    table th:last-child,
+    table td:last-child {
+        display: none !important;
+    }
+}
         
     </style>
 </head>
@@ -545,6 +642,8 @@
             style="background: #10b981; color: white; padding: 7px 14px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; height: 32px;">
         🖨️ Imprimir Selección
     </button>
+    
+    <button id="btnVaciar" class="btn-admin btn-clear-db"><i class="fas fa-trash-alt"></i> Vaciar Base de Datos</button>
 </div>
         <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
     
@@ -571,6 +670,15 @@
 
 <div id="controles_paginacion" style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 15px; margin-bottom: 15px;">
     </div>
+
+<!-- Encabezado que sustituirá al formulario solo al imprimir -->
+<div class="print-header">
+    <h2>SISTEMA DIF MUNICIPAL</h2>
+    <p>PADRÓN Y REGISTROS FILTRADOS DE BENEFICIARIOS</p>
+    <div class="print-meta">
+        <span><b>Fecha de impresión:</b> <script>document.write(new Date().toLocaleDateString('es-MX'))</script></span>
+    </div>
+</div>
 <div style="width: 100%; overflow-x: auto; border: 1px solid #cbd5e1; border-radius: 8px; margin-top: 30px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); box-sizing: border-box;">
     <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; min-width: 1700px; --border: #cbd5e1;">
         <thead>
@@ -2664,125 +2772,46 @@ window.cerrarSesion = function() {
     window.location.href = "index.html";
 };
 
+// ==========================================
+// IMPRIMIR REGISTROS FILTRADOS EN EL SISTEMA
+// ==========================================
 window.imprimirSeleccionFiltrada = function() {
-    // Obtener los registros que están actualmente filtrados
-    const registrosAImprimir = window.registrosFiltradosActuales || [];
+    // 1. Verificar que existan registros filtrados
+    const registrosAImprimir = window.registrosFiltradosActuales || window.listadoLive || [];
     
     if (registrosAImprimir.length === 0) {
-        alert("No hay registros filtrados para imprimir.");
+        Swal.fire({
+            title: 'Sin datos',
+            text: 'No hay registros filtrados en la tabla para imprimir.',
+            icon: 'warning',
+            confirmButtonColor: '#f59e0b'
+        });
         return;
     }
 
-    // Crear una nueva ventana en el navegador para la impresión
-    const ventanaImpresion = window.open('', '_blank');
+    // 2. Guardar la configuración previa de paginación
+    const filasPrevia = window.filasPorPagina;
+    const paginaPrevia = window.paginaActual;
+
+    // 3. Mostrar TODOS los registros filtrados en la tabla del sistema
+    window.filasPorPagina = 999999;
+    window.paginaActual = 1;
     
-    // Construir la estructura básica del reporte impreso
-    let htmlReporte = `
-    <html>
-    <head>
-        <title>Reporte de Registros Filtrados</title>
-        <style>
-            body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
-            h2 { text-align: center; color: #1e3a8a; margin-bottom: 5px; }
-            p { text-align: center; font-size: 12px; color: #64748b; margin-top: 0; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 11px; }
-            th, td { border: 1px solid #cbd5e1; padding: 8px; text-align: left; }
-            th { background-color: #f1f5f9; color: #1e3a8a; font-weight: bold; }
-            .centro { text-align: center; }
-            .badge { font-weight: bold; padding: 2px 4px; border-radius: 3px; }
-            @media print {
-                button { display: none; }
-                body { margin: 0; }
-            }
-        </style>
-    </head>
-    <body>
-        <h2>Padrón de Beneficiarios Seleccionados</h2>
-        <p>Registros encontrados: ${registrosAImprimir.length} | Fecha de generación: ${new Date().toLocaleDateString('es-MX')}</p>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>Prog.</th>
-                    <th>Estatus</th>
-                    <th>Programa / Modalidad</th>
-                    <th>Localidad / Colonia</th>
-                    <th>CURP / CCT</th>
-                    <th>Nombre Completo / Escuela</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
+    if (typeof window.renderizarTablasSincronizadas === 'function') {
+        window.renderizarTablasSincronizadas();
+    }
 
-    // Iterar sobre los registros filtrados para aplanarlos en filas de impresión
-    registrosAImprimir.forEach(d => {
-        const nProgresivo = d.num_progresivo || '-';
-        const estatus = d.estatus || 'PENDIENTE';
-        const progModalidad = `${d.programa || 'SIN ASIGNAR'} / ${d.subgrupo || 'GENERAL'}`.toUpperCase();
-        const lugar = (d.localidad || d.col_loc || 'N/A').toUpperCase();
+    // 4. Esperar un breve instante a que el DOM se actualice e imprimir
+    setTimeout(() => {
+        window.print();
 
-        if (d.integrantes && Array.isArray(d.integrantes) && d.integrantes.length > 0) {
-            // Caso Colectivos: Crear fila por integrante
-            d.integrantes.forEach(int => {
-                const nombreInt = `${int.nombre || ''} ${int.paterno || ''} ${int.materno || ''}`.trim().toUpperCase();
-                htmlReporte += `
-                    <tr>
-                        <td class="centro"><strong>${nProgresivo}</strong></td>
-                        <td class="centro"><span class="badge">${estatus}</span></td>
-                        <td>${progModalidad}</td>
-                        <td>${lugar}</td>
-                        <td style="font-family:monospace;">${int.curp || 'N/A'}</td>
-                        <td>[INTEGRANTE] ${nombreInt}</td>
-                    </tr>
-                `;
-            });
-        } else {
-            // Caso Individual / PAE
-            let identificacion = "";
-            let curpClave = "";
-
-            if (d.pae_escuela) {
-                const nombreAlumno = d.beneficiario?.nombre_completo_cache || `${d.beneficiario?.nombre || ''} ${d.beneficiario?.paterno || ''} ${d.beneficiario?.materno || ''}`.trim();
-                curpClave = `CCT: ${d.pae_clave_escuela || 'S/N'}<br>CURP: ${d.beneficiario?.curp || 'S/N'}`;
-                identificacion = `ESCUELA: ${d.pae_escuela.toUpperCase()}<br><small>Alumno: ${nombreAlumno.toUpperCase()}</small>`;
-            } else {
-                const nombreCompleto = d.beneficiario?.nombre_completo_cache || `${d.beneficiario?.nombre || ''} ${d.beneficiario?.paterno || ''} ${d.beneficiario?.materno || ''}`.trim();
-                curpClave = d.beneficiario?.curp || d.rep_curp || 'N/A';
-                identificacion = nombreCompleto.toUpperCase();
-                if (d.rep_nombre) identificacion += `<br><small>Rep: ${d.rep_nombre.toUpperCase()}</small>`;
-            }
-
-            htmlReporte += `
-                <tr>
-                    <td class="centro"><strong>${nProgresivo}</strong></td>
-                    <td class="centro"><span class="badge">${estatus}</span></td>
-                    <td>${progModalidad}</td>
-                    <td>${lugar}</td>
-                    <td style="font-family:monospace;">${curpClave}</td>
-                    <td>${identificacion}</td>
-                </tr>
-            `;
+        // 5. Restaurar la paginación original tras cerrar el diálogo de impresión
+        window.filasPorPagina = filasPrevia;
+        window.paginaActual = paginaPrevia;
+        if (typeof window.renderizarTablasSincronizadas === 'function') {
+            window.renderizarTablasSincronizadas();
         }
-    });
-
-    htmlReporte += `
-            </tbody>
-        </table>
-        <script>
-            // Desencadena la acción de impresión automáticamente al cargar la ventana
-            window.onload = function() {
-                window.print();
-                setTimeout(() => { window.close(); }, 500);
-            };
-        <\/script>
-    </body>
-    </html>
-    `;
-
-    // Escribir el contenido en la nueva ventana y cerrarla tras imprimir
-    ventanaImpresion.document.open();
-    ventanaImpresion.document.write(htmlReporte);
-    ventanaImpresion.document.close();
+    }, 300);
 };
 
 window.inicializarFiltrosDinamicos = function() {
