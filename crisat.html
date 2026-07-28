@@ -82,7 +82,13 @@
         .btn-cerrar-sesion { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.8rem; transition: 0.2s; white-space: nowrap; }
         .btn-cerrar-sesion:hover { background: #fca5a5; }
         @media (max-width: 640px) { .user-session-bar { flex-direction: column; align-items: stretch; text-align: center; padding: 15px; gap: 12px; } .user-session-bar-info { flex-direction: column; justify-content: center; gap: 6px; } .btn-cerrar-sesion { width: 100%; padding: 10px; } }
-    </style>
+        .fields-row {display: flex;gap: 10px;align-items: flex-start;width: 100%;}
+        .field-sm {flex: 0 0 210px; /* Controla el ancho angosto de estos selectores */}
+        .field-main {flex: 1 1 auto;min-width: 0;}
+        .checkbox-group-inline {display: flex;gap: 10px;align-items: center;flex-wrap: nowrap;}
+        .checkbox-group-inline .checkbox-item {padding: 6px 15px; font-size: 0.75rem;gap: 4px;white-space: nowrap;}
+        .checkbox-group-inline .checkbox-item:has(input:checked) {background-color: #e0f2fe;border-color: var(--crisat);color: #0369a1;font-weight: 700;}
+        </style>
 </head>
 <body>
 
@@ -212,14 +218,45 @@
             <div class="field span-2"><label>Teléfono</label><input type="tel" id="telefono"></div>
         </fieldset>
 
-        <fieldset>
-            <legend><i class="fas fa-file-medical"></i> Valoración Clínica</legend>
-            <div class="field full-width"><label>Diagnóstico Médico</label><textarea id="diagnostico" rows="2"></textarea></div>
-            <div class="field"><label>¿Discapacidad?</label><select id="discapacidad"><option value="no">No</option><option value="si">Sí</option></select></div>
-            <div class="field"><label>Tipo Limitación</label><select id="tipo_discapacidad"><option value="MOTORA">Motora</option><option value="AUDITIVO">Auditivo</option><option value="INTELECTUAL">Intelectual</option><option value="LENGUAJE">Lenguaje</option></select></div>
-            <div class="field"><label>Grado</label><select id="grado"><option value="LEVE">Leve</option><option value="MODERADO">Moderado</option><option value="SEVERO">Severo</option></select></div>
-            <div class="field"><label>Duración</label><select id="duracion"><option value="TEMPORAL">Temporal</option><option value="PERMANENTE">Permanente</option></select></div>
-        </fieldset>
+      <fieldset>
+    <legend><i class="fas fa-file-medical"></i> Valoración Clínica</legend>
+
+    <!-- Fila Superior -->
+    <div class="field full-width"><label for="diagnostico">Diagnóstico Médico</label><textarea id="diagnostico" rows="2"></textarea></div>
+
+    <!-- Fila Lineal Unificada -->
+    <div class="fields-row full-width">
+        <div class="field field-sm">
+            <label for="discapacidad">¿Discapacidad?</label>
+            <select id="discapacidad">
+                <option value="no">No</option>
+                <option value="si">Sí</option>
+            </select>
+        </div>
+
+        <div class="field field-main">
+            <label>Tipo Limitación</label>
+            <div class="checkbox-group-inline">
+            <label class="checkbox-item"><input type="checkbox" name="tipo_discapacidad" value="MOTORA"> Motora</label>
+            <label class="checkbox-item"><input type="checkbox" name="tipo_discapacidad" value="AUDITIVO"> Auditivo</label>
+            <label class="checkbox-item"><input type="checkbox" name="tipo_discapacidad" value="INTELECTUAL"> Intelectual</label>
+            <label class="checkbox-item"><input type="checkbox" name="tipo_discapacidad" value="LENGUAJE"> Lenguaje</label></div>
+        </div>
+
+        <div class="field field-sm">
+            <label for="grado">Grado</label><select id="grado">
+                <option value="LEVE">Leve</option>
+                <option value="MODERADO">Moderado</option>
+                <option value="SEVERO">Severo</option></select>
+        </div>
+
+        <div class="field field-sm">
+            <label for="duracion">Duración</label><select id="duracion">
+                <option value="TEMPORAL">Temporal</option>
+                <option value="PERMANENTE">Permanente</option></select>
+        </div>
+    </div>
+</fieldset>
 
         <fieldset>
             <legend><i class="fas fa-hand-holding-medical"></i> Plan de Tratamiento (Evolución Clínica)</legend>
@@ -352,21 +389,22 @@
     </div>
 
     <div class="table-responsive">
-        <table id="tablaGeneral">
-            <thead>
-                <tr>
-                    <th style="width: 85px;">Cita</th>
-                    <th style="width: 80px;">Expediente</th>
-                    <th>Paciente / Diagnóstico</th>
-                    <th>Dirección</th>
-                    <th style="width: 80px;">Terapeuta</th>
-                    <th style="width: 150px;">Terapias</th>
-                    <th style="width: 110px;">Cuota / Est.</th>
-                    <th style="width: 110px;" class="no-print">Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="cuerpoTabla"></tbody>
-        </table>
+<table id="tablaGeneral">
+    <thead>
+        <tr>
+            <th style="width: 85px;">Cita</th>
+            <th style="width: 80px;">Expediente</th>
+            <th>Paciente / Diagnóstico</th>
+            <th>Dirección</th>
+            <th style="width: 80px;">Terapeuta</th>
+            <th style="width: 160px;">Valoración Discapacidad</th>
+            <th style="width: 150px;">Terapias</th>
+            <th style="width: 110px;">Cuota / Est.</th>
+            <th style="width: 110px;" class="no-print">Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="cuerpoTabla"></tbody>
+</table>
     </div>
 
     <div class="pagination-container no-print">
@@ -543,7 +581,6 @@
             'sexo': 'H',
             'municipio': 'SAN ANDRÉS TUXTLA',
             'discapacidad': 'no',
-            'tipo_discapacidad': 'MOTORA',
             'grado': 'LEVE',
             'duracion': 'TEMPORAL'
         };
@@ -555,7 +592,8 @@
         const elFechaCaptura = document.getElementById('fecha_captura');
         if (elFechaCaptura) elFechaCaptura.value = window.obtenerFechaLocal();
 
-        document.querySelectorAll('.check-serv, .chk-dia').forEach(cb => cb.checked = false);
+        // Desmarcar todos los checkboxes
+        document.querySelectorAll('.check-serv, .chk-dia, input[name="tipo_discapacidad"]').forEach(cb => cb.checked = false);
 
         const radioCol = document.querySelector('input[name="tipo_ubicacion"][value="COLONIA"]');
         if (radioCol) radioCol.checked = true;
@@ -565,50 +603,122 @@
     };
 
     // --- CONSTRUCCIÓN DEL OBJETO DE DATOS DEL FORMULARIO ---
-    function obtenerDatosFormulario() {
-        const serviciosSeleccionados = Array.from(document.querySelectorAll('.check-serv:checked'))
-            .map(cb => cb.value)
-            .join(', ');
+function obtenerDatosFormulario() {
+    const serviciosSeleccionados = Array.from(document.querySelectorAll('.check-serv:checked'))
+        .map(cb => cb.value)
+        .join(', ');
 
-        const diasSeleccionados = Array.from(document.querySelectorAll('.chk-dia:checked'))
-            .map(cb => cb.value);
+    const diasSeleccionados = Array.from(document.querySelectorAll('.chk-dia:checked'))
+        .map(cb => cb.value);
 
-        const tipoUbicacion = document.querySelector('input[name="tipo_ubicacion"]:checked')?.value || 'COLONIA';
+    // Múltiples selecciones de limitantes independientemente de la discapacidad
+    const tiposDiscapacidad = Array.from(document.querySelectorAll('input[name="tipo_discapacidad"]:checked'))
+        .map(cb => cb.value)
+        .join(', ');
 
-        return {
-            departamento: "CRISAT",
-            fecha_captura: document.getElementById('fecha_captura')?.value || window.obtenerFechaLocal(),
-            nombre_paciente: (document.getElementById('nombre')?.value || '').trim().toUpperCase(),
-            curp: (document.getElementById('curp')?.value || '').trim().toUpperCase(),
-            expediente: (document.getElementById('expediente')?.value || '').trim().toUpperCase(),
-            fecha_ISO: document.getElementById('fecha_cita')?.value || '',
-            hora: document.getElementById('hora_cita')?.value || '',
-            estatus: document.getElementById('estatus')?.value || 'PENDIENTE',
-            estatus_expediente: document.getElementById('estatus_expediente')?.value || 'EN TRATAMIENTO',
-            monto: parseFloat(document.getElementById('cuota')?.value) || 0,
-            diagnostico: (document.getElementById('diagnostico')?.value || '').trim().toUpperCase(),
-            localidad: document.getElementById('municipio')?.value || 'SAN ANDRÉS TUXTLA',
-            sexo: document.getElementById('sexo')?.value || 'H',
-            fecha_nacimiento: document.getElementById('fecha_nacimiento')?.value || '',
-            lugar_nacimiento: (document.getElementById('lugar_nacimiento')?.value || '').trim().toUpperCase(),
-            escolaridad: (document.getElementById('escolaridad')?.value || '').trim().toUpperCase(),
-            ocupacion: (document.getElementById('ocupacion')?.value || '').trim().toUpperCase(),
-            edad: document.getElementById('edad')?.value || '',
-            direccion: (document.getElementById('direccion')?.value || '').trim().toUpperCase(),
-            telefono: (document.getElementById('telefono')?.value || '').trim(),
-            col_loc: (document.getElementById('col_loc')?.value || '').trim().toUpperCase(),
-            justificacion: (document.getElementById('motivo_justificacion')?.value || '').trim().toUpperCase(),
-            nombre_terapeuta: (document.getElementById('nombre_terapeuta')?.value || '').trim().toUpperCase(),
-            tipo_ubicacion: tipoUbicacion,
-            servicio: serviciosSeleccionados,
-            dias_atencion: diasSeleccionados,
-            discapacidad: document.getElementById('discapacidad')?.value || 'no',
-            tipo_discapacidad: document.getElementById('tipo_discapacidad')?.value || '',
-            grado: document.getElementById('grado')?.value || '',
-            duracion: document.getElementById('duracion')?.value || '',
-            timestamp: serverTimestamp()
-        };
-    }
+    const tipoUbicacion = document.querySelector('input[name="tipo_ubicacion"]:checked')?.value || 'COLONIA';
+
+    return {
+        departamento: "CRISAT",
+        fecha_captura: document.getElementById('fecha_captura')?.value || window.obtenerFechaLocal(),
+        nombre_paciente: (document.getElementById('nombre')?.value || '').trim().toUpperCase(),
+        curp: (document.getElementById('curp')?.value || '').trim().toUpperCase(),
+        expediente: (document.getElementById('expediente')?.value || '').trim().toUpperCase(),
+        fecha_ISO: document.getElementById('fecha_cita')?.value || '',
+        hora: document.getElementById('hora_cita')?.value || '',
+        estatus: document.getElementById('estatus')?.value || 'PENDIENTE',
+        estatus_expediente: document.getElementById('estatus_expediente')?.value || 'EN TRATAMIENTO',
+        monto: parseFloat(document.getElementById('cuota')?.value) || 0,
+        diagnostico: (document.getElementById('diagnostico')?.value || '').trim().toUpperCase(),
+        localidad: document.getElementById('municipio')?.value || 'SAN ANDRÉS TUXTLA',
+        sexo: document.getElementById('sexo')?.value || 'H',
+        fecha_nacimiento: document.getElementById('fecha_nacimiento')?.value || '',
+        lugar_nacimiento: (document.getElementById('lugar_nacimiento')?.value || '').trim().toUpperCase(),
+        escolaridad: (document.getElementById('escolaridad')?.value || '').trim().toUpperCase(),
+        ocupacion: (document.getElementById('ocupacion')?.value || '').trim().toUpperCase(),
+        edad: document.getElementById('edad')?.value || '',
+        direccion: (document.getElementById('direccion')?.value || '').trim().toUpperCase(),
+        telefono: (document.getElementById('telefono')?.value || '').trim(),
+        col_loc: (document.getElementById('col_loc')?.value || '').trim().toUpperCase(),
+        justificacion: (document.getElementById('motivo_justificacion')?.value || '').trim().toUpperCase(),
+        nombre_terapeuta: (document.getElementById('nombre_terapeuta')?.value || '').trim().toUpperCase(),
+        tipo_ubicacion: tipoUbicacion,
+        servicio: serviciosSeleccionados,
+        dias_atencion: diasSeleccionados,
+        
+        // CAMPOS AUTÓNOMOS DEL MÓDULO DIAGNÓSTICO MÉDICO
+        discapacidad: document.getElementById('discapacidad')?.value || 'no',
+        tipo_discapacidad: tiposDiscapacidad,
+        grado: document.getElementById('grado')?.value || '',
+        duracion: document.getElementById('duracion')?.value || '',
+        
+        timestamp: serverTimestamp()
+    };
+}
+
+    // --- Cargar datos para edición ---
+    window.prepararEdicion = (id) => {
+        const r = cacheRegistros.find(item => item.id === id);
+        if (!r) return;
+
+        document.getElementById('editId').value = r.id;
+        document.getElementById('nombre').value = r.nombre_paciente || '';
+        document.getElementById('curp').value = r.curp || '';
+        document.getElementById('expediente').value = r.expediente || '';
+        document.getElementById('fecha_cita').value = r.fecha_ISO || '';
+        document.getElementById('hora_cita').value = r.hora || '';
+        document.getElementById('cuota').value = r.monto || '';
+        document.getElementById('diagnostico').value = r.diagnostico || '';
+        document.getElementById('telefono').value = r.telefono || '';
+        document.getElementById('direccion').value = r.direccion || '';
+        document.getElementById('col_loc').value = r.col_loc || '';
+        document.getElementById('fecha_nacimiento').value = r.fecha_nacimiento || '';
+        document.getElementById('lugar_nacimiento').value = r.lugar_nacimiento || '';
+        document.getElementById('escolaridad').value = r.escolaridad || '';
+        document.getElementById('ocupacion').value = r.ocupacion || '';
+        document.getElementById('edad').value = r.edad || '';
+        document.getElementById('motivo_justificacion').value = r.justificacion || '';
+        document.getElementById('nombre_terapeuta').value = r.nombre_terapeuta || '';
+        document.getElementById('estatus').value = r.estatus || 'PENDIENTE';
+        document.getElementById('estatus_expediente').value = r.estatus_expediente || 'EN TRATAMIENTO';
+        document.getElementById('sexo').value = r.sexo || 'H';
+        document.getElementById('municipio').value = r.localidad || 'SAN ANDRÉS TUXTLA';
+        document.getElementById('discapacidad').value = r.discapacidad || 'no';
+        document.getElementById('grado').value = r.grado || 'LEVE';
+        document.getElementById('duracion').value = r.duracion || 'TEMPORAL';
+
+        // Cargar múltiples checkboxes de tipo de discapacidad
+        document.querySelectorAll('input[name="tipo_discapacidad"]').forEach(cb => cb.checked = false);
+        if (r.tipo_discapacidad) {
+            const tiposGuardados = r.tipo_discapacidad.split(',').map(s => s.trim());
+            tiposGuardados.forEach(val => {
+                const cb = document.querySelector(`input[name="tipo_discapacidad"][value="${CSS.escape(val)}"]`);
+                if (cb) cb.checked = true;
+            });
+        }
+
+        // Cargar servicios
+        document.querySelectorAll('.check-serv').forEach(cb => cb.checked = false);
+        if (r.servicio) {
+            const servicios = r.servicio.split(',').map(s => s.trim());
+            servicios.forEach(val => {
+                const cb = document.querySelector(`.check-serv[value="${CSS.escape(val)}"]`);
+                if (cb) cb.checked = true;
+            });
+        }
+
+        // Cargar días de atención
+        document.querySelectorAll('.chk-dia').forEach(cb => cb.checked = false);
+        if (r.dias_atencion && Array.isArray(r.dias_atencion)) {
+            r.dias_atencion.forEach(val => {
+                const cb = document.querySelector(`.chk-dia[value="${CSS.escape(val)}"]`);
+                if (cb) cb.checked = true;
+            });
+        }
+
+        window.toggleCamposEspeciales();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     function calcularProximaFechaCita(fechaBaseStr, diasSeleccionados) {
         if (!fechaBaseStr) fechaBaseStr = window.obtenerFechaLocal();
@@ -763,7 +873,7 @@
         }
     }
 
-    // --- ACCIONES Y EDICIÓN ---
+   // --- ACCIONES Y EDICIÓN ---
     window.prepararEdicion = (id) => {
         const r = cacheRegistros.find(item => item.id === id);
         if (!r) return;
@@ -796,34 +906,60 @@
         document.getElementById('col_loc').value = r.col_loc || "";
         document.getElementById('motivo_justificacion').value = r.justificacion || "";
 
-        const tSelect = document.getElementById('nombre_terapeuta');
-        const tGuardado = (r.nombre_terapeuta || "").toUpperCase();
-        let encontrada = false;
-        for (let i = 0; i < tSelect.options.length; i++) {
-            if (tSelect.options[i].value.toUpperCase() === tGuardado) {
-                tSelect.value = tSelect.options[i].value;
-                encontrada = true;
-                break;
-            }
+        // --- CAMPOS AUTÓNOMOS DE DISCAPACIDAD Y LIMITANTES ---
+        const elDiscapacidad = document.getElementById('discapacidad');
+        if (elDiscapacidad) elDiscapacidad.value = r.discapacidad || 'no';
+
+        const elGrado = document.getElementById('grado');
+        if (elGrado) elGrado.value = r.grado || '';
+
+        const elDuracion = document.getElementById('duracion');
+        if (elDuracion) elDuracion.value = r.duracion || '';
+
+        // Checkboxes independientes de limitantes / tipo de discapacidad
+        document.querySelectorAll('input[name="tipo_discapacidad"]').forEach(cb => cb.checked = false);
+        if (r.tipo_discapacidad) {
+            const seleccionados = r.tipo_discapacidad.split(',').map(s => s.trim());
+            seleccionados.forEach(val => {
+                const cb = document.querySelector(`input[name="tipo_discapacidad"][value="${CSS.escape(val)}"]`);
+                if (cb) cb.checked = true;
+            });
         }
-        if (!encontrada) tSelect.value = ""; 
+
+        // --- TERAPEUTA Y UBICACIÓN ---
+        const tSelect = document.getElementById('nombre_terapeuta');
+        if (tSelect) {
+            const tGuardado = (r.nombre_terapeuta || "").toUpperCase();
+            let encontrada = false;
+            for (let i = 0; i < tSelect.options.length; i++) {
+                if (tSelect.options[i].value.toUpperCase() === tGuardado) {
+                    tSelect.value = tSelect.options[i].value;
+                    encontrada = true;
+                    break;
+                }
+            }
+            if (!encontrada) tSelect.value = ""; 
+        }
 
         const radio = document.querySelector(`input[name="tipo_ubicacion"][value="${r.tipo_ubicacion || 'COLONIA'}"]`);
-        if(radio) radio.checked = true;
+        if (radio) radio.checked = true;
 
+        // --- SERVICIOS Y DÍAS ---
         const serviciosActivos = r.servicio ? r.servicio.split(', ') : [];
         document.querySelectorAll('.check-serv').forEach(cb => cb.checked = serviciosActivos.includes(cb.value));
 
         const diasActivos = r.dias_atencion || [];
         document.querySelectorAll('.chk-dia').forEach(cb => cb.checked = diasActivos.includes(cb.value));
 
-        window.toggleCamposEspeciales();
+        if (typeof window.toggleCamposEspeciales === 'function') {
+            window.toggleCamposEspeciales();
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     window.eliminarRegistro = async (id) => {
         const confirmar = await window.mostrarConfirmacion("Eliminar Registro", "¿Estás seguro de eliminar este registro permanentemente?");
-        if(confirmar) {
+        if (confirmar) {
             try {
                 await deleteDoc(doc(db, "registros_generales", id));
                 window.mostrarToast("Registro eliminado con éxito.", "success");
@@ -945,11 +1081,10 @@
                (r.diagnostico || '').toLowerCase().includes(termino);
     });
 
-    // 2. ORDENAMIENTO POR FECHA/HORA DE CAPTURA (Los más recientes capturados aparecen primero)
+    // 2. ORDENAMIENTO POR FECHA/HORA DE CAPTURA
     registrosFiltrados.sort((a, b) => {
         const obtenerMs = (item) => {
             if (!item.timestamp) return 0;
-            // Si es un Timestamp nativo de Firestore
             if (typeof item.timestamp.toMillis === 'function') {
                 return item.timestamp.toMillis();
             }
@@ -962,7 +1097,6 @@
             return 0;
         };
 
-        // Orden descendente: el registro más reciente capturado se coloca arriba
         return obtenerMs(b) - obtenerMs(a);
     });
 
@@ -977,7 +1111,7 @@
     const registrosPagina = registrosFiltrados.slice(inicio, fin);
 
     if (registrosPagina.length === 0) {
-        cuerpo.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 25px; color:#64748b;">No se encontraron registros coincidentes.</td></tr>`;
+        cuerpo.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 25px; color:#64748b;">No se encontraron registros coincidentes.</td></tr>`;
     } else {
         let htmlFilas = "";
 
@@ -1013,6 +1147,23 @@
             if (r.estatus_expediente === "ALTA MÉDICA") badgeExpediente = `<span class="pill pill-alta">ALTA MÉDICA</span>`;
             if (r.estatus_expediente === "BAJA POR INASISTENCIA") badgeExpediente = `<span class="pill pill-baja">BAJA</span>`;
 
+            // --- CONSTRUCCIÓN DE LA CELDA DE DISCAPACIDAD Y LIMITACIÓN (100% INDEPENDIENTES) ---
+            const tieneDiscapacidad = (r.discapacidad || 'no').toLowerCase() === 'si';
+            const badgeDiscapacidad = tieneDiscapacidad 
+                ? `<span class="badge" style="background:#fee2e2; color:#991b1b; font-size:0.7rem; font-weight:bold;">SÍ TIENE DISCAPACIDAD</span>` 
+                : `<span class="badge" style="background:#f1f5f9; color:#64748b; font-size:0.7rem;">NO TIENE DISCAPACIDAD</span>`;
+
+            const tipoLimitacion = r.tipo_discapacidad || 'Sin limitación';
+            const detalleGradoDuracion = [r.grado, r.duracion].filter(Boolean).join(' • ');
+
+            const celdaDiscapacidad = `
+                ${badgeDiscapacidad}<br>
+                <b style="color: var(--crisat); font-size: 0.75rem;">Limitante:</b> <span style="font-size:0.75rem;">${tipoLimitacion}</span><br>
+                <small style="color: #64748b; font-size: 0.72rem; display:block; margin-top:2px;">
+                    <b>Detalle:</b> ${detalleGradoDuracion || 'N/A'}
+                </small>
+            `;
+
             htmlFilas += `<tr ${claseFila}>
                 <td>
                     <b>${r.fecha_ISO || '--'}</b><br>
@@ -1033,11 +1184,16 @@
                 </td>
 
                 <td><b>${r.direccion || 'N/A'}</b><br><small>${r.col_loc || 'Sin ubicación'}</small></td>
+                
                 <td>
                     <div style="font-weight:600; color:var(--crisat); font-size:0.75rem;">
                         <i class="fas fa-user-md"></i> ${r.nombre_terapeuta || 'SIN ASIGNAR'}
                     </div>
                 </td>
+
+                <!-- COLUMNA UNIFICADA DISCAPACIDAD -->
+                <td>${celdaDiscapacidad}</td>
+
                 <td>${r.servicio || '--'}</td>
                 <td>$${parseFloat(r.monto || 0).toFixed(2)}<br><span class="badge ${badgeClass}">${r.estatus}</span></td>
                 <td class="no-print">
@@ -1065,7 +1221,6 @@
                 htmlPaginas += `<span style="padding: 0 4px; color: #94a3b8;">...</span>`;
             }
         }
-
         htmlPaginas += `<button class="btn-page" ${paginaActual === totalPaginas || totalPaginas === 0 ? 'disabled' : ''} onclick="window.cambiarPagina(${paginaActual + 1})">Siguiente</button>`;
         contPaginas.innerHTML = htmlPaginas;
     }
