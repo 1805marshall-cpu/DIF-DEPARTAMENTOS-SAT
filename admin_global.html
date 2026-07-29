@@ -126,7 +126,7 @@ canvas { flex-grow:1; }
             <small id="role-tag" style="color:var(--warning); font-size: 10px;"></small>
         </div>
 
-<nav class="nav-menu">
+        <nav class="nav-menu">
             <div id="nav-medica" class="nav-item" onclick="showView('medica', this)"><i class="fas fa-notes-medical"></i> <span>Área Médica</span></div>
             <div id="nav-social" class="nav-item" onclick="showView('social', this)"><i class="fa-solid fa-users"></i> <span>Trabajo Social</span></div>
             <div id="nav-psicologia" class="nav-item" onclick="showView('psicologia', this)"><i class="fas fa-brain"></i> <span>Psicología</span></div>
@@ -136,38 +136,39 @@ canvas { flex-grow:1; }
             <div id="nav-crisat" class="nav-item" onclick="showView('crisat', this)"><i class="fas fa-diagnoses"></i> <span>Crisat</span></div>
             <div id="nav-territorial" class="nav-item" onclick="showView('territorial', this)"><i class="fas fa-city"></i> <span>Resumen Territorial</span></div>
             <div id="nav-estadisticas" class="nav-item" onclick="showView('estadisticas', this)"><i class="fa-solid fa-chart-line"></i> <span>Estadistico</span></div>
-
         </nav>
 
         <!-- Agrega este bloque antes del nav-exit -->
-<div class="user-profile-box">
-<i class="fas fa-user-circle" style="font-size: 20px;"></i> <div> <b style="display:block; font-size:11px;">Admin_Global</b>
-        <small style="color: #94a3b8;">Sistema DIF</small>
-    </div>
-    <div class="user-details">
-        <span id="user-name-display">Cargando...</span>
-        <small id="user-role-display">SISTEMA DIF</small>
-    </div>
-</div>
+        <div class="user-profile-box">
+            <i class="fas fa-user-circle" style="font-size: 20px;"></i> 
+            <div> 
+                <b style="display:block; font-size:11px;">Admin_Global</b>
+                <small style="color: #94a3b8;">Sistema DIF</small>
+            </div>
+            <div class="user-details">
+                <span id="user-name-display">Cargando...</span>
+                <small id="user-role-display">SISTEMA DIF</small>
+            </div>
+        </div>
 
-<div class="nav-exit" onclick="window.cerrarSesion()" style="cursor: pointer;">
-    <i class="fas fa-sign-out-alt"></i>
-    <span>Cerrar Sesión</span> </div>
+        <div class="nav-exit" onclick="window.cerrarSesion()" style="cursor: pointer;">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Cerrar Sesión</span> 
+        </div>
     </div>
 
     <div class="main-content">
         <div class="top-bar">
-        
             <div style="display:flex; align-items:center; gap:20px;">
                 <i class="fas fa-bars" id="btn-toggle"></i>
                 <h2 id="view-title" style="margin:0;">Panel</h2>
             </div>
             <div style="flex-grow: 1; max-width: 400px; margin: 0 20px; position: relative;">
-    <i class="fas fa-search" style="position: absolute; left: 12px; top: 10px; color: #64748b;"></i>
-    <input type="text" id="global-search-input" placeholder="BUSCAR POR NOMBRE, FOLIO O CAMPO CLAVE..." 
-        onkeyup="window.reprocesarTodo()" 
-        style="width: 90%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
-</div>
+                <i class="fas fa-search" style="position: absolute; left: 12px; top: 10px; color: #64748b;"></i>
+                <input type="text" id="global-search-input" placeholder="BUSCAR POR NOMBRE, FOLIO O CAMPO CLAVE..." 
+                    onkeyup="window.reprocesarTodo()" 
+                    style="width: 90%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
+            </div>
             <div style="flex-grow: 1; max-width: 400px; margin: 0 20px; position: relative;">
                 <i class="fas fa-map-marker-alt" style="position: absolute; left: 12px; top: 10px; color: #64748b;"></i>
                 <input type="text" id="global-zone-search" placeholder="BUSCAR POR ZONA / LOCALIDAD..." 
@@ -175,168 +176,164 @@ canvas { flex-grow:1; }
                     style="width: 90%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
             </div>
             <div style="margin: 0 15px;">
-    <select id="global-month-filter" onchange="window.reprocesarTodo()" 
-        style="padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; font-weight: bold; outline: none; cursor: pointer;">
-        <option value="all">📅 TODOS LOS MESES</option>
-        <option value="01">Enero</option>
-        <option value="02">Febrero</option>
-        <option value="03">Marzo</option>
-        <option value="04">Abril</option>
-        <option value="05">Mayo</option>
-        <option value="06">Junio</option>
-        <option value="07">Julio</option>
-        <option value="08">Agosto</option>
-        <option value="09">Septiembre</option>
-        <option value="10">Octubre</option>
-        <option value="11">Noviembre</option>
-        <option value="12">Diciembre</option>
-    </select>
-</div>
+                <select id="global-month-filter" onchange="window.reprocesarTodo()" 
+                    style="padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; font-weight: bold; outline: none; cursor: pointer;">
+                    <option value="all">📅 TODOS LOS MESES</option>
+                    <option value="01">Enero</option>
+                    <option value="02">Febrero</option>
+                    <option value="03">Marzo</option>
+                    <option value="04">Abril</option>
+                    <option value="05">Mayo</option>
+                    <option value="06">Junio</option>
+                    <option value="07">Julio</option>
+                    <option value="08">Agosto</option>
+                    <option value="09">Septiembre</option>
+                    <option value="10">Octubre</option>
+                    <option value="11">Noviembre</option>
+                    <option value="12">Diciembre</option>
+                </select>
+            </div>
             <div id="reloj"></div>
         </div>   
 
-<div id="view-vulnerable" class="view-container" style="display:none;">
-    <div class="access-card" style="background: var(--vulnerable-color); padding: 20px; color: white; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <h2 style="margin:0;">Panel Global de Población Vulnerable</h2>
-            <small>Coordinación de Indicadores Operativos y Demográficos</small>
-        </div>
-        <a href="vulnerable.html" class="btn-open" style="background: white; color: var(--vulnerable-color); padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">Abrir Módulo de Captura</a>
-    </div>
-<h3 style="color: #1e293b; margin-bottom: 10px;">📊 Estatus de Gestión Operativa</h3>
-
-<div class="stats-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; margin-bottom: 25px;">
-    
-    <div class="stat-box" style="grid-column: span 2; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #3b82f6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-        <small style="color:#64748b; font-weight: bold;">Total Padrón</small>
-        <div id="v-total" style="font-size: 24px; font-weight: bold; color: #1e293b;">0</div>
-    </div>
-    
-    <div class="stat-box" style="grid-column: span 2; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #10b981; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-        <small style="color:#64748b; font-weight: bold;">Entregados</small>
-        <div id="v-ent" style="font-size: 24px; font-weight: bold; color: #10b981;">0</div>
-    </div>
-    
-    <div class="stat-box" style="grid-column: span 2; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #f59e0b; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-        <small style="color:#64748b; font-weight: bold;">Pendientes</small>
-        <div id="v-pen" style="font-size: 24px; font-weight: bold; color: #ef4444;">0</div>
-    </div>
-
-    <div class="stat-box" style="grid-column: span 3; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #8b5cf6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-        <small style="color:#64748b; font-weight: bold;"> DIF Estatal</small>
-        <div id="v-estatal-stats" style="font-size: 24px; font-weight: bold; color: #8b5cf6;">0</div>
-                <div style="display: flex; gap: 10px; margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 8px;">
-            <span style="font-size: 11px; color: #16a34a; font-weight: 600;">
-                📦 Entregados: <span id="v-estatal-ent" style="font-family: monospace; font-size: 12px;">0</span>
-            </span>
-            <span style="font-size: 11px; color: #ef4444; font-weight: 600;">
-                ⏳ Pendientes: <span id="v-estatal-pen" style="font-family: monospace; font-size: 12px;">0</span>
-            </span>
-        </div>
-    </div>
-
-    <div class="stat-box" style="grid-column: span 3; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #64748b; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-        <small style="color:#64748b; font-weight: bold;"> DIF Municipal</small>
-        <div id="v-estatal-no-stats" style="font-size: 24px; font-weight: bold; color: #64748b;">0</div>
-                <div style="display: flex; gap: 10px; margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 8px;">
-            <span style="font-size: 11px; color: #16a34a; font-weight: 600;">
-                📦 Entregados: <span id="v-no-estatal-ent" style="font-family: monospace; font-size: 12px;">0</span>
-            </span>
-            <span style="font-size: 11px; color: #ef4444; font-weight: 600;">
-                ⏳ Pendientes: <span id="v-no-estatal-pen" style="font-family: monospace; font-size: 12px;">0</span>
-            </span>
-        </div>
-    </div>
-
-</div>
-
-    <h3 style="color: #1e293b; margin-bottom: 10px;">👥 Demografía e Indicadores de Inclusión</h3>
-    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
-        <div class="stat-box" style="background: #fdf2f8; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <small style="color:#db2777; font-weight: bold;">Mujeres Beneficiadas</small>
-            <div id="v-mujeres" style="font-size: 24px; font-weight: bold; color: #db2777;">0</div>
-        </div>
-        <div class="stat-box" style="background: #f0fdf4; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <small style="color:#16a34a; font-weight: bold;">Hombres Beneficiados</small>
-            <div id="v-hombres" style="font-size: 24px; font-weight: bold; color: #16a34a;">0</div>
-        </div>
-        <div class="stat-box" style="background: #fefce8; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <small style="color:#ca8a04; font-weight: bold;">Población Indígena</small>
-            <div id="v-indigena" style="font-size: 24px; font-weight: bold; color: #ca8a04;">0</div>
-        </div>
-        <div class="stat-box" style="background: #f0fdfa; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <small style="color:#0d9488; font-weight: bold;">Con Discapacidad</small>
-            <div id="v-discapacidad" style="font-size: 24px; font-weight: bold; color: #0d9488;">0</div>
-        </div>
-    </div>
-
-  <div class="panel-cobertura-territorial" style="margin-top: 25px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #6366f1;">
-    <h3 style="color: #1e293b; margin-bottom: 5px;">📍 Distribución Geográfica y Cuantificación de Apoyos</h3>
-    <p style="color: #64748b; font-size: 13px; margin-bottom: 15px; margin-top: 0;">Cantidades exactas entregadas o gestionadas por cada zona/comunidad.</p>
-    
-    <div id="v-cobertura-territorial-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
-        </div>
-</div>
-
-<div class="panel-cobertura-territorial" style="margin-top: 25px; font-family: sans-serif;">
-    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #10b981;">
-        <h3 style="font-size: 16px; color: #1e293b; margin: 0 0 5px 0;"><i class="fas fa-chart-pie" style="color:#10b981;"></i> Distribución Porcentual por Programa</h3>
-        <p style="color: #64748b; font-size: 13px; margin: 0 0 20px 0;">Representación en gráficos de pastel del impacto de cada apoyo en las comunidades.</p>
-        
-        <div id="v-lista-territorio" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; max-height: 750px; overflow-y: auto; padding-right: 5px;">
+        <!-- VIEW POBLACIÓN VULNERABLE -->
+        <div id="view-vulnerable" class="view-container" style="display:none;">
+            <div class="access-card" style="background: var(--vulnerable-color); padding: 20px; color: white; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="margin:0;">Panel Global de Población Vulnerable</h2>
+                    <small>Coordinación de Indicadores Operativos y Demográficos</small>
+                </div>
+                <a href="vulnerable.html" class="btn-open" style="background: white; color: var(--vulnerable-color); padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">Abrir Módulo de Captura</a>
             </div>
-    </div>
-</div>
-</div>
+            <h3 style="color: #1e293b; margin-bottom: 10px;">📊 Estatus de Gestión Operativa</h3>
 
-<div style="background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; margin-top: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-    
-    <!-- ENCABEZADO Y CONTROLES -->
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
-        <h3 style="font-size: 15px; font-weight: bold; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 8px;">
-            <i class="fas fa-list-alt" style="color: #6366f1;"></i> Resumen por Ubicación y Programa
-        </h3>
-        
-        <!-- Botón de Impresión -->
-        <button onclick="imprimirTablaVulnerable()" 
-                style="background: #0284c7; color: white; border: none; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s;">
-            <i class="fas fa-print"></i> Imprimir Reporte
-        </button>
-    </div>
+            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 15px; margin-bottom: 25px;">
+                <div class="stat-box" style="grid-column: span 2; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #3b82f6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <small style="color:#64748b; font-weight: bold;">Total Padrón</small>
+                    <div id="v-total" style="font-size: 24px; font-weight: bold; color: #1e293b;">0</div>
+                </div>
+                
+                <div class="stat-box" style="grid-column: span 2; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #10b981; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <small style="color:#64748b; font-weight: bold;">Entregados</small>
+                    <div id="v-ent" style="font-size: 24px; font-weight: bold; color: #10b981;">0</div>
+                </div>
+                
+                <div class="stat-box" style="grid-column: span 2; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #f59e0b; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <small style="color:#64748b; font-weight: bold;">Pendientes</small>
+                    <div id="v-pen" style="font-size: 24px; font-weight: bold; color: #ef4444;">0</div>
+                </div>
 
-    <!-- PANEL DE FILTROS EN TIEMPO REAL -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 15px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #f1f5f9;">
-        <div>
-            <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">📍 Localidad / Colonia:</label>
-            <input type="text" id="v-filtro-loc" oninput="renderizarTablaVulnerable()" placeholder="Buscar por localidad o colonia..." 
-                   style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; outline: none; box-sizing: border-box;">
-        </div>
-        <div>
-            <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">📦 Programa / Subprograma:</label>
-            <input type="text" id="v-filtro-subprograma" oninput="renderizarTablaVulnerable()" placeholder="Buscar por programa o subgrupo..." 
-                   style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; outline: none; box-sizing: border-box;">
-        </div>
-    </div>
+                <div class="stat-box" style="grid-column: span 3; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #8b5cf6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <small style="color:#64748b; font-weight: bold;"> DIF Estatal</small>
+                    <div id="v-estatal-stats" style="font-size: 24px; font-weight: bold; color: #8b5cf6;">0</div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 8px;">
+                        <span style="font-size: 11px; color: #16a34a; font-weight: 600;">
+                            📦 Entregados: <span id="v-estatal-ent" style="font-family: monospace; font-size: 12px;">0</span>
+                        </span>
+                        <span style="font-size: 11px; color: #ef4444; font-weight: 600;">
+                            ⏳ Pendientes: <span id="v-estatal-pen" style="font-family: monospace; font-size: 12px;">0</span>
+                        </span>
+                    </div>
+                </div>
 
-    <!-- TABLA -->
-    <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
-            <thead>
-                <tr style="background: #f1f5f9; color: #475569; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #e2e8f0;">
-                    <th style="padding: 10px 12px;">Localidad / Colonia</th>
-                    <th style="padding: 10px 12px;">Programa</th>
-                    <th style="padding: 10px 12px;">Subgrupo / Subprograma</th>
-                    <th style="padding: 10px 12px; text-align: center;">Total</th>
-                    <th style="padding: 10px 12px; text-align: center;">Sin Entregar</th>
-                    <th style="padding: 10px 12px; text-align: center;">Entregados</th>
-                </tr>
-            </thead>
-            <tbody id="v-tabla-registros"></tbody>
-        </table>
-    </div>
-</div>
+                <div class="stat-box" style="grid-column: span 3; background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #64748b; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <small style="color:#64748b; font-weight: bold;"> DIF Municipal</small>
+                    <div id="v-estatal-no-stats" style="font-size: 24px; font-weight: bold; color: #64748b;">0</div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px; border-top: 1px dashed #e2e8f0; padding-top: 8px;">
+                        <span style="font-size: 11px; color: #16a34a; font-weight: 600;">
+                            📦 Entregados: <span id="v-no-estatal-ent" style="font-family: monospace; font-size: 12px;">0</span>
+                        </span>
+                        <span style="font-size: 11px; color: #ef4444; font-weight: 600;">
+                            ⏳ Pendientes: <span id="v-no-estatal-pen" style="font-family: monospace; font-size: 12px;">0</span>
+                        </span>
+                    </div>
+                </div>
+            </div> <!-- CORREGIDO: Se agregó el cierre de stats-grid de Estatus Operativo -->
 
-<div id="view-social" class="view-container" style="display:none;">
+            <h3 style="color: #1e293b; margin-bottom: 10px;">👥 Demografía e Indicadores de Inclusión</h3>
+            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 25px;">
+                <div class="stat-box" style="background: #fdf2f8; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <small style="color:#db2777; font-weight: bold;">Mujeres Beneficiadas</small>
+                    <div id="v-mujeres" style="font-size: 24px; font-weight: bold; color: #db2777;">0</div>
+                </div>
+                <div class="stat-box" style="background: #f0fdf4; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <small style="color:#16a34a; font-weight: bold;">Hombres Beneficiados</small>
+                    <div id="v-hombres" style="font-size: 24px; font-weight: bold; color: #16a34a;">0</div>
+                </div>
+                <div class="stat-box" style="background: #fefce8; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <small style="color:#ca8a04; font-weight: bold;">Población Indígena</small>
+                    <div id="v-indigena" style="font-size: 24px; font-weight: bold; color: #ca8a04;">0</div>
+                </div>
+                <div class="stat-box" style="background: #f0fdfa; padding: 15px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <small style="color:#0d9488; font-weight: bold;">Con Discapacidad</small>
+                    <div id="v-discapacidad" style="font-size: 24px; font-weight: bold; color: #0d9488;">0</div>
+                </div>
+            </div>
+
+            <div class="panel-cobertura-territorial" style="margin-top: 25px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #6366f1;">
+                <h3 style="color: #1e293b; margin-bottom: 5px;">📍 Distribución Geográfica y Cuantificación de Apoyos</h3>
+                <p style="color: #64748b; font-size: 13px; margin-bottom: 15px; margin-top: 0;">Cantidades exactas entregadas o gestionadas por cada zona/comunidad.</p>
+                
+                <div id="v-cobertura-territorial-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;"></div>
+            </div>
+
+            <div class="panel-cobertura-territorial" style="margin-top: 25px; font-family: sans-serif;">
+                <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #10b981;">
+                    <h3 style="font-size: 16px; color: #1e293b; margin: 0 0 5px 0;"><i class="fas fa-chart-pie" style="color:#10b981;"></i> Distribución Porcentual por Programa</h3>
+                    <p style="color: #64748b; font-size: 13px; margin: 0 0 20px 0;">Representación en gráficos de pastel del impacto de cada apoyo en las comunidades.</p>
+                    
+                    <div id="v-lista-territorio" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; max-height: 750px; overflow-y: auto; padding-right: 5px;"></div>
+                </div>
+            </div>
+
+            <div style="background: white; border-radius: 8px; border: 1px solid #e2e8f0; padding: 20px; margin-top: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <!-- ENCABEZADO Y CONTROLES (CORREGIDO display: flex) -->
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+                    <h3 style="font-size: 15px; font-weight: bold; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-list-alt" style="color: #6366f1;"></i> Resumen por Ubicación y Programa
+                    </h3>
+                    
+                    <!-- Botón de Impresión -->
+                    <button onclick="imprimirTablaVulnerable()" 
+                            style="background: #0284c7; color: white; border: none; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s;">
+                        <i class="fas fa-print"></i> Imprimir Reporte
+                    </button>
+                </div>
+
+                <!-- PANEL DE FILTROS EN TIEMPO REAL (CORREGIDO display: grid) -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 15px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #f1f5f9;">
+                    <div>
+                        <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">📍 Localidad / Colonia:</label>
+                        <input type="text" id="v-filtro-loc" oninput="renderizarTablaVulnerable()" placeholder="Buscar por localidad o colonia..." 
+                               style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; outline: none; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="font-size: 11px; font-weight: 700; color: #475569; display: block; margin-bottom: 4px;">📦 Programa / Subprograma:</label>
+                        <input type="text" id="v-filtro-subprograma" oninput="renderizarTablaVulnerable()" placeholder="Buscar por programa o subgrupo..." 
+                               style="width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px; outline: none; box-sizing: border-box;">
+                    </div>
+                </div>
+
+                <!-- TABLA -->
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="background: #f1f5f9; color: #475569; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #e2e8f0;">
+                                <th style="padding: 10px 12px;">Localidad / Colonia</th>
+                                <th style="padding: 10px 12px;">Programa</th>
+                                <th style="padding: 10px 12px;">Subgrupo / Subprograma</th>
+                                <th style="padding: 10px 12px; text-align: center;">Total</th>
+                                <th style="padding: 10px 12px; text-align: center;">Sin Entregar</th>
+                                <th style="padding: 10px 12px; text-align: center;">Entregados</th>
+                            </tr>
+                        </thead>
+                        <tbody id="v-tabla-registros"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div> <!-- CORREGIDO: Cierre correcto de view-vulnerable al final de su contenido -->
+
+ <div id="view-social" class="view-container" style="display:none;">
     <div class="access-card" style="background: var(--social-color);">
         <div><b>Trabajo Social</b></div>
         <a href="social.html" class="btn-open">Abrir Módulo de Captura</a>
@@ -362,7 +359,7 @@ canvas { flex-grow:1; }
         <small>Detalles</small>
         <div id="stat-detalle" style="font-size:14px; font-weight:bold;">0</div>
     </div>
-</div>
+ </div>
 
     <!-- Contabilidad (Stat Boxes Dinámicas) -->
     <div id="s-reporte-contable" class="stats-grid" style="margin-bottom: 20px;"></div>
@@ -394,7 +391,8 @@ canvas { flex-grow:1; }
             </div>
         </div>
 
-<div id="view-historial" class="view-container" style="display:none;">
+
+ <div id="view-historial" class="view-container" style="display:none;">
     <div class="dash">
         <div class="card money"><h3>Ingreso Periodo</h3><span class="monto" id="t-caja">$0.00</span></div>
         <div class="card valid"><h3>Ingreso Validado</h3><span class="monto" id="t-validado">$0.00</span></div>
@@ -506,7 +504,9 @@ canvas { flex-grow:1; }
         <div class="panel" style="padding:15px; background:#fff; height: 220px; border-radius:6px;"><b>Incremento Semanal ($)</b><canvas id="chart-incremento"></canvas></div>
     </div>
 </div>
-
+<!-- ========================================== -->
+<!-- PANEL DE PREVISUALIZACIÓN Y CONTROL: PSICOLOGIA -->
+<!-- ========================================== -->
 <div id="view-psicologia" class="view-container" style="display:none;">
     <div class="access-card" style="background: var(--psico-color);">
         <div><b>Psicología</b></div>
@@ -572,7 +572,9 @@ canvas { flex-grow:1; }
     </div>
     </div>  
 </div>
-
+<!-- ========================================== -->
+<!-- PANEL DE PREVISUALIZACIÓN Y CONTROL: JEFATURA-PSICOLOGIA -->
+<!-- ========================================== -->
 <div id="view-jefatura-psicologia" class="view-container" style="display:none;">
     <div class="access-card" style="background: #701a27;"><div><b>Jefatura de Psicología</b></div><a href="jefatura_psicologia.html" class="btn-open">Abrir Módulo de Captura</a></div>
     <div class="filter-bar"></div>
@@ -1343,7 +1345,6 @@ window.reprocesarVulnerable = () => {
     renderizarTablaVulnerable();
 };
 
-
 // =============================================================================
 // FUNCIÓN PARA RENDERIZAR Y FILTRAR LA TABLA EN TIEMPO REAL
 // =============================================================================
@@ -1397,8 +1398,6 @@ window.renderizarTablaVulnerable = function() {
 
     tablaRegistros.innerHTML = htmlFilas;
 };
-
-
 // =============================================================================
 // FUNCIÓN GLOBAL DE IMPRESIÓN (GENERA VISTA LIMPIA PARA IMPRESORA O PDF)
 // =============================================================================
@@ -1469,7 +1468,7 @@ window.imprimirTablaVulnerable = function() {
         ventana.close();
     }, 250);
 
-}; // <-- AQUÍ CIERRA TU FUNCIÓN window.reprocesarVulnerable
+}; 
        // =============================================================================
 // FUNCIÓN GLOBAL PARA LA DESCARGA INDIVIDUAL (SÁCADA DEL FLUJO REACTIVO)
 // =============================================================================
