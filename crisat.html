@@ -185,38 +185,39 @@
             </div>
         </fieldset>
         
-        <fieldset>
-            <legend><i class="fas fa-user-injured"></i> Datos Personales</legend>
-            <div class="field span-2"><label>CURP</label><input type="text" id="curp" style="text-transform:uppercase;"></div>
-            <div class="field span-2"><label>Nombre del Paciente *</label><input type="text" id="nombre" required></div>
-            <div class="field"><label>Sexo</label><select id="sexo"><option value="H">Hombre</option><option value="M">Mujer</option></select></div>
-            <div class="field"><label>F. Nacimiento</label><input type="date" id="fecha_nacimiento" onchange="window.calcularEdad()"></div>
-            
-            <div class="field"><label>Lugar de Nacimiento</label><input type="text" id="lugar_nacimiento" style="text-transform:uppercase;"></div>
-            <div class="field"><label>Escolaridad</label><input type="text" id="escolaridad" style="text-transform:uppercase;"></div>
-            <div class="field"><label>Ocupación</label><input type="text" id="ocupacion" style="text-transform:uppercase;"></div>
-            
-            <div class="field"><label>Edad</label><input type="number" id="edad" readonly></div>
-            <div class="field"><label>Municipio</label><input type="text" id="municipio" value="SAN ANDRÉS TUXTLA"></div>
-            
-            <div class="field span-2">
-                <label>Ubicación</label>
-                <div class="ubicacion-container" style="display: flex; gap: 20px; align-items: center;">
-                    <div style="display: flex; gap: 15px;">
-                        <label style="display: flex; align-items: center; gap: 6px;">
-                            <input type="radio" name="tipo_ubicacion" value="COLONIA" checked> Colonia
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 6px;">
-                            <input type="radio" name="tipo_ubicacion" value="LOCALIDAD"> Localidad
-                        </label>
-                    </div>
-                    <input type="text" id="col_loc" placeholder="Nombre de la colonia o localidad..." style="flex-grow: 1;">
-                </div>
+<fieldset>
+    <legend><i class="fas fa-user-injured"></i> Datos Personales</legend>
+    <div class="field span-2"><label>CURP</label><input type="text" id="curp" style="text-transform:uppercase;"></div>
+    <div class="field span-2"><label>Nombre del Paciente *</label><input type="text" id="nombre" required></div>
+    <div class="field"><label>Sexo</label><select id="sexo"><option value="H">Hombre</option><option value="M">Mujer</option></select></div>
+    <div class="field"><label>F. Nacimiento</label><input type="date" id="fecha_nacimiento" onchange="window.calcularEdad()"></div>
+    
+    <div class="field"><label>Lugar de Nacimiento</label><input type="text" id="lugar_nacimiento" style="text-transform:uppercase;"></div>
+    <div class="field"><label>Escolaridad</label><input type="text" id="escolaridad" style="text-transform:uppercase;"></div>
+    <div class="field"><label>Ocupación</label><input type="text" id="ocupacion" style="text-transform:uppercase;"></div>
+    
+    <!-- Se cambia type="number" a type="text" para permitir el texto completo -->
+    <div class="field"><label>Edad</label><input type="text" id="edad" readonly></div>
+    <div class="field"><label>Municipio</label><input type="text" id="municipio" value="SAN ANDRÉS TUXTLA"></div>
+    
+    <div class="field span-2">
+        <label>Ubicación</label>
+        <div class="ubicacion-container" style="display: flex; gap: 20px; align-items: center;">
+            <div style="display: flex; gap: 15px;">
+                <label style="display: flex; align-items: center; gap: 6px;">
+                    <input type="radio" name="tipo_ubicacion" value="COLONIA" checked> Colonia
+                </label>
+                <label style="display: flex; align-items: center; gap: 6px;">
+                    <input type="radio" name="tipo_ubicacion" value="LOCALIDAD"> Localidad
+                </label>
             </div>
-            
-            <div class="field span-2"><label>Dirección</label><input type="text" id="direccion"></div>
-            <div class="field span-2"><label>Teléfono</label><input type="tel" id="telefono"></div>
-        </fieldset>
+            <input type="text" id="col_loc" placeholder="Nombre de la colonia o localidad..." style="flex-grow: 1;">
+        </div>
+    </div>
+    
+    <div class="field span-2"><label>Dirección</label><input type="text" id="direccion"></div>
+    <div class="field span-2"><label>Teléfono</label><input type="tel" id="telefono"></div>
+</fieldset>
 
       <fieldset>
     <legend><i class="fas fa-file-medical"></i> Valoración Clínica</legend>
@@ -550,6 +551,41 @@
         if (hoy.getMonth() < cumple.getMonth() || (hoy.getMonth() === cumple.getMonth() && hoy.getDate() < cumple.getDate())) edad--;
         document.getElementById("edad").value = edad;
     };
+
+window.calcularEdad = () => {
+    const f = document.getElementById("fecha_nacimiento")?.value;
+    if (!f) return;
+
+    const hoy = new Date();
+    // Prevenimos el desfase de día por zona horaria agregando T00:00:00
+    const cumple = new Date(f + "T00:00:00");
+
+    let años = hoy.getFullYear() - cumple.getFullYear();
+    let meses = hoy.getMonth() - cumple.getMonth();
+    let dias = hoy.getDate() - cumple.getDate();
+
+    // Si el día actual es menor al día de nacimiento, ajustamos restando un mes
+    if (dias < 0) {
+        meses--;
+        const diasMesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0).getDate();
+        dias += diasMesAnterior;
+    }
+
+    // Si el mes actual es menor al mes de nacimiento, ajustamos restando un año
+    if (meses < 0) {
+        años--;
+        meses += 12;
+    }
+
+    // Calculamos semanas y días sobrantes
+    const semanas = Math.floor(dias / 7);
+    const diasRestantes = dias % 7;
+
+    // Asignamos el texto formateado a la variable 'edad' que requiere el input
+    let edad = `${años} años, ${meses} meses, ${semanas} semanas y ${diasRestantes} días`;
+
+    document.getElementById("edad").value = edad;
+};
 
     window.toggleCamposEspeciales = () => {
         const box = document.getElementById("box_justificante");
