@@ -1117,23 +1117,11 @@ function obtenerDatosFormulario() {
                (r.diagnostico || '').toLowerCase().includes(termino);
     });
 
-    // 2. ORDENAMIENTO POR FECHA/HORA DE CAPTURA
+// 2. ORDENAMIENTO POR FECHA Y HORA DE LA CITA (DE MÁS ACTUAL A PASADA)
     registrosFiltrados.sort((a, b) => {
-        const obtenerMs = (item) => {
-            if (!item.timestamp) return 0;
-            if (typeof item.timestamp.toMillis === 'function') {
-                return item.timestamp.toMillis();
-            }
-            if (item.timestamp.seconds) {
-                return item.timestamp.seconds * 1000;
-            }
-            if (item.timestamp instanceof Date) {
-                return item.timestamp.getTime();
-            }
-            return 0;
-        };
-
-        return obtenerMs(b) - obtenerMs(a);
+        const fechaA = new Date((a.fecha_ISO || '1970-01-01') + 'T' + (a.hora || '00:00'));
+        const fechaB = new Date((b.fecha_ISO || '1970-01-01') + 'T' + (b.hora || '00:00'));
+        return fechaB - fechaA;
     });
 
     const totalRegistros = registrosFiltrados.length;
