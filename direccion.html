@@ -13,6 +13,8 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- html2pdf.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- SweetAlert2 CSS y JS -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
@@ -430,8 +432,14 @@
       const usuario = sessionStorage.getItem('nombre_usuario') || localStorage.getItem('activeUser') || 'Usuario';
 
       if (!sesionActiva || (departamento !== 'DIRECCION' && departamento !== 'GLOBAL')) {
-        alert('Acceso no autorizado. Por favor inicie sesión.');
-        window.location.href = 'index.html';
+        Swal.fire({
+          title: 'Acceso No Autorizado',
+          text: 'Por favor inicie sesión.',
+          icon: 'error',
+          confirmButtonText: 'Aceptar'
+        }).then(() => {
+          window.location.href = 'index.html';
+        });
         return;
       }
 
@@ -447,12 +455,23 @@
     }
 
     window.cerrarSesion = function() {
-      if (confirm('¿Desea cerrar sesión del sistema?')) {
-        sessionStorage.clear();
-        localStorage.removeItem('activeUser');
-        localStorage.removeItem('userDep');
-        window.location.href = 'index.html';
-      }
+      Swal.fire({
+        title: '¿Desea cerrar sesión?',
+        text: 'Se saldrá de la sesión actual del sistema.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          sessionStorage.clear();
+          localStorage.removeItem('activeUser');
+          localStorage.removeItem('userDep');
+          window.location.href = 'index.html';
+        }
+      });
     };
 
     window.switchModule = function(modKey, event) {
@@ -710,11 +729,11 @@
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
             <h6 class="fw-bold text-success m-0"><i class="fa-solid fa-arrow-trend-up me-1"></i> Ingresos</h6>
             <div class="d-flex align-items-center gap-2 no-print">
-                      <div class="d-block">
-            <label class="form-label fw-semibold text-muted mb-1" style="font-size: 0.8rem;">
-              <i class="fa-solid fa-triangle-exclamation me-1"></i> Este filtro solo es para los MODULOS 2.- CRISAT, 3. CAIC, 4.- A. MEDICA
-            </label>
-          </div>
+              <div class="d-block">
+                <label class="form-label fw-semibold text-muted mb-1" style="font-size: 0.8rem;">
+                  <i class="fa-solid fa-triangle-exclamation me-1"></i> Este filtro solo es para los MÓDULOS: CRISAT, CAIC, ÁREA MÉDICA
+                </label>
+              </div>
               <div class="input-group input-group-sm" style="width: auto;">
                 <span class="input-group-text text-muted">Desde</span>
                 <input type="date" id="startIngreso" class="form-control" value="${filterState.startIngreso}" onchange="actualizarFiltrosFechas()">
@@ -841,12 +860,30 @@
     };
 
     window.deleteRecord = async function(id) {
-      if (confirm('¿Está seguro de eliminar este registro de la base de datos?')) {
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Esta acción eliminará el registro de la base de datos.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+      });
+
+      if (result.isConfirmed) {
         try {
           await deleteDoc(doc(firestore, dbCollections[currentModule].path, id));
+          Swal.fire({
+            title: '¡Eliminado!',
+            text: 'El registro ha sido borrado correctamente.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false
+          });
         } catch (error) {
           console.error("Error al eliminar:", error);
-          alert("Error al eliminar el registro.");
+          Swal.fire('Error', 'No se pudo eliminar el registro.', 'error');
         }
       }
     };
@@ -871,9 +908,17 @@
           await addDoc(dbCollections[currentModule], nuevoRegistro);
         }
         bsModal.hide();
+        
+        Swal.fire({
+          title: '¡Éxito!',
+          text: id ? 'Registro actualizado correctamente.' : 'Registro guardado exitosamente.',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
       } catch (error) {
         console.error("Error al guardar en Firestore:", error);
-        alert("Error al conectar con la base de datos.");
+        Swal.fire('Error', 'Error al conectar con la base de datos.', 'error');
       }
     };
 
@@ -896,7 +941,7 @@
           const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
           if (rows.length <= 1) {
-            alert('El archivo Excel está vacío o no tiene registros.');
+            Swal.fire('Atención', 'El archivo Excel está vacío o no tiene registros.', 'warning');
             return;
           }
 
@@ -980,11 +1025,11 @@
             countAdded++;
           }
 
-          alert(`¡Se importaron ${countAdded} registros correctamente en ${currentModule.toUpperCase()}!`);
+          Swal.fire('¡Importación Exitosa!', `Se importaron ${countAdded} registros correctamente en ${currentModule.toUpperCase()}.`, 'success');
           document.getElementById('importFile').value = '';
         } catch (err) {
           console.error("Error al procesar el archivo Excel:", err);
-          alert("Ocurrió un error al leer el archivo Excel. Revisa la consola (F12).");
+          Swal.fire('Error', 'Ocurrió un error al leer el archivo Excel. Revisa la consola.', 'error');
         }
       };
       reader.readAsArrayBuffer(file);
@@ -994,7 +1039,7 @@
       if (typeof XLSX === 'undefined') return;
       const data = getFilteredData();
       if (data.length === 0) {
-        alert('No hay datos para exportar.');
+        Swal.fire('Atención', 'No hay datos para exportar.', 'info');
         return;
       }
 
@@ -1074,7 +1119,18 @@
     });
 
     window.eliminarRegistrosVacios = async function() {
-      if (!confirm('¿Estás seguro de eliminar todos los registros vacíos o en ceros del módulo actual?')) return;
+      const result = await Swal.fire({
+        title: '¿Limpiar registros vacíos?',
+        text: 'Se eliminarán todos los registros vacíos o en ceros del módulo actual.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#ffc107',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, limpiar',
+        cancelButtonText: 'Cancelar'
+      });
+
+      if (!result.isConfirmed) return;
 
       try {
         const dataActual = db[currentModule] || [];
@@ -1090,10 +1146,10 @@
           }
         }
 
-        alert(`Se han limpiado y eliminado ${borrados} registros vacíos o en ceros.`);
+        Swal.fire('¡Limpieza Completa!', `Se han limpiado y eliminado ${borrados} registros vacíos o en ceros.`, 'success');
       } catch (error) {
         console.error("Error al limpiar registros:", error);
-        alert("Ocurrió un error al intentar limpiar la base de datos.");
+        Swal.fire('Error', 'Ocurrió un error al intentar limpiar la base de datos.', 'error');
       }
     };
 
