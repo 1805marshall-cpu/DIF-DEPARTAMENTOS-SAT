@@ -5,88 +5,362 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DIF 2026 - 2029 | Procuraduría</title>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root { 
-            --primary: #1e40af; --success: #059669; --warning: #f59e0b; 
-            --danger: #dc2626; --bg: #f8fafc; --procu: #1e3a8a; --excel: #1d6f42;
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    :root { 
+        --primary: #0f172a; --success: #10b981; --warning: #f59e0b; 
+        --danger: #ef4444; --bg: #ffffff; --border: #e2e8f0; 
+        --text: #334155; --text-light: #64748b;
+    }
+    
+    body { 
+        font-family: 'Segoe UI', system-ui, sans-serif; 
+        background: var(--bg); 
+        margin: 0; 
+        color: var(--text); 
+        font-size: 13px; 
+    }
+    
+    /* HEADER MINIMALISTA */
+    header { 
+        background: #fff; 
+        padding: 16px 24px; 
+        border-bottom: 1px solid var(--border); 
+        display: flex; 
+        flex-direction: row;
+        justify-content: space-between; 
+        align-items: center; 
+    }
+    
+    .container { 
+        max-width: 1400px; 
+        margin: 20px auto; 
+        padding: 0 20px; 
+    }
+    
+    .card { 
+        background: #fff; 
+        padding: 24px; 
+        border-radius: 8px; 
+        border: 1px solid var(--border); 
+        margin-bottom: 20px; 
+    }
+    
+    h3 { 
+        margin: 0 0 16px 0; 
+        font-size: 12px; 
+        color: var(--primary); 
+        text-transform: uppercase; 
+        letter-spacing: 0.5px; 
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    /* REJILLA FORMULARIO LIMPIA */
+    .form-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+        gap: 16px; 
+    }
+    
+    .form-group { 
+        display: flex; 
+        flex-direction: column; 
+    }
+    
+    label { 
+        font-size: 10px; 
+        font-weight: 600; 
+        color: var(--text-light); 
+        text-transform: uppercase; 
+        margin-bottom: 6px; 
+        letter-spacing: 0.3px;
+    }
+    
+    input, select, textarea { 
+        padding: 8px 12px; 
+        border: 1px solid var(--border); 
+        border-radius: 6px; 
+        font-size: 12px; 
+        outline: none; 
+        transition: border-color 0.2s, box-shadow 0.2s; 
+        width: 100%;
+        box-sizing: border-box;
+        background: #fff;
+    }
+    
+    input:focus, select:focus, textarea:focus { 
+        border-color: var(--primary); 
+        box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.05); 
+    }
+    
+    /* ACCIONES Y BOTONES PLANOS */
+    .btn-box { 
+        display: flex; 
+        gap: 10px; 
+        margin-top: 20px; 
+        flex-wrap: wrap; 
+    }
+    
+    .btn { 
+        padding: 8px 16px; 
+        border: 1px solid var(--border); 
+        border-radius: 6px; 
+        font-weight: 600; 
+        cursor: pointer; 
+        font-size: 11px; 
+        color: var(--text); 
+        background: #fff;
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        gap: 8px; 
+        text-transform: uppercase; 
+        transition: background 0.2s, border-color 0.2s; 
+    }
+
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+    
+    .btn:hover { 
+        background: #f8fafc; 
+        border-color: #cbd5e1;
+    }
+
+    .btn-primary:hover {
+        background: #1e293b;
+    }
+
+    /* CAJA DE BÚSQUEDA SUTIL */
+    .search-box { 
+        background: #fafafa; 
+        padding: 16px; 
+        border-radius: 8px; 
+        border: 1px solid var(--border); 
+        margin-bottom: 20px; 
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px; 
+        align-items: flex-end; 
+    }
+    
+    /* TABLA LIMPIA */
+    .table-wrap { 
+        background: #fff; 
+        border-radius: 8px; 
+        border: 1px solid var(--border); 
+        overflow-x: auto; 
+        width: 100%;
+    }
+    
+    table { 
+        width: 100%; 
+        border-collapse: collapse; 
+    }
+    
+    th { 
+        background: #fafafa; 
+        padding: 12px 16px; 
+        text-align: left; 
+        font-size: 10px; 
+        color: var(--text-light); 
+        border-bottom: 1px solid var(--border); 
+        text-transform: uppercase; 
+        letter-spacing: 0.5px;
+    }
+    
+    td { 
+        padding: 12px 16px; 
+        border-bottom: 1px solid var(--border); 
+        vertical-align: middle; 
+    }
+    
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr:hover { 
+        background-color: #fafafa; 
+    }
+    
+    /* PAGINACIÓN */
+    .paginacion-bar { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        background: #fff; 
+        padding: 16px; 
+        border-radius: 8px; 
+        margin-top: 20px; 
+        border: 1px solid var(--border); 
+        flex-wrap: wrap;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--text-light);
+    }
+    
+    .btn-pag { 
+        padding: 6px 12px; 
+        border: 1px solid var(--border); 
+        background: white; 
+        border-radius: 6px; 
+        cursor: pointer; 
+        font-size: 11px; 
+        color: var(--text);
+    }
+    
+    .btn-pag:disabled { 
+        opacity: 0.4; 
+        cursor: not-allowed; 
+    }
+
+    /* MEDIA QUERIES - MÓVIL */
+    @media (max-width: 768px) {
+        header {
+            flex-direction: column;
+            gap: 12px;
+            text-align: center;
+            padding: 16px;
+        }
+
+        .container {
+            padding: 0 10px;
+        }
+
+        .card {
+            padding: 16px;
+        }
+
+        .table-wrap {
+            border: none;
+            background: transparent;
+        }
+
+        table, thead, tbody, th, td, tr { 
+            display: block; 
+        }
+
+        thead tr { 
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+        }
+
+        tr { 
+            background: #ffffff;
+            border: 1px solid var(--border); 
+            border-radius: 8px;
+            margin-bottom: 12px;
+            padding: 12px;
+        }
+
+        tr:hover {
+            background-color: #ffffff;
+        }
+
+        td { 
+            border: none;
+            border-bottom: 1px solid #f8fafc; 
+            position: relative;
+            padding-left: 45% !important; 
+            text-align: right;
+            font-size: 12px;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            box-sizing: border-box;
+        }
+
+        td:last-child {
+            border-bottom: 0;
+            padding-top: 10px;
+        }
+
+        td:before { 
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            transform: translateY(-50%);
+            width: 40%; 
+            padding-right: 10px; 
+            white-space: nowrap;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-light);
+            font-size: 10px;
+            text-transform: uppercase;
+            content: attr(data-label);
         }
         
-        body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; color: #1e293b; font-size: 13px; }
-        header { background: #fff; padding: 15px 40px; border-bottom: 3px solid var(--procu); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .container { max-width: 1850px; margin: 20px auto; padding: 0 20px; }
-        
-        .card { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; margin-bottom: 20px; }
-        h3 { margin: 0 0 15px 0; font-size: 11px; color: var(--procu); text-transform: uppercase; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; letter-spacing: 1px; }
-        
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
-        .form-group { display: flex; flex-direction: column; }
-        label { font-size: 9px; font-weight: bold; color: #64748b; text-transform: uppercase; margin-bottom: 3px; }
-        input, select, textarea { padding: 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; outline: none; transition: 0.2s; }
-        input:focus, textarea:focus { border-color: var(--procu); box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.1); }
-        
-        .btn-box { display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap; }
-        .btn { padding: 10px 16px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 10px; color: white; display: flex; align-items: center; gap: 6px; text-transform: uppercase; transition: 0.3s; }
-        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        td input, td select, td textarea {
+            text-align: left;
+            width: 100% !important;
+        }
 
-        .search-box { background: #f1f5f9; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 15px; display: flex; gap: 15px; align-items: flex-end; }
+        td button {
+            width: 100%;
+        }
         
-        .table-wrap { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1400px; }
-        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 10px; color: #475569; border-bottom: 2px solid #e2e8f0; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
-        tr:hover { background-color: #fcfcfc; }
-        
-        .paginacion-bar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px 20px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #e2e8f0; }
-        .btn-pag { padding: 6px 12px; border: 1px solid #cbd5e1; background: white; border-radius: 4px; cursor: pointer; font-size: 11px; }
-        .btn-pag:disabled { opacity: 0.5; cursor: not-allowed; }
+        .paginacion-bar {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
 
-        @media print { .no-print { display: none !important; } }
-    </style>
+    @media print { 
+        .no-print { display: none !important; } 
+    }
+</style>
 </head>
 <body>
 
-<header class="no-print" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 20px;">
-    <div style="display: flex; align-items: center; gap: 20px;">
-        <h2 style="margin:0; color: var(--procu); font-size: 18px;">
-            <i class="fas fa-balance-scale"></i> PROCURADURÍA DIF | SISTEMA 2026-2029
+<header class="no-print" style="display: flex; align-items: center; justify-content: space-between; padding: 16px 24px;">
+    <div style="display: flex; align-items: center; gap: 16px;">
+        <h2 style="margin: 0; color: var(--primary); font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+            <i class="fas fa-balance-scale"></i> Procuraduría DIF | Sistema 2026-2029
         </h2>
-        <!-- Contenedor estilizado para el saludo del usuario activo -->
-        <div id="user-display" style="font-size: 11px; font-weight: bold; color: #1e3a8a; background: #eff6ff; border: 1px solid #bfdbfe; padding: 6px 12px; border-radius: 6px; display: flex; align-items: center; gap: 6px;">
-            <i class="fas fa-user-circle" style="font-size: 14px; color: #2563eb;"></i>
+        <!-- Contenedor sutil para el saludo del usuario activo -->
+        <div id="user-display" style="font-size: 11px; font-weight: 500; color: var(--text); background: #f8fafc; border: 1px solid var(--border); padding: 5px 10px; border-radius: 6px; display: flex; align-items: center; gap: 6px;">
+            <i class="fas fa-user-circle" style="font-size: 13px; color: var(--text-light);"></i>
             <span id="user-text">Cargando usuario...</span>
         </div>
     </div>
 
     <!-- Grupo de botones de navegación y sesión -->
     <div style="display: flex; gap: 8px;">
-        <button class="btn" style="background: var(--primary);" onclick="location.href='admin_global.html'">
-            <i class="fa-solid fa-chart-pie"></i> DASHBOARD
+        <button class="btn" onclick="location.href='admin_global.html'">
+            <i class="fa-solid fa-chart-pie"></i> Dashboard
         </button>
-        <button class="btn" style="background: var(--danger);" onclick="cerrarSesion()">
-            <i class="fas fa-sign-out-alt"></i> CERRAR SESIÓN
+        <button class="btn" style="color: var(--danger); border-color: #fecaca;" onclick="cerrarSesion()">
+            <i class="fas fa-sign-out-alt"></i> Salir
         </button>
     </div>
 </header>
 
 <div class="container">
 <div class="card no-print">
-    <h3 style="margin-bottom: 25px; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;">
+    <h3>
         <i class="fas fa-folder-plus"></i> Registro de Expediente
     </h3>
     <input type="hidden" id="edit-id">
     
-    <div class="form-grid" style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="form-grid" style="display: flex; flex-direction: column; gap: 16px;">
         
         <!-- SECCIÓN 1: DATOS GENERALES DEL EXPEDIENTE -->
-        <fieldset style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #ffffff;">
-            <legend style="padding: 0 15px; font-weight: 800; color: var(--primary); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+        <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #fff; margin: 0;">
+            <legend style="padding: 0 8px; font-weight: 600; color: var(--text-light); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
                 <i class="fas fa-id-card"></i> Información del Folio
             </legend>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
                 <div class="form-group">
                     <label>No.</label>
-                    <input type="text" id="no" readonly style="background:#f8fafc; font-weight: bold; border: 1px solid #cbd5e1;">
+                    <input type="text" id="no" readonly style="background:#fafafa; font-weight: 600;">
                 </div>
                 <div class="form-group">
                     <label>Fecha</label>
@@ -100,11 +374,11 @@
         </fieldset>
 
         <!-- SECCIÓN 2: UBICACIÓN Y CONTACTO -->
-        <fieldset style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #f8fafc;">
-            <legend style="padding: 0 15px; font-weight: 800; color: #0ea5e9; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+        <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #fff; margin: 0;">
+            <legend style="padding: 0 8px; font-weight: 600; color: var(--text-light); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
                 <i class="fas fa-map-marker-alt"></i> Domicilio y Procedencia
             </legend>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
                 <div class="form-group">
                     <label>Domicilio</label>
                     <input type="text" id="domicilio" placeholder="Calle, número, etc.">
@@ -117,11 +391,11 @@
         </fieldset>
 
         <!-- SECCIÓN 3: DETALLES JURÍDICOS / ASUNTO -->
-        <fieldset style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; background-color: #ffffff;">
-            <legend style="padding: 0 15px; font-weight: 800; color: #64748b; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">
+        <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #fff; margin: 0;">
+            <legend style="padding: 0 8px; font-weight: 600; color: var(--text-light); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
                 <i class="fas fa-gavel"></i> Información del Caso
             </legend>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
                 <div class="form-group" style="grid-column: span 2;">
                     <label>Asunto(s)</label>
                     <input type="text" id="asuntos" placeholder="Ej: Pensión Alimenticia, Guardia y Custodia...">
@@ -135,10 +409,10 @@
                 </div>
                 <div class="form-group" style="grid-column: span 3;">
                     <label>Detalles y Observaciones</label>
-                    <textarea id="detalles" rows="3" placeholder="Observaciones detalladas del caso..." style="width: 100%; resize: vertical;"></textarea>
+                    <textarea id="detalles" rows="2" placeholder="Observaciones detalladas del caso..." style="width: 100%; resize: vertical;"></textarea>
                 </div>
                 <div class="form-group" style="grid-column: span 3;">
-                    <label><i class="fas fa-pen-nib"></i> Elaboró:</label>
+                    <label><i class="fas fa-pen-nib"></i> Elaboró</label>
                     <input type="text" id="elaboro" placeholder="Nombre del servidor público">
                 </div>
             </div>
@@ -146,16 +420,25 @@
     </div>
 
     <!-- BOTONERA -->
-    <div class="btn-box" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
-        <button class="btn" id="btn-save" style="background:var(--success)" onclick="guardar()"><i class="fas fa-save"></i> GUARDAR</button>
-        <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
-        <button class="btn" style="background:#64748b" onclick="limpiarForm()"><i class="fas fa-broom"></i> LIMPIAR</button>
+    <div class="btn-box" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
+        <button class="btn btn-primary" id="btn-save" onclick="guardar()"><i class="fas fa-save"></i> Guardar</button>
+        <button class="btn" id="btn-update" style="background: var(--warning); border-color: var(--warning); color: white; display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> Actualizar</button>
+        <button class="btn" onclick="exportarExcel()"><i class="fas fa-download"></i> Excel</button>
+        
+        <label class="btn" style="cursor:pointer;">
+            <i class="fas fa-file-import"></i> Importar
+            <input type="file" id="import-excel" accept=".xlsx, .xls" style="display:none" onchange="importarDesdeExcel(event)">
+        </label>
+
+        <button class="btn" onclick="limpiarForm()"><i class="fas fa-broom"></i> Limpiar</button>
+        <button class="btn" style="color: var(--danger); border-color: #fecaca;" onclick="borrarTodaLaBase()"><i class="fas fa-trash-alt"></i> Vaciar</button>
+        <button class="btn" onclick="limpiarForm()"><i class="fas fa-plus"></i> Nuevo</button>
     </div>
 </div>
 
     <div class="search-box no-print">
         <div class="form-group" style="flex:2;">
-            <label>🔎 Buscador Inteligente</label>
+            <label><i class="fas fa-search"></i> Buscador Inteligente</label>
             <input type="text" id="buscador" placeholder="Escribe para buscar por cualquier campo..." onkeyup="filtrar()">
         </div>
         <div class="form-group" style="flex:1;">
@@ -171,11 +454,11 @@
     </div>
 
     <div class="paginacion-bar no-print">
-        <div id="info-total" style="font-size: 11px; font-weight: bold; color: var(--procu);"></div>
+        <div id="info-total" style="font-size: 11px; font-weight: 500; color: var(--text-light);"></div>
         <div>
-            <button class="btn-pag" id="btn-prev" onclick="cambiarPagina(-1)">« Anterior</button>
-            <span id="page-info" style="margin: 0 15px; font-weight: bold;">Página 1</span>
-            <button class="btn-pag" id="btn-next" onclick="cambiarPagina(1)">Siguiente »</button>
+            <button class="btn-pag" id="btn-prev" onclick="cambiarPagina(-1)"><i class="fas fa-chevron-left"></i> Anterior</button>
+            <span id="page-info" style="margin: 0 12px; font-weight: 600;">Página 1</span>
+            <button class="btn-pag" id="btn-next" onclick="cambiarPagina(1)">Siguiente <i class="fas fa-chevron-right"></i></button>
         </div>
     </div>
 
@@ -199,7 +482,6 @@
         </table>
     </div>
 </div>
-
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -219,6 +501,90 @@
     let filasPorPagina = 10;
     let proximoNo = 1;
 
+    // Sistema de notificaciones minimalista y elegante (Toast)
+    function mostrarNotificacion(mensaje, tipo = 'success') {
+        let contenedor = document.getElementById('toast-container');
+        if (!contenedor) {
+            contenedor = document.createElement('div');
+            contenedor.id = 'toast-container';
+            contenedor.style.cssText = 'position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;';
+            document.body.appendChild(contenedor);
+        }
+
+        const colores = {
+            success: { bg: '#10b981', icon: 'fa-check-circle' },
+            error: { bg: '#ef4444', icon: 'fa-exclamation-circle' },
+            warning: { bg: '#f59e0b', icon: 'fa-exclamation-triangle' },
+            info: { bg: '#0f172a', icon: 'fa-info-circle' }
+        };
+
+        const config = colores[tipo] || colores.success;
+
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            background: #ffffff; color: #334155; padding: 12px 16px; border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 4px solid ${config.bg};
+            display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 500;
+            pointer-events: auto; min-width: 260px; max-width: 380px;
+            animation: slideIn 0.3s ease forwards;
+        `;
+        toast.innerHTML = `<i class="fas ${config.icon}" style="color: ${config.bg}; font-size: 14px;"></i> <span style="flex:1;">${mensaje}</span>`;
+
+        contenedor.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease forwards';
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    }
+
+    // Modal de diálogo personalizado moderno
+    function mostrarModalConfirmacion(titulo, mensaje, textoBoton, colorBoton, callback) {
+        let overlay = document.getElementById('custom-modal-overlay');
+        if (overlay) overlay.remove();
+
+        overlay = document.createElement('div');
+        overlay.id = 'custom-modal-overlay';
+        overlay.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(2px);
+            display: flex; align-items: center; justify-content: center; z-index: 10000;
+            animation: fadeIn 0.2s ease forwards;
+        `;
+
+        overlay.innerHTML = `
+            <div style="background: #ffffff; padding: 24px; border-radius: 12px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; text-align: center;">
+                <div style="font-size: 14px; font-weight: 600; color: #0f172a; margin-bottom: 8px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                    <i class="fas fa-question-circle" style="color: #f59e0b;"></i> ${titulo}
+                </div>
+                <div style="font-size: 12px; color: #64748b; margin-bottom: 20px; line-height: 1.5;">
+                    ${mensaje}
+                </div>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button id="modal-btn-cancel" style="padding: 8px 16px; border: 1px solid #e2e8f0; background: #fff; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; color: #64748b; flex:1;">Cancelar</button>
+                    <button id="modal-btn-ok" style="padding: 8px 16px; border: none; background: ${colorBoton}; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; color: white; flex:1;">${textoBoton}</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(overlay);
+
+        document.getElementById('modal-btn-cancel').onclick = () => overlay.remove();
+        document.getElementById('modal-btn-ok').onclick = () => {
+            overlay.remove();
+            callback();
+        };
+    }
+
+    // Estilos dinámicos para animaciones de notificaciones y modales
+    const estiloAnimaciones = document.createElement('style');
+    estiloAnimaciones.innerHTML = `
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    `;
+    document.head.appendChild(estiloAnimaciones);
+
     // Configuración global de la sesión al cargar la página
     document.addEventListener("DOMContentLoaded", () => {
         const sesionActiva = sessionStorage.getItem('sesion_activa');
@@ -226,18 +592,24 @@
         const departamento = sessionStorage.getItem('departamento');
 
         if (sesionActiva === 'true' && nombreUsuario) {
-            document.getElementById('user-text').innerText = `BIENVENIDO: ${nombreUsuario.toUpperCase()} (${departamento || 'PROCURADURÍA'})`;
+            document.getElementById('user-text').innerText = `${nombreUsuario.toUpperCase()} (${departamento || 'PROCURADURÍA'})`;
         } else {
             document.getElementById('user-text').innerText = "MODO: INVITADO";
         }
     });
 
-    // Función global expuesta para cerrar la sesión de forma segura
+    // Función global expuesta para cerrar la sesión con estilo
     window.cerrarSesion = () => {
-        if(confirm("¿Está seguro de que desea cerrar la sesión actual?")) {
-            sessionStorage.clear();
-            window.location.href = 'index.html'; // Cambia por el nombre exacto de tu archivo de Login si difiere
-        }
+        mostrarModalConfirmacion(
+            "Cerrar Sesión", 
+            "¿Está seguro de que desea salir del sistema actual?", 
+            "Salir", 
+            "#ef4444", 
+            () => {
+                sessionStorage.clear();
+                window.location.href = 'index.html';
+            }
+        );
     };
 
     onSnapshot(dataRef, (snapshot) => {
@@ -301,11 +673,11 @@
                     });
                     count++;
                 }
-                alert(`✅ Importación exitosa: ${count} registros.`);
+                mostrarNotificacion(`Importación exitosa: ${count} registros cargados.`, 'success');
                 e.target.value = "";
             } catch (err) {
                 console.error(err);
-                alert("Error al importar el archivo Excel.");
+                mostrarNotificacion("Error al procesar el archivo Excel.", 'error');
             }
         };
         reader.readAsArrayBuffer(file);
@@ -313,10 +685,14 @@
 
     window.guardar = async () => {
         const data = obtenerValoresForm();
-        if(!data.nombre) return alert("El nombre es obligatorio");
+        if(!data.nombre) {
+            mostrarNotificacion("El nombre del solicitante es obligatorio.", 'warning');
+            return;
+        }
         data.t = new Date().getTime();
         await addDoc(dataRef, data);
         window.limpiarForm();
+        mostrarNotificacion("Expediente guardado correctamente.", 'success');
     };
 
     window.actualizar = async () => {
@@ -324,26 +700,41 @@
         if(!id) return;
         await updateDoc(doc(db, "procuraduria", id), obtenerValoresForm());
         window.limpiarForm();
-        alert("✅ Registro actualizado.");
+        mostrarNotificacion("Registro actualizado correctamente.", 'success');
     };
 
     window.borrarTodaLaBase = async () => {
-        if (confirm("⚠️ ¿Desea eliminar TODA la información? Esta acción es irreversible.")) {
-            const password = prompt("Escriba 'ELIMINAR' para confirmar:");
-            if (password === "ELIMINAR") {
-                const querySnapshot = await getDocs(dataRef);
-                const batch = writeBatch(db);
-                querySnapshot.forEach((doc) => batch.delete(doc.ref));
-                await batch.commit();
-                alert("✅ Base de datos vaciada.");
+        mostrarModalConfirmacion(
+            "Vaciar Base de Datos", 
+            "¿Desea eliminar TODA la información del sistema? Escriba 'ELIMINAR' para confirmar.", 
+            "Vaciar Base", 
+            "#ef4444", 
+            async () => {
+                const password = prompt("Para confirmar el vaciado total, escriba la palabra 'ELIMINAR':");
+                if (password === "ELIMINAR") {
+                    const querySnapshot = await getDocs(dataRef);
+                    const batch = writeBatch(db);
+                    querySnapshot.forEach((doc) => batch.delete(doc.ref));
+                    await batch.commit();
+                    mostrarNotificacion("La base de datos ha sido vaciada por completo.", 'success');
+                } else if(password !== null) {
+                    mostrarNotificacion("Contraseña de confirmación incorrecta.", 'error');
+                }
             }
-        }
+        );
     };
 
     window.eliminarDoc = async (id) => { 
-        if(confirm("¿Seguro que desea eliminar este registro?")) {
-            await deleteDoc(doc(db, "procuraduria", id)); 
-        }
+        mostrarModalConfirmacion(
+            "Eliminar Expediente", 
+            "¿Está seguro de que desea eliminar este registro de forma permanente?", 
+            "Eliminar", 
+            "#ef4444", 
+            async () => {
+                await deleteDoc(doc(db, "procuraduria", id)); 
+                mostrarNotificacion("Registro eliminado exitosamente.", 'success');
+            }
+        );
     };
 
     window.filtrar = () => {
@@ -382,18 +773,20 @@
 
         tbody.innerHTML = segmento.map(reg => `
             <tr>
-                <td><span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-weight:bold;">${reg.no}</span></td>
-                <td>${reg.fecha || ''}</td>
-                <td><b>${reg.nombre || ''}</b></td>
-                <td>${reg.domicilio || ''}</td>
-                <td>${reg.lugar || ''}</td>
-                <td style="color:var(--procu); font-weight:bold;">${reg.asuntos || ''}</td>
-                <td style="max-width:300px; font-size:11px; color:#475569;">${reg.detalles || ''}</td>
-                <td>${reg.horarios_mixtos || 'No'}</td>
-                <td>${reg.elaboro || ''}</td>
-                <td class="no-print">
-                    <button class="btn" style="background:#fef3c7; color:#92400e; padding:5px 8px;" onclick="editarLocal('${reg.id}')"><i class="fas fa-edit"></i></button>
-                    <button class="btn" style="background:#fee2e2; color:#991b1b; padding:5px 8px;" onclick="eliminarDoc('${reg.id}')"><i class="fas fa-trash"></i></button>
+                <td data-label="No."><span style="background:#f1f5f9; color:#0f172a; padding:3px 8px; border-radius:4px; font-weight:600;">${reg.no}</span></td>
+                <td data-label="Fecha">${reg.fecha || ''}</td>
+                <td data-label="Nombre"><b>${reg.nombre || ''}</b></td>
+                <td data-label="Domicilio">${reg.domicilio || ''}</td>
+                <td data-label="Lugar">${reg.lugar || ''}</td>
+                <td data-label="Asuntos" style="color:var(--primary); font-weight:600;">${reg.asuntos || ''}</td>
+                <td data-label="Detalles" style="max-width:300px; font-size:11px; color:var(--text-light);">${reg.detalles || ''}</td>
+                <td data-label="H. Mixtos">${reg.horarios_mixtos || 'No'}</td>
+                <td data-label="Elaboró">${reg.elaboro || ''}</td>
+                <td class="no-print" data-label="Acciones">
+                    <div style="display:flex; gap:6px; justify-content:flex-end;">
+                        <button class="btn" style="padding:6px 10px; background:#f8fafc; border-color:#e2e8f0; color:#0f172a;" onclick="editarLocal('${reg.id}')" title="Editar"><i class="fas fa-edit"></i></button>
+                        <button class="btn" style="padding:6px 10px; background:#fff5f5; border-color:#fecaca; color:#ef4444;" onclick="eliminarDoc('${reg.id}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+                    </div>
                 </td>
             </tr>
         `).join('');
@@ -419,7 +812,7 @@
         });
         document.getElementById('no').value = proximoNo;
         document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
-        document.getElementById('btn-save').style.display = 'inline-block';
+        document.getElementById('btn-save').style.display = 'inline-flex';
         document.getElementById('btn-update').style.display = 'none';
     };
 
@@ -437,8 +830,9 @@
         document.getElementById('horarios_mixtos').value = reg.horarios_mixtos || 'No';
         document.getElementById('elaboro').value = reg.elaboro || '';
         document.getElementById('btn-save').style.display = 'none';
-        document.getElementById('btn-update').style.display = 'inline-block';
+        document.getElementById('btn-update').style.display = 'inline-flex';
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        mostrarNotificacion("Modo de edición activado para el registro seleccionado.", 'info');
     };
 
     window.cambiarPagina = (dir) => { 
@@ -475,6 +869,7 @@
         XLSX.utils.book_append_sheet(wb, ws, "Padron_Procuraduria");
         const fHoy = new Date().toISOString().split('T')[0];
         XLSX.writeFile(wb, `Reporte_Procuraduria_${fHoy}.xlsx`);
+        mostrarNotificacion("Archivo Excel exportado con éxito.", 'success');
     };
 
     window.limpiarForm();
