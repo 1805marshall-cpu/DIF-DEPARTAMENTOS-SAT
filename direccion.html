@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Control Financiero - DIF San Andrés Tuxtla</title>
+  
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome 6 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <!-- SheetJS (Excel) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- html2pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+
+    :root {
+      --dif-pink: #d81b60;
+      --dif-pink-light: #f8bbd0;
+      --dif-pink-soft: #fce4ec;
+      --dif-bg: #f8fafc;
+      --dif-border: #e2e8f0;
+      --text-main: #334155;
+    }
+
+    body {
+      background-color: var(--dif-bg);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-main);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+    }
+
+    .brand-header {
+      background-color: #ffffff;
+      border-bottom: 1px solid var(--dif-border);
+      padding: 1rem 2rem;
+    }
+
+    .logo-img {
+      max-height: 55px;
+      object-fit: contain;
+    }
+
+    .nav-tabs {
+      border-bottom: 1px solid var(--dif-border);
+    }
+
+    .nav-tabs .nav-link {
+      color: #64748b;
+      font-weight: 500;
+      font-size: 0.9rem;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 10px 18px;
+      transition: all 0.2s ease;
+    }
+
+    .nav-tabs .nav-link:hover {
+      color: var(--dif-pink);
+    }
+
+    .nav-tabs .nav-link.active {
+      color: var(--dif-pink);
+      border-bottom: 2px solid var(--dif-pink);
+      background: transparent;
+    }
+
+    .report-card {
+      background: #fff;
+      border: 1px solid var(--dif-border);
+      padding: 35px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02), 0 1px 2px -1px rgba(0, 0, 0, 0.02);
+    }
+
+    .table-excel {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-bottom: 15px;
+    }
+
+    .table-excel th, .table-excel td {
+      border: 1px solid var(--dif-border) !important;
+      padding: 8px 12px;
+      vertical-align: middle;
+      color: var(--text-main);
+    }
+
+    .header-pink-bar {
+      background-color: var(--dif-pink-soft) !important;
+      color: #880e4f !important;
+      font-weight: 600;
+      text-align: center;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid var(--dif-pink-light) !important;
+    }
+
+    .summary-box-excel {
+      width: 280px;
+      margin-left: auto;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    .summary-box-excel td {
+      border: 1px solid var(--dif-border) !important;
+      padding: 6px 12px;
+      font-weight: 500;
+      background-color: #fafafa;
+    }
+
+    .signature-section {
+      margin-top: 65px;
+      font-size: 0.78rem;
+    }
+
+    .signature-line {
+      border-top: 1px solid #94a3b8;
+      width: 260px;
+      margin: 0 auto;
+      padding-top: 6px;
+      font-weight: 600;
+      color: #1e293b;
+      text-align: center;
+    }
+
+    .card {
+      border: 1px solid var(--dif-border);
+      border-radius: 8px;
+      box-shadow: 0 1px 2px 0 rgba(0,0,0,0.01);
+    }
+
+    .btn {
+      font-weight: 500;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      padding: 0.45rem 1rem;
+      transition: all 0.2s;
+    }
+
+    .btn-danger, .btn-primary {
+      background-color: var(--dif-pink);
+      border-color: var(--dif-pink);
+    }
+
+    .btn-danger:hover, .btn-primary:hover {
+      background-color: #ad1457;
+      border-color: #ad1457;
+    }
+
+    .form-control, .form-select {
+      border-color: var(--dif-border);
+      font-size: 0.85rem;
+      border-radius: 6px;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--dif-pink);
+      box-shadow: 0 0 0 3px rgba(216, 27, 96, 0.1);
+    }
+
+    @media print {
+      .no-print { display: none !important; }
+      body { background: white !important; padding: 0 !important; margin: 0 !important; }
+      .report-card { border: none !important; padding: 0 !important; box-shadow: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ENCABEZADO SUPERIOR WEB -->
+  <header class="brand-header shadow-sm mb-4 no-print">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-3">
+        <img src="logo_municipio.png" alt="Logo Municipio" class="logo-img" onerror="this.style.display='none'">
+        <div>
+          <h6 class="m-0 fw-semibold text-uppercase text-muted" style="font-size: 0.75rem; letter-spacing: 0.05em;">H. Ayuntamiento Constitucional</h6>
+          <h5 class="m-0 fw-bold text-dark" style="font-size: 1.05rem;">SAN ANDRÉS TUXTLA, VER.</h5>
+          <small class="text-muted" style="font-size: 0.75rem;">2026 - 2029</small>
+        </div>
+      </div>
+      
+      <div class="text-center d-none d-md-block">
+        <h4 class="fw-bold mb-0 text-uppercase" style="color: #880e4f; font-size: 0.95rem; letter-spacing: 0.05em;">Sistema de Control Financiero</h4>
+        <small class="text-muted" style="font-size: 0.75rem;">Control de Ingresos y Gastos</small>
+      </div>
+
+      <!-- SECCIÓN DERECHA: LOGO + USUARIO + BOTÓN SALIR -->
+      <div class="d-flex align-items-center gap-3">
+        <div class="text-end d-none d-lg-block">
+          <span class="d-block fw-bold text-dark" id="userNameDisplay" style="font-size: 0.8rem;">Usuario</span>
+          <span class="badge bg-light text-secondary border" id="userDepDisplay" style="font-size: 0.65rem;">DIRECCIÓN</span>
+        </div>
+        <button class="btn btn-outline-danger btn-sm px-2 py-1" onclick="cerrarSesion()" title="Cerrar Sesión">
+          <i class="fa-solid fa-power-off"></i> <span class="d-none d-md-inline ms-1">Salir</span>
+        </button>
+        <img src="logo_dif.png" alt="Logo DIF Municipal" class="logo-img" onerror="this.style.display='none'">
+      </div>
+    </div>
+  </header>
+
+  <div class="container-fluid px-4">
+
+    <!-- NAVEGACIÓN DE MÓDULOS -->
+    <ul class="nav nav-tabs mb-4 no-print" id="moduleTabs">
+      <li class="nav-item">
+        <button class="nav-link active" onclick="switchModule('fondo', event)">
+          <i class="fa-solid fa-file-invoice-dollar me-2 text-muted"></i>1. Liquidación de Gastos (Fondo Revolvente)
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" onclick="switchModule('crisat', event)">
+          <i class="fa-solid fa-hand-holding-medical me-2 text-muted"></i>2. CRISAT
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" onclick="switchModule('caic', event)">
+          <i class="fa-solid fa-children me-2 text-muted"></i>3. CAIC / Asistencia Infantil
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link" onclick="switchModule('medica', event)">
+          <i class="fa-solid fa-stethoscope me-2 text-muted"></i>4. Área Médica
+        </button>
+      </li>
+    </ul>
+
+<!-- BARRA DE ACCIONES -->
+    <div class="card p-3 mb-4 no-print bg-white">
+      <div class="row g-3 align-items-center">
+        <!-- FILTRO POR RANGO DE FECHAS -->
+        <div class="col-md-6">
+          <div class="d-block">
+            <label class="form-label fw-semibold text-muted mb-1" style="font-size: 0.8rem;">
+              <i class="fa-solid fa-triangle-exclamation me-1"></i> Este filtro solo es para el módulo FONDO REVOLVENTE
+            </label>
+          </div>
+          <div class="d-block">
+            <label class="form-label fw-semibold text-muted mb-1" style="font-size: 0.8rem;">
+              <i class="fa-solid fa-calendar-days me-1"></i> Filtrar por Rango de Fechas:
+            </label>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text text-muted">Desde</span>
+              <input type="date" id="dateStart" class="form-control" onchange="applyFilters()">
+            </div>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text text-muted">Hasta</span>
+              <input type="date" id="dateEnd" class="form-control" onchange="applyFilters()">
+            </div>
+            <button class="btn btn-outline-secondary btn-sm text-nowrap" onclick="resetDateFilter()" title="Limpiar fechas">
+              <i class="fa-solid fa-rotate-left"></i> Todos
+            </button>
+          </div>
+        </div>
+
+        <!-- SELECTOR DE FILAS POR PÁGINA -->
+        <div class="col-md-2">
+                  <div class="d-block">
+            <label class="form-label fw-semibold text-muted mb-1" style="font-size: 0.8rem;">
+              <i class="fa-solid fa-triangle-exclamation me-1"></i> Este filtro de listas solo es para el módulo FONDO REVOLVENTE
+            </label>
+          </div>
+          <label class="form-label fw-semibold text-muted mb-1" style="font-size: 0.8rem;"><i class="fa-solid fa-list-ol me-1"></i> Mostrar:</label>
+          <select id="rowsPerPageSelect" class="form-select form-select-sm" onchange="changeRowsPerPage()">
+            <option value="10" selected>10 filas</option>
+            <option value="20">20 filas</option>
+            <option value="30">30 filas</option>
+            <option value="50">50 filas</option>
+          </select>
+        </div>
+
+        <!-- BOTÓN NUEVO REGISTRO -->
+        <div class="col-md-2">
+          <label class="form-label d-block mb-1">&nbsp;</label>
+          <button class="btn btn-sm btn-danger w-100 fw-semibold" onclick="openModal()">
+            <i class="fa-solid fa-plus me-1"></i> Nuevo Registro
+          </button>
+        </div>
+
+        <!-- BOTONES DE ACCIÓN (IMPORTAR, EXPORTAR, PDF, IMPRIMIR, LIMPIAR) -->
+        <div class="col-md-6 text-end">
+          <label class="form-label d-block mb-1">&nbsp;</label>
+          <div class="btn-group btn-group-sm w-100 w-md-auto flex-wrap gap-1">
+            <button class="btn btn-outline-secondary fw-semibold border-secondary-subtle text-dark" onclick="triggerImportExcel()">
+              <i class="fa-solid fa-file-arrow-up me-1 text-muted"></i> Importar
+            </button>
+            <input type="file" id="importFile" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importExcelFile(event)">
+            <button class="btn btn-outline-secondary fw-semibold border-secondary-subtle text-dark" onclick="exportExcel()">
+              <i class="fa-solid fa-file-excel me-1 text-success"></i> Exportar
+            </button>
+            <button class="btn btn-outline-secondary fw-semibold border-secondary-subtle text-dark" onclick="exportPDF()">
+              <i class="fa-solid fa-file-pdf me-1 text-danger"></i> PDF
+            </button>
+            <button class="btn btn-outline-secondary fw-semibold border-secondary-subtle text-dark" onclick="printReport()">
+              <i class="fa-solid fa-print me-1 text-muted"></i> Imprimir
+            </button>
+            <button class="btn btn-outline-danger fw-semibold border-secondary-subtle text-dark" onclick="eliminarRegistrosVacios()" title="Limpiar registros vacíos o en 0">
+              <i class="fa-solid fa-broom me-1 text-danger"></i> Limpiar Vacíos
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ÁREA REPORTE DINÁMICO -->
+    <div id="printable-area" class="report-card mb-5">
+      <!-- Se llena dinámicamente mediante JS -->
+    </div>
+
+  </div>
+
+  <!-- MODAL EDITAR / AGREGAR REGISTRO -->
+  <div class="modal fade" id="recordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header text-white" style="background-color: var(--dif-pink);">
+          <h5 class="modal-title fw-semibold fs-6" id="modalTitle">Registro</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <form id="recordForm" onsubmit="saveRecord(event)">
+          <div class="modal-body p-4">
+            <input type="hidden" id="recordId">
+            
+            <div class="mb-3" id="typeGroup">
+              <label class="form-label fw-semibold text-muted" style="font-size: 0.8rem;">Tipo de Operación</label>
+              <select class="form-select" id="fieldTipo" required>
+                <option value="INGRESO">INGRESO</option>
+                <option value="GASTO">GASTO</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold text-muted" style="font-size: 0.8rem;">Fecha</label>
+              <input type="date" class="form-control" id="fieldFecha" required>
+            </div>
+
+            <div class="mb-3" id="nombreGroup">
+              <label class="form-label fw-semibold text-muted" style="font-size: 0.8rem;" id="lblNombre">Proveedor / Prestador de Servicios</label>
+              <input type="text" class="form-control" id="fieldNombre">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold text-muted" style="font-size: 0.8rem;">Concepto / Descripción</label>
+              <textarea class="form-control" id="fieldConcepto" rows="2" required></textarea>
+            </div>
+
+            <div class="mb-3" id="facturaGroup">
+              <label class="form-label fw-semibold text-muted" style="font-size: 0.8rem;">No. Factura / Recibo</label>
+              <input type="text" class="form-control" id="fieldFactura">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold text-muted" style="font-size: 0.8rem;">Importe / Monto ($)</label>
+              <input type="number" step="0.01" class="form-control" id="fieldMonto" required>
+            </div>
+          </div>
+          <div class="modal-footer bg-light px-4 py-3 border-0">
+            <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-danger btn-sm px-3 fw-semibold">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- SCRIPT DE FIREBASE Y LÓGICA PRINCIPAL -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E",
+        projectId: "poblacion-vulnerable---dif"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+
+    const dbCollections = {
+      fondo: collection(firestore, "fondo_revolvente"),
+      crisat: collection(firestore, "crisat"),
+      caic: collection(firestore, "caic"),
+      medica: collection(firestore, "medica")
+    };
+
+    let currentPage = 1;
+    let rowsPerPage = 10;
+    let currentModule = 'fondo';
+    let bsModal = null;
+    let anticipoMonto = 100000.00;
+
+    let db = { fondo: [], crisat: [], caic: [], medica: [] };
+
+    // Estados independientes para los filtros de fecha de Ingresos y Gastos
+    let filterState = {
+      startIngreso: '',
+      endIngreso: '',
+      startGasto: '',
+      endGasto: ''
+    };
+
+    window.actualizarFiltrosFechas = function() {
+      const sIng = document.getElementById('startIngreso');
+      const eIng = document.getElementById('endIngreso');
+      const sGas = document.getElementById('startGasto');
+      const eGas = document.getElementById('endGasto');
+
+      if (sIng) filterState.startIngreso = sIng.value;
+      if (eIng) filterState.endIngreso = eIng.value;
+      if (sGas) filterState.startGasto = sGas.value;
+      if (eGas) filterState.endGasto = eGas.value;
+
+      renderModule();
+    };
+
+    function inicializarSesionUsuario() {
+      const sesionActiva = sessionStorage.getItem('sesion_activa');
+      const departamento = sessionStorage.getItem('departamento');
+      const usuario = sessionStorage.getItem('nombre_usuario') || localStorage.getItem('activeUser') || 'Usuario';
+
+      if (!sesionActiva || (departamento !== 'DIRECCION' && departamento !== 'GLOBAL')) {
+        alert('Acceso no autorizado. Por favor inicie sesión.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const userDisplay = document.getElementById('userNameDisplay');
+      const depDisplay = document.getElementById('userDepDisplay');
+      
+      if (userDisplay) {
+        userDisplay.innerText = usuario.replace('.', ' ').toUpperCase();
+      }
+      if (depDisplay) {
+        depDisplay.innerText = departamento;
+      }
+    }
+
+    window.cerrarSesion = function() {
+      if (confirm('¿Desea cerrar sesión del sistema?')) {
+        sessionStorage.clear();
+        localStorage.removeItem('activeUser');
+        localStorage.removeItem('userDep');
+        window.location.href = 'index.html';
+      }
+    };
+
+    window.switchModule = function(modKey, event) {
+      currentModule = modKey;
+      currentPage = 1; 
+      filterState = { startIngreso: '', endIngreso: '', startGasto: '', endGasto: '' };
+      
+      const links = document.querySelectorAll('#moduleTabs .nav-link');
+      links.forEach(link => link.classList.remove('active'));
+      if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+      }
+      renderModule();
+    };
+
+    window.applyFilters = function() {
+      currentPage = 1;
+      renderModule();
+    };
+
+    // Función unificada que filtra correctamente según el módulo activo
+    function getFilteredData() {
+      let data = db[currentModule] || [];
+      let filtered = [...data];
+
+      if (currentModule === 'fondo') {
+        const startInput = document.getElementById('dateStart')?.value;
+        const endInput = document.getElementById('dateEnd')?.value;
+
+        filtered = filtered.filter(item => {
+          if (!item.fecha) return false;
+          if (startInput && item.fecha < startInput) return false;
+          if (endInput && item.fecha > endInput) return false;
+          return true;
+        });
+      }
+
+      filtered.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      return filtered;
+    }
+
+    window.resetDateFilter = function() {
+      const start = document.getElementById('dateStart');
+      const end = document.getElementById('dateEnd');
+      if (start) start.value = '';
+      if (end) end.value = '';
+      applyFilters();
+    };
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const parts = dateStr.split('-');
+      if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0].slice(-2)}`;
+      return dateStr;
+    }
+
+    function getSignatureBlockHtml() {
+      return `
+        <div class="row signature-section text-center">
+          <div class="col-6">
+            <div class="signature-line">LIC. LORENA GONZALEZ KEGEL</div>
+            <div class="small text-muted mt-1" style="font-size: 0.7rem; letter-spacing: 0.03em;">NOMBRE Y FIRMA DE QUIEN RECIBE Y VALIDA</div>
+          </div>
+          <div class="col-6">
+            <div class="signature-line">L.F.C.P. JOSELINE CECILIA MIROS GONZALEZ</div>
+            <div class="small text-muted mt-1" style="font-size: 0.7rem; letter-spacing: 0.03em;">NOMBRE Y FIRMA DEL COMISIONADO</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderModule() {
+      const container = document.getElementById('printable-area');
+      const data = getFilteredData();
+
+      if (currentModule === 'fondo') {
+        renderFondoRevolventeReport(container, data);
+      } else {
+        renderIngresosGastosReport(container, data);
+      }
+    }
+
+    function renderFondoRevolventeReport(container, filteredData) {
+      const startIndex = (currentPage - 1) * rowsPerPage;
+      const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
+
+      let totalGastos = 0;
+      let rowsHtml = '';
+
+      paginatedData.forEach((item) => {
+        const montoVal = parseFloat(item.monto) || 0;
+        totalGastos += montoVal;
+        rowsHtml += `
+          <tr>
+            <td class="text-center">${formatDate(item.fecha)}</td>
+            <td>${item.concepto || ''}</td>
+            <td class="text-center">${item.factura || ''}</td>
+            <td>${item.proveedor || ''}</td>
+            <td class="text-end">$ ${montoVal.toLocaleString('es-MX', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="text-center no-print" style="width:70px;">
+              <button class="btn btn-sm btn-link text-secondary p-0 me-2" onclick="editRecord('${item.id}')"><i class="fa-regular fa-pen-to-square"></i></button>
+              <button class="btn btn-sm btn-link text-danger p-0" onclick="deleteRecord('${item.id}')"><i class="fa-regular fa-trash-can"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+
+      const aFavor = anticipoMonto - totalGastos;
+
+      container.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-light">
+          <img src="logo_municipio.png" style="height: 50px;" onerror="this.style.display='none'">
+          <div class="text-center">
+            <h6 class="fw-semibold m-0 text-muted" style="font-size: 0.75rem; letter-spacing: 0.05em;">H. AYUNTAMIENTO CONSTITUCIONAL</h6>
+            <h5 class="fw-bold m-0" style="font-size: 0.95rem;">SAN ANDRÉS TUXTLA, VER.</h5>
+            <small class="text-muted" style="font-size: 0.75rem;">2026 - 2029</small>
+            <h5 class="fw-bold m-0 mt-2 text-uppercase text-dark" style="font-size: 0.9rem; letter-spacing: 0.03em;">Liquidación de Gastos</h5>
+          </div>
+          <img src="logo_dif.png" style="height: 55px;" alt="Logo DIF" onerror="this.style.display='none'">
+        </div>
+
+        <div class="row g-1 fw-medium mb-4 text-secondary" style="font-size: 0.8rem;">
+          <div class="col-8">
+            <div>NOMBRE DEL COMISIONADO: <span class="text-dark">LIC. LORENA GONZALEZ KEGEL</span></div>
+            <div>LUGAR: <span class="text-dark">SAN ANDRÉS TUXTLA</span></div>
+            <div>CONCEPTO: <span class="text-dark">FONDO FIJO DEL DIF MUNICIPAL 2026</span></div>
+          </div>
+          <div class="col-4">
+            <div>ADSCRIPCIÓN: <span class="text-dark">DIF MUNICIPAL</span></div>
+            <div>FECHA: <span class="text-dark">2026</span></div>
+          </div>
+        </div>
+
+        <table class="table-excel">
+          <thead>
+            <tr>
+              <th colspan="5" class="header-pink-bar">Relación de Documentación Comprobatoria</th>
+              <th class="no-print header-pink-bar"></th>
+            </tr>
+            <tr class="header-pink-bar" style="font-size: 0.75rem;">
+              <th style="width: 90px;">FECHA</th>
+              <th>CONCEPTO</th>
+              <th style="width: 120px;">NO. DE FACTURA</th>
+              <th style="width: 200px;">PROVEEDOR</th>
+              <th style="width: 120px;">IMPORTE</th>
+              <th class="no-print" style="width:70px;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml || '<tr><td colspan="6" class="text-center py-4 text-muted fst-italic" style="font-size: 0.8rem;">Sin registros en esta página</td></tr>'}
+          </tbody>
+        </table>
+
+        ${getPaginationHtml(filteredData.length)}
+
+        <div class="d-flex justify-content-end mt-3">
+          <table class="summary-box-excel">
+            <tr>
+              <td class="text-muted">TOTAL:</td>
+              <td class="text-end fw-semibold">$ ${totalGastos.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">ANTICIPO:</td>
+              <td class="text-end fw-semibold">$ ${anticipoMonto.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">REINTEGRO:</td>
+              <td class="text-end fw-semibold">$ -</td>
+            </tr>
+            <tr>
+              <td class="text-muted">A CARGO:</td>
+              <td class="text-end fw-semibold">$ -</td>
+            </tr>
+            <tr>
+              <td class="text-muted">A FAVOR:</td>
+              <td class="text-end fw-semibold">$ ${aFavor.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            </tr>
+          </table>
+        </div>
+
+        ${getSignatureBlockHtml()}
+      `;
+    }
+
+    function renderIngresosGastosReport(container, data) {
+      const ingresos = data.filter(d => {
+        if (d.tipo !== 'INGRESO') return false;
+        if (!d.fecha) return false;
+        if (filterState.startIngreso && d.fecha < filterState.startIngreso) return false;
+        if (filterState.endIngreso && d.fecha > filterState.endIngreso) return false;
+        return true;
+      });
+
+      const gastos = data.filter(d => {
+        if (d.tipo !== 'GASTO') return false;
+        if (!d.fecha) return false;
+        if (filterState.startGasto && d.fecha < filterState.startGasto) return false;
+        if (filterState.endGasto && d.fecha > filterState.endGasto) return false;
+        return true;
+      });
+
+      let totalIng = 0;
+      let totalGas = 0;
+
+      let ingresosHtml = '';
+      ingresos.forEach(item => {
+        const montoVal = parseFloat(item.monto) || 0;
+        totalIng += montoVal;
+        ingresosHtml += `
+          <tr>
+            <td class="text-center">${formatDate(item.fecha)}</td>
+            <td>${item.proveedor || ''}</td>
+            <td>${item.concepto || ''}</td>
+            <td class="text-end">$ ${montoVal.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            <td class="text-center no-print" style="width:70px;">
+              <button class="btn btn-sm btn-link text-secondary p-0 me-2" onclick="editRecord('${item.id}')"><i class="fa-regular fa-pen-to-square"></i></button>
+              <button class="btn btn-sm btn-link text-danger p-0" onclick="deleteRecord('${item.id}')"><i class="fa-regular fa-trash-can"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+
+      let gastosHtml = '';
+      gastos.forEach(item => {
+        const montoVal = parseFloat(item.monto) || 0;
+        totalGas += montoVal;
+        gastosHtml += `
+          <tr>
+            <td class="text-center">${formatDate(item.fecha)}</td>
+            <td>${item.proveedor || ''}</td>
+            <td>${item.concepto || ''}</td>
+            <td class="text-end">$ ${montoVal.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            <td class="text-center no-print" style="width:70px;">
+              <button class="btn btn-sm btn-link text-secondary p-0 me-2" onclick="editRecord('${item.id}')"><i class="fa-regular fa-pen-to-square"></i></button>
+              <button class="btn btn-sm btn-link text-danger p-0" onclick="deleteRecord('${item.id}')"><i class="fa-regular fa-trash-can"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+
+      const totalBalance = totalIng - totalGas;
+
+      container.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-light">
+          <img src="logo_municipio.png" style="height: 50px;" onerror="this.style.display='none'">
+          <div class="text-center">
+            <h6 class="fw-semibold m-0 text-muted" style="font-size: 0.75rem; letter-spacing: 0.05em;">H. AYUNTAMIENTO DE SAN ANDRÉS TUXTLA, VER.</h6>
+            <h6 class="fw-bold m-0" style="font-size: 0.85rem;">2026 - 2029</h6>
+          </div>
+          <img src="logo_dif.png" style="height: 55px;" alt="Logo DIF" onerror="this.style.display='none'">
+        </div>
+
+        <!-- SECCIÓN INGRESOS -->
+        <div class="card p-3 mb-4 shadow-sm">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h6 class="fw-bold text-success m-0"><i class="fa-solid fa-arrow-trend-up me-1"></i> Ingresos</h6>
+            <div class="d-flex align-items-center gap-2 no-print">
+                      <div class="d-block">
+            <label class="form-label fw-semibold text-muted mb-1" style="font-size: 0.8rem;">
+              <i class="fa-solid fa-triangle-exclamation me-1"></i> Este filtro solo es para los MODULOS 2.- CRISAT, 3. CAIC, 4.- A. MEDICA
+            </label>
+          </div>
+              <div class="input-group input-group-sm" style="width: auto;">
+                <span class="input-group-text text-muted">Desde</span>
+                <input type="date" id="startIngreso" class="form-control" value="${filterState.startIngreso}" onchange="actualizarFiltrosFechas()">
+              </div>
+              <div class="input-group input-group-sm" style="width: auto;">
+                <span class="input-group-text text-muted">Hasta</span>
+                <input type="date" id="endIngreso" class="form-control" value="${filterState.endIngreso}" onchange="actualizarFiltrosFechas()">
+              </div>
+              <button class="btn btn-outline-secondary btn-sm" onclick="filterState.startIngreso=''; filterState.endIngreso=''; renderModule();" title="Limpiar fechas de ingresos">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+            </div>
+          </div>
+          <table class="table-excel mb-0">
+            <thead>
+              <tr class="header-pink-bar" style="font-size: 0.75rem;">
+                <th style="width: 100px;">FECHA</th>
+                <th style="width: 220px;">NOMBRE</th>
+                <th>CONCEPTO</th>
+                <th style="width: 130px;">TOTAL</th>
+                <th class="no-print" style="width:70px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${ingresosHtml || '<tr><td colspan="5" class="text-center py-3 text-muted fst-italic" style="font-size: 0.8rem;">Sin ingresos en este periodo</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- SECCIÓN GASTOS -->
+        <div class="card p-3 mb-3 shadow-sm">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h6 class="fw-bold text-danger m-0"><i class="fa-solid fa-arrow-trend-down me-1"></i> Gastos</h6>
+            <div class="d-flex align-items-center gap-2 no-print">
+              <div class="input-group input-group-sm" style="width: auto;">
+                <span class="input-group-text text-muted">Desde</span>
+                <input type="date" id="startGasto" class="form-control" value="${filterState.startGasto}" onchange="actualizarFiltrosFechas()">
+              </div>
+              <div class="input-group input-group-sm" style="width: auto;">
+                <span class="input-group-text text-muted">Hasta</span>
+                <input type="date" id="endGasto" class="form-control" value="${filterState.endGasto}" onchange="actualizarFiltrosFechas()">
+              </div>
+              <button class="btn btn-outline-secondary btn-sm" onclick="filterState.startGasto=''; filterState.endGasto=''; renderModule();" title="Limpiar fechas de gastos">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+            </div>
+          </div>
+          <table class="table-excel mb-0">
+            <thead>
+              <tr class="header-pink-bar" style="font-size: 0.75rem;">
+                <th style="width: 100px;">FECHA</th>
+                <th style="width: 220px;">NOMBRE</th>
+                <th>CONCEPTO</th>
+                <th style="width: 130px;">MONTO</th>
+                <th class="no-print" style="width:70px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${gastosHtml || '<tr><td colspan="5" class="text-center py-3 text-muted fst-italic" style="font-size: 0.8rem;">Sin gastos en este periodo</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- CUADRO RESUMEN INFERIOR DERECHA -->
+        <div class="d-flex justify-content-end mt-3">
+          <table class="summary-box-excel">
+            <tr>
+              <td class="text-muted">INGRESOS</td>
+              <td class="text-end fw-semibold">$ ${totalIng.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">GASTOS</td>
+              <td class="text-end fw-semibold">$ ${totalGas.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">TOTAL</td>
+              <td class="text-end fw-semibold">$ ${totalBalance.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            </tr>
+          </table>
+        </div>
+
+        ${getSignatureBlockHtml()}
+      `;
+    }
+
+    window.openModal = function(editId = null) {
+      document.getElementById('recordForm').reset();
+      document.getElementById('recordId').value = '';
+
+      document.getElementById('nombreGroup').style.display = 'block';
+
+      if (currentModule === 'fondo') {
+        document.getElementById('typeGroup').style.display = 'none';
+        document.getElementById('facturaGroup').style.display = 'block';
+        document.getElementById('lblNombre').innerText = 'Proveedor / Prestador de Servicios';
+      } else {
+        document.getElementById('typeGroup').style.display = 'block';
+        document.getElementById('facturaGroup').style.display = 'none';
+        document.getElementById('lblNombre').innerText = 'Nombre de la Persona / Paciente';
+      }
+
+      if (editId) {
+        const item = db[currentModule].find(x => x.id === editId);
+        if (item) {
+          document.getElementById('recordId').value = item.id;
+          document.getElementById('fieldFecha').value = item.fecha;
+          document.getElementById('fieldNombre').value = item.proveedor || '';
+          document.getElementById('fieldConcepto').value = item.concepto;
+          document.getElementById('fieldMonto').value = item.monto;
+          if (item.tipo) document.getElementById('fieldTipo').value = item.tipo;
+          if (item.factura) document.getElementById('fieldFactura').value = item.factura;
+          document.getElementById('modalTitle').innerText = 'Editar Registro';
+        }
+      } else {
+        document.getElementById('modalTitle').innerText = 'Nuevo Registro';
+        document.getElementById('fieldFecha').value = new Date().toISOString().split('T')[0];
+      }
+
+      bsModal.show();
+    };
+
+    window.editRecord = function(id) {
+      openModal(id);
+    };
+
+    window.deleteRecord = async function(id) {
+      if (confirm('¿Está seguro de eliminar este registro de la base de datos?')) {
+        try {
+          await deleteDoc(doc(firestore, dbCollections[currentModule].path, id));
+        } catch (error) {
+          console.error("Error al eliminar:", error);
+          alert("Error al eliminar el registro.");
+        }
+      }
+    };
+
+    window.saveRecord = async function(e) {
+      e.preventDefault();
+      const id = document.getElementById('recordId').value;
+      
+      const nuevoRegistro = {
+        fecha: document.getElementById('fieldFecha').value,
+        proveedor: document.getElementById('fieldNombre').value,
+        concepto: document.getElementById('fieldConcepto').value,
+        monto: parseFloat(document.getElementById('fieldMonto').value) || 0,
+        tipo: currentModule === 'fondo' ? 'GASTO' : document.getElementById('fieldTipo').value,
+        factura: currentModule === 'fondo' ? document.getElementById('fieldFactura').value : ''
+      };
+
+      try {
+        if (id) {
+          await updateDoc(doc(firestore, dbCollections[currentModule].path, id), nuevoRegistro);
+        } else {
+          await addDoc(dbCollections[currentModule], nuevoRegistro);
+        }
+        bsModal.hide();
+      } catch (error) {
+        console.error("Error al guardar en Firestore:", error);
+        alert("Error al conectar con la base de datos.");
+      }
+    };
+
+    window.triggerImportExcel = function() {
+      document.getElementById('importFile').click();
+    };
+
+    window.importExcelFile = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          
+          const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+          if (rows.length <= 1) {
+            alert('El archivo Excel está vacío o no tiene registros.');
+            return;
+          }
+
+          function parseExcelDate(serial) {
+            if (!serial) return new Date().toISOString().split('T')[0];
+            
+            if (typeof serial === 'string') {
+              let trimmed = serial.trim();
+              if (trimmed.includes('/')) {
+                const parts = trimmed.split('/');
+                if (parts.length === 3) {
+                  let year = parts[2];
+                  if (year.length === 2) year = '20' + year;
+                  return `${year}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                }
+              }
+              return trimmed;
+            }
+
+            if (typeof serial === 'number') {
+              const utc_days = Math.floor(serial - 25569);
+              const utc_value = utc_days * 86400;
+              const dateInfo = new Date(utc_value * 1000);
+              
+              const year = dateInfo.getUTCFullYear();
+              const month = String(dateInfo.getUTCMonth() + 1).padStart(2, '0');
+              const day = String(dateInfo.getUTCDate()).padStart(2, '0');
+              return `${year}-${month}-${day}`;
+            }
+
+            return String(serial);
+          }
+
+          let countAdded = 0;
+          for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            if (!row || row.length === 0) continue;
+
+            const fechaRaw = row[0];
+            const fechaVal = parseExcelDate(fechaRaw);
+            
+            let nuevoRegistro = {};
+
+            if (currentModule === 'fondo') {
+              const conceptoVal = row[1] !== undefined ? String(row[1]) : '';
+              const facturaVal = row[2] !== undefined ? String(row[2]) : '';
+              const proveedorVal = row[3] !== undefined ? String(row[3]) : '';
+              const montoRaw = row[4] !== undefined ? row[4] : 0;
+              const montoVal = parseFloat(String(montoRaw).replace('$', '').replace(',', '').trim()) || 0;
+
+              if (!conceptoVal.trim() && montoVal === 0) continue;
+
+              nuevoRegistro = {
+                fecha: fechaVal,
+                concepto: conceptoVal,
+                factura: facturaVal,
+                proveedor: proveedorVal,
+                monto: montoVal,
+                tipo: 'GASTO'
+              };
+            } else {
+              const nombreVal = row[1] !== undefined ? String(row[1]) : '';
+              const conceptoVal = row[2] !== undefined ? String(row[2]) : '';
+              const montoRaw = row[3] !== undefined ? row[3] : 0;
+              const montoVal = parseFloat(String(montoRaw).replace('$', '').replace(',', '').trim()) || 0;
+              const tipoVal = row[4] !== undefined ? String(row[4]).toUpperCase().trim() : 'INGRESO';
+
+              if (!conceptoVal.trim() && montoVal === 0) continue;
+
+              nuevoRegistro = {
+                fecha: fechaVal,
+                proveedor: nombreVal,
+                concepto: conceptoVal,
+                monto: montoVal,
+                tipo: tipoVal === 'GASTO' ? 'GASTO' : 'INGRESO',
+                factura: ''
+              };
+            }
+
+            await addDoc(dbCollections[currentModule], nuevoRegistro);
+            countAdded++;
+          }
+
+          alert(`¡Se importaron ${countAdded} registros correctamente en ${currentModule.toUpperCase()}!`);
+          document.getElementById('importFile').value = '';
+        } catch (err) {
+          console.error("Error al procesar el archivo Excel:", err);
+          alert("Ocurrió un error al leer el archivo Excel. Revisa la consola (F12).");
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    };
+
+    window.exportExcel = function() {
+      if (typeof XLSX === 'undefined') return;
+      const data = getFilteredData();
+      if (data.length === 0) {
+        alert('No hay datos para exportar.');
+        return;
+      }
+
+      const exportData = data.map((item, index) => {
+        if (currentModule === 'fondo') {
+          return {
+            'No.': index + 1,
+            'Fecha': item.fecha,
+            'Concepto': item.concepto,
+            'No. Factura': item.factura || '',
+            'Proveedor': item.proveedor,
+            'Importe Total': item.monto
+          };
+        } else {
+          return {
+            'No.': index + 1,
+            'Fecha': item.fecha,
+            'Nombre': item.proveedor || '',
+            'Tipo': item.tipo,
+            'Concepto': item.concepto,
+            'Monto': item.monto
+          };
+        }
+      });
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, currentModule.toUpperCase());
+      XLSX.writeFile(workbook, `Reporte_${currentModule.toUpperCase()}_DIF.xlsx`);
+    };
+
+    window.printReport = function() {
+      window.print();
+    };
+
+    window.exportPDF = function() {
+      const element = document.getElementById('printable-area');
+      if (typeof html2pdf === 'undefined') {
+        window.print();
+        return;
+      }
+
+      const opt = {
+        margin:       [0.3, 0.3, 0.3, 0.3],
+        filename:     `Reporte_${currentModule.toUpperCase()}_DIF.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, allowTaint: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      };
+
+      const noPrintElements = element.querySelectorAll('.no-print');
+      noPrintElements.forEach(el => el.style.display = 'none');
+
+      html2pdf().set(opt).from(element).save().then(() => {
+        noPrintElements.forEach(el => el.style.display = '');
+      }).catch(() => {
+        noPrintElements.forEach(el => el.style.display = '');
+        window.print();
+      });
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      inicializarSesionUsuario();
+
+      bsModal = new bootstrap.Modal(document.getElementById('recordModal'));
+
+      Object.keys(dbCollections).forEach(key => {
+        onSnapshot(dbCollections[key], (snapshot) => {
+          db[key] = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+          if (currentModule === key) {
+            renderModule();
+          }
+        }, (error) => {
+          console.error("Error al sincronizar Firestore:", error);
+        });
+      });
+    });
+
+    window.eliminarRegistrosVacios = async function() {
+      if (!confirm('¿Estás seguro de eliminar todos los registros vacíos o en ceros del módulo actual?')) return;
+
+      try {
+        const dataActual = db[currentModule] || [];
+        let borrados = 0;
+
+        for (let item of dataActual) {
+          const monto = parseFloat(item.monto) || 0;
+          const concepto = (item.concepto || '').trim();
+          
+          if (concepto === '' || concepto.toLowerCase() === 'sin concepto' || monto === 0) {
+            await deleteDoc(doc(firestore, dbCollections[currentModule].path, item.id));
+            borrados++;
+          }
+        }
+
+        alert(`Se han limpiado y eliminado ${borrados} registros vacíos o en ceros.`);
+      } catch (error) {
+        console.error("Error al limpiar registros:", error);
+        alert("Ocurrió un error al intentar limpiar la base de datos.");
+      }
+    };
+
+    window.changeRowsPerPage = function() {
+      const select = document.getElementById('rowsPerPageSelect');
+      rowsPerPage = parseInt(select.value) || 10;
+      currentPage = 1;
+      renderModule();
+    };
+
+    window.changePage = function(page) {
+      currentPage = page;
+      renderModule();
+    };
+
+    function getPaginationHtml(totalItems) {
+      const totalPages = Math.ceil(totalItems / rowsPerPage);
+      if (totalPages <= 1) return '';
+
+      let buttons = '';
+      for (let i = 1; i <= totalPages; i++) {
+        buttons += `<button class="btn btn-sm ${i === currentPage ? 'btn-danger' : 'btn-outline-secondary'} mx-1" onclick="changePage(${i})">${i}</button>`;
+      }
+
+      return `
+        <div class="d-flex justify-content-between align-items-center mt-3 no-print">
+          <small class="text-muted">Mostrando página ${currentPage} de ${totalPages} (${totalItems} registros en total)</small>
+          <div>${buttons}</div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
