@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Captura de Entrega de Despensas</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome 6 CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    brand: {
+                        50: '#fdf4f7',
+                        100: '#fbe8ef',
+                        500: '#ec4899', // Rosa principal del corazón
+                        600: '#db2777',
+                        700: '#be185d',
+                    },
+                    wine: {
+                        700: '#831843',
+                        800: '#701a3c',
+                        900: '#500724', // Tono vino oscuro de los contornos
+                    },
+                    sand: {
+                        100: '#fef3c7',
+                        200: '#fde68a',
+                        300: '#e5c494', // Tono arena/beige de las figuras del centro
+                    },
+                    earth: {
+                        600: '#a3703d',
+                        700: '#85582c', // Tono marrón/tierra de las manos que sostienen
+                        800: '#6b441f',
+                    }
+                }
+            }
+        }
+    }
+</script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+   <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="bg-brand-50 text-wine-900 shadow-md sticky top-0 z-50 border-b border-brand-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <img src="logo_dif.png" alt="Logo DIF" class="h-12 w-auto object-contain">
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-wine-900">Sistema de Control de Despensas</h1>
+                    <p class="text-xs text-earth-700">Dirección Integral de la Familia</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3 text-xs bg-white/80 px-4 py-2 rounded-lg border border-brand-100 shadow-sm">
+                <i class="fa-regular fa-calendar-check text-brand-600 text-base"></i>
+                <div>
+                    <span class="block font-semibold text-wine-900" id="current-date-display">--/--/----</span>
+                    <span class="text-earth-700">Módulo de Atención Activo</span>
+                </div>
+                <div class="flex items-center space-x-4 border-l pl-4 border-brand-200">
+    <div class="text-right hidden sm:block">
+        <p class="text-[10px] text-slate-500 uppercase font-bold">Usuario activo</p>
+        <p class="text-xs font-bold text-wine-900" id="user-display">Cargando...</p>
+    </div>
+    <button onclick="cerrarSesion()" class="text-wine-900 hover:text-red-600 transition p-2" title="Cerrar Sesión">
+        <i class="fa-solid fa-right-from-bracket"></i>
+    </button>
+</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full space-y-8">
+
+        <!-- Formulario y Tabla -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- Formulario de Captura / Edición -->
+            <div class="lg:col-span-5 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                        <div class="flex items-center space-x-2.5">
+                            <i class="fa-solid fa-id-card text-brand-600 text-lg"></i>
+                            <h3 class="font-bold text-slate-900 text-base" id="form-title">Nueva Captura de Despensa</h3>
+                        </div>
+                        <span id="edit-badge" class="hidden bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                            <i class="fa-solid fa-pen-to-square"></i> Modo Edición
+                        </span>
+                    </div>
+
+                    <form id="capture-form" onsubmit="saveRecord(event)" class="space-y-4">
+                        <input type="hidden" id="record-id">
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                    <i class="fa-solid fa-hashtag text-slate-400 mr-1"></i>No. (Folio Auto)
+                                </label>
+                                <input type="text" id="folio" required readonly class="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-xs font-mono font-bold text-slate-700 cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                    <i class="fa-regular fa-calendar text-slate-400 mr-1"></i>Fecha Captura
+                                </label>
+                                <input type="date" id="capture-date" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                <i class="fa-solid fa-user text-slate-400 mr-1"></i>Nombre Completo
+                            </label>
+                            <input type="text" id="full-name" required placeholder="Ej. María Elena González Pérez" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500">
+                        </div>
+
+                        <!-- F. Nacimiento y Edad -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                    <i class="fa-solid fa-cake-candles text-slate-400 mr-1"></i>F. Nacimiento
+                                </label>
+                                <input type="date" id="birth-date" required onchange="calculateExactAge()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                    <i class="fa-solid fa-user-clock text-slate-400 mr-1"></i>Edad Exacta
+                                </label>
+                                <input type="text" id="age" required readonly placeholder="Auto-calculada" class="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-xs font-medium text-slate-700 cursor-not-allowed">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                <i class="fa-solid fa-venus-mars text-slate-400 mr-1"></i>Género
+                            </label>
+                            <select id="gender" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500">
+                                <option value="Femenino">Femenino</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                    <i class="fa-solid fa-building-flag text-slate-400 mr-1"></i>Municipio
+                                </label>
+                                <input type="text" id="municipality" required placeholder="Ej. San Andrés Tuxtla" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                    <i class="fa-solid fa-map-pin text-slate-400 mr-1"></i>Loc / Col
+                                </label>
+                                <input type="text" id="locality" required placeholder="Ej. Centro" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                <i class="fa-solid fa-location-dot text-slate-400 mr-1"></i>Dirección
+                            </label>
+                            <input type="text" id="address" required placeholder="Calle, número exterior/interior" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500">
+                        </div>
+
+                        <!-- Cantidad del Apoyo y Tipo de Apoyo -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                    <i class="fa-solid fa-scale-balanced text-slate-400 mr-1"></i>Cantidad del Apoyo
+                                </label>
+                                <input type="text" id="support-quantity" required placeholder="Ej. 1 despensa, 5 kg, etc." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                    <i class="fa-solid fa-box text-slate-400 mr-1"></i>Tipo de Apoyo
+                                </label>
+                                <input type="text" id="support-type" list="support-options" required placeholder="Ej. Despensa Básica" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500">
+                                <datalist id="support-options"></datalist>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                    <i class="fa-solid fa-star text-slate-400 mr-1"></i>¿Primera vez?
+                                </label>
+                                <select id="first-time" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500">
+                                    <option value="Sí">Sí</option>
+                                    <option value="No">No</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                <i class="fa-solid fa-arrows-rotate text-slate-400 mr-1"></i>Frecuencia de Entrega
+                            </label>
+                            <div class="grid grid-cols-4 gap-2">
+                                <label class="cursor-pointer border rounded-lg p-2 text-center text-xs flex items-center justify-center space-x-1 hover:bg-slate-50 has-[:checked]:bg-brand-50 has-[:checked]:border-brand-500 has-[:checked]:text-brand-700 font-medium">
+                                    <input type="radio" name="frequency" value="Semanal" class="hidden" checked>
+                                    <span>Semanal</span>
+                                </label>
+                                <label class="cursor-pointer border rounded-lg p-2 text-center text-xs flex items-center justify-center space-x-1 hover:bg-slate-50 has-[:checked]:bg-brand-50 has-[:checked]:border-brand-500 has-[:checked]:text-brand-700 font-medium">
+                                    <input type="radio" name="frequency" value="Quincenal" class="hidden">
+                                    <span>Quincenal</span>
+                                </label>
+                                <label class="cursor-pointer border rounded-lg p-2 text-center text-xs flex items-center justify-center space-x-1 hover:bg-slate-50 has-[:checked]:bg-brand-50 has-[:checked]:border-brand-500 has-[:checked]:text-brand-700 font-medium">
+                                    <input type="radio" name="frequency" value="Mensual" class="hidden">
+                                    <span>Mensual</span>
+                                </label>
+                                <label class="cursor-pointer border rounded-lg p-2 text-center text-xs flex items-center justify-center space-x-1 hover:bg-slate-50 has-[:checked]:bg-brand-50 has-[:checked]:border-brand-500 has-[:checked]:text-brand-700 font-medium">
+                                    <input type="radio" name="frequency" value="No recurrente" class="hidden">
+                                    <span>No</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                <i class="fa-solid fa-comment-dots text-slate-400 mr-1"></i>Observaciones / Comentarios
+                            </label>
+                            <textarea id="observations" rows="2" placeholder="Detalles adicionales, notas o comentarios sobre la entrega..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-brand-500"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">
+                                <i class="fa-solid fa-camera text-slate-400 mr-1"></i>Fotografía / Evidencia (Múltiples)
+                            </label>
+                            <div class="flex items-center space-x-3">
+                                <!-- Contenedor de miniaturas múltiples -->
+                                <div id="photo-preview-container" class="flex items-center space-x-2 overflow-x-auto py-1 min-h-[50px]">
+                                    <div class="w-12 h-12 rounded-lg bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-400 shrink-0">
+                                        <i class="fa-solid fa-image text-lg" id="photo-icon"></i>
+                                    </div>
+                                </div>
+                                <input type="file" id="photo-input" accept="image/*" multiple class="text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer w-full">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3 pt-3">
+                            <button type="submit" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-sm transition flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span id="submit-btn-text">Guardar Registro</span>
+                            </button>
+                            <button type="button" onclick="resetForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-semibold py-2.5 px-4 rounded-xl transition flex items-center justify-center space-x-1">
+                                <i class="fa-solid fa-xmark"></i>
+                                <span>Limpiar</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabla y Paginación -->
+            <div class="lg:col-span-7 space-y-5 flex flex-col justify-between">
+                
+                <!-- Único Buscador Inteligente y Selector -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                        <div class="relative flex-grow">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                            </div>
+                            <input type="text" id="search-input" oninput="filterRecords()" placeholder="Buscar por Folio, Nombre, Municipio, Colonia o Dirección..." class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-brand-500">
+                        </div>
+
+                        <div class="flex items-center space-x-2 shrink-0 self-end sm:self-auto">
+                            <label for="rows-per-page" class="text-xs text-slate-600 font-medium flex items-center gap-1">
+                                <i class="fa-solid fa-list-ol text-slate-400"></i> Mostrar:
+                            </label>
+                            <select id="rows-per-page" onchange="changeRowsPerPage()" class="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 font-semibold focus:ring-2 focus:ring-brand-500">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Panel rápido de elegibilidad integrado al buscar -->
+                    <div id="eligibility-result" class="hidden text-xs"></div>
+                </div>
+
+                <!-- Tabla -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-100/80 text-slate-700 uppercase font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="p-3">Foto</th>
+                                    <th class="p-3">No.</th>
+                                    <th class="p-3">Beneficiario</th>
+                                    <th class="p-3">Ubicación</th>
+                                    <th class="p-3">Apoyo / Cantidad</th>
+                                    <th class="p-3">Última / Próxima</th>
+                                    <th class="p-3 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body" class="divide-y divide-slate-100 text-slate-700">
+                                <!-- Filas dinámicas -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Paginación -->
+                    <div class="bg-slate-50 p-3.5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                        <span id="pagination-info" class="text-slate-500 font-medium">Mostrando 0 de 0 registros</span>
+                        <div class="flex items-center space-x-1" id="pagination-controls">
+                            <!-- Botones -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal para Ver Fotografía en Grande con Navegación -->
+    <div id="photo-modal" class="hidden fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4" onclick="closePhotoModal()">
+        <div class="relative bg-white rounded-2xl p-4 max-w-lg w-full shadow-2xl flex flex-col items-center" onclick="event.stopPropagation()">
+            <button onclick="closePhotoModal()" class="absolute top-3 right-3 bg-slate-100 hover:bg-slate-200 text-slate-700 w-8 h-8 rounded-full flex items-center justify-center text-sm transition z-10">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-image text-brand-600"></i> Evidencia Fotográfica
+            </h3>
+            <div id="modal-img-container" class="relative w-full max-h-[70vh] overflow-hidden rounded-xl bg-slate-100 border flex items-center justify-center">
+                <img id="modal-img" src="" class="max-h-[65vh] w-auto object-contain rounded-lg" alt="Foto Ampliada">
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            <p><i class="fa-solid fa-building-columns mr-1"></i> Sistema Administrativo de Captura de Apoyos y Despensas &bull; Módulo Oficial</p>
+        </div>
+    </footer>
+</body>
+
+    <!-- LÓGICA JAVASCRIPT DEL SISTEMA -->
+    <script>
+// ==========================================
+// ESTADO GLOBAL DE LA APLICACIÓN
+// ==========================================
+// ==========================================
+// ESTADO GLOBAL DE LA APLICACIÓN
+// ==========================================
+let records = JSON.parse(localStorage.getItem('pantry_records')) || [];
+let filteredRecords = [...records];
+let currentPage = 1;
+let rowsPerPage = 10;
+let currentPhotosData = []; // Array para múltiples fotos en memoria
+
+// Variables para el visor de fotos en el modal
+let activeViewerPhotos = [];
+let activePhotoIndex = 0;
+
+// Inicialización al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+    // --- 1. Validar sesión y mostrar usuario al cargar ---
+    const usuario = localStorage.getItem('activeUser') || 'Usuario';
+    const userDisplay = document.getElementById('user-display');
+    if (userDisplay) {
+        userDisplay.innerText = usuario.toUpperCase();
+    }
+    
+    // Seguridad: Si no hay sesión activa, expulsa al index
+    if (!sessionStorage.getItem('sesion_activa')) {
+        window.location.href = 'index.html';
+        return;
+    }
+    // ----------------------------------------------------
+
+    setCurrentDate();
+    resetForm();
+    updateSupportDatalist();
+    renderTable();
+});
+
+// --- 2. Función de Cierre de Sesión ---
+function cerrarSesion() {
+    if (confirm('¿Está seguro que desea cerrar la sesión?')) {
+        sessionStorage.clear();
+        localStorage.removeItem('activeUser');
+        localStorage.removeItem('userDep');
+        window.location.href = 'index.html';
+    }
+}
+
+// Configurar Fecha Actual en la cabecera y formulario
+function setCurrentDate() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    
+    const dateDisplay = document.getElementById('current-date-display');
+    const captureDateInput = document.getElementById('capture-date');
+
+    if (dateDisplay) dateDisplay.textContent = `${dd}/${mm}/${yyyy}`;
+    if (captureDateInput) captureDateInput.value = `${yyyy}-${mm}-${dd}`;
+}
+
+// ==========================================
+// LÓGICA DE AUTO-INCREMENTO DEL FOLIO
+// ==========================================
+function getNextFolio() {
+    if (records.length === 0) {
+        return "FOL-0001";
+    }
+    
+    const folioNumbers = records.map(r => {
+        const match = r.folio ? r.folio.match(/\d+/) : null;
+        return match ? parseInt(match[0], 10) : 0;
+    });
+
+    const maxNumber = Math.max(...folioNumbers, 0);
+    const nextNumber = maxNumber + 1;
+    
+    return `FOL-${String(nextNumber).padStart(4, '0')}`;
+}
+
+// Retroalimentación del Datalist de Tipo de Apoyo
+function updateSupportDatalist() {
+    const datalist = document.getElementById('support-options');
+    if (!datalist) return;
+    datalist.innerHTML = '';
+    
+    const uniqueSupports = [...new Set(records.map(r => r.supportType).filter(Boolean))];
+    const defaultOptions = ['Despensa Básica', 'Despensa Adulto Mayor', 'Despensa Escolar', 'Despensa Emergencia'];
+    const allOptions = [...new Set([...uniqueSupports, ...defaultOptions])];
+
+    allOptions.forEach(type => {
+        const option = document.createElement('option');
+        option.value = type;
+        datalist.appendChild(option);
+    });
+}
+
+// ==========================================
+// GUARDAR O EDITAR REGISTRO
+// ==========================================
+function saveRecord(event) {
+    event.preventDefault();
+
+    const recordId = document.getElementById('record-id').value;
+    const folio = document.getElementById('folio').value;
+    const captureDate = document.getElementById('capture-date').value;
+    const birthDate = document.getElementById('birth-date').value;
+    const fullName = document.getElementById('full-name').value.trim();
+    const age = document.getElementById('age').value;
+    const gender = document.getElementById('gender').value;
+    const municipality = document.getElementById('municipality').value.trim();
+    const locality = document.getElementById('locality').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const supportQuantity = document.getElementById('support-quantity').value.trim();
+    const supportType = document.getElementById('support-type').value.trim();
+    const firstTime = document.getElementById('first-time').value;
+    const frequencyElement = document.querySelector('input[name="frequency"]:checked');
+    const frequency = frequencyElement ? frequencyElement.value : 'Mensual';
+    const observations = document.getElementById('observations').value.trim();
+
+    const nextDelivery = calculateNextDelivery(captureDate, frequency);
+
+    const recordData = {
+        id: recordId ? recordId : Date.now().toString(),
+        folio,
+        captureDate,
+        birthDate,
+        fullName,
+        age,
+        gender,
+        municipality,
+        locality,
+        address,
+        supportQuantity,
+        supportType,
+        firstTime,
+        frequency,
+        nextDelivery,
+        observations,
+        photos: [...currentPhotosData]
+    };
+
+    if (recordId) {
+        const index = records.findIndex(r => r.id === recordId);
+        if (index !== -1) records[index] = recordData;
+        showToast('¡Registro actualizado exitosamente!', 'success');
+    } else {
+        records.unshift(recordData);
+        showToast('¡Registro guardado exitosamente!', 'success');
+    }
+
+    localStorage.setItem('pantry_records', JSON.stringify(records));
+    filteredRecords = [...records];
+    updateSupportDatalist();
+    resetForm();
+    filterRecords();
+}
+
+// Calcular fecha estimada de siguiente entrega
+function calculateNextDelivery(dateString, frequency) {
+    if (frequency === 'No recurrente') return 'N/A (Única vez)';
+
+    const date = new Date(dateString + 'T00:00:00');
+    if (frequency === 'Semanal') date.setDate(date.getDate() + 7);
+    else if (frequency === 'Quincenal') date.setDate(date.getDate() + 15);
+    else if (frequency === 'Mensual') date.setMonth(date.getMonth() + 1);
+    
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+}
+
+// Resetear Formulario y Generar Nuevo Folio
+function resetForm() {
+    const form = document.getElementById('capture-form');
+    if (form) form.reset();
+    
+    const recordIdInput = document.getElementById('record-id');
+    const folioInput = document.getElementById('folio');
+    if (recordIdInput) recordIdInput.value = '';
+    if (folioInput) folioInput.value = getNextFolio();
+    
+    currentPhotosData = [];
+    renderPhotoPreviews();
+
+    const formTitle = document.getElementById('form-title');
+    const submitBtnText = document.getElementById('submit-btn-text');
+    const editBadge = document.getElementById('edit-badge');
+
+    if (formTitle) formTitle.textContent = 'Nueva Captura de Despensa';
+    if (submitBtnText) submitBtnText.textContent = 'Guardar Registro';
+    if (editBadge) editBadge.classList.add('hidden');
+
+    setCurrentDate();
+}
+
+// ==========================================
+// CARGAR REGISTRO PARA EDITAR
+// ==========================================
+function editRecord(id) {
+    const record = records.find(r => r.id === id);
+    if (!record) return;
+
+    document.getElementById('record-id').value = record.id;
+    document.getElementById('folio').value = record.folio;
+    document.getElementById('capture-date').value = record.captureDate;
+    document.getElementById('birth-date').value = record.birthDate || '';
+    document.getElementById('full-name').value = record.fullName;
+    document.getElementById('age').value = record.age;
+    document.getElementById('gender').value = record.gender;
+    document.getElementById('municipality').value = record.municipality;
+    document.getElementById('locality').value = record.locality;
+    document.getElementById('address').value = record.address;
+    document.getElementById('support-quantity').value = record.supportQuantity || '';
+    document.getElementById('support-type').value = record.supportType;
+    document.getElementById('first-time').value = record.firstTime;
+    document.getElementById('observations').value = record.observations || '';
+
+    const radio = document.querySelector(`input[name="frequency"][value="${record.frequency}"]`);
+    if (radio) radio.checked = true;
+
+    if (record.photos && Array.isArray(record.photos)) {
+        currentPhotosData = [...record.photos];
+    } else if (record.photo) {
+        currentPhotosData = [record.photo];
+    } else {
+        currentPhotosData = [];
+    }
+    renderPhotoPreviews();
+
+    document.getElementById('form-title').textContent = 'Editar Registro de Apoyo';
+    document.getElementById('submit-btn-text').textContent = 'Actualizar Registro';
+    document.getElementById('edit-badge').classList.remove('hidden');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Eliminar Registro
+function deleteRecord(id) {
+    if (confirm('¿Está seguro de eliminar este registro de entrega?')) {
+        records = records.filter(r => r.id !== id);
+        localStorage.setItem('pantry_records', JSON.stringify(records));
+        filteredRecords = [...records];
+        updateSupportDatalist();
+        filterRecords();
+        resetForm();
+        showToast('Registro eliminado correctamente', 'error');
+    }
+}
+
+// ==========================================
+// GESTIÓN DE MÚLTIPLES FOTOGRAFÍAS
+// ==========================================
+const photoInput = document.getElementById('photo-input');
+if (photoInput) {
+    photoInput.setAttribute('multiple', 'true');
+    photoInput.onchange = function(event) {
+        const files = event.target.files;
+        if (!files) return;
+
+        for (let file of files) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentPhotosData.push(e.target.result);
+                renderPhotoPreviews();
+            }
+            reader.readAsDataURL(file);
+        }
+        event.target.value = '';
+    };
+}
+
+function renderPhotoPreviews() {
+    const previewContainer = document.getElementById('photo-preview-container');
+    if (!previewContainer) return;
+
+    if (currentPhotosData.length === 0) {
+        previewContainer.innerHTML = `
+            <div class="w-12 h-12 rounded-lg bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-400 shrink-0">
+                <i class="fa-solid fa-image text-lg" id="photo-icon"></i>
+            </div>
+        `;
+        return;
+    }
+
+    previewContainer.innerHTML = '';
+    currentPhotosData.forEach((photoSrc, index) => {
+        previewContainer.innerHTML += `
+            <div class="relative group w-12 h-12 rounded-lg overflow-hidden border border-slate-300 shrink-0">
+                <img src="${photoSrc}" class="w-full h-full object-cover cursor-pointer hover:scale-110 transition" onclick="openPhotoModalByIndex(${index})" title="Ver foto">
+                <button type="button" onclick="removePhoto(${index})" class="absolute top-0 right-0 bg-rose-600 text-white w-4 h-4 rounded-bl flex items-center justify-center text-[10px] opacity-90 hover:opacity-100">
+                    &times;
+                </button>
+            </div>
+        `;
+    });
+}
+
+function removePhoto(index) {
+    currentPhotosData.splice(index, 1);
+    renderPhotoPreviews();
+}
+
+// ==========================================
+// VISOR MODAL
+// ==========================================
+function openPhotoModal(photosArrayOrSingle) {
+    if (Array.isArray(photosArrayOrSingle)) {
+        activeViewerPhotos = photosArrayOrSingle;
+    } else if (typeof photosArrayOrSingle === 'string' && photosArrayOrSingle) {
+        activeViewerPhotos = [photosArrayOrSingle];
+    } else {
+        activeViewerPhotos = [...currentPhotosData];
+    }
+
+    if (activeViewerPhotos.length === 0) return;
+    activePhotoIndex = 0;
+    renderModalContent();
+    document.getElementById('photo-modal').classList.remove('hidden');
+}
+
+function openPhotoModalByIndex(index) {
+    activeViewerPhotos = [...currentPhotosData];
+    activePhotoIndex = index;
+    renderModalContent();
+    document.getElementById('photo-modal').classList.remove('hidden');
+}
+
+function renderModalContent() {
+    const modalContainer = document.getElementById('photo-modal');
+    if (!modalContainer) return;
+    let modalBox = modalContainer.querySelector('div > div');
+    
+    const imageContainer = modalBox.querySelector('#modal-img-container') || document.createElement('div');
+    imageContainer.id = 'modal-img-container';
+    imageContainer.className = 'relative w-full max-h-[70vh] overflow-hidden rounded-xl bg-slate-100 border flex items-center justify-center';
+    
+    let navButtonsHtml = '';
+    if (activeViewerPhotos.length > 1) {
+        navButtonsHtml = `
+            <button onclick="prevPhoto(event)" class="absolute left-2 bg-black/50 hover:bg-black/75 text-white w-8 h-8 rounded-full flex items-center justify-center transition">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button onclick="nextPhoto(event)" class="absolute right-2 bg-black/50 hover:bg-black/75 text-white w-8 h-8 rounded-full flex items-center justify-center transition">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <span class="absolute bottom-2 bg-black/60 text-white text-[11px] px-2.5 py-0.5 rounded-full">
+                Foto ${activePhotoIndex + 1} de ${activeViewerPhotos.length}
+            </span>
+        `;
+    }
+
+    imageContainer.innerHTML = `
+        <img id="modal-img" src="${activeViewerPhotos[activePhotoIndex]}" class="max-h-[65vh] w-auto object-contain rounded-lg" alt="Evidencia Ampliada">
+        ${navButtonsHtml}
+    `;
+
+    const existingContainer = modalBox.querySelector('#modal-img-container');
+    if (existingContainer) {
+        existingContainer.replaceWith(imageContainer);
+    } else {
+        modalBox.appendChild(imageContainer);
+    }
+}
+
+function prevPhoto(event) {
+    event.stopPropagation();
+    activePhotoIndex = (activePhotoIndex - 1 + activeViewerPhotos.length) % activeViewerPhotos.length;
+    renderModalContent();
+}
+
+function nextPhoto(event) {
+    event.stopPropagation();
+    activePhotoIndex = (activePhotoIndex + 1) % activeViewerPhotos.length;
+    renderModalContent();
+}
+
+function closePhotoModal() {
+    document.getElementById('photo-modal').classList.add('hidden');
+}
+
+// ==========================================
+// FILTRADO Y TABLA
+// ==========================================
+function filterRecords() {
+    const searchInput = document.getElementById('search-input');
+    const query = searchInput ? searchInput.value.toLowerCase() : '';
+    
+    filteredRecords = records.filter(r => 
+        (r.folio && r.folio.toLowerCase().includes(query)) ||
+        (r.fullName && r.fullName.toLowerCase().includes(query)) ||
+        (r.municipality && r.municipality.toLowerCase().includes(query)) ||
+        (r.locality && r.locality.toLowerCase().includes(query)) ||
+        (r.address && r.address.toLowerCase().includes(query)) ||
+        (r.supportType && r.supportType.toLowerCase().includes(query))
+    );
+    currentPage = 1;
+    renderTable();
+}
+
+function changeRowsPerPage() {
+    const select = document.getElementById('rows-per-page');
+    if (select) rowsPerPage = parseInt(select.value, 10);
+    currentPage = 1;
+    renderTable();
+}
+
+function renderTable() {
+    const tbody = document.getElementById('table-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    const total = filteredRecords.length;
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = Math.min(start + rowsPerPage, total);
+    const pageRecords = filteredRecords.slice(start, end);
+
+    if (pageRecords.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="p-6 text-center text-slate-400">
+                    <i class="fa-regular fa-folder-open text-2xl mb-2 block"></i>
+                    No se encontraron registros de entregas.
+                </td>
+            </tr>`;
+    } else {
+        pageRecords.forEach(r => {
+            let recordPhotos = [];
+            if (r.photos && Array.isArray(r.photos)) recordPhotos = r.photos;
+            else if (r.photo) recordPhotos = [r.photo];
+
+            let firstPhoto = recordPhotos.length > 0 ? recordPhotos[0] : null;
+
+            const avatar = firstPhoto 
+                ? `<img src="${firstPhoto}" class="w-9 h-9 rounded-full object-cover border border-slate-200 cursor-pointer hover:scale-110 transition shadow-sm" onclick='openPhotoModal(${JSON.stringify(recordPhotos)})' title="Ver fotos (${recordPhotos.length})">`
+                : `<div class="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs">${r.fullName ? r.fullName.charAt(0) : '?'}</div>`;
+
+            const proxEntregaHtml = r.frequency === 'No recurrente' 
+                ? `<div class="text-[11px] text-slate-500 italic">Única vez</div>`
+                : `<div class="text-[11px] text-brand-700 font-medium">Próx: ${r.nextDelivery || 'N/A'}</div>`;
+
+            tbody.innerHTML += `
+                <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+                    <td class="p-3">${avatar}</td>
+                    <td class="p-3 font-mono font-bold text-brand-700">${r.folio}</td>
+                    <td class="p-3">
+                        <div class="font-semibold text-slate-800">${r.fullName}</div>
+                        <div class="text-[10px] text-slate-400">${r.age} &bull; ${r.gender}</div>
+                    </td>
+                    <td class="p-3">
+                        <div class="font-medium">${r.locality}</div>
+                        <div class="text-[10px] text-slate-400">${r.municipality}</div>
+                    </td>
+                    <td class="p-3">
+                        <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] px-2 py-0.5 rounded-full font-semibold block w-max">${r.supportType}</span>
+                        <span class="text-[10px] font-bold text-slate-600">Cant: ${r.supportQuantity || '1'}</span>
+                    </td>
+                    <td class="p-3">
+                        <div class="text-[11px] text-slate-600">Últ: ${r.captureDate}</div>
+                        ${proxEntregaHtml}
+                    </td>
+                    <td class="p-3 text-center space-x-1">
+                        <button onclick="editRecord('${r.id}')" title="Editar" class="p-1.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg transition">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button onclick="deleteRecord('${r.id}')" title="Eliminar" class="p-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg transition">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    const paginationInfo = document.getElementById('pagination-info');
+    if (paginationInfo) {
+        paginationInfo.textContent = total > 0 
+            ? `Mostrando ${start + 1} a ${end} de ${total} registros`
+            : 'Mostrando 0 de 0 registros';
+    }
+
+    renderPaginationControls(total);
+}
+
+function renderPaginationControls(total) {
+    const container = document.getElementById('pagination-controls');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const totalPages = Math.ceil(total / rowsPerPage);
+    if (totalPages <= 1) return;
+
+    const prevBtn = document.createElement('button');
+    prevBtn.className = `px-2.5 py-1 rounded-lg border text-xs font-medium ${currentPage === 1 ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-white hover:bg-slate-100 text-slate-700'}`;
+    prevBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
+    prevBtn.disabled = currentPage === 1;
+    prevBtn.onclick = () => { currentPage--; renderTable(); };
+    container.appendChild(prevBtn);
+
+    for (let i = 1; i <= totalPages; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = `px-2.5 py-1 rounded-lg border text-xs font-bold ${i === currentPage ? 'bg-brand-600 text-white border-brand-600' : 'bg-white hover:bg-slate-100 text-slate-700'}`;
+        pageBtn.textContent = i;
+        pageBtn.onclick = () => { currentPage = i; renderTable(); };
+        container.appendChild(pageBtn);
+    }
+
+    const nextBtn = document.createElement('button');
+    nextBtn.className = `px-2.5 py-1 rounded-lg border text-xs font-medium ${currentPage === totalPages ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-white hover:bg-slate-100 text-slate-700'}`;
+    nextBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.onclick = () => { currentPage++; renderTable(); };
+    container.appendChild(nextBtn);
+}
+
+// Calcular edad exacta en Años, Meses, Semanas y Días
+function calculateExactAge() {
+    const birthDateStr = document.getElementById('birth-date').value;
+    if (!birthDateStr) return;
+
+    const birthDate = new Date(birthDateStr + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (birthDate > today) {
+        alert('La fecha de nacimiento no puede ser mayor a la fecha actual.');
+        document.getElementById('birth-date').value = '';
+        document.getElementById('age').value = '';
+        return;
+    }
+
+    let years = today.getFullYear() - birthDate.getFullYear();
+    let months = today.getMonth() - birthDate.getMonth();
+    let days = today.getDate() - birthDate.getDate();
+
+    if (days < 0) {
+        months--;
+        const prevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+        days += prevMonth.getDate();
+    }
+
+    if (months < 0) {
+        years--;
+        months += 12;
+    }
+
+    const diffTime = Math.abs(today - birthDate);
+    const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    const weeks = Math.floor((totalDays % 30.44) / 7);
+
+    let ageString = '';
+    if (years > 0) ageString += `${years} año${years > 1 ? 's' : ''} `;
+    if (months > 0) ageString += `${months} mes${months > 1 ? 'es' : ''} `;
+    if (weeks > 0 && years === 0) ageString += `${weeks} sem `;
+    if (days > 0 && years === 0 && months === 0) ageString += `${days} día${days > 1 ? 's' : ''}`;
+    
+    if (!ageString) ageString = 'Recién nacido';
+
+    document.getElementById('age').value = ageString.trim();
+}
+
+// ==========================================
+// SISTEMA DE ALERTAS VISUALES (TOAST)
+// ==========================================
+function showToast(message, type = 'success') {
+    const existingToast = document.getElementById('custom-toast');
+    if (existingToast) existingToast.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'custom-toast';
+    const bgColor = type === 'success' ? 'bg-emerald-600' : 'bg-rose-600';
+    const icon = type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation';
+
+    toast.className = `fixed bottom-5 right-5 z-50 ${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center space-x-2 text-xs font-semibold transition-all duration-300 transform translate-y-5 opacity-0`;
+    toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i><span>${message}</span>`;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.remove('translate-y-5', 'opacity-0');
+    }, 50);
+
+    setTimeout(() => {
+        toast.classList.add('translate-y-5', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+    </script>
+</body>
+</html>
