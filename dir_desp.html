@@ -77,12 +77,23 @@
                     <p class="text-xs text-earth-700">Dirección Integral de la Familia</p>
                 </div>
             </div>
+
+            <!-- Ejemplo para el botón de Excel -->
+<button onclick="exportToExcel()" class="...">
+    <i class="fa-solid fa-file-excel mr-1"></i> Exportar Excel
+</button>
+
+<!-- Ejemplo para el botón de Imprimir -->
+<button onclick="printFilteredRecords()" class="...">
+    <i class="fa-solid fa-print mr-1"></i> Imprimir Reporte
+</button>
             <div class="flex items-center space-x-3 text-xs bg-white/80 px-4 py-2 rounded-lg border border-brand-100 shadow-sm">
                 <i class="fa-regular fa-calendar-check text-brand-600 text-base"></i>
                 <div>
                     <span class="block font-semibold text-wine-900" id="current-date-display">--/--/----</span>
                     <span class="text-earth-700">Módulo de Atención Activo</span>
                 </div>
+
                 <div class="flex items-center space-x-4 border-l pl-4 border-brand-200">
                     <div class="text-right hidden sm:block">
                         <p class="text-[10px] text-slate-500 uppercase font-bold">Usuario activo</p>
@@ -352,8 +363,7 @@
             <p><i class="fa-solid fa-building-columns mr-1"></i> Sistema Administrativo de Captura de Apoyos y Despensas &bull; Módulo Oficial</p>
         </div>
     </footer>
-
-    <!-- LÓGICA JAVASCRIPT DEL SISTEMA CON FIREBASE -->
+<!-- LÓGICA JAVASCRIPT DEL SISTEMA CON FIREBASE -->
     <script>
         let records = [];
         let filteredRecords = [];
@@ -377,8 +387,8 @@
             }
 
             setCurrentDate();
-            resetForm();
             await loadRecordsFromFirebase();
+            resetForm(); // Se ejecuta después de cargar para que tome bien el folio consecutivo
         });
 
         function cerrarSesion() {
@@ -403,7 +413,7 @@
             if (captureDateInput) captureDateInput.value = `${yyyy}-${mm}-${dd}`;
         }
 
-        async function loadRecordsFromFirebase() {
+async function loadRecordsFromFirebase() {
             try {
                 if (!window.db || !window.firebaseMethods) {
                     console.error("Firebase no está inicializado globalmente en window.");
@@ -421,6 +431,16 @@
                     });
                 });
                 
+                // ORDENAR DE MAYOR A MENOR SEGÚN EL NÚMERO DE FOLIO
+                records.sort((a, b) => {
+                    const getNum = (folioStr) => {
+                        if (!folioStr) return 0;
+                        const matches = folioStr.match(/\d+/g);
+                        return matches ? parseInt(matches[matches.length - 1], 10) : 0;
+                    };
+                    return getNum(b.folio) - getNum(a.folio); // b - a para orden descendente (mayor a menor)
+                });
+
                 filteredRecords = [...records];
                 updateSupportDatalist();
                 renderTable();
@@ -431,11 +451,16 @@
         }
 
         function getNextFolio() {
-            if (records.length === 0) return "FOL-0001";
+            if (!records || records.length === 0) return "FOL-0001";
             
+            // Extrae todos los números de los folios existentes de forma segura
             const folioNumbers = records.map(r => {
-                const match = r.folio ? r.folio.match(/\d+/) : null;
-                return match ? parseInt(match[0], 10) : 0;
+                if (!r.folio) return 0;
+                // Busca todas las secuencias de dígitos en el texto del folio
+                const matches = r.folio.match(/\d+/g);
+                if (!matches) return 0;
+                // Toma el último grupo de números encontrado (ej. de FOL-0005 toma 5)
+                return parseInt(matches[matches.length - 1], 10);
             });
 
             const maxNumber = Math.max(...folioNumbers, 0);
@@ -462,7 +487,12 @@
             event.preventDefault();
 
             const recordId = document.getElementById('record-id').value;
-            const folio = document.getElementById('folio').value;
+            // Si el usuario escribió un folio personalizado lo respeta, si está vacío asigna el siguiente automático
+            let folio = document.getElementById('folio').value.trim();
+            if (!folio) {
+                folio = getNextFolio();
+            }
+
             const captureDate = document.getElementById('capture-date').value;
             const birthDate = document.getElementById('birth-date').value;
             const fullName = document.getElementById('full-name').value.trim();
@@ -934,6 +964,142 @@
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
         }
+
+        // FUNCIÓN PARA EXPORTAR A EXCEL (CSV compatible con Excel usando filteredRecords)
+        function exportToExcel() {
+            if (!filteredRecords || filteredRecords.length === 0) {
+                showToast('No hay registros filtrados para exportar', 'error');
+                return;
+            }
+
+            // Definir cabeceras del reporte
+            let csvContent = "\uFEFF"; // BOM para que Excel reconozca tildes y caracteres especiales (UTF-8)
+            csvContent += "Folio,Nombre Completo,Edad,Género,Municipio,Localidad,Dirección,Tipo de Apoyo,Cantidad,Fecha Captura,Próxima Entrega,Frecuencia,Observaciones\n";
+
+            // Recorrer los registros filtrados actuales
+            filteredRecords.forEach(r => {
+                const row = [
+                    `"${r.folio || ''}"`,
+                    `"${r.fullName || ''}"`,
+                    `"${r.age || ''}"`,
+                    `"${r.gender || ''}"`,
+                    `"${r.municipality || ''}"`,
+                    `"${r.locality || ''}"`,
+                    `"${r.address || ''}"`,
+                    `"${r.supportType || ''}"`,
+                    `"${r.supportQuantity || '1'}"`,
+                    `"${r.captureDate || ''}"`,
+                    `"${r.nextDelivery || ''}"`,
+                    `"${r.frequency || ''}"`,
+                    `"${(r.observations || '').replace(/"/g, '""')}"` // Escapar comillas dobles
+                ];
+                csvContent += row.join(",") + "\n";
+            });
+
+            // Crear archivo descargable
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `reporte_despensas_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('¡Archivo Excel exportado con éxito!', 'success');
+        }
+
+        // FUNCIÓN PARA IMPRIMIR CONFORME AL FILTRO ACTUAL
+function printFilteredRecords() {
+    if (!filteredRecords || filteredRecords.length === 0) {
+        showToast('No hay registros filtrados para imprimir', 'error');
+        return;
+    }
+
+    // 1. Crear o buscar un iframe oculto en el documento
+    let iframe = document.getElementById('print-iframe');
+    if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'print-iframe';
+        iframe.style.position = 'absolute';
+        iframe.style.width = '0px';
+        iframe.style.height = '0px';
+        iframe.style.border = 'none';
+        iframe.style.left = '-9999px';
+        document.body.appendChild(iframe);
+    }
+
+    // 2. Armar el diseño HTML exclusivo para la impresión
+    let htmlContent = `
+        <!DOCTYPE html>
+        <html>
+            <head>
+                <title>Reporte de Entregas de Despensas</title>
+                <style>
+                    body { font-family: Arial, sans-serif; font-size: 11px; color: #333; margin: 15px; }
+                    h2 { text-align: center; margin-bottom: 5px; color: #1e293b; text-transform: uppercase; }
+                    p.subtitle { text-align: center; font-size: 10px; color: #64748b; margin-top: 0; margin-bottom: 15px; }
+                    table { width: 100%; border-collapse: collapse; }
+                    th, td { border: 1px solid #cbd5e1; padding: 6px 8px; text-align: left; vertical-align: middle; }
+                    th { background-color: #f1f5f9; color: #334155; font-weight: bold; }
+                    tr:nth-child(even) { background-color: #f8fafc; }
+                    .text-center { text-align: center; }
+                    @media print {
+                        body { margin: 0; }
+                    }
+                </style>
+            </head>
+            <body>
+                <h2>Reporte de Entregas de Despensas</h2>
+                <p class="subtitle">Generado el: ${new Date().toLocaleDateString()} &bull; Total de registros filtrados: ${filteredRecords.length}</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Folio</th>
+                            <th>Beneficiario</th>
+                            <th>Ubicación (Localidad / Municipio)</th>
+                            <th>Apoyo</th>
+                            <th>Cant.</th>
+                            <th>Fecha</th>
+                            <th>Frecuencia / Próx.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    `;
+
+    filteredRecords.forEach(r => {
+        htmlContent += `
+            <tr>
+                <td><b>${r.folio || ''}</b></td>
+                <td>${r.fullName || ''} <br><small>${r.age || ''} - ${r.gender || ''}</small></td>
+                <td>${r.locality || ''}, ${r.municipality || ''}</td>
+                <td>${r.supportType || ''}</td>
+                <td class="text-center">${r.supportQuantity || '1'}</td>
+                <td>${r.captureDate || ''}</td>
+                <td>${r.frequency || ''} <br><small>Próx: ${r.nextDelivery || 'N/A'}</small></td>
+            </tr>
+        `;
+    });
+
+    htmlContent += `
+                    </tbody>
+                </table>
+            </body>
+        </html>
+    `;
+
+    // 3. Escribir el contenido dentro del iframe y activar la impresión silenciosa
+    const doc = iframe.contentWindow.document;
+    doc.open();
+    doc.write(htmlContent);
+    doc.close();
+
+    // Esperar a que el contenido cargue por completo en el iframe y lanzar el cuadro de impresión
+    setTimeout(() => {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+    }, 300);
+}
     </script>
 </body>
 </html>
