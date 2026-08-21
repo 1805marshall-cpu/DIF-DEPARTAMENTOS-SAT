@@ -3028,12 +3028,58 @@ window.renderReporteJerarquico = function() {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 
-    // Helper para normalizar el mes a 2 dígitos ('01', '02', etc.)
-    const obtenerMesNormalizado = (fechaStr) => {
-        if (!fechaStr) return null;
-        const partes = fechaStr.trim().split(/[-/]/);
+    // Formateador Universal y Robusto para cualquier tipo de Fecha (Firestore, YYYY-MM-DD, DD/MM/YYYY, etc.)
+    const formatearFechaUniversal = (fechaInput) => {
+        if (!fechaInput) return '';
+
+        // 1. Si es un objeto de Firestore Timestamp ({ seconds: ... })
+        if (typeof fechaInput === 'object' && fechaInput.seconds) {
+            const dateObj = new Date(fechaInput.seconds * 1000);
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const y = dateObj.getFullYear();
+            return `${d}/${m}/${y}`;
+        }
+
+        // 2. Si es una cadena de texto o número
+        let fechaStr = String(fechaInput).trim();
+        if (!fechaStr) return '';
+
+        // Si viene en formato ISO o YYYY-MM-DD / YYYY/MM/DD
+        if (fechaStr.includes('-') || fechaStr.includes('/')) {
+            const separador = fechaStr.includes('-') ? '-' : '/';
+            const partes = fechaStr.split(separador);
+
+            if (partes.length === 3) {
+                // Caso YYYY-MM-DD (Año de 4 dígitos al inicio)
+                if (partes[0].length === 4) {
+                    return `${partes[2].padStart(2, '0')}/${partes[1].padStart(2, '0')}/${partes[0]}`;
+                }
+                // Caso DD-MM-YYYY o DD/MM/YYYY (Día al inicio)
+                if (partes[2].length === 4 || partes[2].length === 2) {
+                    let anio = partes[2];
+                    if (anio.length === 2) anio = '20' + anio;
+                    return `${partes[0].padStart(2, '0')}/${partes[1].padStart(2, '0')}/${anio}`;
+                }
+            }
+        }
+
+        return fechaStr; // Retorna original si no coincide con ningún patrón conocido
+    };
+
+    // Helper para normalizar el mes a 2 dígitos ('01', '02', etc.) para los filtros
+    const obtenerMesNormalizado = (fechaInput) => {
+        if (!fechaInput) return null;
+        
+        let fechaStr = fechaInput;
+        if (typeof fechaInput === 'object' && fechaInput.seconds) {
+            fechaStr = new Date(fechaInput.seconds * 1000).toISOString().split('T')[0];
+        }
+
+        const partes = String(fechaStr).trim().split(/[-/]/);
         if (partes.length >= 2) {
-            const mesNum = parseInt(partes[1], 10);
+            // Identificar si el mes está en la segunda posición (YYYY-MM-DD) o primera/segunda
+            const mesNum = partes[0].length === 4 ? parseInt(partes[1], 10) : parseInt(partes[0], 10);
             return isNaN(mesNum) ? null : String(mesNum).padStart(2, '0');
         }
         return null;
@@ -3132,12 +3178,8 @@ window.renderReporteJerarquico = function() {
         // POBLACIÓN VULNERABLE
         ...registrosVulnerablesProcesados,
 
-        // ÁREA MÉDICA (Robustecido para múltiples llaves y normalización)
+        // ÁREA MÉDICA
         ...safeArray(safeStore.medica || safeStore.area_medica || safeStore.medico || safeStore.consultas_medicas).map(i => {
-            let fechaValida = i.fecha || i.fecha_registro || i.created_at || i.createdAt || '';
-            if (typeof fechaValida === 'object' && fechaValida.seconds) {
-                fechaValida = new Date(fechaValida.seconds * 1000).toISOString().split('T')[0];
-            }
             return {
                 dep: 'AREA MEDICA',
                 zona: i.col_loc || i.localidad || i.lugar || i.municipio || i.zona || 'N/A',
@@ -3145,10 +3187,24 @@ window.renderReporteJerarquico = function() {
                 info: i.diagnostico || i.consulta || i.servicio || i.asunto || i.motivo || 'CONSULTA MEDICA GENERAL',
                 nombre: i.paciente || i.nombre || i.beneficiario || '',
                 folio: i.folio || i.receta || '',
-                fecha: String(fechaValida)
+                fecha: i.fecha || i.fecha_registro || i.created_at || i.createdAt || ''
             };
         }),
 
+        // ÁREA MÉDICA
+        ...safeArray(safeStore.medica || safeStore.area_medica || safeStore.medico || safeStore.consultas_medicas).map(i => {
+            return {
+                dep: 'AREA MEDICA',
+                zona: i.col_loc || i.localidad || i.lugar || i.municipio || i.zona || 'N/A',
+                estatus: (i.estatus || i.estado || 'ATENDIDO').toUpperCase(),
+                info: i.diagnostico || i.consulta || i.servicio || i.asunto || i.motivo || 'CONSULTA MEDICA GENERAL',
+                nombre: i.paciente || i.nombre || i.beneficiario || '',
+                folio: i.folio || i.receta || '',
+                // Incluimos fecha_cap para que la tome sin problemas
+                fecha: i.fecha_cap || i.fecha || i.fecha_registro || i.created_at || i.createdAt || ''
+            };
+        }),
+        
         // CRISAT
         ...safeArray(safeStore.crisat || safeStore.CRISAT).map(i => ({
             dep: 'CRISAT',
@@ -3200,7 +3256,7 @@ window.renderReporteJerarquico = function() {
         return acc;
     }, {});
 
-    // Colores identificadores por Departamento (Incluye Área Médica)
+    // Colores identificadores por Departamento
     const coloresDep = {
         'TRABAJO SOCIAL': '#6366f1',
         'PSICOLOGIA': '#3b82f6',
@@ -3240,11 +3296,15 @@ window.renderReporteJerarquico = function() {
                     if (i.estatus === 'VALIDADO' || i.estatus === 'ACTIVO' || i.estatus === 'ATENDIDO') colorEstatus = '#2563eb'; // Azul/Verde oficial
 
                     const colorBadgeDep = coloresDep[i.dep] || '#64748b';
+                    const fechaLegible = formatearFechaUniversal(i.fecha);
 
                     return `
                     <div style="padding:8px 15px; font-size:11px; border-bottom:1px solid #f8fafc;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span style="color:white; background:${colorBadgeDep}; padding:1px 6px; border-radius:4px; font-size:9.5px; font-weight:bold;">${escapeHTML(i.dep)}</span>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <span style="color:white; background:${colorBadgeDep}; padding:1px 6px; border-radius:4px; font-size:9.5px; font-weight:bold;">${escapeHTML(i.dep)}</span>
+                                ${fechaLegible ? `<span style="background:#f1f5f9; color:#475569; padding:1px 5px; border-radius:4px; font-size:9.5px; font-weight:600;"><i class="far fa-calendar-alt" style="margin-right:3px;"></i>${escapeHTML(fechaLegible)}</span>` : ''}
+                            </div>
                             <span style="font-weight:bold; color:${colorEstatus}; font-size:10px;">${escapeHTML(i.estatus)}</span>
                         </div>
                         <div style="color:#334155; margin-top:4px;">
