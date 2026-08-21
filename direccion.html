@@ -317,9 +317,6 @@
         <div class="col-md-6 text-end">
           <label class="form-label d-block mb-1">&nbsp;</label>
           <div class="btn-group btn-group-sm w-100 w-md-auto flex-wrap gap-1">
-            <button class="btn btn-outline-secondary fw-semibold border-secondary-subtle text-dark" onclick="triggerImportExcel()">
-              <i class="fa-solid fa-file-arrow-up me-1 text-muted"></i> Importar
-            </button>
             <input type="file" id="importFile" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importExcelFile(event)">
             <button class="btn btn-outline-secondary fw-semibold border-secondary-subtle text-dark" onclick="exportExcel()">
               <i class="fa-solid fa-file-excel me-1 text-success"></i> Exportar
@@ -329,9 +326,6 @@
             </button>
             <button class="btn btn-outline-secondary fw-semibold border-secondary-subtle text-dark" onclick="printReport()">
               <i class="fa-solid fa-print me-1 text-muted"></i> Imprimir
-            </button>
-            <button class="btn btn-outline-danger fw-semibold border-secondary-subtle text-dark" onclick="eliminarRegistrosVacios()" title="Limpiar registros vacíos o en 0">
-              <i class="fa-solid fa-broom me-1 text-danger"></i> Limpiar Vacíos
             </button>
           </div>
         </div>
