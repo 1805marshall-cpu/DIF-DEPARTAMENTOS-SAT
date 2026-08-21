@@ -176,7 +176,6 @@
   </style>
 </head>
 <body>
-
 <!-- ENCABEZADO SUPERIOR WEB -->
   <header class="brand-header shadow-sm mb-4 no-print">
     <div class="container-fluid d-flex justify-content-between align-items-center">
@@ -266,9 +265,9 @@
 
         <!-- SELECTOR DE FILAS POR PÁGINA -->
         <div class="col-md-2">
-                  <div class="d-block">
+          <div class="d-block">
             <label class="form-label fw-semibold text-muted mb-1" style="font-size: 0.8rem;">
-              <i class="fa-solid fa-triangle-exclamation me-1"></i> Este filtro de listas solo es para el módulo FONDO REVOLVENTE
+              <i class="fa-solid fa-triangle-exclamation me-1"></i> Listas (Fondo)
             </label>
           </div>
           <label class="form-label fw-semibold text-muted mb-1" style="font-size: 0.8rem;"><i class="fa-solid fa-list-ol me-1"></i> Mostrar:</label>
@@ -286,6 +285,32 @@
           <button class="btn btn-sm btn-danger w-100 fw-semibold" onclick="openModal()">
             <i class="fa-solid fa-plus me-1"></i> Nuevo Registro
           </button>
+        </div>
+
+        <!-- BÚSQUEDA MINUCIOSA (GLOBAL PARA LOS 4 MÓDULOS) -->
+        <div class="col-md-6">
+          <label class="form-label fw-semibold text-muted mb-1" style="font-size: 0.8rem;">
+            <i class="fa-solid fa-magnifying-glass me-1"></i> Búsqueda minuciosa (Concepto, Proveedor, Factura, Monto...):
+          </label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light text-muted">
+              <i class="fa-solid fa-filter"></i>
+            </span>
+            <input 
+              type="text" 
+              id="globalSearchInput" 
+              class="form-control" 
+              placeholder="Escribe para buscar en tiempo real en este módulo..." 
+              value="" 
+              oninput="actualizarBusqueda()">
+            <button 
+              class="btn btn-outline-secondary" 
+              type="button" 
+              onclick="document.getElementById('globalSearchInput').value=''; actualizarBusqueda();" 
+              title="Limpiar búsqueda">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
         </div>
 
         <!-- BOTONES DE ACCIÓN (IMPORTAR, EXPORTAR, PDF, IMPRIMIR, LIMPIAR) -->
@@ -375,7 +400,6 @@
   </div>
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
   <!-- SCRIPT DE FIREBASE Y LÓGICA PRINCIPAL -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -396,7 +420,7 @@
       medica: collection(firestore, "medica")
     };
 
-    let currentPage = 1;
+let currentPage = 1;
     let rowsPerPage = 10;
     let currentModule = 'fondo';
     let bsModal = null;
@@ -404,12 +428,23 @@
 
     let db = { fondo: [], crisat: [], caic: [], medica: [] };
 
-    // Estados independientes para los filtros de fecha de Ingresos y Gastos
+    // Estado independiente para los filtros de fecha y la búsqueda minuciosa
     let filterState = {
       startIngreso: '',
       endIngreso: '',
       startGasto: '',
-      endGasto: ''
+      endGasto: '',
+      search: '' // <--- NUEVO: Campo para la búsqueda minuciosa
+    };
+
+  // <--- NUEVO: Función para capturar el valor de búsqueda
+    window.actualizarBusqueda = function() {
+      const searchInput = document.getElementById('globalSearchInput');
+      if (searchInput) {
+        filterState.search = searchInput.value.toLowerCase().trim();
+        currentPage = 1; // Reiniciar a la primera página al buscar
+        renderModule();
+      }
     };
 
     window.actualizarFiltrosFechas = function() {
@@ -474,11 +509,15 @@
       });
     };
 
-    window.switchModule = function(modKey, event) {
+window.switchModule = function(modKey, event) {
       currentModule = modKey;
       currentPage = 1; 
-      filterState = { startIngreso: '', endIngreso: '', startGasto: '', endGasto: '' };
+      // Limpiamos filtros al cambiar de módulo, incluyendo la búsqueda
+      filterState = { startIngreso: '', endIngreso: '', startGasto: '', endGasto: '', search: '' };
       
+      const searchInput = document.getElementById('globalSearchInput');
+      if (searchInput) searchInput.value = '';
+
       const links = document.querySelectorAll('#moduleTabs .nav-link');
       links.forEach(link => link.classList.remove('active'));
       if (event && event.currentTarget) {
@@ -487,16 +526,12 @@
       renderModule();
     };
 
-    window.applyFilters = function() {
-      currentPage = 1;
-      renderModule();
-    };
-
-    // Función unificada que filtra correctamente según el módulo activo
+// Función unificada que filtra por fechas y realiza la búsqueda minuciosa
     function getFilteredData() {
       let data = db[currentModule] || [];
       let filtered = [...data];
 
+      // 1. Filtrado por rango de fechas (específico para fondo o general)
       if (currentModule === 'fondo') {
         const startInput = document.getElementById('dateStart')?.value;
         const endInput = document.getElementById('dateEnd')?.value;
@@ -506,6 +541,24 @@
           if (startInput && item.fecha < startInput) return false;
           if (endInput && item.fecha > endInput) return false;
           return true;
+        });
+      }
+
+      // 2. <--- NUEVO: Búsqueda minuciosa global (concepto, proveedor, factura o monto)
+      if (filterState.search) {
+        const query = filterState.search;
+        filtered = filtered.filter(item => {
+          const concepto = (item.concepto || '').toLowerCase();
+          const proveedor = (item.proveedor || '').toLowerCase();
+          const factura = (item.factura || '').toLowerCase();
+          const monto = String(item.monto || '').toLowerCase();
+          const tipo = (item.tipo || '').toLowerCase();
+
+          return concepto.includes(query) || 
+                 proveedor.includes(query) || 
+                 factura.includes(query) || 
+                 monto.includes(query) ||
+                 tipo.includes(query);
         });
       }
 
