@@ -135,6 +135,7 @@ canvas { flex-grow:1; }
             <div id="nav-procuraduria" class="nav-item" onclick="showView('procuraduria', this)"><i class="fas fa-balance-scale"></i> <span>Procuraduría</span></div>
             <div id="nav-crisat" class="nav-item" onclick="showView('crisat', this)"><i class="fas fa-diagnoses"></i> <span>Crisat</span></div>
             <div id="nav-direccion" class="nav-item" onclick="showView('direccion', this)"><i class="fa-solid fa-building"></i> <span>Direccion</span></div>
+            <div id="nav-apoyo_direccion" class="nav-item" onclick="showView('apoyo_direccion', this)"><i class="fa-solid fa-hands-holding"></i> <span>Apoyos Direccion</span></div>
             <div id="nav-territorial" class="nav-item" onclick="showView('territorial', this)"><i class="fas fa-city"></i> <span>Resumen Territorial</span></div>
             <div id="nav-estadisticas" class="nav-item" onclick="showView('estadisticas', this)"><i class="fa-solid fa-chart-line"></i> <span>Estadistico</span></div>
         </nav>
@@ -197,19 +198,85 @@ canvas { flex-grow:1; }
             <div id="reloj"></div>
         </div>   
 
-        <div id="view-direccion" class="view-container" style="display:none;">
-                    <div class="access-card" style="background: var(--vulnerable-color); padding: 20px; color: white; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h2 style="margin:0;">Finanzas General de Dirección del SMDIF</h2>
-                    <small>Coordinación de Indicadores </small>
-                </div>
-                <a href="direccion.html" class="btn-open" style="background: white; color: var(--vulnerable-color); padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">Abrir Módulo de Captura</a>
+<!-- ========================================== -->
+<!-- PANEL DE ESTADÍSTICAS Y MÉTRICAS: DIRECCIÓN / FINANZAS -->
+<!-- ========================================== -->
+<div id="view-direccion" class="view-container" style="display: none;">
+    <!-- Tarjeta de Acceso o Encabezado del Panel -->
+    <div class="access-card d-flex justify-content-between align-items-center p-3 mb-4 bg-white shadow-sm rounded">
+        <div>
+            <b><i class="fa-solid fa-building text-danger mr-2"></i> Panel Global de Dirección y Finanzas</b>
+            <div style="font-size: 11px; opacity: 0.9; margin-top: 3px;" class="text-muted">Resumen y métricas generales de ingresos, gastos y movimientos registrados</div>
+        </div>
+        <button onclick="reprocesarDireccion()" class="btn btn-outline-danger btn-sm">
+            <i class="fa-solid fa-rotate-right mr-1"></i> Actualizar Métricas
+        </button>
+    </div>
+
+    <!-- KPIs / Tarjetas de Estadísticas Principales -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card p-3 border-top border-4 border-primary shadow-sm">
+                <small class="text-muted fw-semibold" style="font-size: 0.75rem;">TOTAL INGRESOS</small>
+                <div id="dir-total-ingresos" class="fs-4 fw-bold text-primary mt-1">$0.00</div>
             </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 border-top border-4 shadow-sm" style="border-top-color: var(--dif-pink) !important;">
+                <small class="text-muted fw-semibold" style="font-size: 0.75rem;">TOTAL GASTOS</small>
+                <div id="dir-total-gastos" class="fs-4 fw-bold mt-1" style="color: var(--dif-pink);">$0.00</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 border-top border-4 border-success shadow-sm">
+                <small class="text-muted fw-semibold" style="font-size: 0.75rem;">BALANCE GENERAL</small>
+                <div id="dir-balance" class="fs-4 fw-bold text-success mt-1">$0.00</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3 border-top border-4 border-secondary shadow-sm">
+                <small class="text-muted fw-semibold" style="font-size: 0.75rem;">TOTAL REGISTROS</small>
+                <div id="dir-total-registros" class="fs-4 fw-bold text-secondary mt-1">0</div>
+            </div>
+        </div>
+    </div>
 
-        </div> <!-- CORREGIDO: Cierre correcto de view-direccion al final de su contenido -->
+    <!-- Paneles de Listados Distribuidos (Estilo similar a tu muestra) -->
+    <div class="row g-3">
+        <!-- Últimos Registros -->
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm h-100">
+                <b><i class="fa-solid fa-clock-rotate-left text-secondary mr-1"></i> Últimos Registros</b>
+                <div id="dir-list-registros" style="max-height: 280px; overflow-y: auto; margin-top: 10px;">
+                    <div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin registros</div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Movimientos por Módulo -->
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm h-100">
+                <b><i class="fa-solid fa-folder-open text-success mr-1"></i> Movimientos por Módulo</b>
+                <div id="dir-list-modulos" style="max-height: 280px; overflow-y: auto; margin-top: 10px;">
+                    <div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>
+                </div>
+            </div>
+        </div>
 
+        <!-- Proveedores / Nombres Frecuentes -->
+        <div class="col-md-4">
+            <div class="card p-3 shadow-sm h-100">
+                <b><i class="fa-solid fa-users text-info mr-1"></i> Proveedores / Nombres Frecuentes</b>
+                <div id="dir-list-proveedores" style="max-height: 280px; overflow-y: auto; margin-top: 10px;">
+                    <div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ========================================== -->
         <!-- VIEW POBLACIÓN VULNERABLE -->
+        <!-- ========================================== -->
         <div id="view-vulnerable" class="view-container" style="display:none;">
             <div class="access-card" style="background: var(--vulnerable-color); padding: 20px; color: white; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
@@ -606,99 +673,243 @@ canvas { flex-grow:1; }
 <!-- PANEL DE PREVISUALIZACIÓN Y CONTROL: CRISAT -->
 <!-- ========================================== -->
 
-<div id="view-crisat" class="view-container" style="display:none;">
-    <!-- Encabezado del Módulo -->
-    <div class="access-card" style="background: #701a27;">
-        <div><b>CRISAT</b> - Centro de Rehabilitación Integral</div>
-        <a href="crisat.html" class="btn-open">Abrir Módulo de Captura</a>
-    </div>
+        <div id="view-crisat" class="view-container" style="display:none; padding: 20px;">
+            <!-- Tarjeta de Acceso al Módulo -->
+            <div class="access-card" style="background: #701a27; padding: 20px; color: white; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 style="margin:0;"><i class="fas fa-diagnoses"></i> Panel Global de CRISAT</h2>
+                    <small>Centro de Rehabilitación e Inclusión Social - Indicadores y Estadísticas</small>
+                </div>
+                <a href="crisat.html" class="btn-open" style="background: white; color: #701a27; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">Abrir Módulo de Captura</a>
+            </div>
 
-    <div class="filter-bar"></div>
+            <h3 style="color: #1e293b; margin-bottom: 10px;">📊 Métricas Generales y Financieras</h3>
 
-    <!-- Rejilla de Indicadores (KPIs) -->
-    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 20px;">
-        <!-- Total Registros -->
-        <div class="stat-box" style="border-top:3px solid #701a27; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04);">
-            <small style="color:#64748b; font-weight:700; font-size:0.75rem;">REGISTROS / ATENCIONES</small>
-            <div id="crisat-total" style="font-size:1.4rem; font-weight:800; color:#701a27; margin-top:4px;">0</div>
+            <!-- KPIs de Estadísticas y Finanzas -->
+            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                <div class="stat-box" style="background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #701a27; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <small style="color:#64748b; font-weight: bold;">Total Actividades</small>
+                    <div id="crisat-total" style="font-size: 22px; font-weight: bold; color: #1e293b;">0</div>
+                </div>
+
+                <div class="stat-box" style="background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #0ea5e9; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <small style="color:#64748b; font-weight: bold;">Pacientes Únicos</small>
+                    <div id="crisat-ent" style="font-size: 22px; font-weight: bold; color: #0ea5e9;">0</div>
+                </div>
+
+                <div class="stat-box" style="background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #10b981; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <small style="color:#64748b; font-weight: bold;">Ingresos Totales</small>
+                    <div id="crisat-ingresos" style="font-size: 22px; font-weight: bold; color: #10b981;">$0.00</div>
+                </div>
+
+                <div class="stat-box" style="background: #ffffff; padding: 15px; border-radius: 6px; border-left: 5px solid #8b5cf6; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <small style="color:#64748b; font-weight: bold;">Altas / Concluidos</small>
+                    <div id="crisat-altas" style="font-size: 22px; font-weight: bold; color: #8b5cf6;">0</div>
+                </div>
+            </div>
+
+            <!-- Demografía (Género y Edades) -->
+            <h3 style="color: #1e293b; margin-bottom: 10px;">👥 Distribución Demográfica</h3>
+            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 25px;">
+                <div class="stat-box" style="background: #fdf2f8; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <small style="color:#db2777; font-weight: bold;">Mujeres</small>
+                    <div id="crisat-mujeres" style="font-size: 20px; font-weight: bold; color: #db2777;">0</div>
+                </div>
+                <div class="stat-box" style="background: #f0fdf4; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <small style="color:#16a34a; font-weight: bold;">Hombres</small>
+                    <div id="crisat-hombres" style="font-size: 20px; font-weight: bold; color: #16a34a;">0</div>
+                </div>
+                <div class="stat-box" style="background: #fefce8; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <small style="color:#ca8a04; font-weight: bold;">Niños (0-17)</small>
+                    <div id="crisat-ninos" style="font-size: 20px; font-weight: bold; color: #ca8a04;">0</div>
+                </div>
+                <div class="stat-box" style="background: #f0fdfa; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <small style="color:#0d9488; font-weight: bold;">Adultos (18-59)</small>
+                    <div id="crisat-adultos" style="font-size: 20px; font-weight: bold; color: #0d9488;">0</div>
+                </div>
+                <div class="stat-box" style="background: #f8fafc; padding: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                    <small style="color:#475569; font-weight: bold;">Mayores (60+)</small>
+                    <div id="crisat-mayores" style="font-size: 20px; font-weight: bold; color: #475569;">0</div>
+                </div>
+            </div>
+
+            <!-- Paneles de Listados (Pacientes, Colonias y Localidades) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+                <!-- 1. Pacientes Recientes / Listado -->
+                <div class="panel" style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #701a27;">
+                    <b style="font-size: 13px; color: #1e293b; display: block; margin-bottom: 12px;">
+                        <i class="fas fa-user-injured" style="color:#701a27; margin-right: 5px;"></i> Listado de Pacientes
+                    </b>
+                    <div id="crisat-list-pacientes" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+
+                <!-- 2. Colonias -->
+                <div class="panel" style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #0284c7;">
+                    <b style="font-size: 13px; color: #1e293b; display: block; margin-bottom: 12px;">
+                        <i class="fas fa-city" style="color:#0284c7; margin-right: 5px;"></i> Distribución por Colonias
+                    </b>
+                    <div id="crisat-list-colonias" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+
+                <!-- 3. Localidades -->
+                <div class="panel" style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #10b981;">
+                    <b style="font-size: 13px; color: #1e293b; display: block; margin-bottom: 12px;">
+                        <i class="fas fa-map-marker-alt" style="color:#10b981; margin-right: 5px;"></i> Distribución por Localidades
+                    </b>
+                    <div id="crisat-list-localidades" style="max-height: 400px; overflow-y: auto;"></div>
+                </div>
+            </div>
         </div>
-        
-        <!-- Total Pacientes -->
-        <div class="stat-box" style="border-top:3px solid #0284c7; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04);">
-            <small style="color:#64748b; font-weight:700; font-size:0.75rem;">TOTAL PACIENTES</small>
-            <div id="crisat-ent" style="font-size:1.4rem; font-weight:800; color:#0284c7; margin-top:4px;">0</div>
-        </div>
-
-        <!-- Pacientes de Alta / Tratamiento Terminado -->
-        <div class="stat-box" style="border-top:3px solid #16a34a; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04);">
-            <small style="color:#64748b; font-weight:700; font-size:0.75rem;">TRATAMIENTO TERMINADO</small>
-            <div id="crisat-altas" style="font-size:1.4rem; font-weight:800; color:#16a34a; margin-top:4px;">0</div>
-        </div>
-
-        <!-- Distribución por Género -->
-        <!-- Género (M / H) -->
-<div class="stat-box" style="border-top:3px solid #db2777; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04); text-align: center;">
-    <small style="color:#64748b; font-weight:700; font-size:0.75rem; display: block;">GÉNERO (M / H)</small>
-    <div style="font-size:1.1rem; font-weight:800; margin-top:6px; display:flex; gap:10px; align-items:center; justify-content: center;">
-        <span style="color:#db2777;"><i class="fas fa-venus"></i> <span id="crisat-mujeres">0</span></span>
-        <span style="color:#cbd5e1;">|</span>
-        <span style="color:#2563eb;"><i class="fas fa-mars"></i> <span id="crisat-hombres">0</span></span>
-    </div>
-</div>
-
-<!-- Distribución por Edades -->
-<div class="stat-box" style="border-top:3px solid #b45309; background:#fff; padding:12px; border-radius:10px; box-shadow:0 2px 5px rgba(0,0,0,0.04); text-align: center;">
-    <small style="color:#64748b; font-weight:700; font-size:0.75rem; display: block;">RANGO DE EDADES</small>
-    <div style="display: flex; gap: 4px; flex-wrap: wrap; margin-top: 8px; justify-content: center;">
-        <span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">0-17: <b id="crisat-ninos">0</b></span>
-        <span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">18-59: <b id="crisat-adultos">0</b></span>
-        <span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 600;">60+: <b id="crisat-mayores">0</b></span>
-    </div>
-</div>
-    </div>
-
-    <!-- Contenido de Listas -->
-    <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px;">
-        <!-- Lista 1: Pacientes, Diagnóstico, Terapeuta y Sesiones/Terapias -->
-        <div class="panel" style="background:#fff; padding:18px; border-radius:12px; border:1px solid #e2e8f0;">
-            <b style="color:#701a27; font-size:1rem; display:block; margin-bottom:12px;">
-                <i class="fas fa-user-injured"></i> Lista de Pacientes, Diagnóstico y Terapias
-            </b>
-            <div id="crisat-list-pacientes" style="max-height:480px; overflow-y:auto; padding-right:5px;"></div>
-        </div>
 
 
-<!-- Lista 2: Zonas (Colonias y Localidades) -->
-<div class="panel" style="background:#fff; padding:18px; border-radius:12px; border:1px solid #e2e8f0;">
-    <b style="color:#701a27; font-size:1rem; display:block; margin-bottom:16px;">
-        <i class="fas fa-map-marked-alt"></i> Terapias por Zonas
-    </b>
-
-    <!-- Contenedor en Grid de 2 columnas -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
-        
-        <!-- Columna 1: Colonias -->
+<!-- ========================================== -->
+<!-- PANEL DE ESTADÍSTICAS Y MÉTRICAS: DESPENSAS -->
+<!-- ========================================== -->
+<div id="view-apoyo_direccion" class="view-container">
+    <!-- Tarjeta de Acceso o Encabezado del Panel -->
+    <div class="access-card">
         <div>
-            <span style="color:#4a5568; font-weight:700; font-size:0.85rem; display:block; margin-bottom:8px;">
-                <i class="fas fa-city" style="color:#701a27; margin-right:4px;"></i> Colonias
-            </span>
-            <div id="crisat-list-colonias" style="max-height:440px; overflow-y:auto; padding-right:5px;"></div>
+            <b><i class="fa-solid fa-chart-pie"></i> Panel Global de Dirección de Despensas</b>
+            <div style="font-size: 11px; opacity: 0.9; margin-top: 3px;">Resumen y métricas generales de entregas y apoyos registrados</div>
+        </div>
+        <button onclick="reprocesarDespensas()" class="btn-open">
+            <i class="fa-solid fa-rotate-right mr-1"></i> Actualizar Métricas
+        </button>
+    </div>
+
+    <!-- KPIs / Tarjetas de Estadísticas Principales -->
+    <div class="stats-grid">
+        <div class="stat-box">
+            <small>Total Entregas</small>
+            <div id="desp-total">0</div>
+        </div>
+        <div class="stat-box" style="border-top: 4px solid var(--secondary);">
+            <small>Beneficiarios Únicos</small>
+            <div id="desp-beneficiarios" style="color: var(--secondary);">0</div>
+        </div>
+        <div class="stat-box" style="border-top: 4px solid #db2777;">
+            <small>Mujeres Atendidas</small>
+            <div id="desp-mujeres" style="color: #db2777;">0</div>
+        </div>
+        <div class="stat-box" style="border-top: 4px solid #059669;">
+            <small>Hombres Atendidos</small>
+            <div id="desp-hombres" style="color: #059669;">0</div>
+        </div>
+    </div>
+
+    <!-- Paneles de Listados Distribuidos -->
+    <div class="panel-grid">
+        <!-- Beneficiarios Recientes -->
+        <div class="panel">
+            <b><i class="fa-solid fa-users" style="color: var(--primary); margin-right: 5px;"></i> Últimos Registros</b>
+            <div id="desp-list-pacientes" style="overflow-y: auto;">
+                <div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin registros</div>
+            </div>
         </div>
 
-        <!-- Columna 2: Localidades -->
-        <div>
-            <span style="color:#4a5568; font-weight:700; font-size:0.85rem; display:block; margin-bottom:8px;">
-                <i class="fas fa-map-marker-alt" style="color:#701a27; margin-right:4px;"></i> Localidades
-            </span>
-            <div id="crisat-list-localidades" style="max-height:440px; overflow-y:auto; padding-right:5px;"></div>
+        <!-- Tipos de Apoyo -->
+        <div class="panel">
+            <b><i class="fa-solid fa-box-open" style="color: #059669; margin-right: 5px;"></i> Tipos de Apoyo</b>
+            <div id="desp-list-tipos" style="overflow-y: auto;">
+                <div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>
+            </div>
         </div>
 
-    </div>
-</div>
+        <!-- Distribución por Localidad -->
+        <div class="panel">
+            <b><i class="fa-solid fa-map-location-dot" style="color: #0369a1; margin-right: 5px;"></i> Localidades / Colonias</b>
+            <div id="desp-list-localidades" style="overflow-y: auto;">
+                <div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>
+            </div>
+        </div>
     </div>
 </div>
 
-    <!-- Vista Territorial -->
+<!-- ========================================== -->
+<!-- VISTA: DIRECCIÓN / CONTROL FINANCIERO -->
+<!-- ========================================== -->
+<div id="view-apoyo_direccion" class="view-container" style="display: none;">
+    
+    <!-- Barra de Pestañas / Módulos Internos -->
+    <div class="card p-3 mb-4 shadow-sm no-print">
+        <ul class="nav nav-pills gap-2" id="moduleTabs">
+            <li class="nav-item">
+                <a class="nav-link active fw-bold px-3 py-2 rounded-3 text-xs" href="#" onclick="switchModule('fondo', event)">
+                    <i class="fa-solid fa-wallet me-1"></i> Fondo Revolvente
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-bold px-3 py-2 rounded-3 text-xs" href="#" onclick="switchModule('crisat', event)">
+                    <i class="fa-solid fa-hand-holding-medical me-1"></i> CRISAT
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-bold px-3 py-2 rounded-3 text-xs" href="#" onclick="switchModule('caic', event)">
+                    <i class="fa-solid fa-child me-1"></i> CAIC
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-bold px-3 py-2 rounded-3 text-xs" href="#" onclick="switchModule('medica', event)">
+                    <i class="fa-solid fa-stethoscope me-1"></i> Área Médica
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Barra de Herramientas y Acciones (Imprimir, Excel, PDF, Nuevo) -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2 no-print">
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-primary btn-sm fw-semibold text-xs" onclick="openModal()">
+                <i class="fa-solid fa-plus me-1"></i> Nuevo Registro
+            </button>
+            <button class="btn btn-success btn-sm fw-semibold text-xs" onclick="triggerImportExcel()">
+                <i class="fa-solid fa-file-excel me-1"></i> Importar Excel
+            </button>
+            <input type="file" id="importFile" style="display: none;" accept=".xlsx, .xls" onchange="importExcelFile(event)">
+            
+            <button class="btn btn-outline-secondary btn-sm fw-semibold text-xs" onclick="exportExcel()">
+                <i class="fa-solid fa-download me-1"></i> Exportar
+            </button>
+            <button class="btn btn-outline-danger btn-sm fw-semibold text-xs" onclick="eliminarRegistrosVacios()" title="Limpiar registros vacíos o en ceros">
+                <i class="fa-solid fa-broom me-1"></i> Limpiar Vacíos
+            </button>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <!-- Filtro de fechas solo para Fondo -->
+            <div id="fondoDateFilterContainer" class="d-flex align-items-center gap-1">
+                <input type="date" id="dateStart" class="form-control form-control-sm text-xs" onchange="applyFilters()">
+                <span class="text-muted text-xs">a</span>
+                <input type="date" id="dateEnd" class="form-control form-control-sm text-xs" onchange="applyFilters()">
+                <button class="btn btn-outline-secondary btn-sm" onclick="resetDateFilter()" title="Limpiar fechas"><i class="fa-solid fa-rotate-left"></i></button>
+            </div>
+            
+            <!-- Selector de filas por página -->
+            <select id="rowsPerPageSelect" class="form-select form-select-sm text-xs" style="width: auto;" onchange="changeRowsPerPage()">
+                <option value="10">10 filas</option>
+                <option value="25">25 filas</option>
+                <option value="50">50 filas</option>
+                <option value="100">100 filas</option>
+            </select>
+
+            <button class="btn btn-dark btn-sm fw-semibold text-xs" onclick="printReport()">
+                <i class="fa-solid fa-print me-1"></i> Imprimir
+            </button>
+            <button class="btn btn-danger btn-sm fw-semibold text-xs" onclick="exportPDF()">
+                <i class="fa-solid fa-file-pdf me-1"></i> PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Área Principal de Reportes e Informes (Contenedor que se imprime/exporta) -->
+    <div id="printable-area" class="card p-4 shadow-sm bg-white" style="border-radius: 12px; font-size: 12px;">
+        <!-- Se renderiza dinámicamente según el módulo seleccionado -->
+    </div>
+</div>
+
+<!-- ========================================== -->
+<!-- PANEL DE PREVISUALIZACIÓN Y CONTROL: TERRITORIAL -->
+<!-- ========================================== -->
 <div id="view-territorial" class="view-container">
     <div class="access-card" style="background: var(--genloc-color);">
         <div><b>RESUMEN TERRITORIAL INTEGRAL</b></div>
@@ -801,14 +1012,29 @@ canvas { flex-grow:1; }
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, doc, onSnapshot, query, orderBy, setDoc, deleteDoc, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, doc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const store = { medica: [], social: [], psicologia: [], jefatura: [], procuraduria: [], general_localidades: [], civis: [], vulnerable: [], crisat: [] };
+// --- STORE INICIAL ACTUALIZADO PARA DIRECCIÓN Y DEPARTAMENTOS ---
+const store = { 
+    medica: [], social: [], psicologia: [], jefatura: [], procuraduria: [], general_localidades: [], vulnerable: [], crisat: [], despensas: [],
+    fondo_d: [],
+    crisat_d: [],
+    caic_d: [],
+    medica_d: []
+};
 window.store = store; 
+
+console.log("--- CONTENIDO DE DIRECCIÓN ---");
+console.log("Fondo Revolvente:", window.store.fondo_d);
+console.log("CRISAT Dir:", window.store.crisat_d);
+console.log("CAIC Dir:", window.store.caic_d);
+console.log("Médica Dir:", window.store.medica_d);
+// Este comando revisa si existen datos en alguna otra colección o te permite listar los nombres reales
+console.log("Store completo actual:", window.store);
 
 // --- FUNCIÓN GLOBAL PARA CAMBIAR DE VISTA ---
 window.mostrarVista = function(idVista) {
@@ -818,7 +1044,6 @@ window.mostrarVista = function(idVista) {
 
     let vistaDestino = document.getElementById(idVista);
     
-    // Si la vista solicitada no existe, se busca la vista correspondiente
     if (!vistaDestino) {
         vistaDestino = document.getElementById('view-crisat');
     }
@@ -826,9 +1051,11 @@ window.mostrarVista = function(idVista) {
     if (vistaDestino) {
         vistaDestino.style.display = 'block';
         
-        // Si entra a CRISAT, forzar refresco de métricas
         if (vistaDestino.id === 'view-crisat') {
-            window.reprocesarCrisat();
+            if (typeof window.reprocesarCrisat === 'function') window.reprocesarCrisat();
+        }
+        if (vistaDestino.id === 'view-direccion') {
+            if (typeof window.reprocesarDireccion === 'function') window.reprocesarDireccion();
         }
     }
 };
@@ -851,13 +1078,8 @@ function iniciarSistema() {
         if (elemUser) elemUser.innerText = usuario.toUpperCase();
         if (elemRole) elemRole.innerText = departamento || "SISTEMA DIF";
         
-        // 1. Ocultar botones no permitidos
         aplicarRestriccionesDeDepartamento();
-        
-        // 2. Asignar clics a los elementos de navegación (.nav-item)
         conectarNavegacion();
-
-        // 3. Vista inicial
         window.mostrarVista('view-bienvenida');
 
     } else {
@@ -865,19 +1087,17 @@ function iniciarSistema() {
     }
 }
 
-// Vincular dinámicamente botones nav-item con sus vistas correspondientes
 function conectarNavegacion() {
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', (e) => {
             e.preventDefault();
-            const idNav = item.id; // Ej: nav-crisat
-            const idVista = idNav.replace('nav-', 'view-'); // Genera view-crisat
+            const idNav = item.id; 
+            const idVista = idNav.replace('nav-', 'view-'); 
             window.mostrarVista(idVista);
         });
     });
 }
 
-// --- FUNCIÓN DE SEGURIDAD PARA OCULTAR VISTAS ---
 function aplicarRestriccionesDeDepartamento() {
     const depUsuario = localStorage.getItem('userDep');
     
@@ -889,10 +1109,10 @@ function aplicarRestriccionesDeDepartamento() {
         "PROCURADURIA": ["nav-procuraduria", "view-procuraduria"],
         "MEDICA": ["nav-medica", "view-medica"],
         "VULNERABLE": ["nav-vulnerable", "view-vulnerable"],
-        "CRISAT": ["nav-crisat", "view-crisat", "view-estadisticas-crisat"]
+        "DIRECCION": ["nav-direccion", "view-direccion"]
     };
 
-    const permitidos = permisos[depUsuario] || ["nav-territorial", "nav-crisat"];
+    const permitidos = permisos[depUsuario] || ["nav-territorial", "nav-crisat", "nav-direccion"];
 
     document.querySelectorAll('.nav-item').forEach(item => {
         if (!permitidos.includes(item.id) && item.id !== "nav-territorial") {
@@ -907,7 +1127,6 @@ function aplicarRestriccionesDeDepartamento() {
     });
 }
 
-// Ejecución segura de DOM
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', iniciarSistema);
 } else {
@@ -920,37 +1139,160 @@ window.reprocesarTodo = function() {
     if (typeof window.reprocesarJefatura === 'function') window.reprocesarJefatura();
     if (typeof window.reprocesarTrabSoc === 'function') window.reprocesarTrabSoc();
     if (typeof window.reprocesarMedica === 'function') window.reprocesarMedica();
-    if (typeof window.reprocesarCivis === 'function') window.reprocesarCivis();
     if (typeof window.renderReporteJerarquico === 'function') window.renderReporteJerarquico();
     if (typeof window.reprocesarVulnerable === 'function') window.reprocesarVulnerable();
     if (typeof window.reprocesarCrisat === 'function') window.reprocesarCrisat();
+    if (typeof window.reprocesarDespensas === 'function') window.reprocesarDespensas();
+    if (typeof window.reprocesarDireccion === 'function') window.reprocesarDireccion();
 };
 
 window.borrarRegistro = async (coleccion, id) => {
     if (confirm("¿Eliminar este registro?")) {
-        await deleteDoc(doc(db, coleccion, id));
+        try {
+            await deleteDoc(doc(db, coleccion, id));
+        } catch (error) {
+            console.error("Error al borrar:", error);
+        }
     }
 };
 
-// --- LISTENERS EN TIEMPO REAL ---
+// --- LISTENERS EN TIEMPO REAL (DEPARTAMENTOS OPERATIVOS) ---
 onSnapshot(collection(db, "trabajo_social"), (s) => { store.social = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarTrabSoc === 'function') window.reprocesarTrabSoc(); });
 onSnapshot(collection(db, "psicologia"), (s) => { store.psicologia = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarPsico === 'function') window.reprocesarPsico(); });
 onSnapshot(collection(db, "jefatura_psicologia"), (s) => { store.jefatura = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarJefatura === 'function') window.reprocesarJefatura(); });
 onSnapshot(collection(db, "procuraduria"), (s) => { store.procuraduria = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarProcuraduria === 'function') window.reprocesarProcuraduria(); });
 onSnapshot(collection(db, "area_medica_v2"), (s) => { store.medica = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarMedica === 'function') window.reprocesarMedica(); if (typeof window.renderReporteJerarquico === 'function') window.renderReporteJerarquico(); });
 onSnapshot(collection(db, "proyetos_pv"), (s) => { store.proyectos = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarVulnerable === 'function') window.reprocesarVulnerable(); });
-onSnapshot(collection(db, "reporte_civis"), (snap) => { store.civis = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })); if (typeof window.reprocesarCivis === 'function') window.reprocesarCivis(); });
+onSnapshot(collection(db, "registros_generales"), (s) => { store.crisat = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarCrisat === 'function') window.reprocesarCrisat(); });
+onSnapshot(collection(db, "despensas_direccion"), (s) => { store.despensas = s.docs.map(d => ({id: d.id, ...d.data()})); window.records = store.despensas; if (typeof window.reprocesarDespensas === 'function') window.reprocesarDespensas(); });
 
-// Listener directo para CRISAT
-onSnapshot(collection(db, "registros_generales"), (s) => { 
-    store.crisat = s.docs.map(d => ({id: d.id, ...d.data()})); 
-    window.reprocesarCrisat(); 
-});
+// --- LISTENERS EN TIEMPO REAL PARA LOS 4 MÓDULOS DE DIRECCIÓN ---
+// Asegúrate de que los nombres de las colecciones aquí coincidan exactamente con los de tu Firestore
+onSnapshot(collection(db, "fondo_revolvente"), (s) => { store.fondo_d = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarDireccion === 'function') window.reprocesarDireccion(); });
+onSnapshot(collection(db, "crisat"), (s) => { store.crisat_d = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarDireccion === 'function') window.reprocesarDireccion(); });
+onSnapshot(collection(db, "caic"), (s) => { store.caic_d = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarDireccion === 'function') window.reprocesarDireccion(); });
+onSnapshot(collection(db, "medica"), (s) => { store.medica_d = s.docs.map(d => ({id: d.id, ...d.data()})); if (typeof window.reprocesarDireccion === 'function') window.reprocesarDireccion(); });
 
-// --- RENDERIZADO DE METRICAS Y TABLAS DE CRISAT ---
+// =============================================================================
+// --- RENDERIZADO DEL PANEL GLOBAL DE DIRECCIÓN Y FINANZAS (4 MÓDULOS) ---
+// =============================================================================
+
+window.reprocesarDireccion = function() {
+    // Consolidamos estrictamente los 4 módulos leyendo directo de las variables de dirección del store
+    const fondoData = (window.store.fondo_d || []).map(item => ({ ...item, origenModule: 'Fondo Revolvente' }));
+    const crisatData = (window.store.crisat_d || []).map(item => ({ ...item, origenModule: 'CRISAT' }));
+    const caicData = (window.store.caic_d || []).map(item => ({ ...item, origenModule: 'CAIC' }));
+    const medicaData = (window.store.medica_d || []).map(item => ({ ...item, origenModule: 'Médica' }));
+
+    const todosLosRegistros = [...fondoData, ...crisatData, ...caicData, ...medicaData];
+
+    let totalIngresos = 0;
+    let totalGastos = 0;
+    let conteoModulos = { 
+        'Fondo Revolvente': fondoData.length, 
+        'CRISAT': crisatData.length, 
+        'CAIC': caicData.length, 
+        'Médica': medicaData.length
+    };
+    let proveedoresFrecuentes = {};
+
+    todosLosRegistros.forEach(item => {
+        const monto = parseFloat(item.monto || item.importe || item.costo || 0);
+        const tipo = String(item.tipo || 'GASTO').toUpperCase();
+        const prov = item.proveedor || item.nombre || item.beneficiario || 'General / Sin especificar';
+
+        // Sumatorias globales (Ingresos vs Gastos)
+        if (tipo.includes('ING') || tipo.includes('ENTRADA')) {
+            totalIngresos += monto;
+        } else {
+            totalGastos += monto; 
+        }
+
+        // Conteo de proveedores / nombres frecuentes
+        proveedoresFrecuentes[prov] = (proveedoresFrecuentes[prov] || 0) + 1;
+    });
+
+    const balanceGeneral = totalIngresos - totalGastos;
+
+    // 1. Actualizar KPIs Principales en el HTML
+    const elIng = document.getElementById('dir-total-ingresos');
+    const elGas = document.getElementById('dir-total-gastos');
+    const elBal = document.getElementById('dir-balance');
+    const elTot = document.getElementById('dir-total-registros');
+
+    if (elIng) elIng.innerText = `$ ${totalIngresos.toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
+    if (elGas) elGas.innerText = `$ ${totalGastos.toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
+    if (elBal) {
+        elBal.innerText = `$ ${balanceGeneral.toLocaleString('es-MX', {minimumFractionDigits: 2})}`;
+        elBal.className = `fs-4 fw-bold mt-1 ${balanceGeneral >= 0 ? 'text-success' : 'text-danger'}`;
+    }
+    if (elTot) elTot.innerText = todosLosRegistros.length;
+
+    // 2. Llenar la sección de "Últimos Registros"
+    const containerRegistros = document.getElementById('dir-list-registros');
+    if (containerRegistros) {
+        if (todosLosRegistros.length === 0) {
+            containerRegistros.innerHTML = `<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin registros</div>`;
+        } else {
+            let htmlReg = '';
+            todosLosRegistros.slice(-10).reverse().forEach(r => {
+                const monto = parseFloat(r.monto || r.importe || r.costo || 0);
+                const etiquetaTexto = r.concepto || r.proveedor || r.nombre || r.beneficiario || 'Sin concepto';
+                htmlReg += `
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2" style="font-size: 11px;">
+                        <div>
+                            <span class="fw-bold text-dark">${etiquetaTexto}</span>
+                            <div class="text-muted" style="font-size: 10px;">${r.origenModule} • ${r.fecha || 'S/F'}</div>
+                        </div>
+                        <span class="fw-semibold text-danger">$ ${monto.toLocaleString('es-MX', {minimumFractionDigits: 2})}</span>
+                    </div>
+                `;
+            });
+            containerRegistros.innerHTML = htmlReg;
+        }
+    }
+
+    // 3. Llenar la sección de "Movimientos por Módulo"
+    const containerModulos = document.getElementById('dir-list-modulos');
+    if (containerModulos) {
+        let htmlMod = '';
+        for (const [mod, count] of Object.entries(conteoModulos)) {
+            htmlMod += `
+                <div class="d-flex justify-content-between align-items-center border-bottom py-2" style="font-size: 11px;">
+                    <span class="text-secondary fw-semibold">${mod}</span>
+                    <span class="badge bg-light text-dark border px-2 py-1">${count} regs</span>
+                </div>
+            `;
+        }
+        containerModulos.innerHTML = htmlMod;
+    }
+
+    // 4. Llenar la sección de "Proveedores / Nombres Frecuentes"
+    const containerProveedores = document.getElementById('dir-list-proveedores');
+    if (containerProveedores) {
+        const sortedProv = Object.entries(proveedoresFrecuentes).sort((a, b) => b[1] - a[1]).slice(0, 8);
+        if (sortedProv.length === 0 || (sortedProv.length === 1 && sortedProv[0][0] === 'General / Sin especificar' && sortedProv[0][1] === 0)) {
+            containerProveedores.innerHTML = `<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>`;
+        } else {
+            let htmlProv = '';
+            sortedProv.forEach(([nombre, veces]) => {
+                htmlProv += `
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-2" style="font-size: 11px;">
+                        <span class="text-truncate mr-2" style="max-width: 170px;" title="${nombre}">${nombre}</span>
+                        <span class="badge bg-secondary text-white" style="font-size: 10px;">${veces} movs</span>
+                    </div>
+                `;
+            });
+            containerProveedores.innerHTML = htmlProv;
+        }
+    }
+};
+// =============================================================================
+// FUNCIÓN PRINCIPAL DE CRISAT
+// =============================================================================
 window.reprocesarCrisat = function() {
-    const datos = store.crisat || [];
-
+    const datos = window.store.crisat || [];
+    
     let totalActividades = datos.length;
     let totalAltas = 0;
     let mujeres = 0;
@@ -958,24 +1300,26 @@ window.reprocesarCrisat = function() {
     let ninos = 0;     // 0 a 17
     let adultos = 0;   // 18 a 59
     let mayores = 0;   // 60+
+    let ingresosTotales = 0;
 
-    // Objetos separados para Colonias y Localidades
     const porColonia = {};
     const porLocalidad = {};
     const pacientesUnicosSet = new Set();
 
     datos.forEach(d => {
-        // Registro de Pacientes Únicos
         const nombrePac = (d.paciente || d.nombre || d.nombre_paciente || d.pacienteNombre || '').trim().toLowerCase();
         if (nombrePac) pacientesUnicosSet.add(nombrePac);
 
-        // Estatus / Altas
+        const pagoRegistro = Number(d.pago || d.costo || d.monto || d.precio || d.cuota || 0);
+        if (!isNaN(pagoRegistro)) {
+            ingresosTotales += pagoRegistro;
+        }
+
         const estatus = String(d.estatus || d.estado || d.alta || '').toLowerCase();
         if (estatus.includes('alta') || estatus.includes('terminad') || estatus.includes('concluid') || estatus.includes('finaliz')) {
             totalAltas++;
         }
 
-        // Género
         const sexo = String(d.sexo || d.genero || '').toUpperCase();
         if (sexo.startsWith('M') || sexo.includes('MUJER') || sexo.includes('FEMENIN')) {
             mujeres++;
@@ -983,7 +1327,6 @@ window.reprocesarCrisat = function() {
             hombres++;
         }
 
-        // Edades
         const edad = Number(d.edad);
         if (!isNaN(edad) && edad > 0) {
             if (edad < 18) ninos++;
@@ -991,7 +1334,6 @@ window.reprocesarCrisat = function() {
             else mayores++;
         }
 
-        // ZONAS: Clasificación basada directamente en d.tipo_ubicacion ("COLONIA" / "LOCALIDAD")
         const zona = (d.col_loc || d.colonia || d.localidad || d.zona || d.comunidad || d.domicilio || 'CABECERA MUNICIPAL').trim().toUpperCase();
         const numTerapias = Number(d.terapias || d.sesiones || d.total_terapias || d.numTerapias || 1);
         const cantidadTerapias = isNaN(numTerapias) ? 1 : numTerapias;
@@ -1002,7 +1344,6 @@ window.reprocesarCrisat = function() {
         } else if (tipoUbicacion === 'COLONIA') {
             porColonia[zona] = (porColonia[zona] || 0) + cantidadTerapias;
         } else {
-            // Respaldos (Fallback) para registros antiguos sin el campo tipo_ubicacion
             if (zona.includes('COL.') || zona.includes('COLONIA')) {
                 porColonia[zona] = (porColonia[zona] || 0) + cantidadTerapias;
             } else {
@@ -1018,16 +1359,22 @@ window.reprocesarCrisat = function() {
 
     const totalPacientesUnicos = pacientesUnicosSet.size || totalActividades;
 
+    const formatoMoneda = new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN',
+        minimumFractionDigits: 2
+    });
+
     setInner('crisat-total', totalActividades.toLocaleString());
     setInner('crisat-ent', totalPacientesUnicos.toLocaleString());
     setInner('crisat-altas', totalAltas.toLocaleString());
+    setInner('crisat-ingresos', formatoMoneda.format(ingresosTotales));
     setInner('crisat-mujeres', mujeres.toLocaleString());
     setInner('crisat-hombres', hombres.toLocaleString());
     setInner('crisat-ninos', ninos.toLocaleString());
     setInner('crisat-adultos', adultos.toLocaleString());
     setInner('crisat-mayores', mayores.toLocaleString());
 
-    // 1. Renderizar Lista de Pacientes
     const elemListPacientes = document.getElementById('crisat-list-pacientes');
     if (elemListPacientes) {
         if (datos.length === 0) {
@@ -1063,19 +1410,17 @@ window.reprocesarCrisat = function() {
         }
     }
 
-    // 2. Renderizar Zonas (Colonias y Localidades)
-
-    function renderizarListaZona(idElemento, datos, icono) {
+    function renderizarListaZona(idElemento, datosZona, icono) {
         const elem = document.getElementById(idElemento);
         if (!elem) return;
 
-        if (!datos || Object.keys(datos).length === 0) {
+        if (!datosZona || Object.keys(datosZona).length === 0) {
             elem.innerHTML = '<div style="padding:15px; color:#64748b; font-size:12px; text-align:center;">Sin registros</div>';
             return;
         }
 
         let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
-        for (const [nombre, totalTerapias] of Object.entries(datos)) {
+        for (const [nombre, totalTerapias] of Object.entries(datosZona)) {
             html += `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#f8fafc; border-radius:8px; border:1px solid #e2e8f0; font-size:12px;">
                     <span style="font-weight:600; color:#1e293b;">
@@ -1090,7 +1435,6 @@ window.reprocesarCrisat = function() {
         elem.innerHTML = html;
     }
 
-    // Inyectar en las dos columnas
     renderizarListaZona('crisat-list-colonias', porColonia, 'fa-city');
     renderizarListaZona('crisat-list-localidades', porLocalidad, 'fa-map-marker-alt');
 };
@@ -1555,7 +1899,6 @@ window.descargarPadronCelda = function(idCeldaClave) {
 // CONTENEDOR GLOBAL PARA INSTANCIAS DE CHART.JS (Previene fugas de memoria)
 // =============================================================================
 window.medicaCharts = {};
-
 
 // =============================================================================
 // MÓDULO: ÁREA MÉDICA
@@ -2244,10 +2587,87 @@ window.reprocesarTrabSoc = function() {
     }
 };
 
+// =============================================================
+// MÓDULO: REPORTE DE DESPENSAS
 // =============================================================================
-// MÓDULO: ESTADÍSTICAS GENERALES Y GRÁFICOS DIF
-// =============================================================================
+window.reprocesarDespensas = function() {
+    // Si usas window.store.despensas como fuente principal:
+    const records = window.store && window.store.despensas ? window.store.despensas : (window.records || []);
 
+    if (!records || records.length === 0) {
+        document.getElementById('desp-total').textContent = '0';
+        document.getElementById('desp-beneficiarios').textContent = '0';
+        document.getElementById('desp-mujeres').textContent = '0';
+        document.getElementById('desp-hombres').textContent = '0';
+        document.getElementById('desp-list-pacientes').innerHTML = '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin registros</div>';
+        document.getElementById('desp-list-tipos').innerHTML = '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>';
+        document.getElementById('desp-list-localidades').innerHTML = '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>';
+        return;
+    }
+
+    let totalEntregas = records.length;
+    let unicosSet = new Set(records.map(r => r.fullName ? r.fullName.trim().toUpperCase() : ''));
+    let totalBeneficiarios = unicosSet.size;
+
+    let mujeres = records.filter(r => r.gender && (r.gender.toLowerCase() === 'femenino' || r.gender.toLowerCase() === 'f')).length;
+    let hombres = records.filter(r => r.gender && (r.gender.toLowerCase() === 'masculino' || r.gender.toLowerCase() === 'm')).length;
+
+    let tiposCount = {};
+    let localidadesCount = {};
+    let pacientesHTML = '';
+
+    records.forEach(r => {
+        let tipo = r.supportType || 'No especificado';
+        tiposCount[tipo] = (tiposCount[tipo] || 0) + 1;
+
+        let loc = r.locality || 'No especificada';
+        localidadesCount[loc] = (localidadesCount[loc] || 0) + 1;
+    });
+
+    document.getElementById('desp-total').textContent = totalEntregas;
+    document.getElementById('desp-beneficiarios').textContent = totalBeneficiarios;
+    document.getElementById('desp-mujeres').textContent = mujeres;
+    document.getElementById('desp-hombres').textContent = hombres;
+
+    let ultimosRecientes = [...records].slice(-10).reverse();
+    ultimosRecientes.forEach(r => {
+        pacientesHTML += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 11px;">
+                <div>
+                    <span style="font-weight: 700; color: #1e293b;">${r.fullName || 'Sin nombre'}</span>
+                    <div style="font-size: 10px; color: #94a3b8;">${r.folio} &bull; ${r.locality || 'N/A'}</div>
+                </div>
+                <span class="badge" style="background: #f1f5f9; color: #475569;">${r.supportType || 'Apoyo'}</span>
+            </div>
+        `;
+    });
+    document.getElementById('desp-list-pacientes').innerHTML = pacientesHTML || '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin registros</div>';
+
+    let tiposHTML = '';
+    Object.keys(tiposCount).sort((a,b) => tiposCount[b] - tiposCount[a]).forEach(tipo => {
+        tiposHTML += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 11px;">
+                <span style="color: #334155; font-weight: 500;">${tipo}</span>
+                <span class="badge" style="background: #ecfdf5; color: #047857; font-weight: 800;">${tiposCount[tipo]}</span>
+            </div>
+        `;
+    });
+    document.getElementById('desp-list-tipos').innerHTML = tiposHTML;
+
+    let locHTML = '';
+    Object.keys(localidadesCount).sort((a,b) => localidadesCount[b] - localidadesCount[a]).forEach(loc => {
+        locHTML += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 11px;">
+                <span style="color: #334155; font-weight: 500;">${loc}</span>
+                <span class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 800;">${localidadesCount[loc]}</span>
+            </div>
+        `;
+    });
+    document.getElementById('desp-list-localidades').innerHTML = locHTML;
+}
+// =============================================================================
+// MÓDULO: ESTADÍSTICAS GENERALES Y GRÁFICOS DIF (COMPLETO Y BLINDADO)
+// =============================================================================
 // Variable global para gestionar la destrucción y recreación limpia de instancias
 window.instanciasGraficosDIF = window.instanciasGraficosDIF || {};
 
@@ -2255,17 +2675,24 @@ window.reprocesarEstadisticasDIF = function() {
     const vistaEstadisticas = document.getElementById('view-estadisticas');
     if (!vistaEstadisticas) return;
 
-    // Destruir instancias previas para evitar superposición visual o fuga de memoria
+    // Destruir instancias previas para evitar superposición
     Object.keys(window.instanciasGraficosDIF).forEach(key => {
         if (window.instanciasGraficosDIF[key]) {
             window.instanciasGraficosDIF[key].destroy();
         }
     });
+    window.instanciasGraficosDIF = {};
 
     const safeStore = (typeof store !== 'undefined' && store !== null) ? store : {};
     const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
     const zona = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
-    const mesFiltro = document.getElementById('global-month-filter')?.value || "all";
+    
+    // 💡 Forzar valor a "all" si el select está vacío o al iniciar la página
+    const selectMesEl = document.getElementById('global-month-filter');
+    if (selectMesEl && (!selectMesEl.value || selectMesEl.value === "")) {
+        selectMesEl.value = "all";
+    }
+    const mesFiltro = selectMesEl ? selectMesEl.value : "all";
 
     const coloresDepartamentos = {
         'TRABAJO SOCIAL': '#6366f1',
@@ -2273,61 +2700,87 @@ window.reprocesarEstadisticasDIF = function() {
         'PROCURADURIA': '#ec4899',
         'JEFATURA DE PSICOLOGIA': '#8b5cf6',
         'POBLACION VULNERABLE': '#a855f7',
-        'CRISAT': '#0284c7'
+        'CRISAT': '#0284c7',
+        'AREA MEDICA': '#10b981' // 👈 Color verde esmeralda para Área Médica
     };
 
-    const estatusPositivos = ['ATENDIDO', 'ENTREGADO', 'REALIZADO', 'VALIDADO', 'ACTIVO'];
+    const estatusPositivos = ['ATENDIDO', 'ENTREGADO', 'REALIZADO', 'VALIDADO', 'ACTIVO', 'FINALIZADO', 'CONCLUIDO', 'COMPLETADO'];
 
-    // Extraer datos del store
+// Helper ultra robusto para extraer la fecha real y asegurar el formato YYYY-MM-DD
+    const extraerFechaReal = (i) => {
+        let f = i.fecha || i.fecha_registro || i.created_at || i.createdAt || '';
+        if (typeof f === 'object' && f !== null) {
+            if (f.seconds) {
+                f = new Date(f.seconds * 1000).toISOString().split('T')[0];
+            } else if (f instanceof Date) {
+                f = f.toISOString().split('T')[0];
+            }
+        }
+        let fStr = String(f).trim();
+        // Si viene con hora tipo "2026-05-12 14:30:00", recortamos solo la fecha
+        if (fStr.includes(' ')) {
+            fStr = fStr.split(' ')[0];
+        }
+        return fStr;
+    };
+    // Extraer datos del store usando estrictamente fechas reales
     let dataConsolidada = [];
 
+    // 1. TRABAJO SOCIAL
     (safeStore.social || safeStore.trabajo_social || safeStore.trabajosocial || []).forEach(i => {
-        dataConsolidada.push({ dep: 'TRABAJO SOCIAL', estatus: i.estatus || 'PENDIENTE', zona: i.col_loc || '', fecha: i.fecha_registro || i.fecha || '2026-03-01', busquedaTexto: `${i.nombre || ''} ${i.asunto || ''}`.toLowerCase() });
+        dataConsolidada.push({ dep: 'TRABAJO SOCIAL', estatus: (i.estatus || 'PENDIENTE').toUpperCase(), zona: i.col_loc || '', fecha: extraerFechaReal(i), busquedaTexto: `${i.nombre || ''} ${i.asunto || ''}`.toLowerCase() });
     });
 
+    // 2. PSICOLOGÍA
     (safeStore.psicologia || safeStore.psicología || safeStore.atencion_psicologica || []).forEach(i => {
-        dataConsolidada.push({ dep: 'PSICOLOGIA', estatus: i.estatus || 'ATENDIDO', zona: i.col_loc || i.localidad || '', fecha: i.fecha || i.fecha_registro || '2026-03-02', busquedaTexto: `${i.paciente || i.nombre || ''} ${i.tema || i.asunto || ''}`.toLowerCase() });
+        dataConsolidada.push({ dep: 'PSICOLOGIA', estatus: (i.estatus || 'ATENDIDO').toUpperCase(), zona: i.col_loc || i.localidad || '', fecha: extraerFechaReal(i), busquedaTexto: `${i.paciente || i.nombre || ''} ${i.tema || i.asunto || ''}`.toLowerCase() });
     });
 
+    // 3. PROCURADURÍA
     (safeStore.procuraduria || safeStore.procuraduría || []).forEach(i => {
-        dataConsolidada.push({ dep: 'PROCURADURIA', estatus: i.estatus || 'ACTIVO', zona: i.lugar || i.col_loc || '', fecha: i.fecha || '2026-03-03', busquedaTexto: `${i.nombre || ''}`.toLowerCase() });
+        dataConsolidada.push({ dep: 'PROCURADURIA', estatus: (i.estatus || 'ACTIVO').toUpperCase(), zona: i.lugar || i.col_loc || '', fecha: extraerFechaReal(i), busquedaTexto: `${i.nombre || ''}`.toLowerCase() });
     });
 
+    // 4. JEFATURA DE PSICOLOGÍA
     (safeStore.jefatura || safeStore.jefatura_psicologia || []).forEach(i => {
-        dataConsolidada.push({ dep: 'JEFATURA DE PSICOLOGIA', estatus: i.estatus || 'REALIZADO', zona: i.colonia || i.col_loc || '', fecha: i.fecha || '2026-03-04', busquedaTexto: `${i.actividad || ''}`.toLowerCase() });
+        dataConsolidada.push({ dep: 'JEFATURA DE PSICOLOGIA', estatus: (i.estatus || 'REALIZADO').toUpperCase(), zona: i.colonia || i.col_loc || '', fecha: extraerFechaReal(i), busquedaTexto: `${i.actividad || ''}`.toLowerCase() });
     });
 
+    // 5. POBLACIÓN VULNERABLE / PROYECTOS
     (safeStore.proyectos || safeStore.poblacion_vulnerable || []).forEach(i => {
-        dataConsolidada.push({ dep: 'POBLACION VULNERABLE', estatus: i.estatus || 'VALIDADO', zona: i.localidad || '', fecha: i.fecha || '2026-03-05', busquedaTexto: `${i.programa || ''}`.toLowerCase() });
+        dataConsolidada.push({ dep: 'POBLACION VULNERABLE', estatus: (i.estatus || 'VALIDADO').toUpperCase(), zona: i.localidad || '', fecha: extraerFechaReal(i), busquedaTexto: `${i.programa || ''}`.toLowerCase() });
     });
 
+    // 6. CRISAT
     (safeStore.crisat || safeStore.CRISAT || []).forEach(i => {
-        dataConsolidada.push({ dep: 'CRISAT', estatus: i.estatus || 'ATENDIDO', zona: i.col_loc || i.localidad || '', fecha: i.fecha_registro || i.fecha || '2026-03-06', busquedaTexto: `${i.nombre || ''} ${i.paciente || ''} ${i.asunto || ''}`.toLowerCase() });
+        dataConsolidada.push({ dep: 'CRISAT', estatus: (i.estatus || 'ATENDIDO').toUpperCase(), zona: i.col_loc || i.localidad || '', fecha: extraerFechaReal(i), busquedaTexto: `${i.nombre || ''} ${i.paciente || ''} ${i.asunto || ''}`.toLowerCase() });
     });
 
-    if (dataConsolidada.length === 0) {
-        dataConsolidada = [
-            { dep: 'TRABAJO SOCIAL', estatus: 'ATENDIDO', zona: '', fecha: '2026-01-10', busquedaTexto: '' },
-            { dep: 'TRABAJO SOCIAL', estatus: 'PENDIENTE', zona: '', fecha: '2026-01-15', busquedaTexto: '' },
-            { dep: 'TRABAJO SOCIAL', estatus: 'ATENDIDO', zona: '', fecha: '2026-02-05', busquedaTexto: '' },
-            { dep: 'PSICOLOGIA', estatus: 'ATENDIDO', zona: '', fecha: '2026-02-12', busquedaTexto: '' },
-            { dep: 'PSICOLOGIA', estatus: 'ATENDIDO', zona: '', fecha: '2026-02-20', busquedaTexto: '' },
-            { dep: 'PSICOLOGIA', estatus: 'PENDIENTE', zona: '', fecha: '2026-03-01', busquedaTexto: '' },
-            { dep: 'PROCURADURIA', estatus: 'ACTIVO', zona: '', fecha: '2026-03-02', busquedaTexto: '' },
-            { dep: 'PROCURADURIA', estatus: 'PENDIENTE', zona: '', fecha: '2026-03-10', busquedaTexto: '' },
-            { dep: 'JEFATURA DE PSICOLOGIA', estatus: 'REALIZADO', zona: '', fecha: '2026-03-15', busquedaTexto: '' },
-            { dep: 'POBLACION VULNERABLE', estatus: 'VALIDADO', zona: '', fecha: '2026-03-18', busquedaTexto: '' },
-            { dep: 'CRISAT', estatus: 'ATENDIDO', zona: '', fecha: '2026-03-22', busquedaTexto: '' }
-        ];
-    }
+    // 7. ÁREA MÉDICA
+    const dataMedicaCruda = safeStore.medica || safeStore.area_medica || safeStore.medico || safeStore.consultas_medicas || [];
+    dataMedicaCruda.forEach(i => {
+        const zonaValida = i.col_loc || i.localidad || i.lugar || i.municipio || i.zona || '';
+        const nombreValido = i.paciente || i.nombre || i.beneficiario || i.nombre_paciente || '';
+        const infoValida = i.diagnostico || i.consulta || i.servicio || i.asunto || i.motivo || '';
 
-    // Filtrado
+        dataConsolidada.push({
+            dep: 'AREA MEDICA',
+            estatus: (i.estatus || 'ATENDIDO').toUpperCase(),
+            zona: zonaValida,
+            fecha: extraerFechaReal(i),
+            busquedaTexto: `${nombreValido} ${infoValida}`.toLowerCase()
+        });
+    });
+
+    // Filtrado Multicriterio (si mesFiltro es 'all', toma todo el año)
     const filtrados = dataConsolidada.filter(item => {
-        const partesFecha = item.fecha ? item.fecha.split('-') : [];
-        const mesItem = partesFecha.length >= 2 ? partesFecha[1] : null;
+        const partesFecha = item.fecha ? item.fecha.split(/[-/]/) : [];
+        const mesItem = partesFecha.length >= 2 ? String(partesFecha[1]).padStart(2, '0') : null;
         const coincideMes = (mesFiltro === 'all' || mesItem === mesFiltro);
-        const coincideZona = item.zona.toLowerCase().includes(zona);
-        const coincideBusqueda = busqueda === "" || item.busquedaTexto.includes(busqueda);
+        
+        const coincideZona = String(item.zona || "").toLowerCase().includes(zona);
+        const coincideBusqueda = busqueda === "" || String(item.busquedaTexto || "").toLowerCase().includes(busqueda);
+        
         return coincideMes && coincideZona && coincideBusqueda;
     });
 
@@ -2365,18 +2818,8 @@ window.reprocesarEstadisticasDIF = function() {
             data: {
                 labels: listaDeps.map(d => d.dep),
                 datasets: [
-                    {
-                        label: 'Atendidos',
-                        data: listaDeps.map(d => d.atendidos),
-                        backgroundColor: '#10b981',
-                        borderRadius: 4
-                    },
-                    {
-                        label: 'Pendientes',
-                        data: listaDeps.map(d => d.pendientes),
-                        backgroundColor: '#ef4444',
-                        borderRadius: 4
-                    }
+                    { label: 'Atendidos', data: listaDeps.map(d => d.atendidos), backgroundColor: '#10b981', borderRadius: 4 },
+                    { label: 'Pendientes', data: listaDeps.map(d => d.pendientes), backgroundColor: '#ef4444', borderRadius: 4 }
                 ]
             },
             options: {
@@ -2386,9 +2829,7 @@ window.reprocesarEstadisticasDIF = function() {
                     x: { stacked: true, grid: { display: false } },
                     y: { stacked: true, beginAtZero: true, grid: { color: '#f1f5f9' } }
                 },
-                plugins: {
-                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
-                }
+                plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }
             }
         });
     }
@@ -2412,9 +2853,7 @@ window.reprocesarEstadisticasDIF = function() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'right', labels: { boxWidth: 10, font: { size: 9.5 } } }
-                },
+                plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 9.5 } } } },
                 cutout: '65%'
             }
         });
@@ -2425,12 +2864,14 @@ window.reprocesarEstadisticasDIF = function() {
     // -------------------------------------------------------------------------
     const ctxTendencia = document.getElementById('grafico-tendencia');
     if (ctxTendencia) {
-        const conteoMeses = ['01', '02', '03', '04'].map(m => filtrados.filter(i => i.fecha.includes(`-${m}-`)).length);
+        const conteoMeses = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].map(m => 
+            dataConsolidada.filter(i => i.fecha.includes(`-${m}-`) || i.fecha.includes(`/${m}/`)).length
+        );
 
         window.instanciasGraficosDIF.tendencia = new Chart(ctxTendencia, {
             type: 'line',
             data: {
-                labels: ['Ene', 'Feb', 'Mar', 'Abr'],
+                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
                 datasets: [{
                     label: 'Registros',
                     data: conteoMeses,
@@ -2450,9 +2891,7 @@ window.reprocesarEstadisticasDIF = function() {
                     x: { grid: { display: false } },
                     y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1 } }
                 },
-                plugins: {
-                    legend: { display: false }
-                }
+                plugins: { legend: { display: false } }
             }
         });
     }
@@ -2483,23 +2922,13 @@ window.reprocesarEstadisticasDIF = function() {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    x: {
-                        title: { display: true, text: 'Volumen Total', font: { size: 10 } },
-                        grid: { color: '#f1f5f9' }
-                    },
-                    y: {
-                        title: { display: true, text: 'Eficiencia (%)', font: { size: 10 } },
-                        min: 0,
-                        max: 100,
-                        grid: { color: '#f1f5f9' }
-                    }
+                    x: { title: { display: true, text: 'Volumen Total', font: { size: 10 } }, grid: { color: '#f1f5f9' } },
+                    y: { title: { display: true, text: 'Eficiencia (%)', font: { size: 10 } }, min: 0, max: 100, grid: { color: '#f1f5f9' } }
                 },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        callbacks: {
-                            label: (ctx) => `${ctx.raw.dep}: ${ctx.raw.x} casos (${ctx.raw.y}% ef.)`
-                        }
+                        callbacks: { label: (ctx) => `${ctx.raw.dep}: ${ctx.raw.x} casos (${ctx.raw.y}% ef.)` }
                     }
                 }
             }
@@ -2507,74 +2936,82 @@ window.reprocesarEstadisticasDIF = function() {
     }
 
     // -------------------------------------------------------------------------
-    // 5. ACTIVIDAD DIARIA RECIENTE (Mapa de Bloques)
+    // 5. ACTIVIDAD DIARIA / MAPA DE BLOQUES
     // -------------------------------------------------------------------------
     const elHeatmap = document.getElementById('grafico-heatmap');
     if (elHeatmap) {
-        const bloques = Array.from({ length: 28 }, (_, idx) => ({
-            dia: idx + 1,
-            cant: Math.floor(Math.random() * 8)
-        }));
+        if (filtrados.length === 0) {
+            elHeatmap.innerHTML = `<div style="font-size:11px; color:#64748b; text-align:center; padding: 20px;">Sin registros para este período.</div>`;
+        } else {
+            const bloques = Array.from({ length: 31 }, (_, idx) => {
+                const diaStr = String(idx + 1).padStart(2, '0');
+                const cant = filtrados.filter(i => i.fecha.endsWith(`-${diaStr}`) || i.fecha.endsWith(`/${diaStr}`)).length;
+                return { dia: idx + 1, cant };
+            });
 
-        const getColor = c => c === 0 ? '#f1f5f9' : c < 3 ? '#bbf7d0' : c < 6 ? '#4ade80' : '#16a34a';
+            const getColor = c => c === 0 ? '#f1f5f9' : c < 3 ? '#bbf7d0' : c < 6 ? '#4ade80' : '#16a34a';
 
-        elHeatmap.innerHTML = `
-            <div style="display:grid; grid-template-columns: repeat(7, 1fr); gap:6px;">
-                ${bloques.map(b => `
-                    <div style="aspect-ratio:1; background:${getColor(b.cant)}; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; font-weight:bold; color:#1e293b; transition: transform 0.1s ease;" 
-                         onmouseover="this.style.transform='scale(1.1)'" 
-                         onmouseout="this.style.transform='scale(1)'"
-                         title="Día ${b.dia}: ${b.cant} registros">
-                        <span>${b.dia}</span>
-                    </div>
-                `).join('')}
-            </div>
-            <div style="display:flex; justify-content:flex-end; align-items:center; gap:4px; margin-top:10px; font-size:9px; color:#64748b;">
-                <span>Menos</span>
-                <span style="width:8px; height:8px; background:#f1f5f9; border-radius:2px;"></span>
-                <span style="width:8px; height:8px; background:#bbf7d0; border-radius:2px;"></span>
-                <span style="width:8px; height:8px; background:#4ade80; border-radius:2px;"></span>
-                <span style="width:8px; height:8px; background:#16a34a; border-radius:2px;"></span>
-                <span>Más</span>
-            </div>`;
+            elHeatmap.innerHTML = `
+                <div style="display:grid; grid-template-columns: repeat(7, 1fr); gap:6px;">
+                    ${bloques.map(b => `
+                        <div style="aspect-ratio:1; background:${getColor(b.cant)}; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:9px; font-weight:bold; color:#1e293b;" 
+                             title="Día ${b.dia}: ${b.cant} registros">
+                            <span>${b.dia}</span>
+                        </div>
+                    `).join('')}
+                </div>`;
+        }
     }
 
     // -------------------------------------------------------------------------
     // 6. LÍNEA DE TIEMPO (Hitos)
     // -------------------------------------------------------------------------
-const elTimeline = document.getElementById('grafico-timeline');
-if (elTimeline) {
-    if (filtrados.length === 0) {
-        elTimeline.innerHTML = `<div style="font-size:11px; color:#64748b;">No hay hitos o registros recientes.</div>`;
-    } else {
-        // Tomamos los últimos 3 registros reales cargados en tu store/sistema
-        const ultimosHitos = filtrados.slice(-3).reverse();
+    const elTimeline = document.getElementById('grafico-timeline');
+    if (elTimeline) {
+        if (filtrados.length === 0) {
+            elTimeline.innerHTML = `<div style="font-size:11px; color:#64748b;">No hay hitos o registros para este filtro.</div>`;
+        } else {
+            const ultimosHitos = filtrados.slice(-3).reverse();
 
-        elTimeline.innerHTML = `
-            <div style="position:relative; padding-left:14px; border-left:2px solid #3b82f6; display:flex; flex-direction:column; gap:12px;">
-                ${ultimosHitos.map(item => `
-                    <div style="position:relative;">
-                        <div style="position:absolute; left:-19px; top:2px; width:8px; height:8px; border-radius:50%; background:#3b82f6;"></div>
-                        <span style="font-size:9px; font-weight:700; color:#64748b;">${item.fecha || 'Sin fecha'}</span>
-                        <div style="font-size:11px; font-weight:800; color:#0f172a; margin-top:1px;">${item.dep}</div>
-                        <div style="font-size:9.5px; color:#475569; margin-top:2px;">
-                            Estatus: <span style="font-weight:bold; color:${item.estatus === 'PENDIENTE' ? '#ef4444' : '#10b981'};">${item.estatus}</span>
-                            ${item.zona ? ` • Zona: ${item.zona}` : ''}
+            elTimeline.innerHTML = `
+                <div style="position:relative; padding-left:14px; border-left:2px solid #3b82f6; display:flex; flex-direction:column; gap:12px;">
+                    ${ultimosHitos.map(item => `
+                        <div style="position:relative;">
+                            <div style="position:absolute; left:-19px; top:2px; width:8px; height:8px; border-radius:50%; background:#3b82f6;"></div>
+                            <span style="font-size:9px; font-weight:700; color:#64748b;">${item.fecha || 'Sin fecha'}</span>
+                            <div style="font-size:11px; font-weight:800; color:#0f172a; margin-top:1px;">${item.dep}</div>
+                            <div style="font-size:9.5px; color:#475569; margin-top:2px;">
+                                Estatus: <span style="font-weight:bold; color:${item.estatus === 'PENDIENTE' ? '#ef4444' : '#10b981'};">${item.estatus}</span>
+                                ${item.zona ? ` • Zona: ${item.zona}` : ''}
+                            </div>
                         </div>
-                    </div>
-                `).join('')}
-            </div>`;
+                    `).join('')}
+                </div>`;
+        }
     }
-}
 };
 
-// Invocación automática
+// Invocación automática y escucha de filtros globales
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     window.reprocesarEstadisticasDIF();
 } else {
     document.addEventListener("DOMContentLoaded", window.reprocesarEstadisticasDIF);
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    const inputBusqueda = document.getElementById('global-search-input');
+    const inputZona = document.getElementById('global-zone-search');
+    const selectMes = document.getElementById('global-month-filter');
+
+    const actualizarTodo = () => {
+        if (typeof window.reprocesarEstadisticasDIF === 'function') window.reprocesarEstadisticasDIF();
+        if (typeof window.renderReporteJerarquico === 'function') window.renderReporteJerarquico();
+    };
+
+    if (inputBusqueda) inputBusqueda.addEventListener('input', actualizarTodo);
+    if (inputZona) inputZona.addEventListener('input', actualizarTodo);
+    if (selectMes) selectMes.addEventListener('change', actualizarTodo);
+});
 // =============================================================================
 // MÓDULO: REPORTE JERÁRQUICO TERRITORIAL Y EXPORTACIÓN A PDF / IMPRESIÓN
 // =============================================================================
@@ -2695,16 +3132,22 @@ window.renderReporteJerarquico = function() {
         // POBLACIÓN VULNERABLE
         ...registrosVulnerablesProcesados,
 
-        // ÁREA MÉDICA
-        ...safeArray(safeStore.medica || safeStore.area_medica || safeStore.medico).map(i => ({
-            dep: 'AREA MEDICA',
-            zona: i.col_loc || i.localidad || i.lugar || 'N/A',
-            estatus: i.estatus || 'ATENDIDO',
-            info: i.diagnostico || i.consulta || i.servicio || i.asunto || 'CONSULTA MEDICA GENERAL',
-            nombre: i.paciente || i.nombre || '',
-            folio: i.folio || i.receta || '',
-            fecha: i.fecha || i.fecha_registro || ''
-        })),
+        // ÁREA MÉDICA (Robustecido para múltiples llaves y normalización)
+        ...safeArray(safeStore.medica || safeStore.area_medica || safeStore.medico || safeStore.consultas_medicas).map(i => {
+            let fechaValida = i.fecha || i.fecha_registro || i.created_at || i.createdAt || '';
+            if (typeof fechaValida === 'object' && fechaValida.seconds) {
+                fechaValida = new Date(fechaValida.seconds * 1000).toISOString().split('T')[0];
+            }
+            return {
+                dep: 'AREA MEDICA',
+                zona: i.col_loc || i.localidad || i.lugar || i.municipio || i.zona || 'N/A',
+                estatus: (i.estatus || 'ATENDIDO').toUpperCase(),
+                info: i.diagnostico || i.consulta || i.servicio || i.asunto || i.motivo || 'CONSULTA MEDICA GENERAL',
+                nombre: i.paciente || i.nombre || i.beneficiario || '',
+                folio: i.folio || i.receta || '',
+                fecha: String(fechaValida)
+            };
+        }),
 
         // CRISAT
         ...safeArray(safeStore.crisat || safeStore.CRISAT).map(i => ({
@@ -2757,7 +3200,7 @@ window.renderReporteJerarquico = function() {
         return acc;
     }, {});
 
-    // Colores identificadores por Departamento
+    // Colores identificadores por Departamento (Incluye Área Médica)
     const coloresDep = {
         'TRABAJO SOCIAL': '#6366f1',
         'PSICOLOGIA': '#3b82f6',
@@ -2794,7 +3237,7 @@ window.renderReporteJerarquico = function() {
                 ${items.map(i => {
                     let colorEstatus = '#16a34a'; // Verde
                     if (i.estatus === 'PENDIENTE') colorEstatus = '#ea580c'; // Naranja
-                    if (i.estatus === 'VALIDADO' || i.estatus === 'ACTIVO') colorEstatus = '#2563eb'; // Azul
+                    if (i.estatus === 'VALIDADO' || i.estatus === 'ACTIVO' || i.estatus === 'ATENDIDO') colorEstatus = '#2563eb'; // Azul/Verde oficial
 
                     const colorBadgeDep = coloresDep[i.dep] || '#64748b';
 
@@ -2814,7 +3257,6 @@ window.renderReporteJerarquico = function() {
             </div>`;
     }).join('');
 };
-
 // =============================================================================
 // IMPRESIÓN DIRECTA SOBRE LA MISMA PÁGINA (SIN VENTANAS NI PESTAÑAS NUEVAS)
 // =============================================================================
@@ -2948,30 +3390,25 @@ window.cerrarSesion = function() {
     }
 };
 
+
 // =============================================================================
-// INICIALIZACIÓN DOM / EVENTOS
+// ENLACE DE EVENTOS PARA ACTUALIZACIÓN EN TIEMPO REAL
 // =============================================================================
+document.addEventListener("DOMContentLoaded", () => {
+    const inputBusqueda = document.getElementById('global-search-input');
+    const inputZona = document.getElementById('global-zone-search');
+    const selectMes = document.getElementById('global-month-filter');
 
-window.onload = () => {
-    console.log("Sistema global y Monitor CIVIS cargados y listos.");
-};
-
-document.addEventListener("DOMContentLoaded", function() {
-    const btnToggle = document.getElementById('btn-toggle');
-    const sidebar = document.querySelector('.sidebar');
-
-    if (btnToggle && sidebar) {
-        btnToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('collapsed');
-            btnToggle.style.transform = sidebar.classList.contains('collapsed') ? 'rotate(90deg)' : 'rotate(0deg)';
-        });
-        
-        btnToggle.style.transition = "transform 0.3s ease, color 0.2s";
-        btnToggle.style.cursor = "pointer";
+    if (inputBusqueda) {
+        inputBusqueda.addEventListener('input', () => window.reprocesarEstadisticasDIF());
+    }
+    if (inputZona) {
+        inputZona.addEventListener('input', () => window.reprocesarEstadisticasDIF());
+    }
+    if (selectMes) {
+        selectMes.addEventListener('change', () => window.reprocesarEstadisticasDIF());
     }
 });
-
-
 </script>
 </body>
 </html>
