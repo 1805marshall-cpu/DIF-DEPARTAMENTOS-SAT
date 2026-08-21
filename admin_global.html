@@ -209,7 +209,7 @@ canvas { flex-grow:1; }
             <div style="font-size: 11px; opacity: 0.9; margin-top: 3px;" class="text-muted">Resumen y métricas generales de ingresos, gastos y movimientos registrados</div>
         </div>
         <button onclick="reprocesarDireccion()" class="btn btn-outline-danger btn-sm">
-            <i class="fa-solid fa-rotate-right mr-1"></i> Actualizar Métricas
+                <a href="direccion.html" class="btn-open" style="background: white; color: var(--vulnerable-color); padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">Abrir Módulo de Captura</a>
         </button>
     </div>
 
@@ -3204,7 +3204,7 @@ window.renderReporteJerarquico = function() {
                 fecha: i.fecha_cap || i.fecha || i.fecha_registro || i.created_at || i.createdAt || ''
             };
         }),
-        
+
         // CRISAT
         ...safeArray(safeStore.crisat || safeStore.CRISAT).map(i => ({
             dep: 'CRISAT',
