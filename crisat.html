@@ -91,7 +91,6 @@
         </style>
 </head>
 <body>
-
 <!-- BARRA DE SESIÓN DE USUARIO -->
 <div class="user-session-bar no-print">
     <div class="user-session-bar-info">
@@ -371,18 +370,27 @@
             <i class="fas fa-search"></i>
             <input type="text" id="inputBuscar" placeholder="Buscar por nombre, expediente, CURP, terapeuta..." oninput="window.filtrarYRenderizar()">
         </div>
+        
+<div class="table-tools-select" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+    <!-- Filtro de Fecha -->
+    <div style="display: flex; align-items: center; gap: 6px;">
+        <label style="font-weight: 600; font-size: 0.85rem;" for="filtroFecha">Fecha:</label>
+        <input type="date" id="filtroFecha" onchange="window.filtrarYRenderizar()" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); font-weight: bold; font-family: inherit;">
+    </div>
 
-        <div class="table-tools-select" style="display: flex; align-items: center; gap: 8px;">
-            <label style="font-weight: 600; font-size: 0.85rem;">Mostrar:</label>
-            <select id="selectFilas" onchange="window.cambiarFilasPorPagina(this.value)" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); font-weight: bold;">
-                <option value="10">10 filas</option>
-                <option value="20">20 filas</option>
-                <option value="30">30 filas</option>
-                <option value="40">40 filas</option>
-                <option value="50">50 filas</option>
-                <option value="500">500 filas</option>
-            </select>
-        </div>
+    <!-- Filtro de Hora Inicio (Predeterminado 08:00) -->
+    <div style="display: flex; align-items: center; gap: 6px;">
+        <label style="font-weight: 600; font-size: 0.85rem;" for="filtroHoraInicio">Desde:</label>
+        <input type="time" id="filtroHoraInicio" value="08:00" onchange="window.filtrarYRenderizar()" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); font-weight: bold; font-family: inherit;">
+    </div>
+
+    <!-- Filtro de Hora Fin (Predeterminado 16:00) -->
+    <div style="display: flex; align-items: center; gap: 6px;">
+        <label style="font-weight: 600; font-size: 0.85rem;" for="filtroHoraFin">Hasta:</label>
+        <input type="time" id="filtroHoraFin" value="16:00" onchange="window.filtrarYRenderizar()" style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); font-weight: bold; font-family: inherit;">
+    </div>
+</div>
+
 
         <button type="button" class="btn-print" onclick="window.print()">
             <i class="fas fa-print"></i> Imprimir Búsqueda
@@ -1099,16 +1107,33 @@ function obtenerDatosFormulario() {
         window.filtrarYRenderizar();
     };
 
- window.filtrarYRenderizar = () => {
+window.filtrarYRenderizar = () => {
     const termino = document.getElementById('inputBuscar')?.value.toLowerCase().trim() || '';
+    const filtroFechaValor = document.getElementById('filtroFecha')?.value || ''; // Ej: "2026-08-21"
+    const filtroHoraInicio = document.getElementById('filtroHoraInicio')?.value || '00:00';
+    const filtroHoraFin = document.getElementById('filtroHoraFin')?.value || '23:59';
+    
     const cuerpo = document.getElementById('cuerpoTabla');
     if (!cuerpo) return;
 
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    // 1. Filtrado por término de búsqueda
+    // 1. Filtrado por término de búsqueda, fecha y rango de hora
     let registrosFiltrados = cacheRegistros.filter(r => {
+        // Filtro por Fecha Completa
+        if (filtroFechaValor) {
+            const fechaISO = r.fecha_ISO || ''; 
+            if (fechaISO !== filtroFechaValor) return false;
+        }
+
+        // Filtro por Rango de Hora (Si la cita tiene hora registrada)
+        const horaCita = r.hora || '00:00';
+        if (horaCita < filtroHoraInicio || horaCita > filtroHoraFin) {
+            return false;
+        }
+
+        // Filtro por Término de Búsqueda (Texto)
         if (!termino) return true;
         return (r.nombre_paciente || '').toLowerCase().includes(termino) ||
                (r.expediente || '').toLowerCase().includes(termino) ||
@@ -1117,29 +1142,22 @@ function obtenerDatosFormulario() {
                (r.diagnostico || '').toLowerCase().includes(termino);
     });
 
-// 2. ORDENAMIENTO POR FECHA Y HORA DE LA CITA (DE MÁS ACTUAL A PASADA)
+    // 2. ORDENAMIENTO POR FECHA Y HORA (De menor a mayor / cronológico)
     registrosFiltrados.sort((a, b) => {
         const fechaA = new Date((a.fecha_ISO || '1970-01-01') + 'T' + (a.hora || '00:00'));
         const fechaB = new Date((b.fecha_ISO || '1970-01-01') + 'T' + (b.hora || '00:00'));
-        return fechaB - fechaA;
+        return fechaA - fechaB; 
     });
 
+    // 3. RENDERIZADO DIRECTO DE TODOS LOS REGISTROS FILTRADOS
     const totalRegistros = registrosFiltrados.length;
-    const totalPaginas = Math.ceil(totalRegistros / filasPorPagina) || 1;
 
-    if (paginaActual > totalPaginas) paginaActual = totalPaginas;
-    if (paginaActual < 1) paginaActual = 1;
-
-    const inicio = (paginaActual - 1) * filasPorPagina;
-    const fin = inicio + filasPorPagina;
-    const registrosPagina = registrosFiltrados.slice(inicio, fin);
-
-    if (registrosPagina.length === 0) {
-        cuerpo.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 25px; color:#64748b;">No se encontraron registros coincidentes.</td></tr>`;
+    if (totalRegistros === 0) {
+        cuerpo.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 25px; color:#64748b;">No se encontraron registros para este horario.</td></tr>`;
     } else {
         let htmlFilas = "";
 
-        registrosPagina.forEach((r) => {
+        registrosFiltrados.forEach((r) => {
             const fechaCita = new Date((r.fecha_ISO || window.obtenerFechaLocal()) + "T00:00:00");
             const diferenciaDias = Math.round((fechaCita - hoy) / (1000 * 60 * 60 * 24));
             const faltasRacha = calcularFaltasConsecutivas(r.expediente);
@@ -1171,7 +1189,7 @@ function obtenerDatosFormulario() {
             if (r.estatus_expediente === "ALTA MÉDICA") badgeExpediente = `<span class="pill pill-alta">ALTA MÉDICA</span>`;
             if (r.estatus_expediente === "BAJA POR INASISTENCIA") badgeExpediente = `<span class="pill pill-baja">BAJA</span>`;
 
-            // --- CONSTRUCCIÓN DE LA CELDA DE DISCAPACIDAD Y LIMITACIÓN (100% INDEPENDIENTES) ---
+            // --- CONSTRUCCIÓN DE LA CELDA DE DISCAPACIDAD Y LIMITACIÓN ---
             const tieneDiscapacidad = (r.discapacidad || 'no').toLowerCase() === 'si';
             const badgeDiscapacidad = tieneDiscapacidad 
                 ? `<span class="badge" style="background:#fee2e2; color:#991b1b; font-size:0.7rem; font-weight:bold;">SÍ TIENE DISCAPACIDAD</span>` 
@@ -1230,26 +1248,16 @@ function obtenerDatosFormulario() {
         cuerpo.innerHTML = htmlFilas;
     }
 
-    // Paginación
     const txtInfo = document.getElementById('txtInfoPaginacion');
     const contPaginas = document.getElementById('contenedorPaginas');
+    
     if (txtInfo) {
-        txtInfo.innerText = `Mostrando ${totalRegistros > 0 ? inicio + 1 : 0} a ${Math.min(fin, totalRegistros)} de ${totalRegistros} registros`;
+        txtInfo.innerText = `Mostrando ${totalRegistros} registros encontrados`;
     }   
     if (contPaginas) {
-        let htmlPaginas = `<button class="btn-page" ${paginaActual === 1 ? 'disabled' : ''} onclick="window.cambiarPagina(${paginaActual - 1})">Anterior</button>`; 
-        for (let i = 1; i <= totalPaginas; i++) {
-            if (i === 1 || i === totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1)) {
-                htmlPaginas += `<button class="btn-page ${i === paginaActual ? 'active' : ''}" onclick="window.cambiarPagina(${i})">${i}</button>`;
-            } else if (i === paginaActual - 2 || i === paginaActual + 2) {
-                htmlPaginas += `<span style="padding: 0 4px; color: #94a3b8;">...</span>`;
-            }
-        }
-        htmlPaginas += `<button class="btn-page" ${paginaActual === totalPaginas || totalPaginas === 0 ? 'disabled' : ''} onclick="window.cambiarPagina(${paginaActual + 1})">Siguiente</button>`;
-        contPaginas.innerHTML = htmlPaginas;
+        contPaginas.innerHTML = ''; 
     }
 };
-
     // --- INICIALIZACIÓN DE EVENTOS ---
     document.addEventListener('DOMContentLoaded', () => {
         const formCrisat = document.getElementById('formCrisat');
