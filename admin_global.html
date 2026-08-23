@@ -3180,19 +3180,9 @@ window.renderReporteJerarquico = function() {
 
         // ÁREA MÉDICA
         ...safeArray(safeStore.medica || safeStore.area_medica || safeStore.medico || safeStore.consultas_medicas).map(i => {
-            return {
-                dep: 'AREA MEDICA',
-                zona: i.col_loc || i.localidad || i.lugar || i.municipio || i.zona || 'N/A',
-                estatus: (i.estatus || 'ATENDIDO').toUpperCase(),
-                info: i.diagnostico || i.consulta || i.servicio || i.asunto || i.motivo || 'CONSULTA MEDICA GENERAL',
-                nombre: i.paciente || i.nombre || i.beneficiario || '',
-                folio: i.folio || i.receta || '',
-                fecha: i.fecha || i.fecha_registro || i.created_at || i.createdAt || ''
-            };
-        }),
+            // Buscamos en todas las variantes posibles de nombres de fecha en la base de datos
+            const fechaValida = i.fecha_cap || i.fecha || i.fecha_registro || i.fecha_atencion || i.fecha_consulta || i.created_at || i.createdAt || i.timestamp || i.date || '';
 
-        // ÁREA MÉDICA
-        ...safeArray(safeStore.medica || safeStore.area_medica || safeStore.medico || safeStore.consultas_medicas).map(i => {
             return {
                 dep: 'AREA MEDICA',
                 zona: i.col_loc || i.localidad || i.lugar || i.municipio || i.zona || 'N/A',
@@ -3200,8 +3190,7 @@ window.renderReporteJerarquico = function() {
                 info: i.diagnostico || i.consulta || i.servicio || i.asunto || i.motivo || 'CONSULTA MEDICA GENERAL',
                 nombre: i.paciente || i.nombre || i.beneficiario || '',
                 folio: i.folio || i.receta || '',
-                // Incluimos fecha_cap para que la tome sin problemas
-                fecha: i.fecha_cap || i.fecha || i.fecha_registro || i.created_at || i.createdAt || ''
+                fecha: fechaValida
             };
         }),
 
