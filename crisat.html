@@ -162,7 +162,9 @@
                 <label>Estatus Expediente</label>
                 <select id="estatus_expediente">
                     <option value="EN TRATAMIENTO">🟢 En Tratamiento</option>
-                    <option value="ALTA MÉDICA">🔵 Alta Médica</option>
+                    <option value="ALTA POR MEJORÍAS">✨ Alta por Mejorías</option>
+                    <option value="ALTA MÉDica">🔵 Alta Médica</option>
+                    <option value="BAJA POR DESERCIÓN">⚠️ Baja por Deserción</option>
                     <option value="BAJA POR INASISTENCIA">🔴 Baja por Inasistencia</option>
                 </select>
             </div>
@@ -1186,8 +1188,15 @@ window.filtrarYRenderizar = () => {
 
             let badgeClass = r.estatus === "ASISTIÓ" ? "asistencia-ok" : (r.estatus === "FALTÓ" ? "alerta-roja" : "");
             let badgeExpediente = "";
-            if (r.estatus_expediente === "ALTA MÉDICA") badgeExpediente = `<span class="pill pill-alta">ALTA MÉDICA</span>`;
-            if (r.estatus_expediente === "BAJA POR INASISTENCIA") badgeExpediente = `<span class="pill pill-baja">BAJA</span>`;
+            if (r.estatus_expediente === "ALTA POR MEJORÍAS") {
+                badgeExpediente = `<span class="pill" style="background:#dcfce7; color:#16a34a;">ALTA POR MEJORÍAS</span>`;
+            } else if (r.estatus_expediente === "ALTA MÉDICA") {
+                badgeExpediente = `<span class="pill pill-alta">ALTA MÉDICA</span>`;
+            } else if (r.estatus_expediente === "BAJA POR DESERCIÓN") {
+                badgeExpediente = `<span class="pill" style="background:#fee2e2; color:#dc2626;">BAJA POR DESERCIÓN</span>`;
+            } else if (r.estatus_expediente === "BAJA POR INASISTENCIA") {
+                badgeExpediente = `<span class="pill pill-baja">BAJA</span>`;
+            }
 
             // --- CONSTRUCCIÓN DE LA CELDA DE DISCAPACIDAD Y LIMITACIÓN ---
             const tieneDiscapacidad = (r.discapacidad || 'no').toLowerCase() === 'si';
