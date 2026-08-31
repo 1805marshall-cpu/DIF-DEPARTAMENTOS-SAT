@@ -1190,7 +1190,7 @@ window.filtrarYRenderizar = () => {
                 badgeExpediente = `<span class="pill" style="background:#dcfce7; color:#16a34a;">ALTA POR MEJORÍAS</span>`;
             } else if (r.estatus_expediente === "BAJA POR DESERCIÓN") {
                 badgeExpediente = `<span class="pill" style="background:#fee2e2; color:#dc2626;">BAJA POR DESERCIÓN</span>`;
-   
+            }
 
             // --- CONSTRUCCIÓN DE LA CELDA DE DISCAPACIDAD Y LIMITACIÓN ---
             const tieneDiscapacidad = (r.discapacidad || 'no').toLowerCase() === 'si';
