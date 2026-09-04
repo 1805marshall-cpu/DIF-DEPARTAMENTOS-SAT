@@ -51,7 +51,6 @@ body { font-family:'Inter','Segoe UI',sans-serif; background:var(--bg); margin:0
 .search-wrapper input { width:100%; padding:10px 15px 10px 40px; border-radius:10px; border:1px solid #e2e8f0; outline:none; font-size:12px; font-weight:600; transition:0.2s; background:#f8fafc; }
 .search-wrapper input:focus { border-color:var(--primary); background:#fff; box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
 .filter-bar { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
-#reloj { font-weight:800; color:#64748b; font-size:14px; font-variant-numeric:tabular-nums; }
 
 /* Tarjetas, Paneles & Métricas */
 .access-card { padding:18px 25px; border-radius:15px; display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; color:#fff; background:var(--primary); border-bottom:3px solid var(--secondary); box-shadow:0 4px 12px rgba(0,0,0,0.1); }
@@ -117,6 +116,44 @@ canvas { flex-grow:1; }
     .filter-bar { flex-direction:row; align-items:center; }
     .filter-bar input, .filter-bar select { flex:1; }
 }
+
+/* Asegurar que el botón toggle siempre esté accesible y por encima de todo en la barra superior */
+#btn-toggle {cursor: pointer;z-index: 1100;position: relative;padding: 10px; /* Amplía el área táctil/de clic del icono */
+}
+
+/* Ajustar el z-index de la barra superior para que nunca quede detrás de la sidebar */
+.top-bar {position: sticky;top: 0;z-index: 1050; 
+}
+
+/* Asegurar que la barra lateral tenga un z-index inferior al menú desplegable o flotante pero superior al contenido */
+.sidebar { z-index: 1000;
+}
+
+.top-bar-filter-item select {
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background-color: #f8fafc;
+        color: #1e293b;
+        font-size: 12px;
+        font-weight: 700;
+        outline: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    .top-bar-filter-item select:hover {
+        border-color: var(--primary, #8a1538);
+        background-color: #ffffff;
+    }
+
+    .top-bar-filter-item select:focus {
+        border-color: var(--primary, #8a1538);
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(138, 21, 56, 0.1);
+    }
     </style>
 </head>
 <body>
@@ -165,6 +202,7 @@ canvas { flex-grow:1; }
                 <i class="fas fa-bars" id="btn-toggle"></i>
                 <h2 id="view-title" style="margin:0;">Panel</h2>
             </div>
+            
             <div style="flex-grow: 1; max-width: 400px; margin: 0 20px; position: relative;">
                 <i class="fas fa-search" style="position: absolute; left: 12px; top: 10px; color: #64748b;"></i>
                 <input type="text" id="global-search-input" placeholder="BUSCAR POR NOMBRE, FOLIO O CAMPO CLAVE..." 
@@ -177,9 +215,8 @@ canvas { flex-grow:1; }
                     onkeyup="window.reprocesarTodo()" 
                     style="width: 90%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
             </div>
-            <div style="margin: 0 15px;">
-                <select id="global-month-filter" onchange="window.reprocesarTodo()" 
-                    style="padding: 8px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 12px; font-weight: bold; outline: none; cursor: pointer;">
+         <div class="top-bar-filter-item" style="margin: 0 5px; flex: 1; min-width: 140px;">
+                        <select id="global-month-filter" onchange="window.reprocesarTodo()">
                     <option value="all">📅 TODOS LOS MESES</option>
                     <option value="01">Enero</option>
                     <option value="02">Febrero</option>
@@ -195,22 +232,31 @@ canvas { flex-grow:1; }
                     <option value="12">Diciembre</option>
                 </select>
             </div>
-            <div id="reloj"></div>
-        </div>   
+
+                        <!-- Filtro de Año NUEVO -->
+            <div class="top-bar-filter-item" style="margin: 0 5px; flex: 1; min-width: 140px;">
+                    <select id="global-year-filter" onchange="window.reprocesarTodo()">
+                    <option value="all">📆 TODOS LOS AÑOS</option>
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                    <option value="2027">2027</option>
+                </select>
+            </div>
+<div id="reloj" class="badge bg-light text-dark border px-3 py-2 shadow-sm" style="font-size: 13px; font-weight: 700; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums;"></div>
+</div>  
+      
 
 <!-- ========================================== -->
 <!-- PANEL DE ESTADÍSTICAS Y MÉTRICAS: DIRECCIÓN / FINANZAS -->
 <!-- ========================================== -->
 <div id="view-direccion" class="view-container" style="display: none;">
     <!-- Tarjeta de Acceso o Encabezado del Panel -->
-    <div class="access-card d-flex justify-content-between align-items-center p-3 mb-4 bg-white shadow-sm rounded">
+<div class="access-card d-flex justify-content-between align-items-center p-3 mb-4 bg-white shadow-sm rounded">
         <div>
             <b><i class="fa-solid fa-building text-danger mr-2"></i> Panel Global de Dirección y Finanzas</b>
             <div style="font-size: 11px; opacity: 0.9; margin-top: 3px;" class="text-muted">Resumen y métricas generales de ingresos, gastos y movimientos registrados</div>
         </div>
-        <button onclick="reprocesarDireccion()" class="btn btn-outline-danger btn-sm">
-                <a href="direccion.html" class="btn-open" style="background: white; color: var(--vulnerable-color); padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">Abrir Módulo de Captura</a>
-        </button>
+        <a href="direccion.html" class="btn-open">Abrir Módulo de Captura</a>
     </div>
 
     <!-- KPIs / Tarjetas de Estadísticas Principales -->
@@ -283,7 +329,7 @@ canvas { flex-grow:1; }
                     <h2 style="margin:0;">Panel Global de Población Vulnerable</h2>
                     <small>Coordinación de Indicadores Operativos y Demográficos</small>
                 </div>
-                <a href="vulnerable.html" class="btn-open" style="background: white; color: var(--vulnerable-color); padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">Abrir Módulo de Captura</a>
+                <a href="vulnerable.html" class="btn-open">Abrir Módulo de Captura</a>
             </div>
             <h3 style="color: #1e293b; margin-bottom: 10px;">📊 Estatus de Gestión Operativa</h3>
 
@@ -680,7 +726,7 @@ canvas { flex-grow:1; }
                     <h2 style="margin:0;"><i class="fas fa-diagnoses"></i> Panel Global de CRISAT</h2>
                     <small>Centro de Rehabilitación e Inclusión Social - Indicadores y Estadísticas</small>
                 </div>
-                <a href="crisat.html" class="btn-open" style="background: white; color: #701a27; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">Abrir Módulo de Captura</a>
+                <a href="crisat.html" class="btn-open">Abrir Módulo de Captura</a>
             </div>
 
             <h3 style="color: #1e293b; margin-bottom: 10px;">📊 Métricas Generales y Financieras</h3>
@@ -772,9 +818,7 @@ canvas { flex-grow:1; }
             <b><i class="fa-solid fa-chart-pie"></i> Panel Global de Dirección de Despensas</b>
             <div style="font-size: 11px; opacity: 0.9; margin-top: 3px;">Resumen y métricas generales de entregas y apoyos registrados</div>
         </div>
-        <button onclick="reprocesarDespensas()" class="btn-open">
-            <i class="fa-solid fa-rotate-right mr-1"></i> Actualizar Métricas
-        </button>
+        <a href="dir_desp.html" class="btn-open">Abrir Módulo de Captura</a>
     </div>
 
     <!-- KPIs / Tarjetas de Estadísticas Principales -->
@@ -1066,7 +1110,6 @@ window.showView = function(modulo, elem) {
     window.mostrarVista(idVista);
 };
 
-// --- INICIALIZACIÓN SEGURA DE LA SESIÓN ---
 function iniciarSistema() {
     const usuario = localStorage.getItem('activeUser');
     const departamento = localStorage.getItem('userDep');
@@ -1081,6 +1124,17 @@ function iniciarSistema() {
         aplicarRestriccionesDeDepartamento();
         conectarNavegacion();
         window.mostrarVista('view-bienvenida');
+
+        // --- LÓGICA DEL TOGGLE ---
+        const btnToggle = document.getElementById('btn-toggle');
+        const sidebar = document.querySelector('.sidebar');
+        if (btnToggle && sidebar) {
+            btnToggle.style.cursor = 'pointer';
+            btnToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+            });
+        }
+        // -------------------------
 
     } else {
         window.location.href = "index.html";
@@ -1178,11 +1232,34 @@ onSnapshot(collection(db, "medica"), (s) => { store.medica_d = s.docs.map(d => (
 // =============================================================================
 
 window.reprocesarDireccion = function() {
-    // Consolidamos estrictamente los 4 módulos leyendo directo de las variables de dirección del store
-    const fondoData = (window.store.fondo_d || []).map(item => ({ ...item, origenModule: 'Fondo Revolvente' }));
-    const crisatData = (window.store.crisat_d || []).map(item => ({ ...item, origenModule: 'CRISAT' }));
-    const caicData = (window.store.caic_d || []).map(item => ({ ...item, origenModule: 'CAIC' }));
-    const medicaData = (window.store.medica_d || []).map(item => ({ ...item, origenModule: 'Médica' }));
+    // Lectura de filtros globales de búsqueda y fechas (mes y año)
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
+    const zona = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
+    const mes = document.getElementById('global-month-filter')?.value || "all";
+    const anio = document.getElementById('global-year-filter')?.value || "all";
+
+    // Función auxiliar de filtrado interno para Dirección
+    const pasaFiltros = (item) => {
+        const textoItem = (item.concepto || item.proveedor || item.nombre || item.beneficiario || "").toLowerCase();
+        const zonaItem = (item.colonia || item.lugar || item.col_loc || "").toLowerCase();
+        const fecha = item.fecha || item.fecha_registro || "";
+
+        const anioReg = fecha.length >= 4 ? fecha.substring(0, 4) : "";
+        const mesReg = fecha.includes('-') ? fecha.split('-')[1] : "";
+
+        const cumpleBusqueda = textoItem.includes(busqueda);
+        const cumpleZona = zonaItem.includes(zona);
+        const cumpleAnio = (anio === 'all' || anioReg === anio);
+        const cumpleMes = (mes === 'all' || mesReg === mes);
+
+        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+    };
+
+    // Consolidamos y filtramos estrictamente los 4 módulos leyendo directo de las variables de dirección del store
+    const fondoData = (window.store.fondo_d || []).filter(pasaFiltros).map(item => ({ ...item, origenModule: 'Fondo Revolvente' }));
+    const crisatData = (window.store.crisat_d || []).filter(pasaFiltros).map(item => ({ ...item, origenModule: 'CRISAT' }));
+    const caicData = (window.store.caic_d || []).filter(pasaFiltros).map(item => ({ ...item, origenModule: 'CAIC' }));
+    const medicaData = (window.store.medica_d || []).filter(pasaFiltros).map(item => ({ ...item, origenModule: 'Médica' }));
 
     const todosLosRegistros = [...fondoData, ...crisatData, ...caicData, ...medicaData];
 
@@ -1438,15 +1515,47 @@ window.reprocesarCrisat = function() {
     renderizarListaZona('crisat-list-colonias', porColonia, 'fa-city');
     renderizarListaZona('crisat-list-localidades', porLocalidad, 'fa-map-marker-alt');
 };
+
 // =============================================================================
-// FUNCIÓN PRINCIPAL DE PROCESAMIENTO RECOLECTOR
+// FUNCIÓN PRINCIPAL DE PROCESAMIENTO POBLACION VULNERABLE
 // =============================================================================
 window.reprocesarVulnerable = () => {
-    // 🌟 Recuerda verificar si lo unificaste como store.vulnerable en tu listener central
-    const data = store.proyectos; 
+    // 🌟 Lectura de filtros globales (búsqueda, zona, mes y año)
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
+    const zonaFiltro = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
+    const mes = document.getElementById('global-month-filter')?.value || "all";
+    const anio = document.getElementById('global-year-filter')?.value || "all";
+
+    const dataCruda = store.proyectos || []; 
     
+    // Filtrado global integrado para Población Vulnerable
+    const data = dataCruda.filter(item => {
+        const programa = (item.programa || "").toLowerCase();
+        const subgrupo = (item.subgrupo || "").toLowerCase();
+        const localidad = (item.localidad || item.col_loc || "").toLowerCase();
+        const colonia = (item.vul_colonia || "").toLowerCase();
+        
+        let nombreBeneficiario = "";
+        if (item.integrantes && Array.isArray(item.integrantes) && item.integrantes.length > 0) {
+            nombreBeneficiario = item.integrantes.map(i => `${i.nombre || ''} ${i.paterno || ''} ${i.materno || ''}`).join(' ').toLowerCase();
+        } else if (item.beneficiario) {
+            nombreBeneficiario = `${item.beneficiario.nombre || ''} ${item.beneficiario.paterno || ''} ${item.beneficiario.materno || ''}`.toLowerCase();
+        }
+
+        const fecha = item.fecha || item.fecha_registro || "";
+        const anioReg = fecha.length >= 4 ? fecha.substring(0, 4) : "";
+        const mesReg = fecha.includes('-') ? fecha.split('-')[1] : "";
+
+        const cumpleBusqueda = programa.includes(busqueda) || subgrupo.includes(busqueda) || nombreBeneficiario.includes(busqueda);
+        const cumpleZona = localidad.includes(zonaFiltro) || colonia.includes(zonaFiltro);
+        const cumpleAnio = (anio === 'all' || anioReg === anio);
+        const cumpleMes = (mes === 'all' || mesReg === mes);
+
+        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+    });
+
     if (!data || data.length === 0) {
-        console.warn("Módulo Vulnerable: No se detectaron registros.");
+        console.warn("Módulo Vulnerable: No se detectaron registros con los filtros actuales.");
         document.querySelectorAll("[id^='v-']").forEach(el => { if(el.tagName !== "TBODY") el.innerText = "0"; });
         const tabla = document.getElementById('v-tabla-registros');
         if (tabla) tabla.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:15px; color:#64748b;">Sin registros en la base de datos central.</td></tr>';
@@ -1659,17 +1768,14 @@ window.reprocesarVulnerable = () => {
                         <div style="width: 130px; height: 130px; border-radius: 50%; background: ${gradienteEstilo}; flex-shrink: 0;"></div>
                         ${htmlLeyenda}
                     </div>`;
-            contenedorTerritorio.appendChild(tarjetaPastel);
-        });
-    } else {
-        contenedorTerritorio.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:30px; color:#64748b; font-size:13px;">No hay registros de apoyos para generar gráficos.</div>';
+                contenedorTerritorio.appendChild(tarjetaPastel);
+            });
+        } else {
+            contenedorTerritorio.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; padding:30px; color:#64748b; font-size:13px;">No hay registros de apoyos para generar gráficos.</div>';
+        }
     }
-} 
 
-// =========================================================================
-// ⬇️ AQUÍ PEGAS EL BLOQUE NUEVO (SECCIÓN 4) ⬇️
-// =========================================================================
-// 4. PREPARACIÓN DE DATOS Y RENDERIZADO DE TABLA (CON FILTROS E IMPRESIÓN) 🌟
+    // 4. PREPARACIÓN DE DATOS Y RENDERIZADO DE TABLA (CON FILTROS E IMPRESIÓN) 🌟
     const resumenTabla = [];
     const mapaResumen = {};
 
@@ -1763,6 +1869,7 @@ window.renderizarTablaVulnerable = function() {
 
     tablaRegistros.innerHTML = htmlFilas;
 };
+
 // =============================================================================
 // FUNCIÓN GLOBAL DE IMPRESIÓN (GENERA VISTA LIMPIA PARA IMPRESORA O PDF)
 // =============================================================================
@@ -1832,8 +1939,8 @@ window.imprimirTablaVulnerable = function() {
         ventana.print();
         ventana.close();
     }, 250);
-
 }; 
+
 // =============================================================================
 // FUNCIÓN GLOBAL PARA LA DESCARGA INDIVIDUAL (SÁCADA DEL FLUJO REACTIVO)
 // =============================================================================
@@ -1872,7 +1979,6 @@ window.descargarPadronCelda = function(idCeldaClave) {
                 contenidoCsv += `"${programa}","${subgrupo}",${zonaString},${nombreCompleto},${curp},${sexo},${telefono},${direccion},"COLECTIVO (TALLER)"\n`;
             });
         } else if (item.beneficiario) {
-            // 🌟 Protegido contra objetos beneficiario vacíos o corruptos
             const b = item.beneficiario;
             const nombreCompleto = `"${(b.nombre_completo_cache || `${b.nombre || ''} ${b.paterno || ''} ${b.materno || ''}`).trim().toUpperCase()}"`;
             const curp = b.curp || 'SIN CURP';
@@ -1895,10 +2001,6 @@ window.descargarPadronCelda = function(idCeldaClave) {
     link.click();
     document.body.removeChild(link);
 };
-// =============================================================================
-// CONTENEDOR GLOBAL PARA INSTANCIAS DE CHART.JS (Previene fugas de memoria)
-// =============================================================================
-window.medicaCharts = {};
 
 // =============================================================================
 // MÓDULO: ÁREA MÉDICA
@@ -1907,7 +2009,38 @@ window.reprocesarMedica = function() {
     const tablaDatos = document.getElementById('m-tabla-datos');
     if (!tablaDatos) return;
 
-    const data = store.medica || [];
+    // 🌟 Lectura de filtros globales (búsqueda, zona, mes y año) sincronizados
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
+    const zonaFiltro = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
+    const mes = document.getElementById('global-month-filter')?.value || "all";
+    const anio = document.getElementById('global-year-filter')?.value || "all";
+
+    const dataCruda = store.medica || [];
+
+    // Filtrado global integrado para el Área Médica
+    const data = dataCruda.filter(d => {
+        const nombrePac = (d.nombre || "").toLowerCase();
+        const categoria = (d.consulta_estudios || "").toLowerCase();
+        let tiposEstudioTxt = "";
+        if (Array.isArray(d.tipo_estudio)) {
+            tiposEstudioTxt = d.tipo_estudio.join(' ').toLowerCase();
+        } else if (typeof d.tipo_estudio === 'string') {
+            tiposEstudioTxt = d.tipo_estudio.toLowerCase();
+        }
+
+        const zonaItem = (d.lugar || d.procedencia || "").toLowerCase();
+
+        const fecha = d.fecha_cap || "";
+        const anioReg = fecha.length >= 4 ? fecha.substring(0, 4) : "";
+        const mesReg = fecha.includes('-') ? fecha.split('-')[1] : "";
+
+        const cumpleBusqueda = nombrePac.includes(busqueda) || categoria.includes(busqueda) || tiposEstudioTxt.includes(busqueda);
+        const cumpleZona = zonaItem.includes(zonaFiltro);
+        const cumpleAnio = (anio === 'all' || anioReg === anio);
+        const cumpleMes = (mes === 'all' || mesReg === mes);
+
+        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+    });
 
     // Helper para detectar registros cancelados
     const esCancelado = (d) => {
@@ -2030,7 +2163,8 @@ window.reprocesarMedica = function() {
     if (document.getElementById('m-paga')) {
         document.getElementById('m-paga').innerText = contadorDePaga;
     }
-   // RENDERIZAR DESGLOSE DENTRO DEL STATBOX DE PAGA
+
+    // RENDERIZAR DESGLOSE DENTRO DEL STATBOX DE PAGA
     const contenedorDesgloseCosto = document.getElementById('m-paga-desglose');
     if (contenedorDesgloseCosto) {
         const itemsCosto = Object.entries(desglosesCosto).sort((a,b) => b[1] - a[1]);
@@ -2040,7 +2174,6 @@ window.reprocesarMedica = function() {
         } else {
             let sumaTotalGeneral = 0;
 
-            // 1. Generar cada fila multiplicando (cuota * cantidad)
             const filasHTML = itemsCosto.map(([costo, cant]) => {
                 const valorNumerico = parseFloat(String(costo).replace(/[^0-9.-]+/g, '')) || 0;
                 const subtotal = valorNumerico * cant;
@@ -2058,7 +2191,6 @@ window.reprocesarMedica = function() {
                 `;
             }).join('');
 
-            // 2. Fila final con la suma total en VERDE
             const totalHTML = `
                 <div style="border-top:1px dashed #cbd5e1; margin-top:4px; padding-top:4px; text-align:center; color:#15803d; font-size:0.75rem; font-weight:bold;">
                     Total: $${sumaTotalGeneral.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
@@ -2170,40 +2302,35 @@ window.reprocesarMedica = function() {
         
         if (!window.medicaCharts) window.medicaCharts = {};
 
-window.medicaCharts[cfg.key] = new Chart(canvas, {
-    type: cfg.type,
-    data: { 
-        labels: cfg.labels, 
-        datasets: [{ 
-            label: 'Total', // <-- Le agregamos un nombre por defecto para evitar el undefined
-            data: cfg.values, 
-            backgroundColor: cfg.color, 
-            borderColor: cfg.color, 
-            fill: cfg.type === 'line', 
-            tension: 0.3, 
-            borderRadius: cfg.type === 'bar' ? 6 : 0 
-        }] 
-    },
-    options: { 
-        responsive: true, 
-        maintainAspectRatio: false, 
-        indexAxis: cfg.axis || 'x',
-        // --- AGREGA ESTE BLOQUE PARA OCULTAR LA LEYENDA ---
-        plugins: {
-            legend: {
-                display: false // Desactiva la leyenda en Chart.js v3 y v4
+        window.medicaCharts[cfg.key] = new Chart(canvas, {
+            type: cfg.type,
+            data: { 
+                labels: cfg.labels, 
+                datasets: [{ 
+                    label: 'Total',
+                    data: cfg.values, 
+                    backgroundColor: cfg.color, 
+                    borderColor: cfg.color, 
+                    fill: cfg.type === 'line', 
+                    tension: 0.3, 
+                    borderRadius: cfg.type === 'bar' ? 6 : 0 
+                }] 
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                indexAxis: cfg.axis || 'x',
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: { 
+                    x: { grid: { display: false } }, 
+                    y: { grid: { display: false } } 
+                } 
             }
-        },
-        legend: {
-            display: false // Compatibilidad por si usas Chart.js v2
-        },
-        // --------------------------------------------------
-        scales: { 
-            x: { grid: { display: false } }, 
-            y: { grid: { display: false } } 
-        } 
-    }
-});
+        });
     });
 };
 // =============================================================================
@@ -2213,85 +2340,132 @@ window.reprocesarPsico = function() {
     const contenedorPrincipal = document.getElementById('p-list-pacientes');
     if (!contenedorPrincipal) return;
 
-    // Elementos de filtrado global (con fallbacks si no se encuentran)
-    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
-    const zona = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
+    // Elementos de filtrado global (búsqueda, zona, mes y año)
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
+    const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     const mes = document.getElementById('global-month-filter')?.value || "all";
+    const anio = document.getElementById('global-year-filter')?.value || "all";
 
-    const filtrados = (store.psicologia || []).filter(item => {
+    const dataCruda = store.psicologia || [];
+
+    // Filtrado de registros
+    const filtrados = dataCruda.filter(item => {
         const paciente = (item.paciente || "").toLowerCase();
         const z = (item.col_loc || "").toLowerCase();
-        const fecha = item.fecha || ""; 
-        const mesRegistro = fecha.includes('-') ? fecha.split('-')[1] : null;
+        const tema = (item.tema || "").toLowerCase();
+        const fecha = item.fecha || ""; // Formato esperado "YYYY-MM-DD"
         
-        return paciente.includes(busqueda) && 
-               z.includes(zona) && 
-               (mes === 'all' || mesRegistro === mes);
+        const anioRegistro = fecha.length >= 4 ? fecha.substring(0, 4) : "";
+        const mesRegistro = fecha.includes('-') ? fecha.split('-')[1] : "";
+        
+        const cumpleBusqueda = paciente.includes(busqueda) || tema.includes(busqueda);
+        const cumpleZona = z.includes(zona);
+        const cumpleAnio = (anio === 'all' || anioRegistro === anio);
+        const cumpleMes = (mes === 'all' || mesRegistro === mes);
+        
+        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
     });
 
-    // Actualización segura de KPIs superiores
+    // Helpers para normalización de género
+    const esMasculino = (g) => {
+        const gen = (g || "").toUpperCase().trim();
+        return gen === 'MASCULINO' || gen === 'HOMBRE';
+    };
+    const esFemenino = (g) => {
+        const gen = (g || "").toUpperCase().trim();
+        return gen === 'FEMENINO' || gen === 'MUJER';
+    };
+
+    // Actualización segura de KPIs principales
     if (document.getElementById('p-total')) document.getElementById('p-total').innerText = filtrados.length;
-    if (document.getElementById('p-total-a')) document.getElementById('p-total-a').innerText = filtrados.filter(d => d.nombre_a && d.nombre_a !== "").length;
+    if (document.getElementById('p-total-a')) document.getElementById('p-total-a').innerText = filtrados.filter(d => d.nombre_a && d.nombre_a.trim() !== "").length;
     if (document.getElementById('p-ses')) document.getElementById('p-ses').innerText = filtrados.length;
 
-    if (document.getElementById('p-hombres')) document.getElementById('p-hombres').innerText = filtrados.filter(d => d.genero_p === 'MASCULINO').length;
-    if (document.getElementById('p-mujeres')) document.getElementById('p-mujeres').innerText = filtrados.filter(d => d.genero_p === 'FEMENINO').length;
+    // Métricas del Paciente (Titular / Principal)
+    if (document.getElementById('p-hombres')) document.getElementById('p-hombres').innerText = filtrados.filter(d => esMasculino(d.genero_p)).length;
+    if (document.getElementById('p-mujeres')) document.getElementById('p-mujeres').innerText = filtrados.filter(d => esFemenino(d.genero_p)).length;
     if (document.getElementById('p-menores')) document.getElementById('p-menores').innerText = filtrados.filter(d => parseInt(d.edad_p) < 18).length;
-    if (document.getElementById('p-hombres-a')) document.getElementById('p-hombres-a').innerText = filtrados.filter(d => d.genero_a === 'MASCULINO').length;
-    if (document.getElementById('p-mujeres-a')) document.getElementById('p-mujeres-a').innerText = filtrados.filter(d => d.genero_a === 'FEMENINO').length;
+
+    // Métricas del Acompañante / Tutor
+    if (document.getElementById('p-hombres-a')) document.getElementById('p-hombres-a').innerText = filtrados.filter(d => esMasculino(d.genero_a)).length;
+    if (document.getElementById('p-mujeres-a')) document.getElementById('p-mujeres-a').innerText = filtrados.filter(d => esFemenino(d.genero_a)).length;
     if (document.getElementById('p-menores-a')) document.getElementById('p-menores-a').innerText = filtrados.filter(d => parseInt(d.edad_a) < 18).length;
 
+    // Agrupación por Rangos de Edad y Localidades
     const edadTemas = { "0-17": {}, "18-35": {}, "36-55": {}, "56+": {} };
     const localTemas = {};
 
     filtrados.forEach(d => {
         const edad = parseInt(d.edad_p);
-        const tema = d.tema || "SIN MOTIVO";
+        const tema = (d.tema || "SIN MOTIVO").trim().toUpperCase();
+        
         if (!isNaN(edad)) {
-            let r = edad < 18 ? "0-17" : edad <= 35 ? "18-35" : edad <= 55 ? "36-55" : "56+";
+            const r = edad < 18 ? "0-17" : edad <= 35 ? "18-35" : edad <= 55 ? "36-55" : "56+";
             edadTemas[r][tema] = (edadTemas[r][tema] || 0) + 1;
         }
 
-        const loc = d.col_loc || "SIN LOCALIDAD";
+        const loc = (d.col_loc || "SIN LOCALIDAD").trim().toUpperCase();
         if (!localTemas[loc]) localTemas[loc] = {};
         localTemas[loc][tema] = (localTemas[loc][tema] || 0) + 1;
     });
 
-    // Inyección en Listas
+    // --- RENDERIZADO DE LISTA PRINCIPAL (Últimas 15 sesiones) ---
     contenedorPrincipal.innerHTML = filtrados.slice(-15).reverse().map(d => `
         <div style="border-bottom:1px solid #f1f5f9; padding:6px 0;">
             <div style="font-weight:800; font-size:11px; color:#0f172a;">${d.paciente || 'S/N'}</div>
-            <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.tema || 'SIN MOTIVO'}</div>
+            <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${d.tema || 'SIN MOTIVO'}</div>
             <div style="font-size:9px; color:#94a3b8; font-weight:bold;">Sesión: ${d.n_sesion || '1'} | ${d.fecha || ''}</div>
-        </div>`).join('');
+        </div>
+    `).join('');
 
-    if (document.getElementById('p-list-edades')) {
-        document.getElementById('p-list-edades').innerHTML = Object.entries(edadTemas).map(([rango, temas]) => `
-            <div style="margin-bottom:10px;">
-                <div style="font-weight:800; font-size:11px; background:#f1f5f9; padding:2px 5px; border-radius:3px;">${rango} años</div>
-                ${Object.entries(temas).map(([tema, count]) => `
-                    <div style="display:flex; justify-content:space-between; font-size:9px; padding-left:8px; margin-top:1px;">
-                        <span style="color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${tema}</span>
-                        <b style="color:#0f172a;">${count}</b>
-                    </div>
-                `).join('')}
-            </div>`).join('');
+    // --- RENDERIZADO DE DESGLOSE POR EDAD ---
+    const divEdades = document.getElementById('p-list-edades');
+    if (divEdades) {
+        divEdades.innerHTML = Object.entries(edadTemas).map(([rango, temas]) => {
+            const listaTemas = Object.entries(temas).sort((a, b) => b[1] - a[1]);
+            return `
+                <div style="margin-bottom:10px;">
+                    <div style="font-weight:800; font-size:11px; background:#f1f5f9; padding:2px 5px; border-radius:3px; color:#334155;">${rango} años</div>
+                    ${listaTemas.length === 0 
+                        ? `<div style="font-size:9px; color:#94a3b8; padding-left:8px;">Sin registros</div>` 
+                        : listaTemas.map(([tema, count]) => `
+                            <div style="display:flex; justify-content:space-between; font-size:9px; padding-left:8px; margin-top:1px;">
+                                <span style="color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${tema}</span>
+                                <b style="color:#0f172a;">${count}</b>
+                            </div>
+                        `).join('')
+                    }
+                </div>
+            `;
+        }).join('');
     }
 
-    if (document.getElementById('p-list-asuntos')) {
-        document.getElementById('p-list-asuntos').innerHTML = Object.entries(localTemas).map(([loc, temas]) => `
-            <div style="margin-bottom:12px;">
-                <div style="font-weight:800; font-size:11px; background:#e2e8f0; padding:3px 6px; border-radius:3px;">${loc}</div>
-                ${Object.entries(temas).map(([tema, count]) => `
-                    <div style="display:flex; justify-content:space-between; font-size:9px; padding-left:8px; margin-top:2px;">
-                        <span style="color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${tema}</span>
-                        <b style="color:#0f172a;">${count}</b>
-                    </div>
-                `).join('')}
-            </div>`).join('');
+    // --- RENDERIZADO DE DESGLOSE POR LOCALIDAD Y TEMAS ---
+    const divAsuntos = document.getElementById('p-list-asuntos');
+    if (divAsuntos) {
+        const localidadesOrdenadas = Object.entries(localTemas).sort((a, b) => {
+            const totalA = Object.values(a[1]).reduce((sum, c) => sum + c, 0);
+            const totalB = Object.values(b[1]).reduce((sum, c) => sum + c, 0);
+            return totalB - totalA;
+        });
+
+        if (localidadesOrdenadas.length === 0) {
+            divAsuntos.innerHTML = `<small style="color:#94a3b8; font-size:10px;">Sin datos disponibles</small>`;
+        } else {
+            divAsuntos.innerHTML = localidadesOrdenadas.map(([loc, temas]) => `
+                <div style="margin-bottom:12px;">
+                    <div style="font-weight:800; font-size:11px; background:#e2e8f0; padding:3px 6px; border-radius:3px; color:#1e293b;">${loc}</div>
+                    ${Object.entries(temas).sort((a, b) => b[1] - a[1]).map(([tema, count]) => `
+                        <div style="display:flex; justify-content:space-between; font-size:9px; padding-left:8px; margin-top:2px;">
+                            <span style="color:#475569; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80%;">${tema}</span>
+                            <b style="color:#0f172a;">${count}</b>
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
     }
 };
-
 // =============================================================================
 // MÓDULO: JEFATURA DE PSICOLOGÍA
 // =============================================================================
@@ -2299,32 +2473,48 @@ window.reprocesarJefatura = function() {
     const contenedorActividades = document.getElementById('jp-list-actividades');
     if (!contenedorActividades) return;
 
-    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
-    const zona = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
+    // Elementos de filtrado global sincronizados
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
+    const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     const mes = document.getElementById('global-month-filter')?.value || "all";
+    const anio = document.getElementById('global-year-filter')?.value || "all";
 
-    const filtrados = (store.jefatura || []).filter(item => {
+    const dataCruda = store.jefatura || [];
+
+    const filtrados = dataCruda.filter(item => {
         const paciente = (item.paciente || "").toLowerCase();
+        const dependencia = (item.dependencia || "").toLowerCase();
+        const actividad = (item.actividad || "").toLowerCase();
         const z = (item.colonia || "").toLowerCase();
         const fecha = item.fecha || ""; 
-        const mesRegistro = fecha.includes('-') ? fecha.split('-')[1] : null;
+
+        const anioRegistro = fecha.length >= 4 ? fecha.substring(0, 4) : "";
+        const mesRegistro = fecha.includes('-') ? fecha.split('-')[1] : "";
         
-        return paciente.includes(busqueda) && 
-               z.includes(zona) && 
-               (mes === 'all' || mesRegistro === mes);
+        const cumpleBusqueda = paciente.includes(busqueda) || dependencia.includes(busqueda) || actividad.includes(busqueda);
+        const cumpleZona = z.includes(zona);
+        const cumpleAnio = (anio === 'all' || anioRegistro === anio);
+        const cumpleMes = (mes === 'all' || mesRegistro === mes);
+
+        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
     });
 
-    if (document.getElementById('jp-total')) document.getElementById('jp-total').innerText = filtrados.length;
+    // Actualización de KPIs superiores
+    if (document.getElementById('jp-total')) {
+        document.getElementById('jp-total').innerText = filtrados.length;
+    }
+
     if (document.getElementById('jp-ent')) {
         const totalPersonas = filtrados.reduce((sum, d) => sum + (parseInt(d.personas) || 0), 0);
         document.getElementById('jp-ent').innerText = totalPersonas;
     }
 
+    // --- RENDERIZADO DE LISTA PRINCIPAL (Últimas 15 actividades) ---
     contenedorActividades.innerHTML = filtrados.slice(-15).reverse().map(d => `
         <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
             <div style="flex:1;">
                 <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.dependencia || 'N/A'}</div>
-                <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.actividad || 'SIN ACTIVIDAD'}</div>
+                <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${d.actividad || 'SIN ACTIVIDAD'}</div>
             </div>
             <div style="text-align:right; font-size:9px; color:#64748b;">
                 ${d.fecha || ''}<br>${d.horario || '--:--'}
@@ -2332,14 +2522,16 @@ window.reprocesarJefatura = function() {
         </div>
     `).join('');
 
-    if (document.getElementById('jp-list-geo')) {
-        document.getElementById('jp-list-geo').innerHTML = filtrados.slice(-15).reverse().map(d => `
+    // --- RENDERIZADO DE LISTA GEOGRÁFICA / OFICIOS ---
+    const contenedorGeo = document.getElementById('jp-list-geo');
+    if (contenedorGeo) {
+        contenedorGeo.innerHTML = filtrados.slice(-15).reverse().map(d => `
             <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
                 <div style="flex:1;">
                     <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.colonia || 'SIN ZONA'}</div>
                     <div style="font-size:9px; color:#64748b; font-weight:700;">${d.actividad || ''}</div>
                 </div>
-                <div style="font-size:9px; font-weight:bold; color:var(--accent); text-align:right;">
+                <div style="font-size:9px; font-weight:bold; color:var(--accent, #0ea5e9); text-align:right;">
                     ${d.oficio || 'S/N'}
                 </div>
             </div>
@@ -2353,61 +2545,93 @@ window.reprocesarProcuraduria = function() {
     const contenedorCasos = document.getElementById('pr-list-casos');
     if (!contenedorCasos) return;
 
-    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
-    const zona = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
+    // Elementos de filtrado global sincronizados
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
+    const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     const mes = document.getElementById('global-month-filter')?.value || "all";
+    const anio = document.getElementById('global-year-filter')?.value || "all";
 
-    const filtrados = (store.procuraduria || []).filter(item => {
+    const dataCruda = store.procuraduria || [];
+
+    const filtrados = dataCruda.filter(item => {
         const nombre = (item.nombre || "").toLowerCase();
+        const asuntos = (item.asuntos || "").toLowerCase();
         const z = (item.lugar || "").toLowerCase();
+        const domicilio = (item.domicilio || "").toLowerCase();
         const fecha = item.fecha || ""; 
-        const mesRegistro = fecha.includes('-') ? fecha.split('-')[1] : null;
+
+        const anioRegistro = fecha.length >= 4 ? fecha.substring(0, 4) : "";
+        const mesRegistro = fecha.includes('-') ? fecha.split('-')[1] : "";
         
-        return nombre.includes(busqueda) && 
-               z.includes(zona) && 
-               (mes === 'all' || mesRegistro === mes);
+        const cumpleBusqueda = nombre.includes(busqueda) || asuntos.includes(busqueda) || domicilio.includes(busqueda);
+        const cumpleZona = z.includes(zona);
+        const cumpleAnio = (anio === 'all' || anioRegistro === anio);
+        const cumpleMes = (mes === 'all' || mesRegistro === mes);
+        
+        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
     });
 
-    if (document.getElementById('pr-total')) document.getElementById('pr-total').innerText = filtrados.length;
-    if (document.getElementById('pr-mixtos')) document.getElementById('pr-mixtos').innerText = filtrados.filter(d => d.horarios_mixtos === 'Si').length;
+    // Actualización segura de KPIs superiores
+    if (document.getElementById('pr-total')) {
+        document.getElementById('pr-total').innerText = filtrados.length;
+    }
 
+    if (document.getElementById('pr-mixtos')) {
+        document.getElementById('pr-mixtos').innerText = filtrados.filter(d => {
+            const mixtoVal = (d.horarios_mixtos || "").toString().toLowerCase().trim();
+            return mixtoVal === 'si' || mixtoVal === 'sí' || mixtoVal === 'true' || mixtoVal === '1';
+        }).length;
+    }
+
+    // --- CONTEO Y DESGLOSE DE ASUNTOS ---
     const conteoAsuntos = {};
     filtrados.forEach(d => { 
-        const a = d.asuntos || "S/ASUNTO"; 
+        const a = (d.asuntos || "S/ASUNTO").trim().toUpperCase(); 
         conteoAsuntos[a] = (conteoAsuntos[a] || 0) + 1; 
     });
     
-    if (document.getElementById('pr-conteo-tabla')) {
-        document.getElementById('pr-conteo-tabla').innerHTML = Object.entries(conteoAsuntos)
-            .sort((a,b) => b[1] - a[1])
-            .map(([asunto, count]) => `
-            <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
-                <div style="flex:1;">
-                    <div style="font-weight:800; font-size:11px; color:#1e293b; text-transform: uppercase;">${asunto}</div>
-                    <div style="font-size:10px; color:var(--primary); font-weight:700;">TOTAL: ${count}</div>
+    const contenedorConteo = document.getElementById('pr-conteo-tabla');
+    if (contenedorConteo) {
+        const asuntosOrdenados = Object.entries(conteoAsuntos).sort((a, b) => b[1] - a[1]);
+        
+        if (asuntosOrdenados.length === 0) {
+            contenedorConteo.innerHTML = `<small style="color:#94a3b8; font-size:10px;">Sin datos disponibles</small>`;
+        } else {
+            contenedorConteo.innerHTML = asuntosOrdenados.map(([asunto, count]) => `
+                <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+                    <div style="flex:1;">
+                        <div style="font-weight:800; font-size:11px; color:#1e293b; text-transform: uppercase;">${asunto}</div>
+                        <div style="font-size:10px; color:var(--primary, #0284c7); font-weight:700;">TOTAL: ${count}</div>
+                    </div>
                 </div>
-            </div>`).join('');
+            `).join('');
+        }
     }
 
+    // --- RENDERIZADO DE LISTA PRINCIPAL DE CASOS (Últimos 15) ---
     contenedorCasos.innerHTML = filtrados.slice(-15).reverse().map(d => `
         <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
             <div style="flex:1;">
                 <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.nombre || 'SIN NOMBRE'}</div>
-                <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.asuntos || 'S/A'}</div>
+                <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${d.asuntos || 'S/A'}</div>
             </div>
-        </div>`).join('');
+        </div>
+    `).join('');
 
-    if (document.getElementById('pr-list-geo')) {
-        document.getElementById('pr-list-geo').innerHTML = filtrados.slice(-15).reverse().map(d => `
+    // --- RENDERIZADO DE LISTA GEOGRÁFICA / DOMICILIOS (Últimos 15) ---
+    const contenedorGeo = document.getElementById('pr-list-geo');
+    if (contenedorGeo) {
+        contenedorGeo.innerHTML = filtrados.slice(-15).reverse().map(d => `
             <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
                 <div style="flex:1;">
                     <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.lugar || 'SIN LUGAR'}</div>
-                    <div style="font-size:9px; color:var(--primary); font-weight:700;">${d.domicilio || 'SIN DOMICILIO'}</div>
+                    <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${d.domicilio || 'SIN DOMICILIO'}</div>
                 </div>
-            </div>`).join('');
+            </div>
+        `).join('');
     }
 };
-// =============================================================================
+/// =============================================================================
 // MÓDULO: TRABAJO SOCIAL
 // =============================================================================
 window.reprocesarTrabSoc = function() {
@@ -2415,10 +2639,11 @@ window.reprocesarTrabSoc = function() {
     const col1 = document.getElementById('col-1');
     if (!col1) return;
 
-    // Lectura segura de inputs de filtrado global
-    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
-    const zona = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
+    // Lectura segura de inputs de filtrado global (búsqueda, zona, mes y año)
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
+    const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     const mes = document.getElementById('global-month-filter')?.value || "all";
+    const anio = document.getElementById('global-year-filter')?.value || "all";
 
     const dataSocial = store.social || [];
 
@@ -2426,22 +2651,34 @@ window.reprocesarTrabSoc = function() {
         const nombre = (item.nombre || "").toLowerCase();
         const programa = (item.programa || "").toLowerCase();
         const asunto = (item.asunto || "").toLowerCase();
+        const detalleAsunto = (item.detalle_asunto || "").toLowerCase();
         const z = (item.col_loc || "").toLowerCase();
+        const direccion = (item.direccion || "").toLowerCase();
+        
         const fecha = (item.fecha_registro || "").trim();
         const partes = fecha.split('-');
+        const anioRegistro = partes.length >= 1 ? partes[0] : "";
         const mesRegistro = partes.length >= 2 ? partes[1] : "";
         
-        const coincideBusqueda = nombre.includes(busqueda) || programa.includes(busqueda) || asunto.includes(busqueda);
-        return coincideBusqueda && z.includes(zona) && (mes === 'all' || mesRegistro === mes);
+        const coincideBusqueda = nombre.includes(busqueda) || 
+                                 programa.includes(busqueda) || 
+                                 asunto.includes(busqueda) || 
+                                 detalleAsunto.includes(busqueda);
+                                 
+        const cumpleZona = z.includes(zona) || direccion.includes(zona);
+        const cumpleAnio = (anio === 'all' || anioRegistro === anio);
+        const cumpleMes = (mes === 'all' || mesRegistro === mes);
+
+        return coincideBusqueda && cumpleZona && cumpleAnio && cumpleMes;
     });
 
     // Conteo global y por personal operativo
     const contPrograma = {}, contAsunto = {}, contDetalle = {}, contPersonal = {};
     
     filtrados.forEach(i => {
-        const p = i.programa || "SIN PROG.";
-        const a = i.asunto || "SIN ASUNTO";
-        const d = i.detalle_asunto || "SIN DETALLE";
+        const p = (i.programa || "SIN PROG.").trim().toUpperCase();
+        const a = (i.asunto || "SIN ASUNTO").trim().toUpperCase();
+        const d = (i.detalle_asunto || "SIN DETALLE").trim().toUpperCase();
         const trabajador = (i.usuario_atendio || i.usuario || i.atendido_por || "NO ASIGNADO").trim().toUpperCase();
 
         contPrograma[p] = (contPrograma[p] || 0) + 1;
@@ -2451,20 +2688,31 @@ window.reprocesarTrabSoc = function() {
     });
 
     // Actualización segura de marcadores KPIs principales
-    if (document.getElementById('s-total')) document.getElementById('s-total').innerText = filtrados.length;
-    if (document.getElementById('s-atendidos')) {
-        document.getElementById('s-atendidos').innerText = filtrados.filter(d => ['ATENDIDO', 'ENTREGADO', 'REALIZADO', 'VALIDADO'].includes(d.estatus)).length;
+    if (document.getElementById('s-total')) {
+        document.getElementById('s-total').innerText = filtrados.length;
     }
+    
+    if (document.getElementById('s-atendidos')) {
+        document.getElementById('s-atendidos').innerText = filtrados.filter(d => {
+            const est = (d.estatus || "").trim().toUpperCase();
+            return ['ATENDIDO', 'ENTREGADO', 'REALIZADO', 'VALIDADO'].includes(est);
+        }).length;
+    }
+    
     if (document.getElementById('s-pendientes')) {
-        document.getElementById('s-pendientes').innerText = filtrados.filter(d => ['PENDIENTE', 'EN PROCESO'].includes(d.estatus)).length;
+        document.getElementById('s-pendientes').innerText = filtrados.filter(d => {
+            const est = (d.estatus || "").trim().toUpperCase();
+            return ['PENDIENTE', 'EN PROCESO'].includes(est);
+        }).length;
     }
     
     const getColor = (e) => {
+        const est = (e || "").trim().toUpperCase();
         const colores = {
             'ATENDIDO': '#16a34a', 'ENTREGADO': '#16a34a', 'REALIZADO': '#16a34a', 'VALIDADO': '#16a34a',
             'PENDIENTE': '#ea580c', 'EN PROCESO': '#2563eb', 'CANCELADO': '#dc2626'
         };
-        return colores[e] || '#64748b';
+        return colores[est] || '#64748b';
     };
 
     // Renderizado dinámico de estadísticas secundarias
@@ -2472,6 +2720,17 @@ window.reprocesarTrabSoc = function() {
         const container = document.getElementById(id);
         if (!container) return;
         const ordenado = Object.entries(objetoConteo).sort((a, b) => b[1] - a[1]);
+        
+        if (ordenado.length === 0) {
+            container.innerHTML = `
+                <div style="font-size: 10px; font-weight: 800; color: #64748b; margin-bottom: 5px; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px;">
+                    ${titulo} (0)
+                </div>
+                <small style="color:#94a3b8; font-size:9px;">Sin datos disponibles</small>
+            `;
+            return;
+        }
+
         container.innerHTML = `
             <div style="font-size: 10px; font-weight: 800; color: #64748b; margin-bottom: 5px; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px;">
                 ${titulo} (${Object.keys(objetoConteo).length})
@@ -2479,8 +2738,8 @@ window.reprocesarTrabSoc = function() {
             <div style="max-height: 120px; overflow-y: auto;">
                 ${ordenado.map(([nombre, cant]) => `
                     <div style="display:flex; justify-content:space-between; font-size:9px; margin-bottom:2px; padding-right:5px;">
-                        <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;">${nombre}</span>
-                        <b style="color:var(--primary);">${cant}</b>
+                        <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;" title="${nombre}">${nombre}</span>
+                        <b style="color:var(--primary, #0284c7);">${cant}</b>
                     </div>
                 `).join('')}
             </div>
@@ -2493,48 +2752,59 @@ window.reprocesarTrabSoc = function() {
     // Agrupación cruzada para Columna 2
     const contCruzado = {};
     filtrados.forEach(i => {
-        const key = `${i.asunto || "SIN ASUNTO"}|${i.programa || "SIN PROG."}|${i.detalle_asunto || "SIN DETALLE"}`;
+        const asuntoVal = (i.asunto || "SIN ASUNTO").trim();
+        const programaVal = (i.programa || "SIN PROG.").trim();
+        const detalleVal = (i.detalle_asunto || "SIN DETALLE").trim();
+        const key = `${asuntoVal}|${programaVal}|${detalleVal}`;
         contCruzado[key] = (contCruzado[key] || 0) + 1;
     });
     const ordenadoCruzado = Object.entries(contCruzado).sort((a, b) => b[1] - a[1]);
 
     // Inyección en Columnas 1, 2 y 3
-    col1.innerHTML = filtrados.slice(-15).reverse().map(i => `
-        <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
-            <div style="flex-grow:1; overflow:hidden;">
-                <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.nombre || 'N/A'}</div>
-                <div style="font-size:9px; color:#64748b;">${i.fecha_registro || ''}</div>
-                <div style="font-size:9px; color:var(--primary); font-weight:700;">${i.asunto || ''}</div>
-                <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus || 'SIN ESTADO'}</div>
-            </div>
-        </div>
-    `).join('');
-    
-    if (document.getElementById('col-2')) {
-        document.getElementById('col-2').innerHTML = ordenadoCruzado.map(([key, count]) => {
-            const [asunto, programa, detalle] = key.split('|');
-            return `
-                <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
-                    <div style="flex-grow:1; overflow:hidden;">
-                        <div style="font-weight:800; font-size:11px; color:#1e293b; white-space:nowrap; text-overflow:ellipsis;">${asunto}</div>
-                        <div style="font-size:9px; color:var(--primary); font-weight:700;">${programa}</div>
-                        <div style="font-size:9px; color:#64748b; font-style:italic;">${detalle}</div>
-                    </div>
-                    <div style="background:#f8fafc; padding:2px 8px; border-radius:10px; font-weight:800; font-size:12px; border:1px solid #e2e8f0; margin-left:10px;">${count}</div>
-                </div>`;
-        }).join('');
-    }
-
-    if (document.getElementById('col-3')) {
-        document.getElementById('col-3').innerHTML = filtrados.slice(-15).reverse().map(i => `
+    col1.innerHTML = filtrados.length === 0 
+        ? `<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin registros</div>`
+        : filtrados.slice(-15).reverse().map(i => `
             <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
                 <div style="flex-grow:1; overflow:hidden;">
-                    <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.col_loc || 'N/A'}</div>
-                    <div style="font-size:9px; color:#64748b;">${i.direccion || ''}</div>
+                    <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.nombre || 'N/A'}</div>
+                    <div style="font-size:9px; color:#64748b;">${i.fecha_registro || ''}</div>
+                    <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${i.asunto || ''}</div>
                     <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus || 'SIN ESTADO'}</div>
                 </div>
             </div>
         `).join('');
+    
+    const col2 = document.getElementById('col-2');
+    if (col2) {
+        col2.innerHTML = ordenadoCruzado.length === 0
+            ? `<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin datos cruzados</div>`
+            : ordenadoCruzado.map(([key, count]) => {
+                const [asunto, programa, detalle] = key.split('|');
+                return `
+                    <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+                        <div style="flex-grow:1; overflow:hidden;">
+                            <div style="font-weight:800; font-size:11px; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${asunto}">${asunto}</div>
+                            <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${programa}</div>
+                            <div style="font-size:9px; color:#64748b; font-style:italic;">${detalle}</div>
+                        </div>
+                        <div style="background:#f8fafc; padding:2px 8px; border-radius:10px; font-weight:800; font-size:12px; border:1px solid #e2e8f0; margin-left:10px; flex-shrink:0;">${count}</div>
+                    </div>`;
+            }).join('');
+    }
+
+    const col3 = document.getElementById('col-3');
+    if (col3) {
+        col3.innerHTML = filtrados.length === 0
+            ? `<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin registros geográficos</div>`
+            : filtrados.slice(-15).reverse().map(i => `
+                <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
+                    <div style="flex-grow:1; overflow:hidden;">
+                        <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.col_loc || 'N/A'}</div>
+                        <div style="font-size:9px; color:#64748b;">${i.direccion || ''}</div>
+                        <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus || 'SIN ESTADO'}</div>
+                    </div>
+                </div>
+            `).join('');
     }
 
     // Gráfico de pastel CSS Puro (Personal Operativo)
@@ -2586,85 +2856,184 @@ window.reprocesarTrabSoc = function() {
         }
     }
 };
-
 // =============================================================
 // MÓDULO: REPORTE DE DESPENSAS
-// =============================================================================
+// =============================================================
+
 window.reprocesarDespensas = function() {
-    // Si usas window.store.despensas como fuente principal:
-    const records = window.store && window.store.despensas ? window.store.despensas : (window.records || []);
+    const recordsCrudos = (window.store && window.store.despensas) ? window.store.despensas : (window.records || []);
+
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
+    const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
+    const mes = document.getElementById('global-month-filter')?.value || "all";
+    const anio = document.getElementById('global-year-filter')?.value || "all";
+
+    // Función universal para extraer año y mes sin importar el formato de la fecha
+    const obtenerAnioMes = (fechaCruda) => {
+        if (!fechaCruda) return { anio: "", mes: "" };
+
+        let f = fechaCruda;
+        if (typeof f === 'object' && f !== null) {
+            if (f.seconds) f = new Date(f.seconds * 1000);
+            else if (f instanceof Date) f = f;
+        }
+
+        let fStr = "";
+        if (f instanceof Date) {
+            fStr = f.toISOString().split('T')[0];
+        } else {
+            fStr = String(f).trim().split(' ')[0];
+        }
+
+        let anioReg = "";
+        let mesReg = "";
+
+        // Soporte para formato YYYY-MM-DD o DD-MM-YYYY
+        if (fStr.includes('-')) {
+            const p = fStr.split('-');
+            if (p[0].length === 4) {
+                anioReg = p[0];
+                mesReg = p[1] || "";
+            } else if (p[2] && p[2].length === 4) {
+                anioReg = p[2];
+                mesReg = p[1] || "";
+            }
+        } 
+        // Soporte para formato DD/MM/YYYY o YYYY/MM/DD
+        else if (fStr.includes('/')) {
+            const p = fStr.split('/');
+            if (p[0].length === 4) {
+                anioReg = p[0];
+                mesReg = p[1] || "";
+            } else if (p[2] && p[2].length === 4) {
+                anioReg = p[2];
+                mesReg = p[1] || "";
+            }
+        }
+
+        return { 
+            anio: anioReg, 
+            mes: mesReg ? String(mesReg).padStart(2, '0') : "" 
+        };
+    };
+
+    const records = recordsCrudos.filter(item => {
+        const fullName = (item.fullName || item.nombre || "").toLowerCase();
+        const folio = (item.folio || "").toLowerCase();
+        const supportType = (item.supportType || item.programa || "").toLowerCase();
+        const locality = (item.locality || item.col_loc || "").toLowerCase();
+        const direccion = (item.direccion || "").toLowerCase();
+        
+        const fechaRaw = item.fecha_registro || item.fecha || item.date || "";
+        const { anio: anioRegistro, mes: mesRegistro } = obtenerAnioMes(fechaRaw);
+        
+        const coincideBusqueda = busqueda === "" || 
+                                 fullName.includes(busqueda) || 
+                                 folio.includes(busqueda) || 
+                                 supportType.includes(busqueda);
+                                 
+        const cumpleZona = zona === "" || locality.includes(zona) || direccion.includes(zona);
+        
+        // Si el registro no tiene fecha pero el filtro está en 'all', se permite pasar
+        const cumpleAnio = (anio === 'all' || anioRegistro === "" || anioRegistro === anio);
+        const cumpleMes = (mes === 'all' || mesRegistro === "" || mesRegistro === mes);
+
+        return coincideBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+    });
 
     if (!records || records.length === 0) {
-        document.getElementById('desp-total').textContent = '0';
-        document.getElementById('desp-beneficiarios').textContent = '0';
-        document.getElementById('desp-mujeres').textContent = '0';
-        document.getElementById('desp-hombres').textContent = '0';
-        document.getElementById('desp-list-pacientes').innerHTML = '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin registros</div>';
-        document.getElementById('desp-list-tipos').innerHTML = '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>';
-        document.getElementById('desp-list-localidades').innerHTML = '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>';
+        if (document.getElementById('desp-total')) document.getElementById('desp-total').textContent = '0';
+        if (document.getElementById('desp-beneficiarios')) document.getElementById('desp-beneficiarios').textContent = '0';
+        if (document.getElementById('desp-mujeres')) document.getElementById('desp-mujeres').textContent = '0';
+        if (document.getElementById('desp-hombres')) document.getElementById('desp-hombres').textContent = '0';
+        if (document.getElementById('desp-list-pacientes')) document.getElementById('desp-list-pacientes').innerHTML = '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin registros</div>';
+        if (document.getElementById('desp-list-tipos')) document.getElementById('desp-list-tipos').innerHTML = '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>';
+        if (document.getElementById('desp-list-localidades')) document.getElementById('desp-list-localidades').innerHTML = '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>';
         return;
     }
 
     let totalEntregas = records.length;
-    let unicosSet = new Set(records.map(r => r.fullName ? r.fullName.trim().toUpperCase() : ''));
+    let unicosSet = new Set(records.map(r => (r.fullName || r.nombre || '').trim().toUpperCase()));
     let totalBeneficiarios = unicosSet.size;
 
-    let mujeres = records.filter(r => r.gender && (r.gender.toLowerCase() === 'femenino' || r.gender.toLowerCase() === 'f')).length;
-    let hombres = records.filter(r => r.gender && (r.gender.toLowerCase() === 'masculino' || r.gender.toLowerCase() === 'm')).length;
+    let mujeres = records.filter(r => {
+        const g = (r.gender || r.genero || "").toLowerCase().trim();
+        return g === 'femenino' || g === 'f' || g === 'mujer';
+    }).length;
+
+    let hombres = records.filter(r => {
+        const g = (r.gender || r.genero || "").toLowerCase().trim();
+        return g === 'masculino' || g === 'm' || g === 'hombre';
+    }).length;
 
     let tiposCount = {};
     let localidadesCount = {};
     let pacientesHTML = '';
 
     records.forEach(r => {
-        let tipo = r.supportType || 'No especificado';
+        let tipo = (r.supportType || r.programa || 'No especificado').trim();
         tiposCount[tipo] = (tiposCount[tipo] || 0) + 1;
 
-        let loc = r.locality || 'No especificada';
+        let loc = (r.locality || r.col_loc || 'No especificada').trim();
         localidadesCount[loc] = (localidadesCount[loc] || 0) + 1;
     });
 
-    document.getElementById('desp-total').textContent = totalEntregas;
-    document.getElementById('desp-beneficiarios').textContent = totalBeneficiarios;
-    document.getElementById('desp-mujeres').textContent = mujeres;
-    document.getElementById('desp-hombres').textContent = hombres;
+    if (document.getElementById('desp-total')) document.getElementById('desp-total').textContent = totalEntregas;
+    if (document.getElementById('desp-beneficiarios')) document.getElementById('desp-beneficiarios').textContent = totalBeneficiarios;
+    if (document.getElementById('desp-mujeres')) document.getElementById('desp-mujeres').textContent = mujeres;
+    if (document.getElementById('desp-hombres')) document.getElementById('desp-hombres').textContent = hombres;
 
     let ultimosRecientes = [...records].slice(-10).reverse();
     ultimosRecientes.forEach(r => {
+        const name = r.fullName || r.nombre || 'Sin nombre';
+        const locName = r.locality || r.col_loc || 'N/A';
+        const supType = r.supportType || r.programa || 'Apoyo';
         pacientesHTML += `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 11px;">
                 <div>
-                    <span style="font-weight: 700; color: #1e293b;">${r.fullName || 'Sin nombre'}</span>
-                    <div style="font-size: 10px; color: #94a3b8;">${r.folio} &bull; ${r.locality || 'N/A'}</div>
+                    <span style="font-weight: 700; color: #1e293b;">${name}</span>
+                    <div style="font-size: 10px; color: #94a3b8;">${r.folio || 'S/F'} &bull; ${locName}</div>
                 </div>
-                <span class="badge" style="background: #f1f5f9; color: #475569;">${r.supportType || 'Apoyo'}</span>
+                <span class="badge" style="background: #f1f5f9; color: #475569;">${supType}</span>
             </div>
         `;
     });
-    document.getElementById('desp-list-pacientes').innerHTML = pacientesHTML || '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin registros</div>';
+    
+    const containerPacientes = document.getElementById('desp-list-pacientes');
+    if (containerPacientes) {
+        containerPacientes.innerHTML = pacientesHTML || '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin registros</div>';
+    }
 
     let tiposHTML = '';
     Object.keys(tiposCount).sort((a,b) => tiposCount[b] - tiposCount[a]).forEach(tipo => {
         tiposHTML += `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 11px;">
-                <span style="color: #334155; font-weight: 500;">${tipo}</span>
+                <span style="color: #334155; font-weight: 500;" title="${tipo}">${tipo}</span>
                 <span class="badge" style="background: #ecfdf5; color: #047857; font-weight: 800;">${tiposCount[tipo]}</span>
             </div>
         `;
     });
-    document.getElementById('desp-list-tipos').innerHTML = tiposHTML;
+    
+    const containerTipos = document.getElementById('desp-list-tipos');
+    if (containerTipos) {
+        containerTipos.innerHTML = tiposHTML || '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>';
+    }
 
     let locHTML = '';
     Object.keys(localidadesCount).sort((a,b) => localidadesCount[b] - localidadesCount[a]).forEach(loc => {
         locHTML += `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 11px;">
-                <span style="color: #334155; font-weight: 500;">${loc}</span>
+                <span style="color: #334155; font-weight: 500;" title="${loc}">${loc}</span>
                 <span class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 800;">${localidadesCount[loc]}</span>
             </div>
         `;
     });
-    document.getElementById('desp-list-localidades').innerHTML = locHTML;
-}
+    
+    const containerLocalidades = document.getElementById('desp-list-localidades');
+    if (containerLocalidades) {
+        containerLocalidades.innerHTML = locHTML || '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>';
+    }
+};
 // =============================================================================
 // MÓDULO: ESTADÍSTICAS GENERALES Y GRÁFICOS DIF (COMPLETO Y BLINDADO)
 // =============================================================================
@@ -2684,15 +3053,22 @@ window.reprocesarEstadisticasDIF = function() {
     window.instanciasGraficosDIF = {};
 
     const safeStore = (typeof store !== 'undefined' && store !== null) ? store : {};
-    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
-    const zona = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
+    const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     
-    // 💡 Forzar valor a "all" si el select está vacío o al iniciar la página
+    // 💡 Forzar valor a "all" si el select de meses está vacío o al iniciar la página
     const selectMesEl = document.getElementById('global-month-filter');
     if (selectMesEl && (!selectMesEl.value || selectMesEl.value === "")) {
         selectMesEl.value = "all";
     }
     const mesFiltro = selectMesEl ? selectMesEl.value : "all";
+
+    // 💡 Forzar valor a "all" o año actual si el select de años está vacío o al iniciar
+    const selectAnioEl = document.getElementById('global-year-filter');
+    if (selectAnioEl && (!selectAnioEl.value || selectAnioEl.value === "")) {
+        selectAnioEl.value = "all";
+    }
+    const anioFiltro = selectAnioEl ? selectAnioEl.value : "all";
 
     const coloresDepartamentos = {
         'TRABAJO SOCIAL': '#6366f1',
@@ -2701,12 +3077,12 @@ window.reprocesarEstadisticasDIF = function() {
         'JEFATURA DE PSICOLOGIA': '#8b5cf6',
         'POBLACION VULNERABLE': '#a855f7',
         'CRISAT': '#0284c7',
-        'AREA MEDICA': '#10b981' // 👈 Color verde esmeralda para Área Médica
+        'AREA MEDICA': '#10b981'
     };
 
     const estatusPositivos = ['ATENDIDO', 'ENTREGADO', 'REALIZADO', 'VALIDADO', 'ACTIVO', 'FINALIZADO', 'CONCLUIDO', 'COMPLETADO'];
 
-// Helper ultra robusto para extraer la fecha real y asegurar el formato YYYY-MM-DD
+    // Helper ultra robusto para extraer la fecha real y asegurar el formato YYYY-MM-DD
     const extraerFechaReal = (i) => {
         let f = i.fecha || i.fecha_registro || i.created_at || i.createdAt || '';
         if (typeof f === 'object' && f !== null) {
@@ -2717,12 +3093,12 @@ window.reprocesarEstadisticasDIF = function() {
             }
         }
         let fStr = String(f).trim();
-        // Si viene con hora tipo "2026-05-12 14:30:00", recortamos solo la fecha
         if (fStr.includes(' ')) {
             fStr = fStr.split(' ')[0];
         }
         return fStr;
     };
+
     // Extraer datos del store usando estrictamente fechas reales
     let dataConsolidada = [];
 
@@ -2772,16 +3148,19 @@ window.reprocesarEstadisticasDIF = function() {
         });
     });
 
-    // Filtrado Multicriterio (si mesFiltro es 'all', toma todo el año)
+    // Filtrado Multicriterio (Mes y Año)
     const filtrados = dataConsolidada.filter(item => {
         const partesFecha = item.fecha ? item.fecha.split(/[-/]/) : [];
+        const anioItem = partesFecha.length >= 1 ? String(partesFecha[0]) : "";
         const mesItem = partesFecha.length >= 2 ? String(partesFecha[1]).padStart(2, '0') : null;
+        
+        const coincideAnio = (anioFiltro === 'all' || anioItem === anioFiltro);
         const coincideMes = (mesFiltro === 'all' || mesItem === mesFiltro);
         
         const coincideZona = String(item.zona || "").toLowerCase().includes(zona);
         const coincideBusqueda = busqueda === "" || String(item.busquedaTexto || "").toLowerCase().includes(busqueda);
         
-        return coincideMes && coincideZona && coincideBusqueda;
+        return coincideAnio && coincideMes && coincideZona && coincideBusqueda;
     });
 
     // Métrica y Agrupación
@@ -2864,8 +3243,18 @@ window.reprocesarEstadisticasDIF = function() {
     // -------------------------------------------------------------------------
     const ctxTendencia = document.getElementById('grafico-tendencia');
     if (ctxTendencia) {
+        const dataParaTendencia = dataConsolidada.filter(item => {
+            const partesFecha = item.fecha ? item.fecha.split(/[-/]/) : [];
+            const anioItem = partesFecha.length >= 1 ? String(partesFecha[0]) : "";
+            return (anioFiltro === 'all' || anioItem === anioFiltro);
+        });
+
         const conteoMeses = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].map(m => 
-            dataConsolidada.filter(i => i.fecha.includes(`-${m}-`) || i.fecha.includes(`/${m}/`)).length
+            dataParaTendencia.filter(i => {
+                const partes = i.fecha.split(/[-/]/);
+                const mesItem = partes.length >= 2 ? String(partes[1]).padStart(2, '0') : "";
+                return mesItem === m;
+            }).length
         );
 
         window.instanciasGraficosDIF.tendencia = new Chart(ctxTendencia, {
@@ -2945,7 +3334,11 @@ window.reprocesarEstadisticasDIF = function() {
         } else {
             const bloques = Array.from({ length: 31 }, (_, idx) => {
                 const diaStr = String(idx + 1).padStart(2, '0');
-                const cant = filtrados.filter(i => i.fecha.endsWith(`-${diaStr}`) || i.fecha.endsWith(`/${diaStr}`)).length;
+                const cant = filtrados.filter(i => {
+                    const partes = i.fecha.split(/[-/]/);
+                    const diaItem = partes.length >= 3 ? String(partes[2]).padStart(2, '0') : "";
+                    return diaItem === diaStr;
+                }).length;
                 return { dia: idx + 1, cant };
             });
 
@@ -2971,7 +3364,7 @@ window.reprocesarEstadisticasDIF = function() {
         if (filtrados.length === 0) {
             elTimeline.innerHTML = `<div style="font-size:11px; color:#64748b;">No hay hitos o registros para este filtro.</div>`;
         } else {
-            const ultimosHitos = filtrados.slice(-3).reverse();
+            const ultimosHitos = [...filtrados].reverse().slice(0, 3);
 
             elTimeline.innerHTML = `
                 <div style="position:relative; padding-left:14px; border-left:2px solid #3b82f6; display:flex; flex-direction:column; gap:12px;">
@@ -3002,6 +3395,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputBusqueda = document.getElementById('global-search-input');
     const inputZona = document.getElementById('global-zone-search');
     const selectMes = document.getElementById('global-month-filter');
+    const selectAnio = document.getElementById('global-year-filter');
 
     const actualizarTodo = () => {
         if (typeof window.reprocesarEstadisticasDIF === 'function') window.reprocesarEstadisticasDIF();
@@ -3011,7 +3405,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (inputBusqueda) inputBusqueda.addEventListener('input', actualizarTodo);
     if (inputZona) inputZona.addEventListener('input', actualizarTodo);
     if (selectMes) selectMes.addEventListener('change', actualizarTodo);
+    if (selectAnio) selectAnio.addEventListener('change', actualizarTodo);
 });
+
 // =============================================================================
 // MÓDULO: REPORTE JERÁRQUICO TERRITORIAL Y EXPORTACIÓN A PDF / IMPRESIÓN
 // =============================================================================
@@ -3028,11 +3424,10 @@ window.renderReporteJerarquico = function() {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 
-    // Formateador Universal y Robusto para cualquier tipo de Fecha (Firestore, YYYY-MM-DD, DD/MM/YYYY, etc.)
+    // Formateador Universal y Robusto para cualquier tipo de Fecha
     const formatearFechaUniversal = (fechaInput) => {
         if (!fechaInput) return '';
 
-        // 1. Si es un objeto de Firestore Timestamp ({ seconds: ... })
         if (typeof fechaInput === 'object' && fechaInput.seconds) {
             const dateObj = new Date(fechaInput.seconds * 1000);
             const d = String(dateObj.getDate()).padStart(2, '0');
@@ -3041,21 +3436,17 @@ window.renderReporteJerarquico = function() {
             return `${d}/${m}/${y}`;
         }
 
-        // 2. Si es una cadena de texto o número
         let fechaStr = String(fechaInput).trim();
         if (!fechaStr) return '';
 
-        // Si viene en formato ISO o YYYY-MM-DD / YYYY/MM/DD
         if (fechaStr.includes('-') || fechaStr.includes('/')) {
             const separador = fechaStr.includes('-') ? '-' : '/';
             const partes = fechaStr.split(separador);
 
             if (partes.length === 3) {
-                // Caso YYYY-MM-DD (Año de 4 dígitos al inicio)
                 if (partes[0].length === 4) {
                     return `${partes[2].padStart(2, '0')}/${partes[1].padStart(2, '0')}/${partes[0]}`;
                 }
-                // Caso DD-MM-YYYY o DD/MM/YYYY (Día al inicio)
                 if (partes[2].length === 4 || partes[2].length === 2) {
                     let anio = partes[2];
                     if (anio.length === 2) anio = '20' + anio;
@@ -3064,7 +3455,23 @@ window.renderReporteJerarquico = function() {
             }
         }
 
-        return fechaStr; // Retorna original si no coincide con ningún patrón conocido
+        return fechaStr;
+    };
+
+    // Helper para normalizar el año ('2026', etc.) para los filtros
+    const obtenerAnioNormalizado = (fechaInput) => {
+        if (!fechaInput) return null;
+        let fechaStr = fechaInput;
+        if (typeof fechaInput === 'object' && fechaInput.seconds) {
+            fechaStr = new Date(fechaInput.seconds * 1000).toISOString().split('T')[0];
+        }
+        const partes = String(fechaStr).trim().split(/[-/]/);
+        if (partes.length >= 1) {
+            if (partes[0].length === 4) return partes[0];
+            if (partes[2] && partes[2].length === 4) return partes[2];
+            if (partes[2] && partes[2].length === 2) return '20' + partes[2];
+        }
+        return null;
     };
 
     // Helper para normalizar el mes a 2 dígitos ('01', '02', etc.) para los filtros
@@ -3078,7 +3485,6 @@ window.renderReporteJerarquico = function() {
 
         const partes = String(fechaStr).trim().split(/[-/]/);
         if (partes.length >= 2) {
-            // Identificar si el mes está en la segunda posición (YYYY-MM-DD) o primera/segunda
             const mesNum = partes[0].length === 4 ? parseInt(partes[1], 10) : parseInt(partes[0], 10);
             return isNaN(mesNum) ? null : String(mesNum).padStart(2, '0');
         }
@@ -3088,10 +3494,11 @@ window.renderReporteJerarquico = function() {
     const safeArray = (arr) => Array.isArray(arr) ? arr : [];
     const safeStore = (typeof store !== 'undefined' && store !== null) ? store : {};
 
-    // 1. Captura segura de filtros globales
+    // 1. Captura segura de filtros globales (incluyendo año)
     const busquedaTexto = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
     const busquedaZona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     const mesFiltro = document.getElementById('global-month-filter')?.value || "all";
+    const anioFiltro = document.getElementById('global-year-filter')?.value || "all";
 
     // 2. Mapeo Especial para Padrón Vulnerable / Proyectos
     const registrosVulnerablesProcesados = [];
@@ -3180,7 +3587,6 @@ window.renderReporteJerarquico = function() {
 
         // ÁREA MÉDICA
         ...safeArray(safeStore.medica || safeStore.area_medica || safeStore.medico || safeStore.consultas_medicas).map(i => {
-            // Buscamos en todas las variantes posibles de nombres de fecha en la base de datos
             const fechaValida = i.fecha_cap || i.fecha || i.fecha_registro || i.fecha_atencion || i.fecha_consulta || i.created_at || i.createdAt || i.timestamp || i.date || '';
 
             return {
@@ -3217,9 +3623,12 @@ window.renderReporteJerarquico = function() {
         }))
     ];
 
-    // 4. Filtrado Multicriterio
+    // 4. Filtrado Multicriterio (Año, Mes, Zona, Texto)
     const filtrados = data.filter(i => {
+        const anioItem = obtenerAnioNormalizado(i.fecha);
         const mesItem = obtenerMesNormalizado(i.fecha);
+        
+        const coincideAnio = (anioFiltro === 'all' || anioItem === anioFiltro);
         const coincideMes = (mesFiltro === 'all' || mesItem === mesFiltro);
         
         const coincideZona = i.zona.toLowerCase().includes(busquedaZona);
@@ -3231,7 +3640,7 @@ window.renderReporteJerarquico = function() {
             i.info.toLowerCase().includes(busquedaTexto)
         );
         
-        return coincideMes && coincideZona && coincideBusqueda;
+        return coincideAnio && coincideMes && coincideZona && coincideBusqueda;
     });
 
     // Guardar temporalmente filtrados en window para uso en reporte PDF
@@ -3280,9 +3689,9 @@ window.renderReporteJerarquico = function() {
                     </span>
                 </div>
                 ${items.map(i => {
-                    let colorEstatus = '#16a34a'; // Verde
-                    if (i.estatus === 'PENDIENTE') colorEstatus = '#ea580c'; // Naranja
-                    if (i.estatus === 'VALIDADO' || i.estatus === 'ACTIVO' || i.estatus === 'ATENDIDO') colorEstatus = '#2563eb'; // Azul/Verde oficial
+                    let colorEstatus = '#16a34a';
+                    if (i.estatus === 'PENDIENTE') colorEstatus = '#ea580c';
+                    if (i.estatus === 'VALIDADO' || i.estatus === 'ACTIVO' || i.estatus === 'ATENDIDO') colorEstatus = '#2563eb';
 
                     const colorBadgeDep = coloresDep[i.dep] || '#64748b';
                     const fechaLegible = formatearFechaUniversal(i.fecha);
@@ -3419,26 +3828,28 @@ window.showView = function(viewId, element) {
     }
 };
 
-// Reloj en tiempo real institucional
-setInterval(() => {
-    const reloj = document.getElementById('reloj');
-    if (reloj) reloj.innerText = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
-}, 1000);
+// =============================================================================
+// RELOJ INSTITUCIONAL
+// =============================================================================
 
-// Función de cierre de sesión segura
-window.cerrarSesion = function() {
-    if (confirm("¿Deseas cerrar la sesión actual del Administrador Global?")) {
-        try {
-            sessionStorage.clear();
-            localStorage.clear();
-            console.log("Sesión e historial local destruidos con éxito.");
-        } catch (error) {
-            console.error("Error al limpiar el almacenamiento local:", error);
+    function actualizarRelojEstiloCuadros() {
+        const ahora = new Date();
+        const horas = String(ahora.getHours()).padStart(2, '0');
+        const minutos = String(ahora.getMinutes()).padStart(2, '0');
+        const segundos = String(ahora.getSeconds()).padStart(2, '0');
+        
+        const relojEl = document.getElementById('reloj');
+        if (relojEl) {
+            relojEl.innerHTML = `
+                <i class="far fa-clock text-muted"></i>
+                <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px;">${horas}</span>:
+                <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px;">${minutos}</span>:
+                <span style="background: #cbd5e1; color: #0f172a; padding: 2px 4px; border-radius: 4px;">${segundos}</span>
+            `;
         }
-        window.location.href = "index.html";
     }
-};
-
+    setInterval(actualizarRelojEstiloCuadros, 1000);
+    actualizarRelojEstiloCuadros();
 
 // =============================================================================
 // ENLACE DE EVENTOS PARA ACTUALIZACIÓN EN TIEMPO REAL
@@ -3447,6 +3858,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputBusqueda = document.getElementById('global-search-input');
     const inputZona = document.getElementById('global-zone-search');
     const selectMes = document.getElementById('global-month-filter');
+    const selectAnio = document.getElementById('global-year-filter');
 
     if (inputBusqueda) {
         inputBusqueda.addEventListener('input', () => window.reprocesarEstadisticasDIF());
@@ -3456,6 +3868,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (selectMes) {
         selectMes.addEventListener('change', () => window.reprocesarEstadisticasDIF());
+    }
+    if (selectAnio) {
+        selectAnio.addEventListener('change', () => window.reprocesarEstadisticasDIF());
     }
 });
 </script>
