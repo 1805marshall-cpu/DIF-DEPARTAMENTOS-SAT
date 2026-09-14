@@ -395,7 +395,7 @@
             <legend style="padding: 0 8px; font-weight: 600; color: var(--text-light); font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
                 <i class="fas fa-gavel"></i> Información del Caso
             </legend>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
                 <div class="form-group" style="grid-column: span 2;">
                     <label>Asunto(s)</label>
                     <input type="text" id="asuntos" placeholder="Ej: Pensión Alimenticia, Guardia y Custodia...">
@@ -407,11 +407,18 @@
                         <option value="Si">Si</option>
                     </select>
                 </div>
-                <div class="form-group" style="grid-column: span 3;">
+                <div class="form-group">
+                    <label>¿Embarazada?</label>
+                    <select id="embarazada">
+                        <option value="No" selected>No</option>
+                        <option value="Sí">Sí</option>
+                    </select>
+                </div>
+                <div class="form-group" style="grid-column: span 4;">
                     <label>Detalles y Observaciones</label>
                     <textarea id="detalles" rows="2" placeholder="Observaciones detalladas del caso..." style="width: 100%; resize: vertical;"></textarea>
                 </div>
-                <div class="form-group" style="grid-column: span 3;">
+                <div class="form-group" style="grid-column: span 4;">
                     <label><i class="fas fa-pen-nib"></i> Elaboró</label>
                     <input type="text" id="elaboro" placeholder="Nombre del servidor público">
                 </div>
@@ -474,6 +481,7 @@
                     <th>Asuntos</th>
                     <th>Detalles</th>
                     <th>H. Mixtos</th>
+                    <th>Embarazada</th>
                     <th>Elaboró</th>
                     <th class="no-print">Acciones</th>
                 </tr>
@@ -683,7 +691,7 @@
         reader.readAsArrayBuffer(file);
     };
 
-    window.guardar = async () => {
+window.guardar = async () => {
         const data = obtenerValoresForm();
         if(!data.nombre) {
             mostrarNotificacion("El nombre del solicitante es obligatorio.", 'warning');
@@ -703,7 +711,7 @@
         mostrarNotificacion("Registro actualizado correctamente.", 'success');
     };
 
-    window.borrarTodaLaBase = async () => {
+window.borrarTodaLaBase = async () => {
         mostrarModalConfirmacion(
             "Vaciar Base de Datos", 
             "¿Desea eliminar TODA la información del sistema? Escriba 'ELIMINAR' para confirmar.", 
@@ -724,7 +732,7 @@
         );
     };
 
-    window.eliminarDoc = async (id) => { 
+window.eliminarDoc = async (id) => { 
         mostrarModalConfirmacion(
             "Eliminar Expediente", 
             "¿Está seguro de que desea eliminar este registro de forma permanente?", 
@@ -754,7 +762,7 @@
         renderTabla();
     };
 
-    function renderTabla() {
+function renderTabla() {
         const totalRegistros = datosMostrados.length;
         const totalPag = Math.ceil(totalRegistros / filasPorPagina) || 1;
         
@@ -781,6 +789,11 @@
                 <td data-label="Asuntos" style="color:var(--primary); font-weight:600;">${reg.asuntos || ''}</td>
                 <td data-label="Detalles" style="max-width:300px; font-size:11px; color:var(--text-light);">${reg.detalles || ''}</td>
                 <td data-label="H. Mixtos">${reg.horarios_mixtos || 'No'}</td>
+                <td data-label="Embarazada">
+                    ${reg.embarazada === 'Sí' 
+                        ? '<span style="background:#fce7f3; color:#db2777; padding:3px 8px; border-radius:4px; font-weight:600;"><i class="fas fa-baby"></i> Sí</span>' 
+                        : 'No'}
+                </td>
                 <td data-label="Elaboró">${reg.elaboro || ''}</td>
                 <td class="no-print" data-label="Acciones">
                     <div style="display:flex; gap:6px; justify-content:flex-end;">
@@ -802,14 +815,16 @@
             asuntos: document.getElementById('asuntos').value.toUpperCase(),
             detalles: document.getElementById('detalles').value,
             horarios_mixtos: document.getElementById('horarios_mixtos').value,
+            embarazada: document.getElementById('embarazada').value,
             elaboro: document.getElementById('elaboro').value.toUpperCase()
         };
     }
-
-    window.limpiarForm = () => {
+    
+window.limpiarForm = () => {
         ['edit-id','fecha','nombre','domicilio','lugar','asuntos','detalles','elaboro'].forEach(id => {
             document.getElementById(id).value = '';
         });
+        document.getElementById('embarazada').value = 'No';
         document.getElementById('no').value = proximoNo;
         document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
         document.getElementById('btn-save').style.display = 'inline-flex';
@@ -828,6 +843,7 @@
         document.getElementById('asuntos').value = reg.asuntos || '';
         document.getElementById('detalles').value = reg.detalles || '';
         document.getElementById('horarios_mixtos').value = reg.horarios_mixtos || 'No';
+        document.getElementById('embarazada').value = reg.embarazada || 'No';
         document.getElementById('elaboro').value = reg.elaboro || '';
         document.getElementById('btn-save').style.display = 'none';
         document.getElementById('btn-update').style.display = 'inline-flex';
@@ -847,6 +863,11 @@
     };
 
     window.exportarExcel = () => {
+        if(datosMostrados.length === 0) {
+            mostrarNotificacion("No hay datos para exportar.", "warning");
+            return;
+        }
+
         const datosOrdenados = [...datosMostrados].sort((a, b) => (parseInt(a.no) || 0) - (parseInt(b.no) || 0));
 
         const datosExportar = datosOrdenados.map(r => ({
@@ -858,11 +879,12 @@
             "Asuntos": r.asuntos, 
             "Detalles": r.detalles, 
             "Horarios Mixtos": r.horarios_mixtos, 
+            "Embarazada": r.embarazada || "No",
             "Elaboró": r.elaboro
         }));
 
         const ws = XLSX.utils.json_to_sheet(datosExportar);
-        const wscols = [{wch: 6}, {wch: 12}, {wch: 35}, {wch: 30}, {wch: 25}, {wch: 25}, {wch: 45}, {wch: 15}, {wch: 20}];
+        const wscols = [{wch: 6}, {wch: 12}, {wch: 35}, {wch: 30}, {wch: 25}, {wch: 25}, {wch: 45}, {wch: 15}, {wch: 15}, {wch: 20}];
         ws['!cols'] = wscols;
 
         const wb = XLSX.utils.book_new();
