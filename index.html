@@ -238,21 +238,24 @@
         });
 
         const cuentas = {
+            /* Super Usuarios (Entran libremente a su panel correspondiente y gestionan todo) */
             "admin": { p: "master2026", url: "admin_global.html", dep: "GLOBAL" },
             "lorena.gonzalez": { p: "logoke.15", url: "admin_global.html", dep: "GLOBAL" }, 
             "angel.vidal": { p: "Angel123..", url: "admin_global.html", dep: "GLOBAL" }, 
+
+            /* USUARIO ESPECÍFICO PARA SALIDAS DE FARMACIA */
+            "farmacia_salida": { p: "salidas2026", url: "farmacia_salidas.html", dep: "FARMACIA" },
+            "paco.gomez": { p: "Paco123..", url: "farmacia_salidas.html", dep: "FARMACIA" },
             
-            /* CUENTAS AGREGADAS PARA CRISAT */
+            /* RESTO DE CUENTAS INSTITUCIONALES */
             "crisat": { p: "crisat2026", url: "crisat.html", dep: "CRISAT" },
             "monica.delaparra": { p: "Monica123..", url: "crisat.html", dep: "CRISAT" },
             "terapia.crisat": { p: "rehab2026", url: "crisat.html", dep: "CRISAT" },
 
-            /* CUENTAS AGREGADAS PARA   DIRECCION */
             "ceci.miros": { p: "Ceci123..", url: "direccion.html", dep: "DIRECCION" },
             "ariana.reyes": { p: "Ariana123..", url: "direccion.html", dep: "DIRECCION" },
             "lupita.montes": { p: "Lupita123..", url: "direccion.html", dep: "DIRECCION" },
 
-            /* CUENTA AGREGADA PARA DIRECCIÓN DE DESPENSAS */
             "despensas": { p: "despensa2026", url: "dir_desp.html", dep: "DESPENSAS" },
 
             "vulnerable": { p: "vul123", url: "vulnerable.html", dep: "VULNERABLE" }, 
@@ -287,17 +290,6 @@
             "apoyo.escolar": { p: "DIF.esc.2026", url: "solicitudes.html", dep: "ESCOLAR" }
         };
 
-        const nombresMedicos = {
-            "hector.gonzalez": "DR. HECTOR ARTURO GONZALEZ DOMINGUEZ",
-            "oscar.perrotin": "DR. OSCAR ALEXIS PERROTIN ORTEGA" 
-        };
-
-        const datosPersonalStaff = {
-            "andre.serrano": { nombre: "ANDREA SERRANO SALAZAR", titulo: "BIENVENIDA" },
-            "juanita.campechano": { nombre: "JUANITA C. CAMPECHANO QUEZADA", titulo: "LICDA." },
-            "monse.plata": { nombre: "MONSERRAT PLATA FLORES", titulo: "L.T.S." }
-        };
-
         function validarAcceso() {
             const userField = document.getElementById('user');
             const passField = document.getElementById('pass');
@@ -312,26 +304,10 @@
                 
                 sessionStorage.setItem('sesion_activa', 'true'); 
                 sessionStorage.setItem('nombre_usuario', user);
-                sessionStorage.setItem('departamento', cuentas[user].dep);
+                sessionStorage.setItem('dep_usuario', cuentas[user].dep);
                 
                 localStorage.setItem('activeUser', user);
                 localStorage.setItem('userDep', cuentas[user].dep);
-
-                if (nombresMedicos[user]) {
-                    sessionStorage.setItem('nombre_medico', nombresMedicos[user]);
-                } else {
-                    sessionStorage.removeItem('nombre_medico');
-                }
-
-                if (datosPersonalStaff[user]) {
-                    sessionStorage.setItem('social_nombre', datosPersonalStaff[user].nombre);
-                    sessionStorage.setItem('social_titulo', datosPersonalStaff[user].titulo);
-                    sessionStorage.setItem('nombre_completo_saludo', datosPersonalStaff[user].nombre);
-                } else {
-                    sessionStorage.removeItem('social_nombre');
-                    sessionStorage.removeItem('social_titulo');
-                    sessionStorage.removeItem('nombre_completo_saluzdo');
-                }
 
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando...';
