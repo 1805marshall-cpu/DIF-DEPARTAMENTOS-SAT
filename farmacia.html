@@ -15,7 +15,7 @@
         
         header { background: white; padding: 15px 40px; border-bottom: 3px solid var(--primary); display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; flex: 1; width: 100%; box-sizing: border-box; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; margin-bottom: 20px; position: relative; }
         
         /* Sistema de Notificaciones Toast bonitas */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
@@ -63,13 +63,23 @@
         .origen-donado { background: #e0f2fe; color: #0369a1; }
         .origen-propio { background: #fef3c7; color: #92400e; }
         
-        /* Estilos y alertas de filas */
-        .vencido { background: #fee2e2 !important; color: #991b1b !important; }
-        .caduca-critico { background: #ffedd5 !important; color: #c2410c !important; }
-        .caduca-proximo { background: #fef9c3 !important; color: #a16207 !important; }
-        .stock-bajo { background: #fae8ff !important; color: #86198f !important; border-left: 4px solid #a855f7; }
+        /* ========================================== */
+        /* COLORES DIFERENCIADOS PARA CADA CASO       */
+        /* ========================================== */
+        .vencido { background: #fee2e2 !important; color: #991b1b !important; border-left: 5px solid #dc2626; } /* Rojo Fuerte */
+        .caduca-critico { background: #ffedd5 !important; color: #c2410c !important; border-left: 5px solid #ea580c; } /* Naranja Escarlata */
+        .caduca-proximo { background: #fef9c3 !important; color: #a16207 !important; border-left: 5px solid #ca8a04; } /* Amarillo Intenso */
+        .stock-bajo { background: #f3e8ff !important; color: #7e22ce !important; border-left: 5px solid #9333ea; } /* Morado / Púrpura Vibrante */
         
         .alerta-texto { font-size: 9px; display: block; font-weight: bold; margin-top: 2px; }
+
+        /* Botón de Ayuda / Info de Colores flotante */
+        .help-btn { background: #0284c7; color: white; border: none; width: 26px; height: 26px; border-radius: 50%; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; transition: background 0.2s; vertical-align: middle; margin-left: 8px; }
+        .help-btn:hover { background: #0369a1; }
+        
+        .info-modal { display: none; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; margin-bottom: 15px; font-size: 12px; color: #334155; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .info-modal ul { margin: 5px 0 0 20px; padding: 0; }
+        .info-modal li { margin-bottom: 4px; }
 
         .search-bar { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box; }
         .btn-logout { background-color: #ef4444; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; }
@@ -146,7 +156,7 @@
                 <label>Origen</label>
                 <select id="m-origen">
                     <option value="DONACIÓN">DONACIÓN</option>
-                    <option value="RECURSO PROPIO">RECURSO PROPIO</option>
+                    <option value="RESOURCE PROPIO">RECURSO PROPIO</option>
                 </select>
             </div>
             <div class="form-group">
@@ -159,8 +169,8 @@
             </div>
         </div>
 
-        <!-- CONTROLES DE BÚSQUEDA Y PAGINACIÓN -->
-        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+        <!-- CONTROLES DE BÚSQUEDA Y AYUDA -->
+        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px; flex-wrap: wrap;">
             <input type="text" class="search-bar" id="b-farmacia" placeholder="🔍 Buscar por nombre..." onkeyup="reiniciarPaginaYListar()" style="flex: 1; margin: 0;">
             
             <div style="display: flex; align-items: center; gap: 5px;">
@@ -168,6 +178,19 @@
                 <select id="select-limite" onchange="cambiarLimite()" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1;">
                 </select>
             </div>
+            <button class="help-btn" onclick="toggleAyuda()" title="Guía de colores y ordenamiento">?</button>
+        </div>
+
+        <!-- VENTANA FLOTANTE EXPLICATIVA DE COLORES Y ORDEN -->
+        <div id="modal-ayuda" class="info-modal">
+            <strong><i class="fas fa-info-circle"></i> Guía de Prioridades y Colores en el Inventario:</strong>
+            <ul>
+                <li><span style="background:#fee2e2; color:#991b1b; padding:1px 6px; border-radius:4px; font-weight:bold;">Rojo Fuerte:</span> Medicamento <b>Vencido</b> (Urgencia máxima).</li>
+                <li><span style="background:#ffedd5; color:#c2410c; padding:1px 6px; border-radius:4px; font-weight:bold;">Naranja:</span> Caducidad en rango <b>Crítico</b> (de 1 a 15 días restantes).</li>
+                <li><span style="background:#fef9c3; color:#a16207; padding:1px 6px; border-radius:4px; font-weight:bold;">Amarillo:</span> Caducidad <b>Próxima</b> (de 16 a 30 días restantes).</li>
+                <li><span style="background:#f3e8ff; color:#7e22ce; padding:1px 6px; border-radius:4px; font-weight:bold;">Morado:</span> Stock Bajo (<b>Menos de 5 piezas</b> disponibles).</li>
+            </ul>
+            <p style="margin: 8px 0 0 0; font-style:italic;"><b>Orden automático aplicado:</b> 1° Fármacos que van a caducar (vencidos y próximos), 2° Fármacos con menos de 5 unidades, y 3° El resto del inventario por orden alfabético.</p>
         </div>
         
         <table>
@@ -218,6 +241,11 @@
         toast.innerHTML = `<i class="fas ${icono}" style="font-size: 16px;"></i> <span>${mensaje}</span>`;
         container.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
+    }
+
+    window.toggleAyuda = () => {
+        const modal = document.getElementById('modal-ayuda');
+        modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
     }
 
     const selectLimite = document.getElementById('select-limite');
@@ -290,7 +318,7 @@
         try {
             if (editID) {
                 await updateDoc(doc(db, "inventario_farmacia", editID), {
-                    nombre, existence: cantidad, existencia: cantidad, caducidad, origen
+                    nombre, existencia: cantidad, caducidad, origen
                 });
                 mostrarToast("Medicamento actualizado correctamente", "success");
                 cancelarEdicion();
@@ -316,7 +344,10 @@
         
         const filtrados = inventario.filter(i => i.nombre.includes(busqueda));
 
-        // --- ORDENAMIENTO INTELIGENTE (Prioridad: Vencidos -> Próximos -> Stock < 5 -> Alfabético) ---
+        // --- ORDENAMIENTO ESTRICTO SOLICITADO ---
+        // 1. Caducidad (Vencidos y próximos primero)
+        // 2. Stock menor a 5 unidades (Morado)
+        // 3. Resto del inventario (Alfabético)
         filtrados.sort((a, b) => {
             const fA = new Date(a.caducidad + "T00:00:00"); fA.setHours(0, 0, 0, 0);
             const fB = new Date(b.caducidad + "T00:00:00"); fB.setHours(0, 0, 0, 0);
@@ -326,24 +357,24 @@
 
             const isVencidoA = diasA <= 0 ? 1 : 0;
             const isVencidoB = diasB <= 0 ? 1 : 0;
-            if (isVencidoA !== isVencidoB) return isVencidoB - isVencidoA; // Vencidos primero
+            if (isVencidoA !== isVencidoB) return isVencidoB - isVencidoA;
 
             const isCriticoA = (diasA > 0 && diasA <= 30) ? 1 : 0;
             const isCriticoB = (diasB > 0 && diasB <= 30) ? 1 : 0;
-            if (isCriticoA !== isCriticoB) return isCriticoB - isCriticoA; // Próximos a caducar después
+            if (isCriticoA !== isCriticoB) return isCriticoB - isCriticoA;
 
-            if (diasA !== diasB) return diasA - diasB; // Entre los próximos, el que venza antes va primero
+            if (diasA !== diasB) return diasA - diasB;
 
-            // Stock bajo (menos de 5 piezas)
+            // Stock menor a 5 unidades
             const stockA = parseInt(a.existencia) || 0;
             const stockB = parseInt(b.existencia) || 0;
             const isBajoA = stockA < 5 ? 1 : 0;
             const isBajoB = stockB < 5 ? 1 : 0;
-            if (isBajoA !== isBajoB) return isBajoB - isBajoA; // Menos de 5 piezas priorizado antes
+            if (isBajoA !== isBajoB) return isBajoB - isBajoA;
 
-            if (stockA !== stockB) return stockA - stockB; // Menor stock general después
+            if (stockA !== stockB) return stockA - stockB;
 
-            return a.nombre.localeCompare(b.nombre); // Alfabético final
+            return a.nombre.localeCompare(b.nombre);
         });
 
         const totalPaginas = Math.ceil(filtrados.length / itemsPorPagina) || 1;
@@ -371,13 +402,13 @@
                 alertaTexto = "⚠️ VENCIDO"; 
             } else if (diasParaCaducar <= 15) { 
                 alertaClase = "caduca-critico"; 
-                alertaTexto = `⚠️ CRÍTICO: ${diasParaCaducar} DÍAS`; 
+                alertaTexto = `⚠️ CADUCIDAD CRÍTICA (${diasParaCaducar} DÍAS)`; 
             } else if (diasParaCaducar <= 30) { 
                 alertaClase = "caduca-proximo"; 
-                alertaTexto = `⚠️ PRÓXIMO: ${diasParaCaducar} DÍAS`; 
+                alertaTexto = `⚠️ PRÓXIMO A CADUCAR (${diasParaCaducar} DÍAS)`; 
             } else if (stock < 5) {
                 alertaClase = "stock-bajo";
-                alertaTexto = `⚠️ POCOS EN STOCK (${stock} pzas)`;
+                alertaTexto = `⚠️ STOCK BAJO (${stock} pzas)`;
             }
 
             const botonesAccion = esAutorizado ? `
