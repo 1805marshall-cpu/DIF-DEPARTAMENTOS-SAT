@@ -3089,8 +3089,6 @@ window.reprocesarDespensas = function() {
 // =============================================================
 // MÓDULO: REPORTE Y CONTROL DE FARMACIA (DEFINITIVO)
 // =============================================================
-
-// --- FUNCIÓN DE REPROCESAMIENTO Y CÁLCULO PARA FARMACIA ---
 window.reprocesarFarmacia = function() {
     const storeObj = window.store || {};
     const inventarioCrudo = Array.isArray(storeObj.inventario_farmacia) ? storeObj.inventario_farmacia : [];
@@ -3100,7 +3098,6 @@ window.reprocesarFarmacia = function() {
     const mesFiltro = document.getElementById('global-month-filter')?.value || "all";
     const anioFiltro = document.getElementById('global-year-filter')?.value || "all";
 
-    // Función para obtener Año y Mes basados ÚNICAMENTE en la fecha de registro (timestamp / t)
     const obtenerAnioMesRegistro = (item) => {
         let fechaCruda = item.timestamp || item.t || item.fecha || "";
         if (!fechaCruda) return { anio: "", mes: "" };
@@ -3135,11 +3132,15 @@ window.reprocesarFarmacia = function() {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    let totalCaducos = inventarioFiltrado.filter(item => {
+    // --- CORRECCIÓN: Filtro unificado para Próximos a Caducar (30 días) ---
+    const inventarioCaducosProximos = inventarioFiltrado.filter(item => {
         if (!item.caducidad) return false;
         const fechaCad = new Date(item.caducidad + "T00:00:00");
-        return fechaCad <= hoy && Number(item.existencia) > 0;
-    }).length;
+        const diasParaCaducar = Math.ceil((fechaCad - hoy) / (1000 * 60 * 60 * 24));
+        return diasParaCaducar > 0 && diasParaCaducar <= 30 && Number(item.existencia) > 0;
+    });
+
+    let totalCaducos = inventarioCaducosProximos.length;
 
     if (document.getElementById('farm-total-tipos')) document.getElementById('farm-total-tipos').textContent = totalTipos;
     if (document.getElementById('farm-stock-total')) document.getElementById('farm-stock-total').innerHTML = `${stockTotal} <small style="font-size:0.75rem;">pzas</small>`;
@@ -3160,14 +3161,8 @@ window.reprocesarFarmacia = function() {
     if (document.getElementById('farm-list-sobran')) document.getElementById('farm-list-sobran').innerHTML = sobranHTML || '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin excedentes</div>';
     if (document.getElementById('badge-count-sobran')) document.getElementById('badge-count-sobran').textContent = topSobran.length;
 
-    // Próximos a Caducar (Rango de 30 días)
-    const topCaducos = inventarioFiltrado.filter(item => {
-        if (!item.caducidad) return false;
-        const fechaCad = new Date(item.caducidad + "T00:00:00");
-        const diasParaCaducar = Math.ceil((fechaCad - hoy) / (1000 * 60 * 60 * 24));
-        return diasParaCaducar > 0 && diasParaCaducar <= 30 && Number(item.existencia) > 0;
-    }).sort((a, b) => new Date(a.caducidad) - new Date(b.caducidad)).slice(0, 10);
-
+    // Próximos a Caducar (Top 10 usando la misma base)
+    const topCaducos = [...inventarioCaducosProximos].sort((a, b) => new Date(a.caducidad) - new Date(b.caducidad)).slice(0, 10);
     let caducosHTML = '';
     topCaducos.forEach(item => {
         caducosHTML += `
@@ -3217,34 +3212,6 @@ window.reprocesarFarmacia = function() {
             tbodyInventario.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding: 20px;">No hay registros en el inventario.</td></tr>`;
         } else {
             tbodyInventario.innerHTML = inventarioFiltrado.map(item => `
-                <tr>
-                    <td><b>${item.nombre || 'Sin nombre'}</b></td>
-                    <td><span class="badge" style="background: #f1f5f9; color: #475569;">${item.origen || 'GENERAL'}</span></td>
-                    <td><span class="badge" style="background: #ecfdf5; color: #047857; font-weight: 800;">${item.existencia || 0} uds</span></td>
-                    <td><span class="text-muted" style="font-size: 0.78rem;">${item.caducidad || 'N/A'}</span></td>
-                </tr>
-            `).join('');
-        }
-    }
-};
-
-// --- FILTRAR INVENTARIO DESDE EL BUSCADOR DE LA TABLA ---
-window.filtrarInventarioFarmacia = function() {
-    const texto = document.getElementById('buscador-inventario-farmacia')?.value.toLowerCase().trim() || "";
-    const inventarioCrudo = (window.store && window.store.inventario_farmacia) ? window.store.inventario_farmacia : [];
-    
-    const filtrados = inventarioCrudo.filter(item => {
-        const nombre = (item.nombre || "").toLowerCase();
-        const origen = (item.origen || "").toLowerCase();
-        return nombre.includes(texto) || origen.includes(texto);
-    });
-
-    const tbodyInventario = document.getElementById('tabla-inventario-general');
-    if (tbodyInventario) {
-        if (filtrados.length === 0) {
-            tbodyInventario.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8; padding: 20px;">No se encontraron medicamentos.</td></tr>`;
-        } else {
-            tbodyInventario.innerHTML = filtrados.map(item => `
                 <tr>
                     <td><b>${item.nombre || 'Sin nombre'}</b></td>
                     <td><span class="badge" style="background: #f1f5f9; color: #475569;">${item.origen || 'GENERAL'}</span></td>
