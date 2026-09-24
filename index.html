@@ -306,6 +306,9 @@
                 sessionStorage.setItem('nombre_usuario', user);
                 sessionStorage.setItem('dep_usuario', cuentas[user].dep);
                 
+                // LÍNEA AÑADIDA PARA COMPATIBILIDAD CON LOS PANELES:
+                sessionStorage.setItem('departamento', cuentas[user].dep);
+                
                 localStorage.setItem('activeUser', user);
                 localStorage.setItem('userDep', cuentas[user].dep);
 
