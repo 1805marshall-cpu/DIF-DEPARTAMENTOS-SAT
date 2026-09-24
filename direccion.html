@@ -231,9 +231,14 @@
           <i class="fa-solid fa-stethoscope me-2 text-muted"></i>4. Área Médica
         </button>
       </li>
+      <li class="nav-item">
+        <button class="nav-link" onclick="switchModule('ambulancia', event)">
+          <i class="fa-solid fa-truck-medical me-2 text-muted"></i>5. Ingresos Ambulancia
+        </button>
+      </li>
     </ul>
 
-<!-- BARRA DE ACCIONES -->
+    <!-- BARRA DE ACCIONES -->
     <div class="card p-3 mb-4 no-print bg-white">
       <div class="row g-3 align-items-center">
         <!-- FILTRO POR RANGO DE FECHAS -->
@@ -287,7 +292,7 @@
           </button>
         </div>
 
-        <!-- BÚSQUEDA MINUCIOSA (GLOBAL PARA LOS 4 MÓDULOS) -->
+        <!-- BÚSQUEDA MINUCIOSA (GLOBAL PARA LOS MÓDULOS) -->
         <div class="col-md-6">
           <label class="form-label fw-semibold text-muted mb-1" style="font-size: 0.8rem;">
             <i class="fa-solid fa-magnifying-glass me-1"></i> Búsqueda minuciosa (Concepto, Proveedor, Factura, Monto...):
@@ -317,6 +322,9 @@
         <div class="col-md-6 text-end">
           <label class="form-label d-block mb-1">&nbsp;</label>
           <div class="btn-group btn-group-sm w-100 w-md-auto flex-wrap gap-1">
+            <button class="btn btn-outline-secondary fw-semibold border-secondary-subtle text-dark" onclick="triggerImportExcel()">
+              <i class="fa-solid fa-file-arrow-up me-1 text-muted"></i> Importar
+            </button>
             <input type="file" id="importFile" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importExcelFile(event)">
             <button class="btn btn-outline-secondary fw-semibold border-secondary-subtle text-dark" onclick="exportExcel()">
               <i class="fa-solid fa-file-excel me-1 text-success"></i> Exportar
@@ -326,6 +334,9 @@
             </button>
             <button class="btn btn-outline-secondary fw-semibold border-secondary-subtle text-dark" onclick="printReport()">
               <i class="fa-solid fa-print me-1 text-muted"></i> Imprimir
+            </button>
+            <button class="btn btn-outline-danger fw-semibold border-secondary-subtle text-dark" onclick="eliminarRegistrosVacios()" title="Limpiar registros vacíos o en 0">
+              <i class="fa-solid fa-broom me-1 text-danger"></i> Limpiar Vacíos
             </button>
           </div>
         </div>
@@ -392,6 +403,7 @@
       </div>
     </div>
   </div>
+
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <!-- SCRIPT DE FIREBASE Y LÓGICA PRINCIPAL -->
@@ -411,7 +423,8 @@
       fondo: collection(firestore, "fondo_revolvente"),
       crisat: collection(firestore, "crisat"),
       caic: collection(firestore, "caic"),
-      medica: collection(firestore, "medica")
+      medica: collection(firestore, "medica"),
+      ambulancia: collection(firestore, "ambulancia") // <--- NUEVO
     };
 
 let currentPage = 1;
@@ -420,7 +433,7 @@ let currentPage = 1;
     let bsModal = null;
     let anticipoMonto = 100000.00;
 
-    let db = { fondo: [], crisat: [], caic: [], medica: [] };
+    let db = { fondo: [], crisat: [], caic: [], medica: [], ambulancia: [] };
 
     // Estado independiente para los filtros de fecha y la búsqueda minuciosa
     let filterState = {
@@ -521,11 +534,12 @@ window.switchModule = function(modKey, event) {
     };
 
 // Función unificada que filtra por fechas y realiza la búsqueda minuciosa
+   // Reemplaza toda tu función getFilteredData actual por esta:
     function getFilteredData() {
       let data = db[currentModule] || [];
       let filtered = [...data];
 
-      // 1. Filtrado por rango de fechas (específico para fondo o general)
+      // 1. Filtrado por rango de fechas específico para Fondo Revolvente
       if (currentModule === 'fondo') {
         const startInput = document.getElementById('dateStart')?.value;
         const endInput = document.getElementById('dateEnd')?.value;
@@ -536,9 +550,11 @@ window.switchModule = function(modKey, event) {
           if (endInput && item.fecha > endInput) return false;
           return true;
         });
-      }
+      } 
+      // Nota: El módulo 'ambulancia' maneja su propio filtrado interno de fechas 
+      // de manera independiente en su propia vista para ingresos y gastos.
 
-      // 2. <--- NUEVO: Búsqueda minuciosa global (concepto, proveedor, factura o monto)
+      // 2. Búsqueda minuciosa global (concepto, proveedor, factura o monto)
       if (filterState.search) {
         const query = filterState.search;
         filtered = filtered.filter(item => {
@@ -560,12 +576,17 @@ window.switchModule = function(modKey, event) {
       return filtered;
     }
 
-    window.resetDateFilter = function() {
+window.resetDateFilter = function() {
       const start = document.getElementById('dateStart');
       const end = document.getElementById('dateEnd');
       if (start) start.value = '';
       if (end) end.value = '';
       applyFilters();
+    };
+
+    // <--- PÉGASTE ESTO AQUÍ ABAJO:
+    window.applyFilters = function() {
+      renderModule();
     };
 
     function formatDate(dateStr) {
@@ -590,16 +611,228 @@ window.switchModule = function(modKey, event) {
       `;
     }
 
+function renderAmbulanciaReport(container, data) {
+      // Filtrar ingresos por su rango de fechas específico
+      const ingresos = data.filter(d => {
+        if (d.tipo !== 'INGRESO') return false;
+        if (!d.fecha) return false;
+        if (filterState.startIngreso && d.fecha < filterState.startIngreso) return false;
+        if (filterState.endIngreso && d.fecha > filterState.endIngreso) return false;
+        return true;
+      });
+
+      // Filtrar gastos por su rango de fechas específico
+      const gastos = data.filter(d => {
+        if (d.tipo !== 'GASTO') return false;
+        if (!d.fecha) return false;
+        if (filterState.startGasto && d.fecha < filterState.startGasto) return false;
+        if (filterState.endGasto && d.fecha > filterState.endGasto) return false;
+        return true;
+      });
+
+      let totalIng = 0;
+      let totalGas = 0;
+
+      let ingresosHtml = '';
+      ingresos.forEach((item, index) => {
+        const montoVal = parseFloat(item.monto) || 0;
+        const esCancelado = (item.concepto || '').toUpperCase().includes('CANCELADO');
+
+        if (!esCancelado) {
+          totalIng += montoVal;
+        }
+
+        if (esCancelado) {
+          ingresosHtml += `
+            <tr>
+              <td class="text-center">${index + 1}</td>
+              <td class="text-center">${formatDate(item.fecha)}</td>
+              <td colspan="3" class="text-center fw-bold text-muted bg-light">CANCELADO</td>
+              <td class="text-center no-print" style="width:70px;">
+                <button class="btn btn-sm btn-link text-secondary p-0 me-2" onclick="editRecord('${item.id}')"><i class="fa-regular fa-pen-to-square"></i></button>
+                <button class="btn btn-sm btn-link text-danger p-0" onclick="deleteRecord('${item.id}')"><i class="fa-regular fa-trash-can"></i></button>
+              </td>
+            </tr>
+          `;
+        } else {
+          ingresosHtml += `
+            <tr>
+              <td class="text-center">${index + 1}</td>
+              <td class="text-center">${formatDate(item.fecha)}</td>
+              <td>${item.proveedor || ''}</td>
+              <td>${item.concepto || ''}</td>
+              <td class="text-end">$ ${montoVal.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+              <td class="text-center no-print" style="width:70px;">
+                <button class="btn btn-sm btn-link text-secondary p-0 me-2" onclick="editRecord('${item.id}')"><i class="fa-regular fa-pen-to-square"></i></button>
+                <button class="btn btn-sm btn-link text-danger p-0" onclick="deleteRecord('${item.id}')"><i class="fa-regular fa-trash-can"></i></button>
+              </td>
+            </tr>
+          `;
+        }
+      });
+
+      let gastosHtml = '';
+      gastos.forEach((item, index) => {
+        const montoVal = parseFloat(item.monto) || 0;
+        totalGas += montoVal;
+        gastosHtml += `
+          <tr>
+            <td class="text-center">${index + 1}</td>
+            <td class="text-center">${formatDate(item.fecha)}</td>
+            <td>${item.proveedor || ''}</td>
+            <td>${item.concepto || ''}</td>
+            <td class="text-end">$ ${montoVal.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            <td class="text-center no-print" style="width:70px;">
+              <button class="btn btn-sm btn-link text-secondary p-0 me-2" onclick="editRecord('${item.id}')"><i class="fa-regular fa-pen-to-square"></i></button>
+              <button class="btn btn-sm btn-link text-danger p-0" onclick="deleteRecord('${item.id}')"><i class="fa-regular fa-trash-can"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+
+      const totalBalance = totalIng - totalGas;
+
+      container.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-light">
+          <img src="logo_municipio.png" style="height: 50px;" onerror="this.style.display='none'">
+          <div class="text-center">
+            <h6 class="fw-semibold m-0 text-muted" style="font-size: 0.75rem; letter-spacing: 0.05em;">H. AYUNTAMIENTO DE SAN ANDRÉS TUXTLA, VER.</h6>
+            <h6 class="fw-bold m-0" style="font-size: 0.85rem;">2026 - 2029</h6>
+          </div>
+          <img src="logo_dif.png" style="height: 55px;" alt="Logo DIF" onerror="this.style.display='none'">
+        </div>
+
+        <!-- TABLA DE INGRESOS (AMBULANCIA) CON SUS FILTROS DE FECHA -->
+        <div class="card p-3 mb-4 shadow-sm">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h6 class="fw-bold text-success m-0"><i class="fa-solid fa-truck-medical me-1"></i> Ingresos por Servicios de Traslado en la Ambulancia</h6>
+            <div class="d-flex align-items-center gap-2 no-print">
+              <div class="input-group input-group-sm" style="width: auto;">
+                <span class="input-group-text text-muted">Desde</span>
+                <input type="date" id="startIngreso" class="form-control" value="${filterState.startIngreso}" onchange="actualizarFiltrosFechas()">
+              </div>
+              <div class="input-group input-group-sm" style="width: auto;">
+                <span class="input-group-text text-muted">Hasta</span>
+                <input type="date" id="endIngreso" class="form-control" value="${filterState.endIngreso}" onchange="actualizarFiltrosFechas()">
+              </div>
+              <button class="btn btn-outline-secondary btn-sm" onclick="limpiarFiltroIngresosAmbulancia()" title="Limpiar fechas de ingresos">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+            </div>
+          </div>
+          <table class="table-excel mb-0">
+            <thead>
+              <tr class="header-pink-bar" style="font-size: 0.75rem;">
+                <th style="width: 90px;">NO. DE FOLIO</th>
+                <th style="width: 100px;">FECHA</th>
+                <th style="width: 200px;">NOMBRE</th>
+                <th>CONCEPTO</th>
+                <th style="width: 130px;">MONTO</th>
+                <th class="no-print" style="width:70px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${ingresosHtml || '<tr><td colspan="6" class="text-center py-3 text-muted fst-italic" style="font-size: 0.8rem;">Sin ingresos en este periodo</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- TABLA DE GASTOS (AMBULANCIA) CON SUS FILTROS DE FECHA -->
+        <div class="card p-3 mb-3 shadow-sm">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h6 class="fw-bold text-danger m-0"><i class="fa-solid fa-file-invoice-dollar me-1"></i> Gastos de Ambulancia</h6>
+            <div class="d-flex align-items-center gap-2 no-print">
+              <div class="input-group input-group-sm" style="width: auto;">
+                <span class="input-group-text text-muted">Desde</span>
+                <input type="date" id="startGasto" class="form-control" value="${filterState.startGasto}" onchange="actualizarFiltrosFechas()">
+              </div>
+              <div class="input-group input-group-sm" style="width: auto;">
+                <span class="input-group-text text-muted">Hasta</span>
+                <input type="date" id="endGasto" class="form-control" value="${filterState.endGasto}" onchange="actualizarFiltrosFechas()">
+              </div>
+              <button class="btn btn-outline-secondary btn-sm" onclick="limpiarFiltroGastosAmbulancia()" title="Limpiar fechas de gastos">
+                <i class="fa-solid fa-rotate-left"></i>
+              </button>
+            </div>
+          </div>
+          <table class="table-excel mb-0">
+            <thead>
+              <tr class="header-pink-bar" style="font-size: 0.75rem;">
+                <th style="width: 70px;">ID</th>
+                <th style="width: 100px;">FECHA</th>
+                <th style="width: 200px;">NOMBRE</th>
+                <th>CONCEPTO</th>
+                <th style="width: 130px;">MONTO</th>
+                <th class="no-print" style="width:70px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${gastosHtml || '<tr><td colspan="6" class="text-center py-3 text-muted fst-italic" style="font-size: 0.8rem;">Sin gastos en este periodo</td></tr>'}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" class="text-end fw-bold text-muted">TOTAL:</td>
+                <td class="text-end fw-bold">$ ${totalGas.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+                <td class="no-print"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- CUADRO RESUMEN INFERIOR DERECHA -->
+        <div class="d-flex justify-content-end mt-3">
+          <table class="summary-box-excel">
+            <tr>
+              <td class="text-muted">INGRESOS</td>
+              <td class="text-end fw-semibold">$ ${totalIng.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">GASTOS</td>
+              <td class="text-end fw-semibold">$ ${totalGas.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            </tr>
+            <tr>
+              <td class="text-muted">TOTAL</td>
+              <td class="text-end fw-semibold">$ ${totalBalance.toLocaleString('es-MX', {minimumFractionDigits: 2})}</td>
+            </tr>
+          </table>
+        </div>
+
+        ${getSignatureBlockHtml()}
+      `;
+    }
+
     function renderModule() {
       const container = document.getElementById('printable-area');
       const data = getFilteredData();
 
       if (currentModule === 'fondo') {
         renderFondoRevolventeReport(container, data);
+      } else if (currentModule === 'ambulancia') {
+        renderAmbulanciaReport(container, data); // <--- NUEVO
       } else {
         renderIngresosGastosReport(container, data);
       }
     }
+
+    window.limpiarFiltroIngresosAmbulancia = function() {
+      filterState.startIngreso = '';
+      filterState.endIngreso = '';
+      const sIng = document.getElementById('startIngreso');
+      const eIng = document.getElementById('endIngreso');
+      if (sIng) sIng.value = '';
+      if (eIng) eIng.value = '';
+      renderModule();
+    };
+
+    window.limpiarFiltroGastosAmbulancia = function() {
+      filterState.startGasto = '';
+      filterState.endGasto = '';
+      const sGas = document.getElementById('startGasto');
+      const eGas = document.getElementById('endGasto');
+      if (sGas) sGas.value = '';
+      if (eGas) eGas.value = '';
+      renderModule();
+    };
 
     function renderFondoRevolventeReport(container, filteredData) {
       const startIndex = (currentPage - 1) * rowsPerPage;
