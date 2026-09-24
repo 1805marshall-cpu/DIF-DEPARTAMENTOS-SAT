@@ -56,7 +56,7 @@
         #modal-galeria .cerrar-modal:hover { color: var(--danger); }
     </style>
 </head>
-<body>
+<<body>
 
 <header>
     <div>
@@ -96,6 +96,30 @@
                 <label>Cantidad a Retirar</label>
                 <input type="number" id="s-cantidad" value="1" min="1">
             </div>
+        </div>
+
+        <!-- BOTÓN EXCLUSIVO PARA AGREGAR MÚLTIPLES EN JORNADA ITINERANTE -->
+        <div id="contenedor-btn-agregar-lote" style="margin-bottom: 15px; display: none;">
+            <button class="btn" style="background:#0284c7;" onclick="agregarMedicamentoALote()">
+                <i class="fas fa-plus"></i> Agregar Fármaco a la Lista de la Jornada
+            </button>
+        </div>
+
+        <!-- TABLA TEMPORAL DE FÁRMACOS SELECCIONADOS (SOLO JORNADA ITINERANTE) -->
+        <div id="contenedor-tabla-lote" style="display:none; margin-bottom: 20px;">
+            <h4 style="color:#0369a1; font-size:0.9rem; margin-bottom:8px;"><i class="fas:list"></i> Fármacos agregados para esta Jornada:</h4>
+            <table style="font-size: 0.9rem; margin-bottom: 10px;">
+                <thead>
+                    <tr style="background: #f1f5f9;">
+                        <th>Medicamento</th>
+                        <th>Cantidad</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-lote-temporal">
+                    <!-- Dinámico -->
+                </tbody>
+            </table>
         </div>
 
         <!-- SECCIÓN DE DATOS DE UBICACIÓN / BENEFICIARIO (Dinámica) -->
@@ -153,7 +177,20 @@
 
     <!-- TABLA DE HISTORIAL DE SALIDAS -->
     <div class="card">
-        <h3><i class="fas fa-clipboard-list"></i> Historial de Salidas y Jornadas</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+            <h3 style="margin:0;"><i class="fas fa-clipboard-list"></i> Historial de Salidas y Jornadas</h3>
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <label style="font-size: 0.85rem; color:#475569; font-weight: 600;">Mostrar:</label>
+                <select id="select-paginacion-limite" onchange="cambiarLimitePaginacion()" style="padding: 5px 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                    <option value="10">10 filas</option>
+                    <option value="25">25 filas</option>
+                    <option value="50">50 filas</option>
+                    <option value="100">100 filas</option>
+                    <option value="200">200 filas</option>
+                </select>
+            </div>
+        </div>
+
         <table>
             <thead>
                 <tr>
@@ -169,6 +206,15 @@
                 <tr><td colspan="6" style="text-align:center; color:#94a3b8;">Cargando registros...</td></tr>
             </tbody>
         </table>
+        
+        <!-- CONTROLES DE PAGINACIÓN -->
+        <div id="controles-paginacion" style="display:flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+            <span id="info-paginacion" style="font-size: 0.85rem; color: #64748b;">Mostrando 0 de 0 registros</span>
+            <div style="display: flex; gap: 5px;">
+                <button class="btn" style="padding: 5px 10px; font-size: 0.85rem; background: #64748b;" onclick="cambiarPagina(-1)" id="btn-pag-anterior"><i class="fas fa-chevron-left"></i> Anterior</button>
+                <button class="btn" style="padding: 5px 10px; font-size: 0.85rem; background: #64748b;" onclick="cambiarPagina(1)" id="btn-pag-siguiente">Siguiente <i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -194,6 +240,11 @@
     let inventarioGlobal = [];
     let salidasGlobal = [];
     let editSalidaID = null;
+    let loteMedicamentosTemp = []; // Lista temporal para múltiples fármacos en Jornada Itinerante
+
+    // Variables de Paginación
+    let paginaActual = 1;
+    let limitePorPagina = 10;
 
     const usuarioLoggeado = (sessionStorage.getItem("nombre_usuario") || localStorage.getItem("activeUser") || "invitado").toLowerCase().trim();
     const superUsuariosPermitidos = ['admin', 'lorena.gonzalez', 'angel.vidal'];
@@ -222,6 +273,8 @@
     });
 
     window.cambiarDestino = () => {
+        loteMedicamentosTemp = [];
+        actualizarTablaLoteTemporal();
         filtrarMedicamentosPorDestino();
         ajustarCamposSegunDestino();
     };
@@ -236,6 +289,8 @@
         const grupoReceta = document.getElementById('grupo-receta');
         const tituloSeccion = document.getElementById('titulo-seccion-datos');
         const contenedor = document.getElementById('contenedor-beneficiario');
+        const contenedorBtnLote = document.getElementById('contenedor-btn-agregar-lote');
+        const contenedorTablaLote = document.getElementById('contenedor-tabla-lote');
 
         if (destino === 'JORNADA ITINERANTE') {
             contenedor.style.display = 'block';
@@ -246,17 +301,22 @@
             grupoLocalidad.style.display = 'flex';
             grupoMunicipio.style.display = 'flex';
             grupoReceta.style.display = 'none';
-        } else if (destino === 'AREA MEDICA') {
-            contenedor.style.display = 'none';
+
+            contenedorBtnLote.style.display = 'block';
+            contenedorTablaLote.style.display = loteMedicamentosTemp.length > 0 ? 'block' : 'none';
         } else {
+            // Aplica tanto para DIRECCION como para AREA MEDICA
             contenedor.style.display = 'block';
-            tituloSeccion.innerText = 'Datos del Beneficiario y Receta';
+            tituloSeccion.innerText = destino === 'AREA MEDICA' ? 'Datos de Entrega en Área Médica' : 'Datos del Beneficiario y Receta';
             grupoNombre.style.display = 'flex';
             grupoEdad.style.display = 'flex';
             grupoGenero.style.display = 'flex';
             grupoLocalidad.style.display = 'flex';
             grupoMunicipio.style.display = 'flex';
             grupoReceta.style.display = 'flex';
+
+            contenedorBtnLote.style.display = 'none';
+            contenedorTablaLote.style.display = 'none';
         }
     };
 
@@ -276,10 +336,68 @@
             : '<option value="">No hay medicamentos disponibles para este origen</option>';
     };
 
+    // Funciones para gestionar lote múltiple en Jornada Itinerante
+    window.agregarMedicamentoALote = () => {
+        const medId = document.getElementById('s-medicamento').value;
+        const cantidad = parseInt(document.getElementById('s-cantidad').value);
+
+        if (!medId) return Swal.fire({ icon: 'warning', title: 'Seleccione un medicamento' });
+        if (isNaN(cantidad) || cantidad <= 0) return Swal.fire({ icon: 'warning', title: 'Cantidad no válida' });
+
+        const medEncontrado = inventarioGlobal.find(i => i.id === medId);
+        if (!medEncontrado) return;
+
+        // Validar stock total acumulado en el lote temporal
+        const yaEnLote = loteMedicamentosTemp.find(item => item.medicamentoId === medId);
+        const cantidadYaAgregada = yaEnLote ? yaEnLote.cantidad : 0;
+
+        if ((cantidad + cantidadYaAgregada) > medEncontrado.existencia) {
+            return Swal.fire({ icon: 'error', title: 'Stock insuficiente', text: `La cantidad total supera las existencias (${medEncontrado.existencia}).` });
+        }
+
+        if (yaEnLote) {
+            yaEnLote.cantidad += cantidad;
+        } else {
+            loteMedicamentosTemp.push({
+                medicamentoId: medId,
+                medicamentoNombre: medEncontrado.nombre,
+                cantidad: cantidad,
+                origenStock: medEncontrado.origen
+            });
+        }
+
+        actualizarTablaLoteTemporal();
+        document.getElementById('s-cantidad').value = "1";
+    };
+
+    window.quitarItemLoteTemp = (index) => {
+        loteMedicamentosTemp.splice(index, 1);
+        actualizarTablaLoteTemporal();
+    };
+
+    function actualizarTablaLoteTemporal() {
+        const tbody = document.getElementById('tbody-lote-temporal');
+        const contenedor = document.getElementById('contenedor-tabla-lote');
+
+        if (loteMedicamentosTemp.length === 0) {
+            contenedor.style.display = 'none';
+            tbody.innerHTML = '';
+            return;
+        }
+
+        contenedor.style.display = 'block';
+        tbody.innerHTML = loteMedicamentosTemp.map((item, idx) => `
+            <tr>
+                <td><b>${item.medicamentoNombre}</b></td>
+                <td>${item.cantidad} uds</td>
+                <td><button class="btn btn-danger" style="padding:2px 6px; font-size:0.75rem;" onclick="quitarItemLoteTemp(${idx})"><i class="fas fa-trash"></i></button></td>
+            </tr>
+        `).join('');
+    }
+
     window.procesarSalida = async () => {
         const destino = document.getElementById('s-destino').value;
-        const medId = document.getElementById('s-medicamento').value;
-        const cantidadRetiro = parseInt(document.getElementById('s-cantidad').value);
+        const inputFotos = document.getElementById('s-fotos');
         
         let beneficiarioNombre = "";
         let beneficiarioEdad = "";
@@ -288,7 +406,7 @@
         let beneficiarioMunicipio = "";
         let beneficiarioReceta = "";
 
-        if (destino === 'DIRECCION') {
+        if (destino === 'DIRECCION' || destino === 'AREA MEDICA') {
             beneficiarioNombre = document.getElementById('b-nombre').value.toUpperCase().trim();
             beneficiarioEdad = document.getElementById('b-edad').value.trim();
             beneficiarioGenero = document.getElementById('b-genero').value;
@@ -297,7 +415,7 @@
             beneficiarioReceta = document.getElementById('b-receta').value.toUpperCase().trim();
 
             if (!beneficiarioNombre || !beneficiarioReceta) {
-                return Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Por favor complete el Nombre del beneficiario y el Folio de la Receta.' });
+                return Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Por favor complete el Nombre y el Folio de Receta.' });
             }
         } else if (destino === 'JORNADA ITINERANTE') {
             beneficiarioLocalidad = document.getElementById('b-localidad').value.toUpperCase().trim();
@@ -305,16 +423,10 @@
             if (!beneficiarioLocalidad) {
                 return Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'Por favor indique la Localidad o Colonia de la jornada.' });
             }
+            if (loteMedicamentosTemp.length === 0 && !editSalidaID) {
+                return Swal.fire({ icon: 'warning', title: 'Sin fármacos', text: 'Debe agregar al menos un medicamento a la lista de la jornada.' });
+            }
         }
-        
-        const inputFotos = document.getElementById('s-fotos');
-
-        if (!medId || isNaN(cantidadRetiro) || cantidadRetiro <= 0) {
-            return Swal.fire({ icon: 'warning', title: 'Datos inválidos', text: 'Por favor seleccione un medicamento y una cantidad válida.' });
-        }
-
-        const medEncontrado = inventarioGlobal.find(i => i.id === medId);
-        if (!medEncontrado && !editSalidaID) return Swal.fire({ icon: 'error', title: 'No encontrado', text: 'Medicamento no encontrado en el inventario.' });
 
         try {
             let arrayFotos = [];
@@ -326,8 +438,10 @@
             }
 
             if (editSalidaID) {
-                if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado', text: 'No tienes permisos de Super Usuario para editar este registro.' });
+                if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado', text: 'No tienes permisos de Super Usuario.' });
 
+                const cantidadRetiro = parseInt(document.getElementById('s-cantidad').value);
+                const medId = document.getElementById('s-medicamento').value;
                 const salidaAntigua = salidasGlobal.find(s => s.id === editSalidaID);
                 const medRef = doc(db, "inventario_farmacia", salidaAntigua.medicamentoId);
                 const medSnap = await getDoc(medRef);
@@ -335,18 +449,11 @@
                 if (medSnap.exists()) {
                     let stockActual = medSnap.data().existencia;
                     let stockCalculado = (stockActual + salidaAntigua.cantidad) - cantidadRetiro;
-                    if (stockCalculado < 0) return Swal.fire({ icon: 'error', title: 'Stock insuficiente', text: 'No hay suficiente stock para realizar esta modificación.' });
-                    
+                    if (stockCalculado < 0) return Swal.fire({ icon: 'error', title: 'Stock insuficiente' });
                     await updateDoc(medRef, { existencia: stockCalculado });
                 }
 
-                // Lógica de reemplazo o conservación de fotos
-                let fotosFinales = salidaAntigua.fotosEvidencia || [];
-                if (arrayFotos.length > 0) {
-                    // Si seleccionaron nuevas fotos en edición, podemos reemplazar o juntar. 
-                    // Preguntamos al usuario o sobreescribimos de manera inteligente si subió nuevas.
-                    fotosFinales = arrayFotos; // Se reemplazan por las nuevas seleccionadas corregidas
-                }
+                let fotosFinales = arrayFotos.length > 0 ? arrayFotos : (salidaAntigua.fotosEvidencia || []);
 
                 await updateDoc(doc(db, "salidas_farmacia", editSalidaID), {
                     destino,
@@ -360,44 +467,72 @@
                     fotosEvidencia: fotosFinales
                 });
 
-                Swal.fire({ icon: 'success', title: '¡Actualizado!', text: 'Salida y evidencias actualizadas correctamente.', timer: 2000, showConfirmButton: false });
+                Swal.fire({ icon: 'success', title: '¡Actualizado!', timer: 2000, showConfirmButton: false });
                 cancelarEdicionSalida();
 
             } else {
-                if (cantidadRetiro > medEncontrado.existencia) {
-                    return Swal.fire({ icon: 'error', title: 'Stock insuficiente', text: `Solo hay ${medEncontrado.existencia} unidades disponibles.` });
+                // Procesamiento normal o múltiple para Jornadas
+                let itemsAProcesar = [];
+                if (destino === 'JORNADA ITINERANTE') {
+                    itemsAProcesar = [...loteMedicamentosTemp];
+                } else {
+                    const medId = document.getElementById('s-medicamento').value;
+                    const cantidadRetiro = parseInt(document.getElementById('s-cantidad').value);
+                    if (!medId || isNaN(cantidadRetiro) || cantidadRetiro <= 0) {
+                        return Swal.fire({ icon: 'warning', title: 'Seleccione medicamento y cantidad válida' });
+                    }
+                    const medEncontrado = inventarioGlobal.find(i => i.id === medId);
+                    if (cantidadRetiro > medEncontrado.existencia) {
+                        return Swal.fire({ icon: 'error', title: 'Stock insuficiente' });
+                    }
+                    itemsAProcesar.push({
+                        medicamentoId: medId,
+                        medicamentoNombre: medEncontrado.nombre,
+                        cantidad: cantidadRetiro,
+                        origenStock: medEncontrado.origen
+                    });
                 }
 
-                await updateDoc(doc(db, "inventario_farmacia", medId), {
-                    existencia: medEncontrado.existencia - cantidadRetiro
-                });
+                // Guardar cada ítem del lote
+                for (let item of itemsAProcesar) {
+                    const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
+                    const medSnap = await getDoc(medRef);
+                    if (medSnap.exists()) {
+                        const stockActual = medSnap.data().existencia;
+                        await updateDoc(medRef, { existencia: stockActual - item.cantidad });
+                    }
 
-                await addDoc(salidasRef, {
-                    destino,
-                    medicamentoId: medId,
-                    medicamentoNombre: medEncontrado.nombre,
-                    cantidad: cantidadRetiro,
-                    beneficiarioNombre,
-                    beneficiarioEdad,
-                    beneficiarioGenero,
-                    beneficiarioLocalidad,
-                    beneficiarioMunicipio,
-                    beneficiarioReceta,
-                    origenStock: medEncontrado.origen,
-                    usuario: usuarioLoggeado,
-                    fecha: new Date().toISOString().split('T')[0],
-                    timestamp: Date.now(),
-                    fotosEvidencia: arrayFotos,
-                    estado: "ACTIVO"
-                });
+                    await addDoc(salidasRef, {
+                        destino,
+                        medicamentoId: item.medicamentoId,
+                        medicamentoNombre: item.medicamentoNombre,
+                        cantidad: item.cantidad,
+                        beneficiarioNombre,
+                        beneficiarioEdad,
+                        beneficiarioGenero,
+                        beneficiarioLocalidad,
+                        beneficiarioMunicipio,
+                        beneficiarioReceta,
+                        origenStock: item.origenStock,
+                        usuario: usuarioLoggeado,
+                        fecha: new Date().toISOString().split('T')[0],
+                        timestamp: Date.now(),
+                        fotosEvidencia: arrayFotos,
+                        estado: "ACTIVO"
+                    });
+                }
 
-                Swal.fire({ icon: 'success', title: '¡Salida Registrada!', text: 'El stock ha sido descontado correctamente.', timer: 2000, showConfirmButton: false });
+                Swal.fire({ icon: 'success', title: '¡Salida Registrada!', timer: 2000, showConfirmButton: false });
+                
+                // Limpiar formulario
                 document.getElementById('s-cantidad').value = "1";
                 document.getElementById('b-nombre').value = "";
                 document.getElementById('b-edad').value = "";
                 document.getElementById('b-localidad').value = "";
                 document.getElementById('b-receta').value = "";
                 inputFotos.value = "";
+                loteMedicamentosTemp = [];
+                actualizarTablaLoteTemporal();
                 filtrarMedicamentosPorDestino();
             }
 
@@ -406,16 +541,44 @@
         }
     };
 
+    // Paginación y Renderizado de Salidas
+    window.cambiarLimitePaginacion = () => {
+        limitePorPagina = parseInt(document.getElementById('select-paginacion-limite').value);
+        paginaActual = 1;
+        renderizarSalidas();
+    };
+
+    window.cambiarPagina = (dir) => {
+        const totalPaginas = Math.ceil(salidasGlobal.length / limitePorPagina) || 1;
+        paginaActual += dir;
+        if (paginaActual < 1) paginaActual = 1;
+        if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+        renderizarSalidas();
+    };
+
     window.renderizarSalidas = () => {
         const tbody = document.getElementById('tabla-salidas');
         if (salidasGlobal.length === 0) {
             tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No hay salidas registradas.</td></tr>`;
+            document.getElementById('info-paginacion').innerText = `Mostrando 0 de 0 registros`;
             return;
         }
 
         salidasGlobal.sort((a, b) => b.timestamp - a.timestamp);
 
-        tbody.innerHTML = salidasGlobal.map(s => {
+        const totalRegistros = salidasGlobal.length;
+        const totalPaginas = Math.ceil(totalRegistros / limitePorPagina) || 1;
+        if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+
+        const inicio = (paginaActual - 1) * limitePorPagina;
+        const fin = inicio + limitePorPagina;
+        const datosPaginados = salidasGlobal.slice(inicio, fin);
+
+        document.getElementById('info-paginacion').innerText = `Mostrando ${inicio + 1} - ${Math.min(fin, totalRegistros)} de ${totalRegistros} registros`;
+        document.getElementById('btn-pag-anterior').disabled = paginaActual === 1;
+        document.getElementById('btn-pag-siguiente').disabled = paginaActual === totalPaginas;
+
+        tbody.innerHTML = datosPaginados.map(s => {
             let htmlGaleria = `<span style="color:#94a3b8; font-size:0.8rem;">Sin fotos</span>`;
             if (s.fotosEvidencia && s.fotosEvidencia.length > 0) {
                 htmlGaleria = `<div class="galeria-fotos">` + 
@@ -441,13 +604,13 @@
             let botonesAccion = "";
             if (esSuperUsuario) {
                 botonesAccion = `
-                    <button class="btn btn-warning" style="padding:5px 8px;" onclick="prepararEdicionSalida('${s.id}')" title="Editar registro y fotos"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger" style="padding:5px 8px;" onclick="eliminarSalida('${s.id}')" title="Eliminar y devolver stock"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-warning" style="padding:5px 8px;" onclick="prepararEdicionSalida('${s.id}')" title="Editar registro"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger" style="padding:5px 8px;" onclick="eliminarSalida('${s.id}')" title="Eliminar"><i class="fas fa-trash"></i></button>
                 `;
             } else {
                 botonesAccion = `
-                    <button class="btn btn-purple" style="padding:5px 8px; font-size:0.8rem;" onclick="devolverParcial('${s.id}')" title="Devolver piezas sobrantes"><i class="fas fa-undo"></i> Devolver</button>
-                    <button class="btn btn-danger" style="padding:5px 5px; font-size:0.8rem;" onclick="todoSeAcabo('${s.id}')" title="Marcar como agotado en campo">Todo Se Acabó</button>
+                    <button class="btn btn-purple" style="padding:5px 8px; font-size:0.8rem;" onclick="devolverParcial('${s.id}')"><i class="fas fa-undo"></i> Devolver</button>
+                    <button class="btn btn-danger" style="padding:5px 5px; font-size:0.8rem;" onclick="todoSeAcabo('${s.id}')">Todo Se Acabó</button>
                 `;
             }
 
@@ -464,7 +627,6 @@
         }).join('');
     };
 
-    // Funciones del Modal de Galería
     window.abrirGaleriaModal = (urlFoto) => {
         const modal = document.getElementById('modal-galeria');
         const imgModal = document.getElementById('imagen-modal-ampliada');
@@ -478,43 +640,34 @@
 
     window.devolverParcial = async (id) => {
         const item = salidasGlobal.find(s => s.id === id);
-        
         const { value: cantidadDevolverStr } = await Swal.fire({
             title: 'Devolución Parcial',
-            text: `¿Cuántas piezas de "${item.medicamentoNombre}" sobraron para devolver? (Retiradas: ${item.cantidad})`,
+            text: `¿Cuántas piezas sobraron para devolver? (Retiradas: ${item.cantidad})`,
             input: 'number',
             inputAttributes: { min: 1, max: item.cantidad, step: 1 },
             inputValue: 1,
             showCancelButton: true,
             confirmButtonText: 'Devolver',
-            cancelButtonText: 'Cancelar',
             confirmButtonColor: '#8b5cf6'
         });
 
         if (!cantidadDevolverStr) return;
         const cantidadDevolver = parseInt(cantidadDevolverStr);
 
-        if (isNaN(cantidadDevolver) || cantidadDevolver <= 0 || cantidadDevolver > item.cantidad) {
-            return Swal.fire({ icon: 'error', title: 'Cantidad no válida', text: 'Verifique que la cantidad esté dentro del rango permitido.' });
-        }
-
         try {
             const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
             const medSnap = await getDoc(medRef);
-
             if (medSnap.exists()) {
-                const stockActual = medSnap.data().existencia;
-                await updateDoc(medRef, { existencia: stockActual + cantidadDevolver });
+                await updateDoc(medRef, { existencia: medSnap.data().existencia + cantidadDevolver });
             }
 
             const nuevaCantidad = item.cantidad - cantidadDevolver;
             if (nuevaCantidad === 0) {
                 await deleteDoc(doc(db, "salidas_farmacia", id));
-                Swal.fire({ icon: 'success', title: 'Devolución completa', text: 'Se devolvieron todas las piezas y el registro fue eliminado.', timer: 2000, showConfirmButton: false });
             } else {
                 await updateDoc(doc(db, "salidas_farmacia", id), { cantidad: nuevaCantidad });
-                Swal.fire({ icon: 'success', title: 'Devolución registrada', text: `Se devolvieron ${cantidadDevolver} piezas al inventario.`, timer: 2000, showConfirmButton: false });
             }
+            Swal.fire({ icon: 'success', title: 'Devolución registrada', timer: 1500, showConfirmButton: false });
         } catch (e) {
             Swal.fire({ icon: 'error', title: 'Error', text: e.message });
         }
@@ -522,32 +675,27 @@
 
     window.todoSeAcabo = async (id) => {
         const item = salidasGlobal.find(s => s.id === id);
-        
         const result = await Swal.fire({
             title: '¿Todo se terminó en campo?',
-            text: `Esto marcará "${item.medicamentoNombre}" como agotado sin devolver stock al inventario.`,
+            text: `Marcará "${item.medicamentoNombre}" como agotado sin devolver stock.`,
             icon: 'question',
             showCancelButton: true,
             confirmButtonText: 'Sí, marcar agotado',
-            cancelButtonText: 'Cancelar',
             confirmButtonColor: '#ef4444'
         });
 
         if (!result.isConfirmed) return;
 
         try {
-            await updateDoc(doc(db, "salidas_farmacia", id), {
-                estado: "AGOTADO EN CAMPO"
-            });
-
-            Swal.fire({ icon: 'success', title: '¡Marcado como Agotado!', text: 'El registro permanece visible en el historial.', timer: 2000, showConfirmButton: false });
+            await updateDoc(doc(db, "salidas_farmacia", id), { estado: "AGOTADO EN CAMPO" });
+            Swal.fire({ icon: 'success', title: 'Actualizado', timer: 1500, showConfirmButton: false });
         } catch (e) {
             Swal.fire({ icon: 'error', title: 'Error', text: e.message });
         }
     };
 
     window.prepararEdicionSalida = (id) => {
-        if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado', text: 'Acción restringida solo para Super Usuarios.' });
+        if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado' });
         const item = salidasGlobal.find(s => s.id === id);
         editSalidaID = id;
         
@@ -567,11 +715,8 @@
         document.getElementById('b-municipio').value = item.beneficiarioMunicipio || 'San Andrés Tuxtla';
         document.getElementById('b-receta').value = item.beneficiarioReceta || '';
         
-        // Indicador visual en edición de fotos
-        const totalFotosActuales = item.fotosEvidencia ? item.fotosEvidencia.length : 0;
-        document.getElementById('aviso-fotos-edicion').innerText = `Este registro cuenta actualmente con ${totalFotosActuales} foto(s). Si seleccionas nuevas fotos aquí, se reemplazarán para corregir la evidencia anterior.`;
-
-        document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> Editar Salida / Registro y Fotos';
+        document.getElementById('aviso-fotos-edicion').innerText = `Este registro cuenta con ${item.fotosEvidencia ? item.fotosEvidencia.length : 0} foto(s). Si seleccionas nuevas se reemplazarán.`;
+        document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> Editar Salida';
         document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-sync"></i> ACTUALIZAR SALIDA';
         document.getElementById('btn-guardar').className = 'btn btn-warning';
         document.getElementById('btn-cancelar').style.display = 'block';
@@ -596,15 +741,13 @@
     };
 
     window.eliminarSalida = async (id) => {
-        if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado', text: 'Acción restringida solo para Super Usuarios.' });
-        
+        if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado' });
         const result = await Swal.fire({
             title: '¿Eliminar registro?',
-            text: "Las piezas entregadas regresarán automáticamente al inventario de la farmacia.",
+            text: "Las piezas regresarán al inventario.",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar',
             confirmButtonColor: '#ef4444'
         });
 
@@ -614,14 +757,11 @@
             const item = salidasGlobal.find(s => s.id === id);
             const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
             const medSnap = await getDoc(medRef);
-            
             if (medSnap.exists()) {
-                const stockActual = medSnap.data().existencia;
-                await updateDoc(medRef, { existencia: stockActual + item.cantidad });
+                await updateDoc(medRef, { existencia: medSnap.data().existencia + item.cantidad });
             }
-
             await deleteDoc(doc(db, "salidas_farmacia", id));
-            Swal.fire({ icon: 'success', title: '¡Eliminado!', text: 'El registro fue eliminado y el stock devuelto.', timer: 2000, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: '¡Eliminado!', timer: 1500, showConfirmButton: false });
         } catch (e) {
             Swal.fire({ icon: 'error', title: 'Error', text: e.message });
         }
