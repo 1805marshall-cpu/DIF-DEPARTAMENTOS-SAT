@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salidas y Jornadas - Farmacia DIF</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SweetAlert2 para alertas atractivas -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+        }
+        body { font-family: 'Inter', sans-serif; background: var(--light); color: var(--dark); margin: 0; padding: 0; }
+        header { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .user-tag { font-size: 0.9rem; color: #64748b; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 25px; }
+        h3 { margin-top: 0; color: var(--dark); display: flex; align-items: center; gap: 10px; font-size: 1.25rem; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group.full { grid-column: 1 / -1; }
+        label { font-size: 0.85rem; font-weight: 600; color: #475569; }
+        input, select, textarea { padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; font-family: inherit; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1); }
+        .btn { background: var(--primary); color: white; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; }
+        .btn:hover { opacity: 0.9; }
+        .btn-success { background: var(--success); }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-purple { background: #8b5cf6; color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: middle; }
+        th { background: #f1f5f9; color: #475569; font-weight: 600; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+        .origen-propio { background: #fef3c7; color: #b45309; }
+        
+        /* Galería de fotos compacta */
+        .galeria-fotos { display: flex; gap: 5px; flex-wrap: wrap; }
+        .foto-miniatura { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
+        .foto-miniatura:hover { transform: scale(1.1); border-color: var(--primary); }
+        
+        .seccion-usuario { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed var(--border); margin-bottom: 15px; }
+
+        /* Modal Galería Estilo Lightbox */
+        #modal-galeria { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; flex-direction: column; }
+        #modal-galeria img { max-width: 90%; max-height: 80vh; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); object-fit: contain; }
+        #modal-galeria .cerrar-modal { position: absolute; top: 20px; right: 30px; color: white; font-size: 2.5rem; cursor: pointer; font-weight: bold; }
+        #modal-galeria .cerrar-modal:hover { color: var(--danger); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div>
+        <h2 style="margin:0"><i class="fas fa-dolly"></i> SALIDAS Y JORNADAS - FARMACIA DIF</h2>
+        <div id="display-usuario" class="user-tag" style="margin-top:5px;">
+            <i class="fas fa-user-circle"></i> <span id="user-name-span">Cargando usuario...</span> 
+            <span id="badge-rol" class="badge" style="background:#e2e8f0; color:#475569;">Rol</span>
+        </div>
+    </div>
+    <button onclick="window.location.href='index.html'" class="btn" style="background:#64748b;">
+        <i class="fas fa-arrow-left"></i> <span>Cerrar Sesión</span>
+    </button>
+</header>
+
+<div class="container">
+    
+    <!-- FORMULARIO DE SALIDA / DISPERSIÓN -->
+    <div class="card">
+        <h3 id="form-title"><i class="fas fa-minus-circle"></i> Registrar Salida / Entrega de Medicamento</h3>
+        
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Destino / Tipo de Salida</label>
+                <select id="s-destino" onchange="cambiarDestino()">
+                    <option value="JORNADA ITINERANTE">Jornada Itinerante (Recurso Propio)</option>
+                    <option value="DIRECCION">Usuarios de Dirección (Recurso Propio)</option>
+                    <option value="AREA MEDICA">Área Médica (Usa Donaciones)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Medicamento del Inventario</label>
+                <select id="s-medicamento">
+                    <option value="">Seleccione un medicamento...</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Cantidad a Retirar</label>
+                <input type="number" id="s-cantidad" value="1" min="1">
+            </div>
+        </div>
+
+        <!-- SECCIÓN DE DATOS DE UBICACIÓN / BENEFICIARIO (Dinámica) -->
+        <div class="seccion-usuario" id="contenedor-beneficiario">
+            <h4 style="margin-top:0; color:var(--primary); font-size:0.95rem;"><i class="fas fa-user-injured"></i> <span id="titulo-seccion-datos">Ubicación de la Jornada</span></h4>
+            <div class="form-grid" style="margin-bottom:0;">
+                <div class="form-group" id="grupo-nombre">
+                    <label>Nombre Completo del Beneficiario</label>
+                    <input type="text" id="b-nombre" placeholder="Nombre completo">
+                </div>
+                <div class="form-group" id="grupo-edad">
+                    <label>Edad</label>
+                    <input type="number" id="b-edad" placeholder="Ej. 45" min="0" max="120">
+                </div>
+                <div class="form-group" id="grupo-genero">
+                    <label>Género</label>
+                    <select id="b-genero">
+                        <option value="FEMENINO">Femenino</option>
+                        <option value="MASCULINO">Masculino</option>
+                        <option value="OTRO">Otro</option>
+                    </select>
+                </div>
+                <div class="form-group" id="grupo-localidad">
+                    <label>Localidad / Colonia</label>
+                    <input type="text" id="b-localidad" placeholder="Ej. Centro o El Hato">
+                </div>
+                <div class="form-group" id="grupo-municipio">
+                    <label>Municipio</label>
+                    <input type="text" id="b-municipio" value="San Andrés Tuxtla" placeholder="Municipio">
+                </div>
+                <div class="form-group" id="grupo-receta">
+                    <label>Folio de Receta Médica</label>
+                    <input type="text" id="b-receta" placeholder="Ej. REC-2026-001">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group full">
+                <label id="label-fotos">Evidencia Fotográfica (Puedes seleccionar varias fotos)</label>
+                <input type="file" id="s-fotos" accept="image/*" multiple>
+                <small style="color:#64748b; margin-top:4px;" id="aviso-fotos-edicion"></small>
+            </div>
+        </div>
+        
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-success" id="btn-guardar" onclick="procesarSalida()">
+                <i class="fas fa-paper-plane"></i> REGISTRAR SALIDA Y DESCONTAR
+            </button>
+            <button class="btn" id="btn-cancelar" style="display:none; background:#94a3b8;" onclick="cancelarEdicionSalida()">
+                CANCELAR
+            </button>
+        </div>
+    </div>
+
+    <!-- TABLA DE HISTORIAL DE SALIDAS -->
+    <div class="card">
+        <h3><i class="fas fa-clipboard-list"></i> Historial de Salidas y Jornadas</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha / Destino</th>
+                    <th>Detalles</th>
+                    <th>Medicamento</th>
+                    <th>Cant.</th>
+                    <th>Evidencias</th>
+                    <th>Acciones / Devolución</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-salidas">
+                <tr><td colspan="6" style="text-align:center; color:#94a3b8;">Cargando registros...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- MODAL GALERÍA FOTOGRÁFICA -->
+<div id="modal-galeria" onclick="cerrarGaleriaModal()">
+    <span class="cerrar-modal">&times;</span>
+    <img id="imagen-modal-ampliada" src="" alt="Evidencia Ampliada">
+    <div style="color:white; margin-top:15px; font-size:0.9rem;" id="modal-texto-info">Haz clic en cualquier parte para cerrar</div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = { apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", projectId: "poblacion-vulnerable---dif" };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    
+    const farmaciaRef = collection(db, "inventario_farmacia");
+    const salidasRef = collection(db, "salidas_farmacia");
+
+    let inventarioGlobal = [];
+    let salidasGlobal = [];
+    let editSalidaID = null;
+
+    const usuarioLoggeado = (sessionStorage.getItem("nombre_usuario") || localStorage.getItem("activeUser") || "invitado").toLowerCase().trim();
+    const superUsuariosPermitidos = ['admin', 'lorena.gonzalez', 'angel.vidal'];
+    const esSuperUsuario = superUsuariosPermitidos.includes(usuarioLoggeado);
+
+    document.getElementById('user-name-span').innerText = usuarioLoggeado.toUpperCase().replace('.', ' ');
+    const badgeRol = document.getElementById('badge-rol');
+    if (esSuperUsuario) {
+        badgeRol.innerText = "SUPER USUARIO (Edición Total)";
+        badgeRol.style.background = "#a21caf";
+        badgeRol.style.color = "#ffffff";
+    } else {
+        badgeRol.innerText = "MODO SALIDAS";
+        badgeRol.style.background = "#b45309";
+        badgeRol.style.color = "#ffffff";
+    }
+
+    onSnapshot(farmaciaRef, (snap) => {
+        inventarioGlobal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        if (!editSalidaID) filtrarMedicamentosPorDestino();
+    });
+
+    onSnapshot(salidasRef, (snap) => {
+        salidasGlobal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        renderizarSalidas();
+    });
+
+    window.cambiarDestino = () => {
+        filtrarMedicamentosPorDestino();
+        ajustarCamposSegunDestino();
+    };
+
+    window.ajustarCamposSegunDestino = () => {
+        const destino = document.getElementById('s-destino').value;
+        const grupoNombre = document.getElementById('grupo-nombre');
+        const grupoEdad = document.getElementById('grupo-edad');
+        const grupoGenero = document.getElementById('grupo-genero');
+        const grupoLocalidad = document.getElementById('grupo-localidad');
+        const grupoMunicipio = document.getElementById('grupo-municipio');
+        const grupoReceta = document.getElementById('grupo-receta');
+        const tituloSeccion = document.getElementById('titulo-seccion-datos');
+        const contenedor = document.getElementById('contenedor-beneficiario');
+
+        if (destino === 'JORNADA ITINERANTE') {
+            contenedor.style.display = 'block';
+            tituloSeccion.innerText = 'Ubicación de la Jornada';
+            grupoNombre.style.display = 'none';
+            grupoEdad.style.display = 'none';
+            grupoGenero.style.display = 'none';
+            grupoLocalidad.style.display = 'flex';
+            grupoMunicipio.style.display = 'flex';
+            grupoReceta.style.display = 'none';
+        } else if (destino === 'AREA MEDICA') {
+            contenedor.style.display = 'none';
+        } else {
+            contenedor.style.display = 'block';
+            tituloSeccion.innerText = 'Datos del Beneficiario y Receta';
+            grupoNombre.style.display = 'flex';
+            grupoEdad.style.display = 'flex';
+            grupoGenero.style.display = 'flex';
+            grupoLocalidad.style.display = 'flex';
+            grupoMunicipio.style.display = 'flex';
+            grupoReceta.style.display = 'flex';
+        }
+    };
+
+    window.filtrarMedicamentosPorDestino = () => {
+        const destino = document.getElementById('s-destino').value;
+        const selectMed = document.getElementById('s-medicamento');
+        
+        let filtrados = [];
+        if (destino === 'AREA MEDICA') {
+            filtrados = inventarioGlobal.filter(i => i.origen === 'DONACIÓN' && i.existencia > 0);
+        } else {
+            filtrados = inventarioGlobal.filter(i => i.origen === 'RECURSO PROPIO' && i.existencia > 0);
+        }
+
+        selectMed.innerHTML = filtrados.length > 0 
+            ? filtrados.map(i => `<option value="${i.id}">${i.nombre} (Disponibles: ${i.existencia})</option>`).join('')
+            : '<option value="">No hay medicamentos disponibles para este origen</option>';
+    };
+
+    window.procesarSalida = async () => {
+        const destino = document.getElementById('s-destino').value;
+        const medId = document.getElementById('s-medicamento').value;
+        const cantidadRetiro = parseInt(document.getElementById('s-cantidad').value);
+        
+        let beneficiarioNombre = "";
+        let beneficiarioEdad = "";
+        let beneficiarioGenero = "";
+        let beneficiarioLocalidad = "";
+        let beneficiarioMunicipio = "";
+        let beneficiarioReceta = "";
+
+        if (destino === 'DIRECCION') {
+            beneficiarioNombre = document.getElementById('b-nombre').value.toUpperCase().trim();
+            beneficiarioEdad = document.getElementById('b-edad').value.trim();
+            beneficiarioGenero = document.getElementById('b-genero').value;
+            beneficiarioLocalidad = document.getElementById('b-localidad').value.toUpperCase().trim();
+            beneficiarioMunicipio = document.getElementById('b-municipio').value.toUpperCase().trim();
+            beneficiarioReceta = document.getElementById('b-receta').value.toUpperCase().trim();
+
+            if (!beneficiarioNombre || !beneficiarioReceta) {
+                return Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Por favor complete el Nombre del beneficiario y el Folio de la Receta.' });
+            }
+        } else if (destino === 'JORNADA ITINERANTE') {
+            beneficiarioLocalidad = document.getElementById('b-localidad').value.toUpperCase().trim();
+            beneficiarioMunicipio = document.getElementById('b-municipio').value.toUpperCase().trim();
+            if (!beneficiarioLocalidad) {
+                return Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'Por favor indique la Localidad o Colonia de la jornada.' });
+            }
+        }
+        
+        const inputFotos = document.getElementById('s-fotos');
+
+        if (!medId || isNaN(cantidadRetiro) || cantidadRetiro <= 0) {
+            return Swal.fire({ icon: 'warning', title: 'Datos inválidos', text: 'Por favor seleccione un medicamento y una cantidad válida.' });
+        }
+
+        const medEncontrado = inventarioGlobal.find(i => i.id === medId);
+        if (!medEncontrado && !editSalidaID) return Swal.fire({ icon: 'error', title: 'No encontrado', text: 'Medicamento no encontrado en el inventario.' });
+
+        try {
+            let arrayFotos = [];
+            if (inputFotos.files && inputFotos.files.length > 0) {
+                for (let file of inputFotos.files) {
+                    const base64 = await convertirBase64(file);
+                    arrayFotos.push(base64);
+                }
+            }
+
+            if (editSalidaID) {
+                if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado', text: 'No tienes permisos de Super Usuario para editar este registro.' });
+
+                const salidaAntigua = salidasGlobal.find(s => s.id === editSalidaID);
+                const medRef = doc(db, "inventario_farmacia", salidaAntigua.medicamentoId);
+                const medSnap = await getDoc(medRef);
+
+                if (medSnap.exists()) {
+                    let stockActual = medSnap.data().existencia;
+                    let stockCalculado = (stockActual + salidaAntigua.cantidad) - cantidadRetiro;
+                    if (stockCalculado < 0) return Swal.fire({ icon: 'error', title: 'Stock insuficiente', text: 'No hay suficiente stock para realizar esta modificación.' });
+                    
+                    await updateDoc(medRef, { existencia: stockCalculado });
+                }
+
+                // Lógica de reemplazo o conservación de fotos
+                let fotosFinales = salidaAntigua.fotosEvidencia || [];
+                if (arrayFotos.length > 0) {
+                    // Si seleccionaron nuevas fotos en edición, podemos reemplazar o juntar. 
+                    // Preguntamos al usuario o sobreescribimos de manera inteligente si subió nuevas.
+                    fotosFinales = arrayFotos; // Se reemplazan por las nuevas seleccionadas corregidas
+                }
+
+                await updateDoc(doc(db, "salidas_farmacia", editSalidaID), {
+                    destino,
+                    cantidad: cantidadRetiro,
+                    beneficiarioNombre,
+                    beneficiarioEdad,
+                    beneficiarioGenero,
+                    beneficiarioLocalidad,
+                    beneficiarioMunicipio,
+                    beneficiarioReceta,
+                    fotosEvidencia: fotosFinales
+                });
+
+                Swal.fire({ icon: 'success', title: '¡Actualizado!', text: 'Salida y evidencias actualizadas correctamente.', timer: 2000, showConfirmButton: false });
+                cancelarEdicionSalida();
+
+            } else {
+                if (cantidadRetiro > medEncontrado.existencia) {
+                    return Swal.fire({ icon: 'error', title: 'Stock insuficiente', text: `Solo hay ${medEncontrado.existencia} unidades disponibles.` });
+                }
+
+                await updateDoc(doc(db, "inventario_farmacia", medId), {
+                    existencia: medEncontrado.existencia - cantidadRetiro
+                });
+
+                await addDoc(salidasRef, {
+                    destino,
+                    medicamentoId: medId,
+                    medicamentoNombre: medEncontrado.nombre,
+                    cantidad: cantidadRetiro,
+                    beneficiarioNombre,
+                    beneficiarioEdad,
+                    beneficiarioGenero,
+                    beneficiarioLocalidad,
+                    beneficiarioMunicipio,
+                    beneficiarioReceta,
+                    origenStock: medEncontrado.origen,
+                    usuario: usuarioLoggeado,
+                    fecha: new Date().toISOString().split('T')[0],
+                    timestamp: Date.now(),
+                    fotosEvidencia: arrayFotos,
+                    estado: "ACTIVO"
+                });
+
+                Swal.fire({ icon: 'success', title: '¡Salida Registrada!', text: 'El stock ha sido descontado correctamente.', timer: 2000, showConfirmButton: false });
+                document.getElementById('s-cantidad').value = "1";
+                document.getElementById('b-nombre').value = "";
+                document.getElementById('b-edad').value = "";
+                document.getElementById('b-localidad').value = "";
+                document.getElementById('b-receta').value = "";
+                inputFotos.value = "";
+                filtrarMedicamentosPorDestino();
+            }
+
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'Error', text: e.message });
+        }
+    };
+
+    window.renderizarSalidas = () => {
+        const tbody = document.getElementById('tabla-salidas');
+        if (salidasGlobal.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No hay salidas registradas.</td></tr>`;
+            return;
+        }
+
+        salidasGlobal.sort((a, b) => b.timestamp - a.timestamp);
+
+        tbody.innerHTML = salidasGlobal.map(s => {
+            let htmlGaleria = `<span style="color:#94a3b8; font-size:0.8rem;">Sin fotos</span>`;
+            if (s.fotosEvidencia && s.fotosEvidencia.length > 0) {
+                htmlGaleria = `<div class="galeria-fotos">` + 
+                    s.fotosEvidencia.map(foto => `<img src="${foto}" class="foto-miniatura" onclick="abrirGaleriaModal('${foto}')" title="Ver imagen ampliada">`).join('') +
+                `</div>`;
+            }
+
+            let detalleTexto = "";
+            if (s.destino === 'JORNADA ITINERANTE') {
+                detalleTexto = `<b>Localidad:</b> ${s.beneficiarioLocalidad || 'N/A'}<br><small style="color:#64748b">Municipio: ${s.beneficiarioMunicipio || 'San Andrés Tuxtla'}</small>`;
+            } else {
+                detalleTexto = `
+                    <b>${s.beneficiarioNombre || 'N/A'}</b><br>
+                    <small style="color:#64748b">Edad: ${s.beneficiarioEdad || '-'} | Receta: ${s.beneficiarioReceta || 'S/F'}</small><br>
+                    <small style="color:#64748b">${s.beneficiarioLocalidad || ''}, ${s.beneficiarioMunicipio || ''}</small>
+                `;
+            }
+
+            let etiquetaAgotado = s.estado === 'AGOTADO EN CAMPO' 
+                ? '<br><span class="badge" style="background:#fee2e2; color:#991b1b; margin-top:3px;">AGOTADO EN CAMPO</span>' 
+                : '';
+
+            let botonesAccion = "";
+            if (esSuperUsuario) {
+                botonesAccion = `
+                    <button class="btn btn-warning" style="padding:5px 8px;" onclick="prepararEdicionSalida('${s.id}')" title="Editar registro y fotos"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger" style="padding:5px 8px;" onclick="eliminarSalida('${s.id}')" title="Eliminar y devolver stock"><i class="fas fa-trash"></i></button>
+                `;
+            } else {
+                botonesAccion = `
+                    <button class="btn btn-purple" style="padding:5px 8px; font-size:0.8rem;" onclick="devolverParcial('${s.id}')" title="Devolver piezas sobrantes"><i class="fas fa-undo"></i> Devolver</button>
+                    <button class="btn btn-danger" style="padding:5px 5px; font-size:0.8rem;" onclick="todoSeAcabo('${s.id}')" title="Marcar como agotado en campo">Todo Se Acabó</button>
+                `;
+            }
+
+            return `
+                <tr>
+                    <td><b>${s.fecha}</b><br><span class="badge origen-propio">${s.destino}</span>${etiquetaAgotado}</td>
+                    <td>${detalleTexto}</td>
+                    <td><b>${s.medicamentoNombre}</b></td>
+                    <td><span class="badge" style="background:#e0f2fe; color:#0369a1;">${s.cantidad} uds</span></td>
+                    <td>${htmlGaleria}</td>
+                    <td>${botonesAccion}</td>
+                </tr>
+            `;
+        }).join('');
+    };
+
+    // Funciones del Modal de Galería
+    window.abrirGaleriaModal = (urlFoto) => {
+        const modal = document.getElementById('modal-galeria');
+        const imgModal = document.getElementById('imagen-modal-ampliada');
+        imgModal.src = urlFoto;
+        modal.style.display = 'flex';
+    };
+
+    window.cerrarGaleriaModal = () => {
+        document.getElementById('modal-galeria').style.display = 'none';
+    };
+
+    window.devolverParcial = async (id) => {
+        const item = salidasGlobal.find(s => s.id === id);
+        
+        const { value: cantidadDevolverStr } = await Swal.fire({
+            title: 'Devolución Parcial',
+            text: `¿Cuántas piezas de "${item.medicamentoNombre}" sobraron para devolver? (Retiradas: ${item.cantidad})`,
+            input: 'number',
+            inputAttributes: { min: 1, max: item.cantidad, step: 1 },
+            inputValue: 1,
+            showCancelButton: true,
+            confirmButtonText: 'Devolver',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#8b5cf6'
+        });
+
+        if (!cantidadDevolverStr) return;
+        const cantidadDevolver = parseInt(cantidadDevolverStr);
+
+        if (isNaN(cantidadDevolver) || cantidadDevolver <= 0 || cantidadDevolver > item.cantidad) {
+            return Swal.fire({ icon: 'error', title: 'Cantidad no válida', text: 'Verifique que la cantidad esté dentro del rango permitido.' });
+        }
+
+        try {
+            const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
+            const medSnap = await getDoc(medRef);
+
+            if (medSnap.exists()) {
+                const stockActual = medSnap.data().existencia;
+                await updateDoc(medRef, { existencia: stockActual + cantidadDevolver });
+            }
+
+            const nuevaCantidad = item.cantidad - cantidadDevolver;
+            if (nuevaCantidad === 0) {
+                await deleteDoc(doc(db, "salidas_farmacia", id));
+                Swal.fire({ icon: 'success', title: 'Devolución completa', text: 'Se devolvieron todas las piezas y el registro fue eliminado.', timer: 2000, showConfirmButton: false });
+            } else {
+                await updateDoc(doc(db, "salidas_farmacia", id), { cantidad: nuevaCantidad });
+                Swal.fire({ icon: 'success', title: 'Devolución registrada', text: `Se devolvieron ${cantidadDevolver} piezas al inventario.`, timer: 2000, showConfirmButton: false });
+            }
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'Error', text: e.message });
+        }
+    };
+
+    window.todoSeAcabo = async (id) => {
+        const item = salidasGlobal.find(s => s.id === id);
+        
+        const result = await Swal.fire({
+            title: '¿Todo se terminó en campo?',
+            text: `Esto marcará "${item.medicamentoNombre}" como agotado sin devolver stock al inventario.`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, marcar agotado',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#ef4444'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            await updateDoc(doc(db, "salidas_farmacia", id), {
+                estado: "AGOTADO EN CAMPO"
+            });
+
+            Swal.fire({ icon: 'success', title: '¡Marcado como Agotado!', text: 'El registro permanece visible en el historial.', timer: 2000, showConfirmButton: false });
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'Error', text: e.message });
+        }
+    };
+
+    window.prepararEdicionSalida = (id) => {
+        if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado', text: 'Acción restringida solo para Super Usuarios.' });
+        const item = salidasGlobal.find(s => s.id === id);
+        editSalidaID = id;
+        
+        document.getElementById('s-destino').value = item.destino;
+        filtrarMedicamentosPorDestino();
+        ajustarCamposSegunDestino();
+
+        setTimeout(() => {
+            document.getElementById('s-medicamento').value = item.medicamentoId;
+        }, 100);
+
+        document.getElementById('s-cantidad').value = item.cantidad;
+        document.getElementById('b-nombre').value = item.beneficiarioNombre || '';
+        document.getElementById('b-edad').value = item.beneficiarioEdad || '';
+        document.getElementById('b-genero').value = item.beneficiarioGenero || 'FEMENINO';
+        document.getElementById('b-localidad').value = item.beneficiarioLocalidad || '';
+        document.getElementById('b-municipio').value = item.beneficiarioMunicipio || 'San Andrés Tuxtla';
+        document.getElementById('b-receta').value = item.beneficiarioReceta || '';
+        
+        // Indicador visual en edición de fotos
+        const totalFotosActuales = item.fotosEvidencia ? item.fotosEvidencia.length : 0;
+        document.getElementById('aviso-fotos-edicion').innerText = `Este registro cuenta actualmente con ${totalFotosActuales} foto(s). Si seleccionas nuevas fotos aquí, se reemplazarán para corregir la evidencia anterior.`;
+
+        document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> Editar Salida / Registro y Fotos';
+        document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-sync"></i> ACTUALIZAR SALIDA';
+        document.getElementById('btn-guardar').className = 'btn btn-warning';
+        document.getElementById('btn-cancelar').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.cancelarEdicionSalida = () => {
+        editSalidaID = null;
+        document.getElementById('s-cantidad').value = "1";
+        document.getElementById('b-nombre').value = "";
+        document.getElementById('b-edad').value = "";
+        document.getElementById('b-localidad').value = "";
+        document.getElementById('b-receta').value = "";
+        document.getElementById('s-fotos').value = "";
+        document.getElementById('aviso-fotos-edicion').innerText = "";
+        document.getElementById('form-title').innerHTML = '<i class="fas fa-minus-circle"></i> Registrar Salida / Entrega de Medicamento';
+        document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-paper-plane"></i> REGISTRAR SALIDA Y DESCONTAR';
+        document.getElementById('btn-guardar').className = 'btn btn-success';
+        document.getElementById('btn-cancelar').style.display = 'none';
+        filtrarMedicamentosPorDestino();
+        ajustarCamposSegunDestino();
+    };
+
+    window.eliminarSalida = async (id) => {
+        if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado', text: 'Acción restringida solo para Super Usuarios.' });
+        
+        const result = await Swal.fire({
+            title: '¿Eliminar registro?',
+            text: "Las piezas entregadas regresarán automáticamente al inventario de la farmacia.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#ef4444'
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const item = salidasGlobal.find(s => s.id === id);
+            const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
+            const medSnap = await getDoc(medRef);
+            
+            if (medSnap.exists()) {
+                const stockActual = medSnap.data().existencia;
+                await updateDoc(medRef, { existencia: stockActual + item.cantidad });
+            }
+
+            await deleteDoc(doc(db, "salidas_farmacia", id));
+            Swal.fire({ icon: 'success', title: '¡Eliminado!', text: 'El registro fue eliminado y el stock devuelto.', timer: 2000, showConfirmButton: false });
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'Error', text: e.message });
+        }
+    };
+
+    function convertirBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    window.onload = () => {
+        ajustarCamposSegunDestino();
+    };
+</script>
+
+</body>
+</html>
