@@ -314,10 +314,52 @@
         </div>
     </div>
 
-    <!-- TABLA DE HISTORIAL -->
+    <!-- SECCIÓN CONSULTA KARDEX POR MEDICAMENTO -->
+    <div class="card" style="border: 2px solid #0284c7;">
+        <h3 style="color:#0284c7;"><i class="fas fa-search-location"></i> Historial y Trazabilidad por Medicamento (Kardex)</h3>
+        <p style="font-size:0.85rem; color:#64748b; margin-top:-5px;">Selecciona un medicamento de la lista para auditar todas sus salidas registradas, beneficiarios y movimientos de stock.</p>
+        
+        <div class="form-grid">
+            <div class="form-group full">
+                <label>Seleccionar Medicamento a Consultar</label>
+                <select id="kardex-select-med" onchange="consultarKardexMedicamento()">
+                    <option value="">-- Elige un medicamento para ver su historial --</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="kardex-resultado" style="display:none; margin-top:10px;">
+            <div style="background:#e0f2fe; padding:12px 15px; border-radius:8px; display:flex; justify-shadow:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px; border:1px solid #bae6fd;">
+                <div>
+                    <h4 id="kardex-nombre-med" style="margin:0; color:#0369a1; font-size:1.1rem;">-</h4>
+                    <span id="kardex-origen-med" style="font-size:0.8rem; color:#0284c7; font-weight:600;">-</span>
+                </div>
+                <div style="text-align:right;">
+                    <span style="font-size:0.75rem; color:#64748b; display:block;">STOCK ACTUAL EN INVENTARIO</span>
+                    <strong id="kardex-stock-actual" style="font-size:1.3rem; color:#0369a1;">0 uds</strong>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr style="background:#0284c7; color:white;">
+                        <th>Fecha</th>
+                        <th>Destino</th>
+                        <th>Beneficiario</th>
+                        <th>Cant. Retirada</th>
+                        <th>Trazabilidad de Stock</th>
+                    </tr>
+                </thead>
+                <tbody id="kardex-tbody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TABLA DE HISTORIAL GENERAL -->
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-            <h3 style="margin:0;"><i class="fas fa-clipboard-list"></i> Historial de Salidas y Jornadas</h3>
+            <h3 style="margin:0;"><i class="fas fa-clipboard-list"></i> Historial General de Salidas y Jornadas</h3>
             <div style="display: flex; align-items: center; gap: 8px;">
                 <label style="font-size: 0.85rem; color:#475569; font-weight: 600;">Mostrar:</label>
                 <select id="select-paginacion-limite" onchange="cambiarLimitePaginacion()" style="padding: 5px 10px; border-radius: 6px; border: 1px solid #cbd5e1;">
@@ -408,6 +450,10 @@
     onSnapshot(farmaciaRef, (snap) => {
         inventarioGlobal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         document.getElementById('kpi-total-meds').innerText = inventarioGlobal.length;
+        
+        // Poblar selector del Kardex
+        poblarSelectorKardex();
+        
         filtrarMedicamentosPorDestino();
     });
 
@@ -426,7 +472,98 @@
         document.getElementById('kpi-total-salidas').innerText = `${totalPiezasEntregadas} uds`;
 
         renderizarSalidas();
+        
+        // Si hay una consulta Kardex activa, refrescarla
+        if (document.getElementById('kardex-select-med').value) {
+            consultarKardexMedicamento();
+        }
     });
+
+    function poblarSelectorKardex() {
+        const selectKardex = document.getElementById('kardex-select-med');
+        const valorPrevio = selectKardex.value;
+        
+        inventarioGlobal.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+        
+        selectKardex.innerHTML = '<option value="">-- Elige un medicamento para ver su historial --</option>' +
+            inventarioGlobal.map(i => `<option value="${i.id}">${i.nombre} (${i.origen || 'S/N'}) - Stock: ${i.existencia}</option>`).join('');
+            
+        if (valorPrevio) selectKardex.value = valorPrevio;
+    }
+
+    window.consultarKardexMedicamento = () => {
+        const medId = document.getElementById('kardex-select-med').value;
+        const contenedorResultado = document.getElementById('kardex-resultado');
+        const tbody = document.getElementById('kardex-tbody');
+
+        if (!medId) {
+            contenedorResultado.style.display = 'none';
+            return;
+        }
+
+        const med = inventarioGlobal.find(i => i.id === medId);
+        if (!med) return;
+
+        document.getElementById('kardex-nombre-med').innerText = med.nombre;
+        document.getElementById('kardex-origen-med').innerText = `Origen: ${med.origen || 'N/A'}`;
+        document.getElementById('kardex-stock-actual').innerText = `${med.existencia} uds`;
+
+        // Filtrar todas las salidas donde participe este medicamento
+        let historialMed = [];
+
+        salidasGlobal.forEach(s => {
+            if (s.medicamentos && Array.isArray(s.medicamentos)) {
+                s.medicamentos.forEach(m => {
+                    if (m.medicamentoId === medId || m.medicamentoNombre === med.nombre) {
+                        historialMed.push({
+                            fecha: s.fecha || 'Sin fecha',
+                            destino: s.destino || 'JORNADA',
+                            beneficiario: s.beneficiarioNombre || 'N/A',
+                            cantidad: m.cantidad || 0,
+                            stockAnterior: m.stockAnterior,
+                            stockPosterior: m.stockPosterior,
+                            timestamp: s.timestamp || 0
+                        });
+                    }
+                });
+            } else if (s.medicamentoId === medId || s.medicamentoNombre === med.nombre || s.nombreMedicamento === med.nombre) {
+                historialMed.push({
+                    fecha: s.fecha || 'Sin fecha',
+                    destino: s.destino || 'JORNADA',
+                    beneficiario: s.beneficiarioNombre || 'N/A',
+                    cantidad: s.cantidad || 1,
+                    stockAnterior: undefined,
+                    stockPosterior: undefined,
+                    timestamp: s.timestamp || 0
+                });
+            }
+        });
+
+        historialMed.sort((a, b) => b.timestamp - a.timestamp);
+
+        if (historialMed.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b;">No hay salidas registradas para este medicamento.</td></tr>`;
+        } else {
+            tbody.innerHTML = historialMed.map(h => {
+                const tieneTraza = (h.stockAnterior !== undefined && h.stockPosterior !== undefined);
+                const textoTraza = tieneTraza 
+                    ? `<span style="color:#0284c7; font-weight:600;">Stock: ${h.stockAnterior} ➔ ${h.stockPosterior}</span>`
+                    : `<span style="color:#94a3b8; font-style:italic;">Registro histórico previo</span>`;
+
+                return `
+                    <tr>
+                        <td><b>${h.fecha}</b></td>
+                        <td><span class="badge origen-propio">${h.destino}</span></td>
+                        <td>${h.beneficiario}</td>
+                        <td><b style="color:#ef4444;">-${h.cantidad} uds</b></td>
+                        <td>${textoTraza}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        contenedorResultado.style.display = 'block';
+    };
 
     window.cambiarDestino = () => {
         filtrarMedicamentosPorDestino();
