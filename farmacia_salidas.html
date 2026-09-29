@@ -6,7 +6,6 @@
     <title>Salidas y Jornadas - Farmacia DIF</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SweetAlert2 para alertas atractivas -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         :root {
@@ -19,9 +18,35 @@
             --border: #e2e8f0;
         }
         body { font-family: 'Inter', sans-serif; background: var(--light); color: var(--dark); margin: 0; padding: 0; }
-        header { background: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .user-tag { font-size: 0.9rem; color: #64748b; font-weight: 500; display: flex; align-items: center; gap: 8px; }
-        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        
+        /* CABECERA OPTIMIZADA */
+        header { 
+            background: white; 
+            padding: 15px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid var(--border); 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .user-tag { font-size: 0.85rem; color: #64748b; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+        
+        /* TARJETAS KPI CABECERA */
+        .kpi-container { display: flex; gap: 12px; }
+        .kpi-card { 
+            background: #f1f5f9; 
+            padding: 6px 14px; 
+            border-radius: 8px; 
+            text-align: center; 
+            border: 1px solid #cbd5e1;
+            min-width: 100px;
+        }
+        .kpi-title { display: block; font-size: 0.65rem; color: #64748b; font-weight: 700; text-transform: uppercase; }
+        .kpi-value { font-size: 1.1rem; font-weight: 700; }
+
+        .container { max-width: 1150px; margin: 30px auto; padding: 0 20px; }
         .card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 25px; }
         h3 { margin-top: 0; color: var(--dark); display: flex; align-items: center; gap: 10px; font-size: 1.25rem; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
@@ -35,37 +60,145 @@
         .btn-success { background: var(--success); }
         .btn-warning { background: var(--warning); color: white; }
         .btn-danger { background: var(--danger); color: white; }
-        .btn-purple { background: #8b5cf6; color: white; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: middle; }
         th { background: #f1f5f9; color: #475569; font-weight: 600; }
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
         .origen-propio { background: #fef3c7; color: #b45309; }
         
-        /* Galería de fotos compacta */
-        .galeria-fotos { display: flex; gap: 5px; flex-wrap: wrap; }
-        .foto-miniatura { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: pointer; transition: transform 0.2s; }
-        .foto-miniatura:hover { transform: scale(1.1); border-color: var(--primary); }
-        
+        /* GALERÍA Y ROTADOR DE IMÁGENES EN TABLA */
+        .carrusel-evidencia {
+            position: relative;
+            width: 75px;
+            height: 75px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            border: 2px solid white;
+            cursor: pointer;
+            background: #f1f5f9;
+        }
+        .carrusel-evidencia img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            transition: opacity 0.6s ease-in-out;
+        }
+        .carrusel-evidencia img.activa { opacity: 1; }
+        .carrusel-evidencia:hover {
+            transform: scale(1.08);
+            transition: transform 0.2s ease;
+            box-shadow: 0 5px 12px rgba(2, 132, 199, 0.3);
+        }
+        .badge-contador-fotos {
+            position: absolute;
+            bottom: 3px;
+            right: 3px;
+            background: rgba(15, 23, 42, 0.75);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 4px;
+            z-index: 5;
+            backdrop-filter: blur(2px);
+        }
+
         .seccion-usuario { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px dashed var(--border); margin-bottom: 15px; }
 
-        /* Modal Galería Estilo Lightbox */
-        #modal-galeria { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; flex-direction: column; }
-        #modal-galeria img { max-width: 90%; max-height: 80vh; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); object-fit: contain; }
-        #modal-galeria .cerrar-modal { position: absolute; top: 20px; right: 30px; color: white; font-size: 2.5rem; cursor: pointer; font-weight: bold; }
+        .lista-meds-tabla { list-style: none; padding: 0; margin: 0; }
+        .lista-meds-tabla li { background: #e0f2fe; color: #0369a1; padding: 6px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; margin-bottom: 5px; display: flex; flex-direction: column; gap: 3px; }
+        .med-header { display: flex; justify-content: space-between; gap: 10px; }
+        .med-stock-info { font-size: 0.72rem; color: #0284c7; font-weight: 500; background: #ffffff; padding: 2px 6px; border-radius: 4px; border: 1px solid #bae6fd; display: inline-block; width: fit-content; }
+
+        /* MODAL GALERÍA */
+        #modal-galeria { 
+            display: none; 
+            position: fixed; 
+            z-index: 9999; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(15, 23, 42, 0.92); 
+            backdrop-filter: blur(5px);
+            justify-content: center; 
+            align-items: center; 
+            flex-direction: column; 
+        }
+        #modal-galeria img { 
+            max-width: 85%; 
+            max-height: 75vh; 
+            border-radius: 12px; 
+            box-shadow: 0 15px 30px rgba(0,0,0,0.6); 
+            object-fit: contain; 
+        }
+        #modal-galeria .cerrar-modal { 
+            position: absolute; 
+            top: 20px; 
+            right: 30px; 
+            color: white; 
+            font-size: 2.5rem; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
         #modal-galeria .cerrar-modal:hover { color: var(--danger); }
+
+        .btn-carrusel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            font-size: 2rem;
+            padding: 15px 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            user-select: none;
+        }
+        .btn-carrusel-nav:hover { background: rgba(255, 255, 255, 0.4); }
+        .btn-carrusel-prev { left: 30px; }
+        .btn-carrusel-next { right: 30px; }
+
+        .indicador-carrusel {
+            color: white;
+            margin-top: 15px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 16px;
+            border-radius: 20px;
+        }
     </style>
 </head>
 <body>
 
 <header>
     <div>
-        <h2 style="margin:0"><i class="fas fa-dolly"></i> SALIDAS Y JORNADAS - FARMACIA DIF</h2>
+        <h2 style="margin:0; font-size: 1.3rem;"><i class="fas fa-dolly"></i> SALIDAS Y JORNADAS - FARMACIA DIF</h2>
         <div id="display-usuario" class="user-tag" style="margin-top:5px;">
             <i class="fas fa-user-circle"></i> <span id="user-name-span">Cargando usuario...</span> 
             <span id="badge-rol" class="badge" style="background:#e2e8f0; color:#475569;">Rol</span>
         </div>
     </div>
+
+    <!-- TARJETAS RESUMEN EN CABECERA -->
+    <div class="kpi-container">
+        <div class="kpi-card">
+            <span class="kpi-title">Tipos de Meds</span>
+            <strong id="kpi-total-meds" class="kpi-value" style="color: #0284c7;">0</strong>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-title">Total Entregados</span>
+            <strong id="kpi-total-salidas" class="kpi-value" style="color: #10b981;">0 uds</strong>
+        </div>
+    </div>
+
     <button onclick="window.location.href='index.html'" class="btn" style="background:#64748b;">
         <i class="fas fa-arrow-left"></i> <span>Cerrar Sesión</span>
     </button>
@@ -73,9 +206,9 @@
 
 <div class="container">
     
-    <!-- FORMULARIO DE SALIDA / DISPERSIÓN -->
+    <!-- FORMULARIO DE SALIDA -->
     <div class="card">
-        <h3 id="form-title"><i class="fas fa-minus-circle"></i> Registrar Salida / Entrega de Medicamento</h3>
+        <h3 id="form-title"><i class="fas fa-minus-circle"></i> Registrar Entrega de Medicamentos por Beneficiario</h3>
         
         <div class="form-grid">
             <div class="form-group">
@@ -88,26 +221,25 @@
             </div>
             <div class="form-group">
                 <label>Medicamento del Inventario</label>
-                <select id="s-medicamento">
+                <select id="s-medicamento" onchange="mostrarPreviewStock()">
                     <option value="">Seleccione un medicamento...</option>
                 </select>
+                <small id="preview-stock-text" style="color:#0284c7; font-weight:600; font-size:0.75rem; margin-top:2px; display:none;"></small>
             </div>
             <div class="form-group">
                 <label>Cantidad a Retirar</label>
-                <input type="number" id="s-cantidad" value="1" min="1">
+                <div style="display:flex; gap:8px;">
+                    <input type="number" id="s-cantidad" value="1" min="1" style="flex:1;" oninput="mostrarPreviewStock()">
+                    <button class="btn" style="background:#0284c7;" onclick="agregarMedicamentoALote()">
+                        <i class="fas fa-plus"></i> Agregar Fármaco
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- BOTÓN EXCLUSIVO PARA AGREGAR MÚLTIPLES EN JORNADA ITINERANTE -->
-        <div id="contenedor-btn-agregar-lote" style="margin-bottom: 15px; display: none;">
-            <button class="btn" style="background:#0284c7;" onclick="agregarMedicamentoALote()">
-                <i class="fas fa-plus"></i> Agregar Fármaco a la Lista de la Jornada
-            </button>
-        </div>
-
-        <!-- TABLA TEMPORAL DE FÁRMACOS SELECCIONADOS (SOLO JORNADA ITINERANTE) -->
+        <!-- TABLA TEMPORAL DE FÁRMACOS SELECCIONADOS -->
         <div id="contenedor-tabla-lote" style="display:none; margin-bottom: 20px;">
-            <h4 style="color:#0369a1; font-size:0.9rem; margin-bottom:8px;"><i class="fas:list"></i> Fármacos agregados para esta Jornada:</h4>
+            <h4 style="color:#0369a1; font-size:0.9rem; margin-bottom:8px;"><i class="fas fa-list"></i> Medicamentos a entregar en esta receta:</h4>
             <table style="font-size: 0.9rem; margin-bottom: 10px;">
                 <thead>
                     <tr style="background: #f1f5f9;">
@@ -117,22 +249,25 @@
                     </tr>
                 </thead>
                 <tbody id="tbody-lote-temporal">
-                    <!-- Dinámico -->
                 </tbody>
             </table>
         </div>
 
-        <!-- SECCIÓN DE DATOS DE UBICACIÓN / BENEFICIARIO (Dinámica) -->
+        <!-- SECCIÓN BENEFICIARIO -->
         <div class="seccion-usuario" id="contenedor-beneficiario">
-            <h4 style="margin-top:0; color:var(--primary); font-size:0.95rem;"><i class="fas fa-user-injured"></i> <span id="titulo-seccion-datos">Ubicación de la Jornada</span></h4>
+            <h4 style="margin-top:0; color:var(--primary); font-size:0.95rem;"><i class="fas fa-user-injured"></i> <span id="titulo-seccion-datos">Datos del Beneficiario</span></h4>
             <div class="form-grid" style="margin-bottom:0;">
                 <div class="form-group" id="grupo-nombre">
                     <label>Nombre Completo del Beneficiario</label>
                     <input type="text" id="b-nombre" placeholder="Nombre completo">
                 </div>
+                <div class="form-group" id="grupo-fecha-nac">
+                    <label>Fecha de Nacimiento</label>
+                    <input type="date" id="b-fecha-nacimiento" onchange="calcularEdadDesdeNacimiento()">
+                </div>
                 <div class="form-group" id="grupo-edad">
                     <label>Edad</label>
-                    <input type="number" id="b-edad" placeholder="Ej. 45" min="0" max="120">
+                    <input type="number" id="b-edad" placeholder="Automática" readonly style="background-color: #f1f5f9;">
                 </div>
                 <div class="form-group" id="grupo-genero">
                     <label>Género</label>
@@ -154,6 +289,10 @@
                     <label>Folio de Receta Médica</label>
                     <input type="text" id="b-receta" placeholder="Ej. REC-2026-001">
                 </div>
+                <div class="form-group" id="grupo-fecha-entrega">
+                    <label>Fecha de Entrega / Salida</label>
+                    <input type="date" id="b-fecha-entrega">
+                </div>
             </div>
         </div>
 
@@ -167,7 +306,7 @@
         
         <div style="display:flex; gap:10px;">
             <button class="btn btn-success" id="btn-guardar" onclick="procesarSalida()">
-                <i class="fas fa-paper-plane"></i> REGISTRAR SALIDA Y DESCONTAR
+                <i class="fas fa-paper-plane"></i> REGISTRAR SALIDA
             </button>
             <button class="btn" id="btn-cancelar" style="display:none; background:#94a3b8;" onclick="cancelarEdicionSalida()">
                 CANCELAR
@@ -175,7 +314,7 @@
         </div>
     </div>
 
-    <!-- TABLA DE HISTORIAL DE SALIDAS -->
+    <!-- TABLA DE HISTORIAL -->
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
             <h3 style="margin:0;"><i class="fas fa-clipboard-list"></i> Historial de Salidas y Jornadas</h3>
@@ -186,7 +325,6 @@
                     <option value="25">25 filas</option>
                     <option value="50">50 filas</option>
                     <option value="100">100 filas</option>
-                    <option value="200">200 filas</option>
                 </select>
             </div>
         </div>
@@ -195,11 +333,11 @@
             <thead>
                 <tr>
                     <th>Fecha / Destino</th>
-                    <th>Detalles</th>
-                    <th>Medicamento</th>
-                    <th>Cant.</th>
+                    <th>Beneficiario y Ubicación</th>
+                    <th>Medicamento(s) y Traza de Stock</th>
+                    <th>Cant. Total</th>
                     <th>Evidencias</th>
-                    <th>Acciones / Devolución</th>
+                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="tabla-salidas">
@@ -207,7 +345,6 @@
             </tbody>
         </table>
         
-        <!-- CONTROLES DE PAGINACIÓN -->
         <div id="controles-paginacion" style="display:flex; justify-content: space-between; align-items: center; margin-top: 15px;">
             <span id="info-paginacion" style="font-size: 0.85rem; color: #64748b;">Mostrando 0 de 0 registros</span>
             <div style="display: flex; gap: 5px;">
@@ -219,11 +356,13 @@
 
 </div>
 
-<!-- MODAL GALERÍA FOTOGRÁFICA -->
-<div id="modal-galeria" onclick="cerrarGaleriaModal()">
-    <span class="cerrar-modal">&times;</span>
+<!-- MODAL GALERÍA -->
+<div id="modal-galeria" onclick="cerrarGaleriaModal(event)">
+    <span class="cerrar-modal" onclick="cerrarGaleriaModalDirecto()">&times;</span>
+    <button class="btn-carrusel-nav btn-carrusel-prev" id="btn-modal-prev" onclick="navegarModalGaleria(-1, event)"><i class="fas fa-chevron-left"></i></button>
     <img id="imagen-modal-ampliada" src="" alt="Evidencia Ampliada">
-    <div style="color:white; margin-top:15px; font-size:0.9rem;" id="modal-texto-info">Haz clic en cualquier parte para cerrar</div>
+    <button class="btn-carrusel-nav btn-carrusel-next" id="btn-modal-next" onclick="navegarModalGaleria(1, event)"><i class="fas fa-chevron-right"></i></button>
+    <div id="indicador-modal" class="indicador-carrusel">Imagen 1 de 1</div>
 </div>
 
 <script type="module">
@@ -240,9 +379,12 @@
     let inventarioGlobal = [];
     let salidasGlobal = [];
     let editSalidaID = null;
-    let loteMedicamentosTemp = []; // Lista temporal para múltiples fármacos en Jornada Itinerante
+    let loteMedicamentosTemp = [];
+    let carruselIntervals = [];
 
-    // Variables de Paginación
+    let fotosModalActuales = [];
+    let indiceFotoModal = 0;
+
     let paginaActual = 1;
     let limitePorPagina = 10;
 
@@ -253,7 +395,7 @@
     document.getElementById('user-name-span').innerText = usuarioLoggeado.toUpperCase().replace('.', ' ');
     const badgeRol = document.getElementById('badge-rol');
     if (esSuperUsuario) {
-        badgeRol.innerText = "SUPER USUARIO (Edición Total)";
+        badgeRol.innerText = "SUPER USUARIO";
         badgeRol.style.background = "#a21caf";
         badgeRol.style.color = "#ffffff";
     } else {
@@ -262,62 +404,32 @@
         badgeRol.style.color = "#ffffff";
     }
 
+    // LISTENER INVENTARIO + KPI MEDS
     onSnapshot(farmaciaRef, (snap) => {
         inventarioGlobal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        if (!editSalidaID) filtrarMedicamentosPorDestino();
+        document.getElementById('kpi-total-meds').innerText = inventarioGlobal.length;
+        filtrarMedicamentosPorDestino();
     });
 
+    // LISTENER SALIDAS + KPI TOTAL ENTREGADOS
     onSnapshot(salidasRef, (snap) => {
         salidasGlobal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        let totalPiezasEntregadas = 0;
+        salidasGlobal.forEach(s => {
+            if (s.medicamentos && Array.isArray(s.medicamentos)) {
+                s.medicamentos.forEach(m => totalPiezasEntregadas += Number(m.cantidad || 0));
+            } else {
+                totalPiezasEntregadas += Number(s.cantidad || 0);
+            }
+        });
+        document.getElementById('kpi-total-salidas').innerText = `${totalPiezasEntregadas} uds`;
+
         renderizarSalidas();
     });
 
     window.cambiarDestino = () => {
-        loteMedicamentosTemp = [];
-        actualizarTablaLoteTemporal();
         filtrarMedicamentosPorDestino();
-        ajustarCamposSegunDestino();
-    };
-
-    window.ajustarCamposSegunDestino = () => {
-        const destino = document.getElementById('s-destino').value;
-        const grupoNombre = document.getElementById('grupo-nombre');
-        const grupoEdad = document.getElementById('grupo-edad');
-        const grupoGenero = document.getElementById('grupo-genero');
-        const grupoLocalidad = document.getElementById('grupo-localidad');
-        const grupoMunicipio = document.getElementById('grupo-municipio');
-        const grupoReceta = document.getElementById('grupo-receta');
-        const tituloSeccion = document.getElementById('titulo-seccion-datos');
-        const contenedor = document.getElementById('contenedor-beneficiario');
-        const contenedorBtnLote = document.getElementById('contenedor-btn-agregar-lote');
-        const contenedorTablaLote = document.getElementById('contenedor-tabla-lote');
-
-        if (destino === 'JORNADA ITINERANTE') {
-            contenedor.style.display = 'block';
-            tituloSeccion.innerText = 'Ubicación de la Jornada';
-            grupoNombre.style.display = 'none';
-            grupoEdad.style.display = 'none';
-            grupoGenero.style.display = 'none';
-            grupoLocalidad.style.display = 'flex';
-            grupoMunicipio.style.display = 'flex';
-            grupoReceta.style.display = 'none';
-
-            contenedorBtnLote.style.display = 'block';
-            contenedorTablaLote.style.display = loteMedicamentosTemp.length > 0 ? 'block' : 'none';
-        } else {
-            // Aplica tanto para DIRECCION como para AREA MEDICA
-            contenedor.style.display = 'block';
-            tituloSeccion.innerText = destino === 'AREA MEDICA' ? 'Datos de Entrega en Área Médica' : 'Datos del Beneficiario y Receta';
-            grupoNombre.style.display = 'flex';
-            grupoEdad.style.display = 'flex';
-            grupoGenero.style.display = 'flex';
-            grupoLocalidad.style.display = 'flex';
-            grupoMunicipio.style.display = 'flex';
-            grupoReceta.style.display = 'flex';
-
-            contenedorBtnLote.style.display = 'none';
-            contenedorTablaLote.style.display = 'none';
-        }
     };
 
     window.filtrarMedicamentosPorDestino = () => {
@@ -332,11 +444,30 @@
         }
 
         selectMed.innerHTML = filtrados.length > 0 
-            ? filtrados.map(i => `<option value="${i.id}">${i.nombre} (Disponibles: ${i.existencia})</option>`).join('')
-            : '<option value="">No hay medicamentos disponibles para este origen</option>';
+            ? '<option value="">Seleccione un medicamento...</option>' + filtrados.map(i => `<option value="${i.id}">${i.nombre} (Disponibles: ${i.existencia})</option>`).join('')
+            : '<option value="">No hay medicamentos disponibles</option>';
+            
+        mostrarPreviewStock();
     };
 
-    // Funciones para gestionar lote múltiple en Jornada Itinerante
+    window.mostrarPreviewStock = () => {
+        const medId = document.getElementById('s-medicamento').value;
+        const cant = parseInt(document.getElementById('s-cantidad').value) || 0;
+        const textElem = document.getElementById('preview-stock-text');
+
+        if (!medId) {
+            textElem.style.display = 'none';
+            return;
+        }
+
+        const med = inventarioGlobal.find(i => i.id === medId);
+        if (med) {
+            const restante = med.existencia - cant;
+            textElem.style.display = 'block';
+            textElem.innerHTML = `<i class="fas fa-info-circle"></i> Stock actual: <b>${med.existencia}</b> ➔ Restarán: <b>${restante >= 0 ? restante : 0}</b>`;
+        }
+    };
+
     window.agregarMedicamentoALote = () => {
         const medId = document.getElementById('s-medicamento').value;
         const cantidad = parseInt(document.getElementById('s-cantidad').value);
@@ -347,7 +478,6 @@
         const medEncontrado = inventarioGlobal.find(i => i.id === medId);
         if (!medEncontrado) return;
 
-        // Validar stock total acumulado en el lote temporal
         const yaEnLote = loteMedicamentosTemp.find(item => item.medicamentoId === medId);
         const cantidadYaAgregada = yaEnLote ? yaEnLote.cantidad : 0;
 
@@ -368,6 +498,7 @@
 
         actualizarTablaLoteTemporal();
         document.getElementById('s-cantidad').value = "1";
+        mostrarPreviewStock();
     };
 
     window.quitarItemLoteTemp = (index) => {
@@ -395,145 +526,139 @@
         `).join('');
     }
 
+    window.calcularEdadDesdeNacimiento = () => {
+        const fechaNac = document.getElementById('b-fecha-nacimiento').value;
+        const inputEdad = document.getElementById('b-edad');
+        if (!fechaNac) { inputEdad.value = ''; return; }
+        const hoy = new Date();
+        const nacimiento = new Date(fechaNac);
+        let edad = hoy.getFullYear() - nacimiento.getFullYear();
+        const m = hoy.getMonth() - nacimiento.getMonth();
+        if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) { edad--; }
+        inputEdad.value = edad >= 0 ? edad : 0;
+    };
+
     window.procesarSalida = async () => {
         const destino = document.getElementById('s-destino').value;
         const inputFotos = document.getElementById('s-fotos');
         
-        let beneficiarioNombre = "";
-        let beneficiarioEdad = "";
-        let beneficiarioGenero = "";
-        let beneficiarioLocalidad = "";
-        let beneficiarioMunicipio = "";
-        let beneficiarioReceta = "";
+        const beneficiarioNombre = document.getElementById('b-nombre').value.toUpperCase().trim();
+        const fechaNacimiento = document.getElementById('b-fecha-nacimiento').value;
+        const beneficiarioEdad = document.getElementById('b-edad').value.trim();
+        const beneficiarioGenero = document.getElementById('b-genero').value;
+        const beneficiarioLocalidad = document.getElementById('b-localidad').value.toUpperCase().trim();
+        const beneficiarioMunicipio = document.getElementById('b-municipio').value.toUpperCase().trim();
+        const beneficiarioReceta = document.getElementById('b-receta').value.toUpperCase().trim();
+        
+        const fechaEntregaInput = document.getElementById('b-fecha-entrega').value;
+        const fechaEntregaFinal = fechaEntregaInput || new Date().toISOString().split('T')[0];
 
-        if (destino === 'DIRECCION' || destino === 'AREA MEDICA') {
-            beneficiarioNombre = document.getElementById('b-nombre').value.toUpperCase().trim();
-            beneficiarioEdad = document.getElementById('b-edad').value.trim();
-            beneficiarioGenero = document.getElementById('b-genero').value;
-            beneficiarioLocalidad = document.getElementById('b-localidad').value.toUpperCase().trim();
-            beneficiarioMunicipio = document.getElementById('b-municipio').value.toUpperCase().trim();
-            beneficiarioReceta = document.getElementById('b-receta').value.toUpperCase().trim();
-
-            if (!beneficiarioNombre || !beneficiarioReceta) {
-                return Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Por favor complete el Nombre y el Folio de Receta.' });
-            }
-        } else if (destino === 'JORNADA ITINERANTE') {
-            beneficiarioLocalidad = document.getElementById('b-localidad').value.toUpperCase().trim();
-            beneficiarioMunicipio = document.getElementById('b-municipio').value.toUpperCase().trim();
-            if (!beneficiarioLocalidad) {
-                return Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'Por favor indique la Localidad o Colonia de la jornada.' });
-            }
-            if (loteMedicamentosTemp.length === 0 && !editSalidaID) {
-                return Swal.fire({ icon: 'warning', title: 'Sin fármacos', text: 'Debe agregar al menos un medicamento a la lista de la jornada.' });
-            }
+        if (loteMedicamentosTemp.length === 0) {
+            return Swal.fire({ icon: 'warning', title: 'Sin medicamentos', text: 'Debe agregar al menos un medicamento a la lista.' });
         }
 
         try {
             let arrayFotos = [];
             if (inputFotos.files && inputFotos.files.length > 0) {
                 for (let file of inputFotos.files) {
-                    const base64 = await convertirBase64(file);
-                    arrayFotos.push(base64);
+                    const base64Comprimido = await comprimirImagenBase64(file, 600, 600, 0.5);
+                    if (base64Comprimido) arrayFotos.push(base64Comprimido);
                 }
             }
 
             if (editSalidaID) {
-                if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado', text: 'No tienes permisos de Super Usuario.' });
+                if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado' });
 
-                const cantidadRetiro = parseInt(document.getElementById('s-cantidad').value);
-                const medId = document.getElementById('s-medicamento').value;
                 const salidaAntigua = salidasGlobal.find(s => s.id === editSalidaID);
-                const medRef = doc(db, "inventario_farmacia", salidaAntigua.medicamentoId);
-                const medSnap = await getDoc(medRef);
 
-                if (medSnap.exists()) {
-                    let stockActual = medSnap.data().existencia;
-                    let stockCalculado = (stockActual + salidaAntigua.cantidad) - cantidadRetiro;
-                    if (stockCalculado < 0) return Swal.fire({ icon: 'error', title: 'Stock insuficiente' });
-                    await updateDoc(medRef, { existencia: stockCalculado });
+                if (salidaAntigua.medicamentos && Array.isArray(salidaAntigua.medicamentos)) {
+                    for (let item of salidaAntigua.medicamentos) {
+                        const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
+                        const medSnap = await getDoc(medRef);
+                        if (medSnap.exists()) {
+                            await updateDoc(medRef, { existencia: medSnap.data().existencia + item.cantidad });
+                        }
+                    }
+                } else if (salidaAntigua.medicamentoId) {
+                    const medRef = doc(db, "inventario_farmacia", salidaAntigua.medicamentoId);
+                    const medSnap = await getDoc(medRef);
+                    if (medSnap.exists()) {
+                        await updateDoc(medRef, { existencia: medSnap.data().existencia + (salidaAntigua.cantidad || 0) });
+                    }
+                }
+
+                let loteMedicamentosConTrazabilidad = [];
+                for (let item of loteMedicamentosTemp) {
+                    const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
+                    const medSnap = await getDoc(medRef);
+                    let stockAnterior = 0;
+                    let stockPosterior = 0;
+
+                    if (medSnap.exists()) {
+                        stockAnterior = medSnap.data().existencia;
+                        stockPosterior = stockAnterior - item.cantidad;
+                        await updateDoc(medRef, { existencia: stockPosterior });
+                    }
+
+                    loteMedicamentosConTrazabilidad.push({ ...item, stockAnterior, stockPosterior });
                 }
 
                 let fotosFinales = arrayFotos.length > 0 ? arrayFotos : (salidaAntigua.fotosEvidencia || []);
 
                 await updateDoc(doc(db, "salidas_farmacia", editSalidaID), {
                     destino,
-                    cantidad: cantidadRetiro,
+                    medicamentos: loteMedicamentosConTrazabilidad,
                     beneficiarioNombre,
+                    fechaNacimiento,
                     beneficiarioEdad,
                     beneficiarioGenero,
                     beneficiarioLocalidad,
                     beneficiarioMunicipio,
                     beneficiarioReceta,
+                    fecha: fechaEntregaFinal,
                     fotosEvidencia: fotosFinales
                 });
 
-                Swal.fire({ icon: 'success', title: '¡Actualizado!', timer: 2000, showConfirmButton: false });
+                Swal.fire({ icon: 'success', title: '¡Registro Actualizado!', timer: 2000, showConfirmButton: false });
                 cancelarEdicionSalida();
 
             } else {
-                // Procesamiento normal o múltiple para Jornadas
-                let itemsAProcesar = [];
-                if (destino === 'JORNADA ITINERANTE') {
-                    itemsAProcesar = [...loteMedicamentosTemp];
-                } else {
-                    const medId = document.getElementById('s-medicamento').value;
-                    const cantidadRetiro = parseInt(document.getElementById('s-cantidad').value);
-                    if (!medId || isNaN(cantidadRetiro) || cantidadRetiro <= 0) {
-                        return Swal.fire({ icon: 'warning', title: 'Seleccione medicamento y cantidad válida' });
-                    }
-                    const medEncontrado = inventarioGlobal.find(i => i.id === medId);
-                    if (cantidadRetiro > medEncontrado.existencia) {
-                        return Swal.fire({ icon: 'error', title: 'Stock insuficiente' });
-                    }
-                    itemsAProcesar.push({
-                        medicamentoId: medId,
-                        medicamentoNombre: medEncontrado.nombre,
-                        cantidad: cantidadRetiro,
-                        origenStock: medEncontrado.origen
-                    });
-                }
+                let loteMedicamentosConTrazabilidad = [];
 
-                // Guardar cada ítem del lote
-                for (let item of itemsAProcesar) {
+                for (let item of loteMedicamentosTemp) {
                     const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
                     const medSnap = await getDoc(medRef);
+                    let stockAnterior = 0;
+                    let stockPosterior = 0;
+
                     if (medSnap.exists()) {
-                        const stockActual = medSnap.data().existencia;
-                        await updateDoc(medRef, { existencia: stockActual - item.cantidad });
+                        stockAnterior = medSnap.data().existencia;
+                        stockPosterior = stockAnterior - item.cantidad;
+                        await updateDoc(medRef, { existencia: stockPosterior });
                     }
 
-                    await addDoc(salidasRef, {
-                        destino,
-                        medicamentoId: item.medicamentoId,
-                        medicamentoNombre: item.medicamentoNombre,
-                        cantidad: item.cantidad,
-                        beneficiarioNombre,
-                        beneficiarioEdad,
-                        beneficiarioGenero,
-                        beneficiarioLocalidad,
-                        beneficiarioMunicipio,
-                        beneficiarioReceta,
-                        origenStock: item.origenStock,
-                        usuario: usuarioLoggeado,
-                        fecha: new Date().toISOString().split('T')[0],
-                        timestamp: Date.now(),
-                        fotosEvidencia: arrayFotos,
-                        estado: "ACTIVO"
-                    });
+                    loteMedicamentosConTrazabilidad.push({ ...item, stockAnterior, stockPosterior });
                 }
 
+                await addDoc(salidasRef, {
+                    destino,
+                    medicamentos: loteMedicamentosConTrazabilidad,
+                    beneficiarioNombre,
+                    fechaNacimiento,
+                    beneficiarioEdad,
+                    beneficiarioGenero,
+                    beneficiarioLocalidad,
+                    beneficiarioMunicipio,
+                    beneficiarioReceta,
+                    usuario: usuarioLoggeado,
+                    fecha: fechaEntregaFinal,
+                    timestamp: Date.now(),
+                    fotosEvidencia: arrayFotos,
+                    estado: "ACTIVO"
+                });
+
                 Swal.fire({ icon: 'success', title: '¡Salida Registrada!', timer: 2000, showConfirmButton: false });
-                
-                // Limpiar formulario
-                document.getElementById('s-cantidad').value = "1";
-                document.getElementById('b-nombre').value = "";
-                document.getElementById('b-edad').value = "";
-                document.getElementById('b-localidad').value = "";
-                document.getElementById('b-receta').value = "";
-                inputFotos.value = "";
-                loteMedicamentosTemp = [];
-                actualizarTablaLoteTemporal();
-                filtrarMedicamentosPorDestino();
+                limpiarFormulario();
             }
 
         } catch (e) {
@@ -541,7 +666,20 @@
         }
     };
 
-    // Paginación y Renderizado de Salidas
+    function limpiarFormulario() {
+        document.getElementById('s-cantidad').value = "1";
+        document.getElementById('b-nombre').value = "";
+        document.getElementById('b-fecha-nacimiento').value = "";
+        document.getElementById('b-edad').value = "";
+        document.getElementById('b-localidad').value = "";
+        document.getElementById('b-receta').value = "";
+        document.getElementById('b-fecha-entrega').value = "";
+        document.getElementById('s-fotos').value = "";
+        loteMedicamentosTemp = [];
+        actualizarTablaLoteTemporal();
+        filtrarMedicamentosPorDestino();
+    }
+
     window.cambiarLimitePaginacion = () => {
         limitePorPagina = parseInt(document.getElementById('select-paginacion-limite').value);
         paginaActual = 1;
@@ -556,8 +694,47 @@
         renderizarSalidas();
     };
 
+    window.comprimirImagenBase64 = (file, maxWidth = 600, maxHeight = 600, calidad = 0.5) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxWidth) { height *= maxWidth / width; width = maxWidth; }
+                    } else {
+                        if (height > maxHeight) { width *= maxHeight / height; height = maxHeight; }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    resolve(canvas.toDataURL('image/jpeg', calidad));
+                };
+                img.onerror = (error) => reject(error);
+                img.src = event.target.result;
+            };
+            reader.onerror = (error) => reject(error);
+            reader.readAsDataURL(file);
+        });
+    };
+
+    function limpiarIntervalosCarrusel() {
+        carruselIntervals.forEach(interval => clearInterval(interval));
+        carruselIntervals = [];
+    }
+
     window.renderizarSalidas = () => {
+        limpiarIntervalosCarrusel();
         const tbody = document.getElementById('tabla-salidas');
+        if (!tbody) return;
+
         if (salidasGlobal.length === 0) {
             tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8;">No hay salidas registradas.</td></tr>`;
             document.getElementById('info-paginacion').innerText = `Mostrando 0 de 0 registros`;
@@ -578,146 +755,217 @@
         document.getElementById('btn-pag-anterior').disabled = paginaActual === 1;
         document.getElementById('btn-pag-siguiente').disabled = paginaActual === totalPaginas;
 
-        tbody.innerHTML = datosPaginados.map(s => {
+        tbody.innerHTML = datosPaginados.map((s, index) => {
             let htmlGaleria = `<span style="color:#94a3b8; font-size:0.8rem;">Sin fotos</span>`;
+            
             if (s.fotosEvidencia && s.fotosEvidencia.length > 0) {
-                htmlGaleria = `<div class="galeria-fotos">` + 
-                    s.fotosEvidencia.map(foto => `<img src="${foto}" class="foto-miniatura" onclick="abrirGaleriaModal('${foto}')" title="Ver imagen ampliada">`).join('') +
-                `</div>`;
-            }
+                const contenedorId = `carrusel-${index}`;
+                const imagenesHTML = s.fotosEvidencia.map((foto, idx) => 
+                    `<img src="${foto}" class="${idx === 0 ? 'activa' : ''}" data-idx="${idx}" alt="Evidencia">`
+                ).join('');
+                
+                const badgeContador = s.fotosEvidencia.length > 1 
+                    ? `<div class="badge-contador-fotos"><i class="fas fa-images"></i> ${s.fotosEvidencia.length}</div>` 
+                    : '';
 
-            let detalleTexto = "";
-            if (s.destino === 'JORNADA ITINERANTE') {
-                detalleTexto = `<b>Localidad:</b> ${s.beneficiarioLocalidad || 'N/A'}<br><small style="color:#64748b">Municipio: ${s.beneficiarioMunicipio || 'San Andrés Tuxtla'}</small>`;
-            } else {
-                detalleTexto = `
-                    <b>${s.beneficiarioNombre || 'N/A'}</b><br>
-                    <small style="color:#64748b">Edad: ${s.beneficiarioEdad || '-'} | Receta: ${s.beneficiarioReceta || 'S/F'}</small><br>
-                    <small style="color:#64748b">${s.beneficiarioLocalidad || ''}, ${s.beneficiarioMunicipio || ''}</small>
+                htmlGaleria = `
+                    <div id="${contenedorId}" class="carrusel-evidencia" onclick="abrirModalGaleriaCarrusel('${s.id}')" title="Clic para expandir evidencias">
+                        ${imagenesHTML}
+                        ${badgeContador}
+                    </div>
                 `;
             }
 
-            let etiquetaAgotado = s.estado === 'AGOTADO EN CAMPO' 
-                ? '<br><span class="badge" style="background:#fee2e2; color:#991b1b; margin-top:3px;">AGOTADO EN CAMPO</span>' 
-                : '';
+            let detalleTexto = `
+                <b>${s.beneficiarioNombre || 'N/A'}</b><br>
+                <small style="color:#64748b">Localidad: ${s.beneficiarioLocalidad || s.localidad || 'S/N'}</small><br>
+                <small style="color:#64748b">Municipio: ${s.beneficiarioMunicipio || s.municipio || 'San Andrés Tuxtla'}</small>
+            `;
+
+            let listaMedHTML = '';
+            let totalPiezas = 0;
+
+            if (s.medicamentos && Array.isArray(s.medicamentos) && s.medicamentos.length > 0) {
+                listaMedHTML = `<ul class="lista-meds-tabla">` + 
+                    s.medicamentos.map(m => {
+                        totalPiezas += Number(m.cantidad || 0);
+                        const tieneTraza = (m.stockAnterior !== undefined && m.stockPosterior !== undefined);
+                        const textoTraza = tieneTraza 
+                            ? `Antes: <b>${m.stockAnterior}</b> ➔ Quedaron: <b>${m.stockPosterior}</b>`
+                            : `Histórico sin traza inicial`;
+
+                        return `
+                            <li>
+                                <div class="med-header">
+                                    <span>${m.medicamentoNombre || 'Sin nombre'}</span>
+                                    <span>${m.cantidad || 0} uds</span>
+                                </div>
+                                <div class="med-stock-info">
+                                    <i class="fas fa-history"></i> ${textoTraza}
+                                </div>
+                            </li>
+                        `;
+                    }).join('') +
+                `</ul>`;
+            } else if (s.medicamentoNombre || s.nombreMedicamento || s.medicamento) {
+                const nombreMed = s.medicamentoNombre || s.nombreMedicamento || s.medicamento || 'Medicamento No Especificado';
+                const cantMed = s.cantidad || 1;
+                totalPiezas = Number(cantMed);
+                listaMedHTML = `<ul class="lista-meds-tabla"><li><div class="med-header"><span>${nombreMed}</span><span>${cantMed} uds</span></div></li></ul>`;
+            } else {
+                listaMedHTML = `<span style="color:#94a3b8; font-size:0.85rem;">Sin medicamentos</span>`;
+            }
 
             let botonesAccion = "";
             if (esSuperUsuario) {
                 botonesAccion = `
-                    <button class="btn btn-warning" style="padding:5px 8px;" onclick="prepararEdicionSalida('${s.id}')" title="Editar registro"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-warning" style="padding:5px 8px;" onclick="prepararEdicionSalida('${s.id}')" title="Editar"><i class="fas fa-edit"></i></button>
                     <button class="btn btn-danger" style="padding:5px 8px;" onclick="eliminarSalida('${s.id}')" title="Eliminar"><i class="fas fa-trash"></i></button>
                 `;
             } else {
-                botonesAccion = `
-                    <button class="btn btn-purple" style="padding:5px 8px; font-size:0.8rem;" onclick="devolverParcial('${s.id}')"><i class="fas fa-undo"></i> Devolver</button>
-                    <button class="btn btn-danger" style="padding:5px 5px; font-size:0.8rem;" onclick="todoSeAcabo('${s.id}')">Todo Se Acabó</button>
-                `;
+                botonesAccion = `<span style="font-size:0.8rem; color:#64748b;">Solo Admin</span>`;
             }
 
             return `
                 <tr>
-                    <td><b>${s.fecha}</b><br><span class="badge origen-propio">${s.destino}</span>${etiquetaAgotado}</td>
+                    <td><b>${s.fecha || 'Sin Fecha'}</b><br><span class="badge origen-propio">${s.destino || 'JORNADA'}</span></td>
                     <td>${detalleTexto}</td>
-                    <td><b>${s.medicamentoNombre}</b></td>
-                    <td><span class="badge" style="background:#e0f2fe; color:#0369a1;">${s.cantidad} uds</span></td>
+                    <td>${listaMedHTML}</td>
+                    <td><span class="badge" style="background:#e0f2fe; color:#0369a1;">${totalPiezas} uds</span></td>
                     <td>${htmlGaleria}</td>
                     <td>${botonesAccion}</td>
                 </tr>
             `;
         }).join('');
+
+        datosPaginados.forEach((s, index) => {
+            if (s.fotosEvidencia && s.fotosEvidencia.length > 1) {
+                iniciarRotacionCarrusel(`carrusel-${index}`);
+            }
+        });
     };
 
-    window.abrirGaleriaModal = (urlFoto) => {
-        const modal = document.getElementById('modal-galeria');
+    function iniciarRotacionCarrusel(contenedorId) {
+        const contenedor = document.getElementById(contenedorId);
+        if (!contenedor) return;
+
+        const imgs = contenedor.querySelectorAll('img');
+        if (imgs.length <= 1) return;
+
+        let currentIndex = 0;
+        let timer = setInterval(() => {
+            imgs[currentIndex].classList.remove('activa');
+            currentIndex = (currentIndex + 1) % imgs.length;
+            imgs[currentIndex].classList.add('activa');
+        }, 2500);
+
+        carruselIntervals.push(timer);
+
+        contenedor.addEventListener('mouseenter', () => clearInterval(timer));
+        contenedor.addEventListener('mouseleave', () => {
+            timer = setInterval(() => {
+                imgs[currentIndex].classList.remove('activa');
+                currentIndex = (currentIndex + 1) % imgs.length;
+                imgs[currentIndex].classList.add('activa');
+            }, 2500);
+            carruselIntervals.push(timer);
+        });
+    }
+
+    window.abrirModalGaleriaCarrusel = (salidaId) => {
+        const item = salidasGlobal.find(s => s.id === salidaId);
+        if (!item || !item.fotosEvidencia || item.fotosEvidencia.length === 0) return;
+
+        fotosModalActuales = item.fotosEvidencia;
+        indiceFotoModal = 0;
+
+        actualizarModalGaleriaView();
+        document.getElementById('modal-galeria').style.display = 'flex';
+    };
+
+    function actualizarModalGaleriaView() {
         const imgModal = document.getElementById('imagen-modal-ampliada');
-        imgModal.src = urlFoto;
-        modal.style.display = 'flex';
+        const indicador = document.getElementById('indicador-modal');
+        const btnPrev = document.getElementById('btn-modal-prev');
+        const btnNext = document.getElementById('btn-modal-next');
+
+        imgModal.src = fotosModalActuales[indiceFotoModal];
+        indicador.innerText = `Foto ${indiceFotoModal + 1} de ${fotosModalActuales.length}`;
+
+        if (fotosModalActuales.length <= 1) {
+            btnPrev.style.display = 'none';
+            btnNext.style.display = 'none';
+        } else {
+            btnPrev.style.display = 'block';
+            btnNext.style.display = 'block';
+        }
+    }
+
+    window.navegarModalGaleria = (direccion, e) => {
+        if (e) e.stopPropagation();
+        indiceFotoModal += direccion;
+        if (indiceFotoModal < 0) {
+            indiceFotoModal = fotosModalActuales.length - 1;
+        } else if (indiceFotoModal >= fotosModalActuales.length) {
+            indiceFotoModal = 0;
+        }
+        actualizarModalGaleriaView();
     };
 
-    window.cerrarGaleriaModal = () => {
+    window.cerrarGaleriaModal = (e) => {
+        if (e.target.id === 'modal-galeria') {
+            document.getElementById('modal-galeria').style.display = 'none';
+        }
+    };
+
+    window.cerrarGaleriaModalDirecto = () => {
         document.getElementById('modal-galeria').style.display = 'none';
     };
 
-    window.devolverParcial = async (id) => {
-        const item = salidasGlobal.find(s => s.id === id);
-        const { value: cantidadDevolverStr } = await Swal.fire({
-            title: 'Devolución Parcial',
-            text: `¿Cuántas piezas sobraron para devolver? (Retiradas: ${item.cantidad})`,
-            input: 'number',
-            inputAttributes: { min: 1, max: item.cantidad, step: 1 },
-            inputValue: 1,
-            showCancelButton: true,
-            confirmButtonText: 'Devolver',
-            confirmButtonColor: '#8b5cf6'
-        });
-
-        if (!cantidadDevolverStr) return;
-        const cantidadDevolver = parseInt(cantidadDevolverStr);
-
-        try {
-            const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
-            const medSnap = await getDoc(medRef);
-            if (medSnap.exists()) {
-                await updateDoc(medRef, { existencia: medSnap.data().existencia + cantidadDevolver });
-            }
-
-            const nuevaCantidad = item.cantidad - cantidadDevolver;
-            if (nuevaCantidad === 0) {
-                await deleteDoc(doc(db, "salidas_farmacia", id));
-            } else {
-                await updateDoc(doc(db, "salidas_farmacia", id), { cantidad: nuevaCantidad });
-            }
-            Swal.fire({ icon: 'success', title: 'Devolución registrada', timer: 1500, showConfirmButton: false });
-        } catch (e) {
-            Swal.fire({ icon: 'error', title: 'Error', text: e.message });
+    document.addEventListener('keydown', (e) => {
+        const modal = document.getElementById('modal-galeria');
+        if (modal && modal.style.display === 'flex') {
+            if (e.key === 'ArrowLeft') navegarModalGaleria(-1);
+            else if (e.key === 'ArrowRight') navegarModalGaleria(1);
+            else if (e.key === 'Escape') cerrarGaleriaModalDirecto();
         }
-    };
-
-    window.todoSeAcabo = async (id) => {
-        const item = salidasGlobal.find(s => s.id === id);
-        const result = await Swal.fire({
-            title: '¿Todo se terminó en campo?',
-            text: `Marcará "${item.medicamentoNombre}" como agotado sin devolver stock.`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, marcar agotado',
-            confirmButtonColor: '#ef4444'
-        });
-
-        if (!result.isConfirmed) return;
-
-        try {
-            await updateDoc(doc(db, "salidas_farmacia", id), { estado: "AGOTADO EN CAMPO" });
-            Swal.fire({ icon: 'success', title: 'Actualizado', timer: 1500, showConfirmButton: false });
-        } catch (e) {
-            Swal.fire({ icon: 'error', title: 'Error', text: e.message });
-        }
-    };
+    });
 
     window.prepararEdicionSalida = (id) => {
         if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado' });
         const item = salidasGlobal.find(s => s.id === id);
         editSalidaID = id;
         
-        document.getElementById('s-destino').value = item.destino;
+        document.getElementById('s-destino').value = item.destino || 'JORNADA ITINERANTE';
         filtrarMedicamentosPorDestino();
-        ajustarCamposSegunDestino();
 
-        setTimeout(() => {
-            document.getElementById('s-medicamento').value = item.medicamentoId;
-        }, 100);
-
-        document.getElementById('s-cantidad').value = item.cantidad;
         document.getElementById('b-nombre').value = item.beneficiarioNombre || '';
+        document.getElementById('b-fecha-nacimiento').value = item.fechaNacimiento || '';
         document.getElementById('b-edad').value = item.beneficiarioEdad || '';
         document.getElementById('b-genero').value = item.beneficiarioGenero || 'FEMENINO';
-        document.getElementById('b-localidad').value = item.beneficiarioLocalidad || '';
-        document.getElementById('b-municipio').value = item.beneficiarioMunicipio || 'San Andrés Tuxtla';
+        document.getElementById('b-localidad').value = item.beneficiarioLocalidad || item.localidad || '';
+        document.getElementById('b-municipio').value = item.beneficiarioMunicipio || item.municipio || 'San Andrés Tuxtla';
         document.getElementById('b-receta').value = item.beneficiarioReceta || '';
+        document.getElementById('b-fecha-entrega').value = item.fecha || '';
+
+        if (item.medicamentos && Array.isArray(item.medicamentos)) {
+            loteMedicamentosTemp = JSON.parse(JSON.stringify(item.medicamentos));
+        } else if (item.medicamentoId || item.medicamentoNombre || item.nombreMedicamento) {
+            loteMedicamentosTemp = [{
+                medicamentoId: item.medicamentoId || '',
+                medicamentoNombre: item.medicamentoNombre || item.nombreMedicamento || item.medicamento || 'Sin Especificar',
+                cantidad: Number(item.cantidad || 1),
+                origenStock: item.origenStock || 'RECURSO PROPIO'
+            }];
+        } else {
+            loteMedicamentosTemp = [];
+        }
+
+        actualizarTablaLoteTemporal();
         
         document.getElementById('aviso-fotos-edicion').innerText = `Este registro cuenta con ${item.fotosEvidencia ? item.fotosEvidencia.length : 0} foto(s). Si seleccionas nuevas se reemplazarán.`;
-        document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> Editar Salida';
-        document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-sync"></i> ACTUALIZAR SALIDA';
+        document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> Editar Entrega de Beneficiario';
+        document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-sync"></i> ACTUALIZAR REGISTRO Y STOCK';
         document.getElementById('btn-guardar').className = 'btn btn-warning';
         document.getElementById('btn-cancelar').style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -725,29 +973,22 @@
 
     window.cancelarEdicionSalida = () => {
         editSalidaID = null;
-        document.getElementById('s-cantidad').value = "1";
-        document.getElementById('b-nombre').value = "";
-        document.getElementById('b-edad').value = "";
-        document.getElementById('b-localidad').value = "";
-        document.getElementById('b-receta').value = "";
-        document.getElementById('s-fotos').value = "";
+        limpiarFormulario();
         document.getElementById('aviso-fotos-edicion').innerText = "";
-        document.getElementById('form-title').innerHTML = '<i class="fas fa-minus-circle"></i> Registrar Salida / Entrega de Medicamento';
-        document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-paper-plane"></i> REGISTRAR SALIDA Y DESCONTAR';
+        document.getElementById('form-title').innerHTML = '<i class="fas fa-minus-circle"></i> Registrar Entrega de Medicamentos por Beneficiario';
+        document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-paper-plane"></i> REGISTRAR SALIDA';
         document.getElementById('btn-guardar').className = 'btn btn-success';
         document.getElementById('btn-cancelar').style.display = 'none';
-        filtrarMedicamentosPorDestino();
-        ajustarCamposSegunDestino();
     };
 
     window.eliminarSalida = async (id) => {
         if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado' });
         const result = await Swal.fire({
             title: '¿Eliminar registro?',
-            text: "Las piezas regresarán al inventario.",
+            text: "Todos los medicamentos de esta salida regresarán al inventario.",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Sí, eliminar',
+            confirmButtonText: 'Sí, eliminar y devolver stock',
             confirmButtonColor: '#ef4444'
         });
 
@@ -755,29 +996,30 @@
 
         try {
             const item = salidasGlobal.find(s => s.id === id);
-            const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
-            const medSnap = await getDoc(medRef);
-            if (medSnap.exists()) {
-                await updateDoc(medRef, { existencia: medSnap.data().existencia + item.cantidad });
+
+            if (item.medicamentos && Array.isArray(item.medicamentos)) {
+                for (let med of item.medicamentos) {
+                    if (med.medicamentoId) {
+                        const medRef = doc(db, "inventario_farmacia", med.medicamentoId);
+                        const medSnap = await getDoc(medRef);
+                        if (medSnap.exists()) {
+                            await updateDoc(medRef, { existencia: medSnap.data().existencia + Number(med.cantidad || 0) });
+                        }
+                    }
+                }
+            } else if (item.medicamentoId) {
+                const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
+                const medSnap = await getDoc(medRef);
+                if (medSnap.exists()) {
+                    await updateDoc(medRef, { existencia: medSnap.data().existencia + Number(item.cantidad || 0) });
+                }
             }
+
             await deleteDoc(doc(db, "salidas_farmacia", id));
-            Swal.fire({ icon: 'success', title: '¡Eliminado!', timer: 1500, showConfirmButton: false });
+            Swal.fire({ icon: 'success', title: '¡Eliminado y stock restaurado!', timer: 1500, showConfirmButton: false });
         } catch (e) {
             Swal.fire({ icon: 'error', title: 'Error', text: e.message });
         }
-    };
-
-    function convertirBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = error => reject(error);
-        });
-    }
-
-    window.onload = () => {
-        ajustarCamposSegunDestino();
     };
 </script>
 
