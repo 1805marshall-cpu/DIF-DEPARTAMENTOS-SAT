@@ -785,62 +785,99 @@
         window.filtrar(false);
     });
 
-    window.verificarApoyoActivo = (nombreActual, idActual = null) => {
-        if (!nombreActual) return null;
-        const nombreLimpio = nombreActual.trim().toUpperCase();
+    window.verificarApoyoActivo = (nombreABuscar, idActual = null) => {
+        if (!nombreABuscar) return null;
+        const nombreLimpio = nombreABuscar.trim().toUpperCase();
         
         const coincidencias = todosLosDatos.filter(reg => {
             const esMismoRegistro = idActual && reg.id === idActual;
-            const nombreCoincide = reg.nombre && reg.nombre.trim().toUpperCase() === nombreLimpio;
-            return !esMismoRegistro && nombreCoincide;
+            if (esMismoRegistro) return false;
+
+            const beneficiarioReg = reg.nombre ? reg.nombre.trim().toUpperCase() : "";
+            const solicitanteReg = reg.nombre_solicitante ? reg.nombre_solicitante.trim().toUpperCase() : "";
+
+            const coincideBeneficiario = beneficiarioReg === nombreLimpio;
+            const coincideSolicitante = solicitanteReg === nombreLimpio;
+
+            return coincideBeneficiario || coincideSolicitante;
         });
 
         return coincidencias.length > 0 ? coincidencias : null;
     };
 
     let ultimoNombreVerificado = "";
+    let ultimoSolicitanteVerificado = "";
 
     window.revisarNombreDuplicado = async () => {
         const nombreInput = document.getElementById('nombre');
-        if (!nombreInput || nombreInput.value === ultimoNombreVerificado) return;
+        const solicitanteInput = document.getElementById('nombre_solicitante');
         
-        ultimoNombreVerificado = nombreInput.value;
+        const nombreVal = nombreInput ? nombreInput.value.trim() : "";
+        const solicitanteVal = solicitanteInput ? solicitanteInput.value.trim() : "";
+
+        if (nombreVal === ultimoNombreVerificado && solicitanteVal === ultimoSolicitanteVerificado) return;
+        
+        ultimoNombreVerificado = nombreVal;
+        ultimoSolicitanteVerificado = solicitanteVal;
+
         const idActual = document.getElementById('edit-id').value || null;
-        const nombreActual = nombreInput.value;
 
-        const historial = window.verificarApoyoActivo(nombreActual, idActual);
+        let nombresARevisar = [];
+        if (nombreVal) nombresARevisar.push({ tipo: 'BENEFICIARIO', valor: nombreVal });
+        if (solicitanteVal && solicitanteVal.toUpperCase() !== "MISMO" && solicitanteVal.toUpperCase() !== nombreVal.toUpperCase()) {
+            nombresARevisar.push({ tipo: 'SOLICITANTE', valor: solicitanteVal });
+        }
 
-        if (historial) {
+        let historialTotal = [];
+
+        nombresARevisar.forEach(item => {
+            const hist = window.verificarApoyoActivo(item.valor, idActual);
+            if (hist) {
+                hist.forEach(h => {
+                    if (!historialTotal.some(r => r.id === h.id)) {
+                        historialTotal.push({ ...h, rolCoincidencia: item.tipo, nombreBuscado: item.valor });
+                    }
+                });
+            }
+        });
+
+        if (historialTotal.length > 0) {
             let filasHtml = '';
-            historial.forEach((reg) => {
+            historialTotal.forEach((reg) => {
+                let etiquetaRol = reg.rolCoincidencia === 'SOLICITANTE' ? '<span style="background:#e0e7ff; color:var(--primary); padding:2px 6px; border-radius:4px; font-size:9px; font-weight:600;">COINCIDE COMO SOLICITANTE</span>' : '<span style="background:#fee2e2; color:var(--danger); padding:2px 6px; border-radius:4px; font-size:9px; font-weight:600;">COINCIDE COMO BENEFICIARIO</span>';
+
                 filasHtml += `
-                    <div style="text-align: left; background: #f8fafc; border-left: 3px solid var(--danger); padding: 10px; margin-bottom: 8px; border-radius: 6px; font-size: 12px; border: 1px solid var(--border);">
-                        <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 4px; color: #334155;">
+                    <div style="text-align: left; background: #f8fafc; border-left: 3px solid var(--warning); padding: 10px; margin-bottom: 8px; border-radius: 6px; font-size: 12px; border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 4px; color: #334155; align-items: center;">
                             <span><i class="fa-regular fa-calendar"></i> ${reg.fecha_registro || 'Sin fecha'}</span>
-                            <span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #475569;">${reg.estatus || 'PENDIENTE'}</span>
+                            <div>
+                                ${etiquetaRol}
+                                <span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #475569; margin-left: 4px;">${reg.estatus || 'PENDIENTE'}</span>
+                            </div>
                         </div>
-                        <div style="color: #64748b;">
-                            <div><b>Programa:</b> ${reg.programa || 'NO ASIGNADO'}</div>
-                            <div><b>Asunto:</b> ${reg.asunto || 'NO ASIGNADO'}</div>
+                        <div style="color: #64748b; margin-top: 4px;">
+                            <div><b>Beneficiario:</b> ${reg.nombre || 'N/A'}</div>
+                            <div><b>Solicitante:</b> ${reg.nombre_solicitante || 'MISMO'}</div>
+                            <div><b>Programa / Asunto:</b> ${reg.programa || 'N/A'} - ${reg.asunto || 'N/A'}</div>
                         </div>
                     </div>
                 `;
             });
 
             Swal.fire({
-                title: 'Antecedentes Detectados',
+                title: '⚠️ Alerta de Coincidencia en Base de Datos',
                 html: `
                     <div style="margin-bottom: 12px; font-size: 12px; color: #475569; text-align: left;">
-                        El ciudadano <b style="color: var(--danger);">${nombreActual.toUpperCase()}</b> ya cuenta con <b>${historial.length}</b> registro(s) previo(s):
+                        Se detectaron registros previos asociados a los nombres ingresados (como <b>Beneficiario</b> o <b>Solicitante</b>):
                     </div>
-                    <div style="max-height: 250px; overflow-y: auto; padding-right: 4px;">
+                    <div style="max-height: 260px; overflow-y: auto; padding-right: 4px;">
                         ${filasHtml}
                     </div>
                 `,
                 icon: 'warning',
-                confirmButtonText: 'Entendido',
+                confirmButtonText: 'Entendido, continuar',
                 confirmButtonColor: 'var(--primary)',
-                width: '480px'
+                width: '520px'
             });
         }
     };
@@ -863,24 +900,6 @@
         if (esExpedientes && !data.exp_recibe) {
             Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'Por favor, ingrese el nombre de quien recibe los documentos.', confirmButtonColor: 'var(--primary)' });
             return;
-        }
-
-        if (!esCapacitacion && !esExpedientes) {
-            const historial = window.verificarApoyoActivo(data.nombre);
-            if (historial) {
-                const result = await Swal.fire({
-                    title: '¿Continuar guardando?',
-                    text: `El beneficiario "${data.nombre}" ya tiene ${historial.length} registro(s) previo(s).`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: 'var(--danger)',
-                    cancelButtonColor: '#64748b',
-                    confirmButtonText: 'Sí, guardar',
-                    cancelButtonText: 'Cancelar'
-                });
-
-                if (!result.isConfirmed) return;
-            }
         }
 
         Swal.fire({
@@ -917,23 +936,6 @@
     window.actualizar = async () => {
         const id = document.getElementById('edit-id').value;
         const data = obtenerValoresForm();
-
-        if (data.asunto !== "CAPACITACION" && data.asunto !== "ENTREGA DE EXPEDIENTES DIF ESTATAL") {
-            const historial = window.verificarApoyoActivo(data.nombre, id);
-
-            if (historial && historial.length > 0) {
-                const result = await Swal.fire({
-                    title: '¿Continuar con la actualización?',
-                    text: `El nombre "${data.nombre}" ya cuenta con ${historial.length} registro(s) previo(s).`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, actualizar',
-                    cancelButtonText: 'Cancelar',
-                    confirmButtonColor: 'var(--primary)'
-                });
-                if (!result.isConfirmed) return;
-            }
-        }
 
         Swal.fire({
             title: 'Actualizando...',
@@ -990,7 +992,6 @@
             if (detalleSelect) detalleSelect.value = reg.detalle_asunto;
         }
 
-        // Carga la lista completa de fotos en el formulario para poder agregar/eliminar
         if (Array.isArray(reg.evidencias)) {
             evidenciasBase64 = [...reg.evidencias];
         } else if (reg.url_evidencia) {
@@ -1340,8 +1341,13 @@
         }
 
         const nombreInput = document.getElementById('nombre');
+        const solicitanteInput = document.getElementById('nombre_solicitante');
+        
         if (nombreInput) {
             nombreInput.addEventListener('blur', window.revisarNombreDuplicado);
+        }
+        if (solicitanteInput) {
+            solicitanteInput.addEventListener('blur', window.revisarNombreDuplicado);
         }
 
         if (nombreSocial && tituloSocial) {
@@ -1350,7 +1356,6 @@
         }
         establecerUsuarioPorDefecto();
 
-        // Control por teclado para navegabilidad del carrusel (Izquierda / Derecha / Escape)
         document.addEventListener('keydown', (e) => {
             const modal = document.getElementById('modal-foto');
             if (modal.style.display === 'flex') {
