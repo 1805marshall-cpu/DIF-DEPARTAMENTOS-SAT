@@ -3,328 +3,418 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIF 2026 | Trabajo Social </title>
+    <title>DIF 2026 | Trabajo Social</title>
+    <!-- Dependencias Únicas -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Añade este enlace en el <head> de tu HTML para habilitar Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-
-<style>
-    :root { 
-        --primary: #4f46e5; /* Indigo moderno y minimalista */
-        --success: #10b981; 
-        --warning: #f59e0b; 
-        --danger: #ef4444; 
-        --bg: #f8fafc; 
-        --text: #334155;
-        --border: #e2e8f0;
-    }
-    
-    body { 
-        font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; 
-        background: var(--bg); 
-        margin: 0; 
-        color: var(--text); 
-        font-size: 13px; 
-        letter-spacing: -0.01em;
-    }
-    
-    /* HEADER MINIMALISTA */
-    header { 
-        background: #ffffff; 
-        padding: 12px 24px; 
-        border-bottom: 1px solid var(--border); 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-    }
-    
-    .container { 
-        max-width: 1400px; 
-        margin: 20px auto; 
-        padding: 0 20px; 
-    }
-    
-    .card { 
-        background: #ffffff; 
-        padding: 24px; 
-        border-radius: 8px; 
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.04); 
-        border: 1px solid var(--border); 
-        margin-bottom: 20px; 
-    }
-    
-    h3 { 
-        margin: 0 0 16px 0; 
-        font-size: 11px; 
-        font-weight: 600;
-        color: #64748b; 
-        text-transform: uppercase; 
-        letter-spacing: 0.05em; 
-    }
-    
-    /* FORMULARIOS LIMPIOS */
-    .form-grid { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
-        gap: 16px; 
-    }
-    
-    .form-group { 
-        display: flex; 
-        flex-direction: column; 
-    }
-    
-    label { 
-        font-size: 10px; 
-        font-weight: 600; 
-        color: #64748b; 
-        text-transform: uppercase; 
-        margin-bottom: 6px; 
-        letter-spacing: 0.03em;
-    }
-    
-    input, select, textarea { 
-        padding: 8px 12px; 
-        border: 1px solid var(--border); 
-        border-radius: 6px; 
-        font-size: 12px; 
-        outline: none; 
-        background: #ffffff;
-        color: var(--text);
-        transition: all 0.2s ease; 
-        width: 100%;
-        box-sizing: border-box;
-    }
-    
-    input:focus, select:focus, textarea:focus { 
-        border-color: var(--primary); 
-        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08); 
-    }
-    
-    /* BOTONES MINIMALISTAS */
-    .btn-box { 
-        display: flex; 
-        gap: 10px; 
-        margin-top: 20px; 
-        flex-wrap: wrap; 
-    }
-    
-    .btn { 
-        padding: 8px 16px; 
-        border: 1px solid transparent; 
-        border-radius: 6px; 
-        font-weight: 500; 
-        cursor: pointer; 
-        font-size: 11px; 
-        color: white; 
-        background: var(--primary);
-        display: inline-flex; 
-        align-items: center; 
-        justify-content: center;
-        gap: 8px; 
-        transition: background 0.2s, transform 0.1s; 
-    }
-    
-    .btn:hover { 
-        opacity: 0.92; 
-    }
-
-    .btn-secondary {
-        background: #ffffff;
-        color: #475569;
-        border-color: var(--border);
-    }
-
-    .btn-secondary:hover {
-        background: #f8fafc;
-        color: #0f172a;
-    }
-    
-    /* CAJA DE BÚSQUEDA */
-    .search-box { 
-        background: #ffffff; 
-        padding: 16px; 
-        border-radius: 8px; 
-        border: 1px solid var(--border); 
-        margin-bottom: 20px; 
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px; 
-        align-items: flex-end; 
-    }
-    
-    /* TABLAS MODERNAS */
-    .table-wrap { 
-        background: #ffffff; 
-        border-radius: 8px; 
-        border: 1px solid var(--border); 
-        overflow-x: auto; 
-        width: 100%;
-    }
-    
-    table { 
-        width: 100%; 
-        border-collapse: collapse; 
-    }
-    
-    th { 
-        background: #f8fafc; 
-        padding: 10px 16px; 
-        text-align: left; 
-        font-size: 10px; 
-        font-weight: 600;
-        color: #64748b; 
-        border-bottom: 1px solid var(--border); 
-        text-transform: uppercase; 
-        letter-spacing: 0.03em;
-    }
-    
-    td { 
-        padding: 12px 16px; 
-        border-bottom: 1px solid #f1f5f9; 
-        vertical-align: middle; 
-        color: #334155;
-    }
-    
-    tr:hover { 
-        background-color: #fafafa; 
-    }
-    
-    /* BADGES DISCRETOS */
-    .status-badge { 
-        padding: 3px 8px; 
-        border-radius: 4px; 
-        font-size: 10px; 
-        font-weight: 500; 
-        text-transform: uppercase; 
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-    }
-    
-    .bg-atendido, .bg-realizado, .bg-validado { background: #ecfdf5; color: #047857; }
-    .bg-entregado, .bg-en-proceso { background: #f0f9ff; color: #0369a1; }
-    .bg-pendiente { background: #fffbeb; color: #b45309; }
-    .bg-cancelado { background: #fef2f2; color: #b91c1c; }
-    
-    /* PAGINACIÓN */
-    .paginacion-bar { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        background: #ffffff; 
-        padding: 12px 16px; 
-        border-radius: 8px; 
-        margin-top: 15px; 
-        border: 1px solid var(--border); 
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    
-    .btn-pag { 
-        padding: 6px 12px; 
-        border: 1px solid var(--border); 
-        background: white; 
-        border-radius: 6px; 
-        cursor: pointer; 
-        font-size: 11px; 
-        color: #475569;
-    }
-    
-    .btn-pag:hover:not(:disabled) {
-        background: #f8fafc;
-    }
-
-    .btn-pag:disabled { 
-        background: #f1f5f9; 
-        cursor: not-allowed; 
-        color: #cbd5e1; 
-    }
-    
-    /* RESPONSIVIDAD MÓVIL */
-    @media (max-width: 768px) {
-        header {
-            flex-direction: column;
-            gap: 8px;
-            text-align: center;
-            padding: 12px;
-        }
-
-        .container {
-            padding: 0 10px;
-        }
-
-        .table-wrap {
-            border: none;
-            background: transparent;
-        }
-
-        table, thead, tbody, th, td, tr { 
-            display: block; 
-        }
-
-        thead tr { 
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
-        }
-
-        tr { 
-            background: #ffffff;
-            border: 1px solid var(--border); 
-            border-radius: 8px;
-            margin-bottom: 12px;
-            padding: 12px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-        }
-
-        td { 
-            border: none;
-            border-bottom: 1px solid #f8fafc; 
-            position: relative;
-            padding-left: 45% !important; 
-            text-align: right;
-            font-size: 12px;
-            min-height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-
-        td:last-child {
-            border-bottom: 0;
-        }
-
-        td:before { 
-            position: absolute;
-            top: 50%;
-            left: 12px;
-            transform: translateY(-50%);
-            width: 40%; 
-            padding-right: 10px; 
-            white-space: nowrap;
-            text-align: left;
-            font-weight: 600;
-            color: #64748b;
-            font-size: 10px;
-            text-transform: uppercase;
-            content: attr(data-label); 
+    <style>
+        :root { 
+            --primary: #4f46e5;
+            --success: #10b981; 
+            --warning: #f59e0b; 
+            --danger: #ef4444; 
+            --bg: #f8fafc; 
+            --text: #334155;
+            --border: #e2e8f0;
         }
         
-        .paginacion-bar {
-            flex-direction: column;
-            text-align: center;
+        body { 
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            color: var(--text); 
+            font-size: 13px; 
+            letter-spacing: -0.01em;
         }
-    }
+        
+        header { 
+            background: #ffffff; 
+            padding: 12px 24px; 
+            border-bottom: 1px solid var(--border); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        
+        .container { 
+            max-width: 1400px; 
+            margin: 20px auto; 
+            padding: 0 20px; 
+        }
+        
+        .card { 
+            background: #ffffff; 
+            padding: 24px; 
+            border-radius: 8px; 
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.04); 
+            border: 1px solid var(--border); 
+            margin-bottom: 20px; 
+        }
+        
+        h3 { 
+            margin: 0 0 16px 0; 
+            font-size: 11px; 
+            font-weight: 600;
+            color: #64748b; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+        }
+        
+        .form-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+            gap: 16px; 
+        }
+        
+        .form-group { 
+            display: flex; 
+            flex-direction: column; 
+        }
+        
+        label { 
+            font-size: 10px; 
+            font-weight: 600; 
+            color: #64748b; 
+            text-transform: uppercase; 
+            margin-bottom: 6px; 
+            letter-spacing: 0.03em;
+        }
+        
+        input, select, textarea { 
+            padding: 8px 12px; 
+            border: 1px solid var(--border); 
+            border-radius: 6px; 
+            font-size: 12px; 
+            outline: none; 
+            background: #ffffff;
+            color: var(--text);
+            transition: all 0.2s ease; 
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        input:focus, select:focus, textarea:focus { 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.08); 
+        }
 
-    @media print { 
-        .no-print { display: none !important; } 
-    }
-</style>
+        /* Botón estilizado para subir fotos */
+        .file-upload-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #f1f5f9;
+            border: 2px dashed var(--border);
+            border-radius: 6px;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-upload-label:hover {
+            background: #e2e8f0;
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .file-upload-input {
+            display: none;
+        }
+        
+        .btn-box { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 20px; 
+            flex-wrap: wrap; 
+        }
+        
+        .btn { 
+            padding: 8px 16px; 
+            border: 1px solid transparent; 
+            border-radius: 6px; 
+            font-weight: 500; 
+            cursor: pointer; 
+            font-size: 11px; 
+            color: white; 
+            background: var(--primary);
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 8px; 
+            transition: background 0.2s, transform 0.1s; 
+        }
+        
+        .btn:hover { 
+            opacity: 0.92; 
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #475569;
+            border-color: var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: #f8fafc;
+            color: #0f172a;
+        }
+        
+        .search-box { 
+            background: #ffffff; 
+            padding: 16px; 
+            border-radius: 8px; 
+            border: 1px solid var(--border); 
+            margin-bottom: 20px; 
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px; 
+            align-items: flex-end; 
+        }
+        
+        .table-wrap { 
+            background: #ffffff; 
+            border-radius: 8px; 
+            border: 1px solid var(--border); 
+            overflow-x: auto; 
+            width: 100%;
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        
+        th { 
+            background: #f8fafc; 
+            padding: 10px 16px; 
+            text-align: left; 
+            font-size: 10px; 
+            font-weight: 600;
+            color: #64748b; 
+            border-bottom: 1px solid var(--border); 
+            text-transform: uppercase; 
+            letter-spacing: 0.03em;
+        }
+        
+        td { 
+            padding: 12px 16px; 
+            border-bottom: 1px solid #f1f5f9; 
+            vertical-align: middle; 
+            color: #334155;
+        }
+        
+        tr:hover { 
+            background-color: #fafafa; 
+        }
+        
+        .status-badge { 
+            padding: 3px 8px; 
+            border-radius: 4px; 
+            font-size: 10px; 
+            font-weight: 500; 
+            text-transform: uppercase; 
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .preview-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+        
+        .thumb-box {
+            position: relative;
+            width: 55px;
+            height: 55px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .thumb-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        .thumb-box .btn-remove-img {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .thumb-box .btn-remove-img:hover {
+            background: rgba(220, 38, 38, 1);
+        }
+        
+        .bg-atendido, .bg-realizado, .bg-validado { background: #ecfdf5; color: #047857; }
+        .bg-entregado, .bg-en-proceso { background: #f0f9ff; color: #0369a1; }
+        .bg-pendiente { background: #fffbeb; color: #b45309; }
+        .bg-cancelado { background: #fef2f2; color: #b91c1c; }
+        
+        .paginacion-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: #ffffff; 
+            padding: 12px 16px; 
+            border-radius: 8px; 
+            margin-top: 15px; 
+            border: 1px solid var(--border); 
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .btn-pag { 
+            padding: 6px 12px; 
+            border: 1px solid var(--border); 
+            background: white; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 11px; 
+            color: #475569;
+        }
+        
+        .btn-pag:hover:not(:disabled) {
+            background: #f8fafc;
+        }
+
+        .btn-pag:disabled { 
+            background: #f1f5f9; 
+            cursor: not-allowed; 
+            color: #cbd5e1; 
+        }
+
+        /* Estilos del Carrusel / Modal */
+        .modal-carrusel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            font-size: 24px;
+            padding: 12px 16px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background 0.2s;
+            user-select: none;
+        }
+
+        .modal-carrusel-nav:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .modal-carrusel-prev { left: 20px; }
+        .modal-carrusel-next { right: 20px; }
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 8px;
+                text-align: center;
+                padding: 12px;
+            }
+
+            .container {
+                padding: 0 10px;
+            }
+
+            .table-wrap {
+                border: none;
+                background: transparent;
+            }
+
+            table, thead, tbody, th, td, tr { 
+                display: block; 
+            }
+
+            thead tr { 
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+
+            tr { 
+                background: #ffffff;
+                border: 1px solid var(--border); 
+                border-radius: 8px;
+                margin-bottom: 12px;
+                padding: 12px;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            }
+
+            td { 
+                border: none;
+                border-bottom: 1px solid #f8fafc; 
+                position: relative;
+                padding-left: 45% !important; 
+                text-align: right;
+                font-size: 12px;
+                min-height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+            }
+
+            td:last-child {
+                border-bottom: 0;
+            }
+
+            td:before { 
+                position: absolute;
+                top: 50%;
+                left: 12px;
+                transform: translateY(-50%);
+                width: 40%; 
+                padding-right: 10px; 
+                white-space: nowrap;
+                text-align: left;
+                font-weight: 600;
+                color: #64748b;
+                font-size: 10px;
+                text-transform: uppercase;
+                content: attr(data-label); 
+            }
+            
+            .paginacion-bar {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media print { 
+            .no-print { display: none !important; } 
+        }
+    </style>
 </head>
 <body>
 
@@ -345,27 +435,15 @@
     <div class="card no-print">
         <h3><i class="fa-solid fa-folder-plus"></i> Registro de Casos y Apoyos</h3>
         <input type="hidden" id="edit-id">
-        <input type="hidden" id="eliminar-foto-flag" value="false">
         
         <div class="form-grid" style="display: flex; flex-direction: column; gap: 16px;">
             
-            <!-- Datos del Beneficiario -->
-            <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff;">
-                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-user"></i> Datos del Beneficiario</legend>
+            <!-- 1. DETALLES DEL TRÁMITE O APOYO -->
+            <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #fafafa;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-hand-holding-heart"></i> Detalles del Trámite o Apoyo</legend>
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px;">
                     <div class="form-group"><label>No. Consecutivo</label><input type="text" id="numero_consecutivo" readonly style="background:#f8fafc; font-weight:500;"></div>
                     <div class="form-group"><label>Fecha de Registro</label><input type="date" id="fecha_registro"></div>
-                    <div class="form-group" style="grid-column: span 2;"><label>Nombre del Beneficiario</label><input type="text" id="nombre" placeholder="Nombre completo"></div>
-                    <div class="form-group"><label>Teléfono</label><input type="tel" id="telefono" placeholder="294..."></div>
-                    <div class="form-group"><label>Colonia / Localidad</label><input type="text" id="col_loc"></div>
-                    <div class="form-group" style="grid-column: span 2;"><label>Dirección Exacta</label><input type="text" id="direccion"></div>
-                </div>
-            </fieldset>
-
-            <!-- Detalles del Trámite -->
-            <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #fafafa;">
-                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-hand-holding-heart"></i> Detalles del Trámite o Apoyo</legend>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
                     <div class="form-group">
                         <label>Programa</label>
                         <select id="programa" onchange="actualizarAsuntos()">
@@ -377,14 +455,65 @@
                             <option value="V.D./E. SOCIOECONOMICO">VISITA DOMICILIARIA / ESTUDIO SOCIOECONOMICO</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>Asunto</label><select id="asunto"><option value="">-- SELECCIONE PROGRAMA --</option></select></div>
+                    <div class="form-group"><label>Asunto</label><select id="asunto" onchange="evaluarVistaAsunto()"><option value="">-- SELECCIONE PROGRAMA --</option></select></div>
+                    
                     <div class="form-group" id="container-detalle-especifico" style="display:none;"><label id="label-detalle">ESPECIFICACIÓN</label><select id="detalle_asunto"></select></div>
                     <div class="form-group"><label>Folio Expediente</label><input type="text" id="folio_expediente" placeholder="Opcional"></div>
-                    <div class="form-group" style="grid-column: span 3;"><label>Detalles Específicos</label><input type="text" id="detalles" placeholder="Breve descripción"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Detalles Específicos</label><input type="text" id="detalles" placeholder="Breve descripción"></div>
                 </div>
             </fieldset>
 
-            <!-- Estatus y Seguimiento -->
+            <!-- 2A. DATOS DEL BENEFICIARIO (MODO ESTÁNDAR) -->
+            <fieldset id="section-beneficiario" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-user"></i> Datos del Beneficiario</legend>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group" style="grid-column: span 2;"><label>Nombre Completo del Beneficiario</label><input type="text" id="nombre" placeholder="Nombre completo"></div>
+                    <div class="form-group"><label>Fecha Nacimiento</label><input type="date" id="fecha_nacimiento" onchange="calcularEdad()"></div>
+                    <div class="form-group"><label>Edad Automática</label><input type="text" id="edad" readonly placeholder="Auto" style="background:#f8fafc; font-weight:500;"></div>
+                    
+                    <div class="form-group">
+                        <label>Género</label>
+                        <select id="genero">
+                            <option value="">-- SELECCIONAR --</option>
+                            <option value="MASCULINO">MASCULINO</option>
+                            <option value="FEMENINO">FEMENINO</option>
+                            <option value="OTRO">OTRO</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Teléfono</label><input type="tel" id="telefono" placeholder="294..."></div>
+                    <div class="form-group"><label>Colonia</label><input type="text" id="colonia"></div>
+                    <div class="form-group"><label>Localidad</label><input type="text" id="localidad"></div>
+
+                    <div class="form-group" style="grid-column: span 2;"><label>Dirección Exacta</label><input type="text" id="direccion"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Nombre Completo del Solicitante</label><input type="text" id="nombre_solicitante" placeholder="En caso de acudir un tercero / tutor"></div>
+                </div>
+            </fieldset>
+
+            <!-- 2B. DATOS DEL EVENTO / CAPACITACIÓN (MODO CAPACITACIÓN) -->
+            <fieldset id="section-capacitacion" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff; display: none;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-chalkboard-user"></i> Datos del Evento / Capacitación</legend>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group" style="grid-column: span 2;"><label>Nombre Completo</label><input type="text" id="cap_nombre" placeholder="Nombre completo del capacitador o evento"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Lugar</label><input type="text" id="cap_lugar" placeholder="Ubicación / Sede"></div>
+                    <div class="form-group"><label>Fecha</label><input type="date" id="cap_fecha"></div>
+                    <div class="form-group"><label>Hora</label><input type="time" id="cap_hora"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Tema</label><input type="text" id="cap_tema" placeholder="Tema impartido"></div>
+                </div>
+            </fieldset>
+
+            <!-- 2C. DATOS DE ENTREGA DE EXPEDIENTES DIF ESTATAL -->
+            <fieldset id="section-expedientes" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff; display: none;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-folder-closed"></i> Datos de Entrega de Expedientes DIF Estatal</legend>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group" style="grid-column: span 2;"><label>Nombre de quien recibe</label><input type="text" id="exp_recibe" placeholder="Nombre completo del funcionario/persona que recibe"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Tipo de Expediente</label><input type="text" id="exp_tipo" placeholder="Ej. Apoyos Funcionales, Proyectos, etc."></div>
+                    <div class="form-group"><label>Cantidad de Expedientes</label><input type="number" id="exp_cantidad" placeholder="0" min="1"></div>
+                    <div class="form-group"><label>Fecha de Entrega</label><input type="date" id="exp_fecha_entrega"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Detalle de Entrega</label><input type="text" id="exp_detalle" placeholder="Observaciones o notas adicionales de la entrega"></div>
+                </div>
+            </fieldset>
+
+            <!-- 3. ESTATUS Y SEGUIMIENTO -->
             <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff;">
                 <legend style="padding: 0 8px; font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-clipboard-check"></i> Estatus y Seguimiento</legend>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
@@ -402,7 +531,7 @@
                     </div>
                     <div class="form-group"><label>H. Mixtos</label><select id="horarios_mixtos"><option value="NO">NO</option><option value="SI">SI</option></select></div>
                     <div class="form-group">
-                        <label>Usuario que Atiende</label>
+                        <label id="label-encargado">Encargado que Atiende</label>
                         <select id="usuario">
                             <option value="">-- SELECCIONAR --</option>
                             <option value="JUANITA C. CAMPECHANO QUEZADA">JUANITA C. CAMPECHANO QUEZADA</option>
@@ -411,14 +540,24 @@
                         </select>
                     </div>
                     <div class="form-group" style="grid-column: span 3;"><label>Observaciones</label><input type="text" id="observaciones"></div>
+                </div>
+            </fieldset>
+
+            <!-- 4. EVIDENCIA FOTOGRÁFICA MÚLTIPLE (EDICIÓN Y GALERÍA) -->
+            <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #fafafa;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-images"></i> Evidencia Fotográfica Múltiple</legend>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
                     <div class="form-group">
-                        <label>Evidencia (Imagen)</label>
-                        <input type="file" id="input_file" accept="image/*">
-                        <small id="txt-compresion" style="color:var(--success); font-weight:500; margin-top:4px; display:none;"><i class="fa-solid fa-bolt"></i> Foto optimizada con éxito.</small>
-                        <button type="button" id="btn-delete-photo" style="display:none; background:var(--danger); color:white; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:10px; font-weight:500; margin-top:6px; align-items:center; gap:5px; width:fit-content;" onclick="quitarFotoForm()">
-                            <i class="fa-solid fa-trash-can"></i> Quitar foto actual
-                        </button>
-                    </div>                
+                        <label>Seleccionar fotos</label>
+                        <div class="file-upload-wrapper">
+                            <label for="input_file" class="file-upload-label">
+                                <i class="fa-solid fa-cloud-arrow-up" style="font-size: 16px;"></i> Subir Imágenes / Tomar Foto
+                            </label>
+                            <input type="file" id="input_file" class="file-upload-input" accept="image/*" multiple onchange="procesarNuevasFotos(event)">
+                        </div>
+                        <small id="txt-compresion" style="color:var(--success); font-weight:500; margin-top:6px; display:none;"><i class="fa-solid fa-bolt"></i> Fotos optimizadas correctamente.</small>
+                    </div>
+                    <div id="galeria-preview" class="preview-container"></div>
                 </div>
             </fieldset>
         </div>
@@ -460,14 +599,16 @@
             <thead>
                 <tr>
                     <th>No.</th>
-                    <th>Evidencia</th>
+                    <th>Evidencia(s)</th>
                     <th>Fecha</th>
-                    <th>Beneficiario</th>
-                    <th>Col / Loc</th>
+                    <th>Beneficiario / Evento / Recibe</th>
+                    <th>Edad / Fecha Entrega / Detalle</th>
+                    <th>Solicitante / Lugar / Tipo Exp</th>
+                    <th>Col / Loc / Tema / Cantidad</th>
                     <th>Programa</th>
                     <th>Asunto</th>
                     <th>Estatus</th>
-                    <th>Usuario</th>
+                    <th>Encargado</th>
                     <th class="no-print">Acciones</th>
                 </tr>
             </thead>
@@ -476,10 +617,19 @@
     </div>
 </div>
 
-<!-- Modal Foto -->
-<div id="modal-foto" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.8); align-items:center; justify-content:center;">
-    <span onclick="document.getElementById('modal-foto').style.display='none'" style="position:absolute; top:20px; right:30px; color:white; font-size:32px; cursor:pointer; user-select:none;"><i class="fa-solid fa-xmark"></i></span>
-    <img id="img-modal" style="max-width:90%; max-height:85%; border-radius:6px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+<!-- Modal Carrusel / Visualizador de Fotos -->
+<div id="modal-foto" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.9); align-items:center; justify-content:center; flex-direction:column;">
+    <span onclick="cerrarCarrusel()" style="position:absolute; top:20px; right:30px; color:white; font-size:32px; cursor:pointer; user-select:none; z-index: 1010;"><i class="fa-solid fa-xmark"></i></span>
+    
+    <button class="modal-carrusel-nav modal-carrusel-prev" onclick="cambiarImagenCarrusel(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+    
+    <div style="position: relative; max-width: 85%; max-height: 75%; display: flex; align-items: center; justify-content: center;">
+        <img id="img-modal" style="max-width:100%; max-height:75vh; border-radius:6px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); object-fit: contain;">
+    </div>
+    
+    <button class="modal-carrusel-nav modal-carrusel-next" onclick="cambiarImagenCarrusel(1)"><i class="fa-solid fa-chevron-right"></i></button>
+
+    <div id="modal-galeria-thumbs" class="preview-container" style="margin-top:20px; max-width: 90%; overflow-x: auto;"></div>
 </div>
 
 <script type="module">
@@ -501,12 +651,63 @@
     let filasPorPagina = 10;
     let proximoNo = 1;
 
+    let evidenciasBase64 = [];
+    
+    // Variables para el carrusel modal
+    let carruselLista = [];
+    let carruselIndexActual = 0;
+
     const listaCampos = [
-        'numero_consecutivo', 'fecha_registro', 'nombre', 'telefono', 
-        'col_loc', 'direccion', 'programa', 'asunto', 'detalle_asunto',
-        'horarios_mixtos', 'folio_expediente', 'estatus', 
-        'detalles', 'usuario', 'observaciones', 'url_evidencia'
+        'numero_consecutivo', 'fecha_registro', 'nombre', 'fecha_nacimiento', 'edad', 'genero',
+        'telefono', 'colonia', 'localidad', 'direccion', 'nombre_solicitante', 'programa', 'asunto', 'detalle_asunto',
+        'horarios_mixtos', 'folio_expediente', 'estatus', 'detalles', 'usuario', 'observaciones',
+        'cap_nombre', 'cap_lugar', 'cap_fecha', 'cap_hora', 'cap_tema',
+        'exp_recibe', 'exp_tipo', 'exp_cantidad', 'exp_fecha_entrega', 'exp_detalle'
     ];
+
+    window.evaluarVistaAsunto = () => {
+        const asunto = document.getElementById('asunto').value;
+        const secBeneficiario = document.getElementById('section-beneficiario');
+        const secCapacitacion = document.getElementById('section-capacitacion');
+        const secExpedientes = document.getElementById('section-expedientes');
+        const labelEncargado = document.getElementById('label-encargado');
+
+        if (asunto === "CAPACITACION") {
+            secBeneficiario.style.display = 'none';
+            secCapacitacion.style.display = 'block';
+            secExpedientes.style.display = 'none';
+            labelEncargado.innerText = "Datos del Encargado";
+        } else if (asunto === "ENTREGA DE EXPEDIENTES DIF ESTATAL") {
+            secBeneficiario.style.display = 'none';
+            secCapacitacion.style.display = 'none';
+            secExpedientes.style.display = 'block';
+            labelEncargado.innerText = "Encargado que Entrega";
+        } else {
+            secBeneficiario.style.display = 'block';
+            secCapacitacion.style.display = 'none';
+            secExpedientes.style.display = 'none';
+            labelEncargado.innerText = "Encargado que Atiende";
+        }
+        window.actualizarEspecificaciones();
+    };
+
+    window.calcularEdad = () => {
+        const fn = document.getElementById('fecha_nacimiento').value;
+        const inputEdad = document.getElementById('edad');
+        if (!fn) {
+            inputEdad.value = "";
+            return;
+        }
+        const hoy = new Date();
+        const cumpleanos = new Date(fn);
+        let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+        const m = hoy.getMonth() - cumpleanos.getMonth();
+
+        if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) {
+            edad--;
+        }
+        inputEdad.value = edad >= 0 ? `${edad} AÑOS` : "";
+    };
 
     function comprimirImagen(file) {
         return new Promise((resolve) => {
@@ -536,6 +737,45 @@
         });
     }
 
+    window.procesarNuevasFotos = async (e) => {
+        const files = Array.from(e.target.files);
+        if(!files.length) return;
+
+        Swal.fire({
+            title: 'Procesando imágenes...',
+            text: 'Optimizando calidad y tamaño.',
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading()
+        });
+
+        for (const file of files) {
+            const b64 = await comprimirImagen(file);
+            evidenciasBase64.push(b64);
+        }
+
+        Swal.close();
+        document.getElementById('txt-compresion').style.display = 'inline-block';
+        renderPreviewEvidencias();
+    };
+
+    function renderPreviewEvidencias() {
+        const galeria = document.getElementById('galeria-preview');
+        galeria.innerHTML = evidenciasBase64.map((b64, index) => `
+            <div class="thumb-box">
+                <img src="${b64}" onclick="abrirCarrusel(${index}, 'FORMULARIO')" alt="Evidencia ${index+1}">
+                <button type="button" class="btn-remove-img" onclick="eliminarFotoEvidencia(${index})" title="Eliminar esta foto"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        `).join('');
+    }
+
+    window.eliminarFotoEvidencia = (index) => {
+        evidenciasBase64.splice(index, 1);
+        renderPreviewEvidencias();
+        if(evidenciasBase64.length === 0) {
+            document.getElementById('txt-compresion').style.display = 'none';
+        }
+    };
+
     onSnapshot(apoyosRef, (snapshot) => {
         todosLosDatos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const numeros = todosLosDatos.map(d => parseInt(d.numero_consecutivo) || 0);
@@ -545,7 +785,6 @@
         window.filtrar(false);
     });
 
-    // 1. COMPROBACIÓN TOTAL CONTRA TODAS LAS FECHAS REGISTRADAS
     window.verificarApoyoActivo = (nombreActual, idActual = null) => {
         if (!nombreActual) return null;
         const nombreLimpio = nombreActual.trim().toUpperCase();
@@ -559,7 +798,6 @@
         return coincidencias.length > 0 ? coincidencias : null;
     };
 
-    // 2. LANZAR ALERTA EN TIEMPO REAL CON EL HISTORIAL COMPLETO DE FECHAS
     let ultimoNombreVerificado = "";
 
     window.revisarNombreDuplicado = async () => {
@@ -607,58 +845,65 @@
         }
     };
 
-    // 3. ADAPTACIÓN DE BOTÓN GUARDAR
     window.subirYGuardar = async () => {
         const data = obtenerValoresForm();
-        if(!data.nombre) {
+        const esCapacitacion = data.asunto === "CAPACITACION";
+        const esExpedientes = data.asunto === "ENTREGA DE EXPEDIENTES DIF ESTATAL";
+
+        if (!esCapacitacion && !esExpedientes && !data.nombre) {
             Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'Por favor, ingrese el nombre del beneficiario.', confirmButtonColor: 'var(--primary)' });
             return;
         }
 
-        const historial = window.verificarApoyoActivo(data.nombre);
-        if (historial) {
-            const result = await Swal.fire({
-                title: '¿Continuar guardando?',
-                text: `El beneficiario "${data.nombre}" ya tiene ${historial.length} registro(s) previo(s).`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: 'var(--danger)',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'Sí, guardar',
-                cancelButtonText: 'Cancelar'
-            });
+        if (esCapacitacion && !data.cap_nombre) {
+            Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'Por favor, ingrese el nombre para la capacitación.', confirmButtonColor: 'var(--primary)' });
+            return;
+        }
 
-            if (!result.isConfirmed) return;
+        if (esExpedientes && !data.exp_recibe) {
+            Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'Por favor, ingrese el nombre de quien recibe los documentos.', confirmButtonColor: 'var(--primary)' });
+            return;
+        }
+
+        if (!esCapacitacion && !esExpedientes) {
+            const historial = window.verificarApoyoActivo(data.nombre);
+            if (historial) {
+                const result = await Swal.fire({
+                    title: '¿Continuar guardando?',
+                    text: `El beneficiario "${data.nombre}" ya tiene ${historial.length} registro(s) previo(s).`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: 'var(--danger)',
+                    cancelButtonColor: '#64748b',
+                    confirmButtonText: 'Sí, guardar',
+                    cancelButtonText: 'Cancelar'
+                });
+
+                if (!result.isConfirmed) return;
+            }
         }
 
         Swal.fire({
             title: 'Guardando registro...',
-            text: 'Procesando imagen y guardando datos.',
+            text: 'Guardando información y evidencias...',
             allowOutsideClick: false,
             didOpen: () => { Swal.showLoading(); }
         });
 
-        const fileInput = document.getElementById('input_file');
-        const file = fileInput.files[0];
-        let base64Data = ""; 
-
         try {
-            if (file) {
-                base64Data = await comprimirImagen(file);
-            }
-            
-            data.url_evidencia = base64Data;
+            data.evidencias = evidenciasBase64;
+            data.url_evidencia = evidenciasBase64.length > 0 ? evidenciasBase64[0] : "";
             await addDoc(apoyosRef, data);
 
             Swal.fire({
                 icon: 'success',
                 title: '¡Guardado exitoso!',
-                text: 'El nuevo apoyo ha sido registrado correctamente.',
+                text: 'El nuevo registro ha sido guardado correctamente.',
                 timer: 2000,
                 showConfirmButton: false
             });
             
-            limpiarForm();
+            window.limpiarForm();
         } catch (e) {
             Swal.fire({
                 icon: 'error',
@@ -672,19 +917,22 @@
     window.actualizar = async () => {
         const id = document.getElementById('edit-id').value;
         const data = obtenerValoresForm();
-        const historial = window.verificarApoyoActivo(data.nombre, id);
 
-        if (historial && historial.length > 0) {
-            const result = await Swal.fire({
-                title: '¿Continuar con la actualización?',
-                text: `El nombre "${data.nombre}" ya cuenta con ${historial.length} registro(s) previo(s).`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, actualizar',
-                cancelButtonText: 'Cancelar',
-                confirmButtonColor: 'var(--primary)'
-            });
-            if (!result.isConfirmed) return;
+        if (data.asunto !== "CAPACITACION" && data.asunto !== "ENTREGA DE EXPEDIENTES DIF ESTATAL") {
+            const historial = window.verificarApoyoActivo(data.nombre, id);
+
+            if (historial && historial.length > 0) {
+                const result = await Swal.fire({
+                    title: '¿Continuar con la actualización?',
+                    text: `El nombre "${data.nombre}" ya cuenta con ${historial.length} registro(s) previo(s).`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, actualizar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: 'var(--primary)'
+                });
+                if (!result.isConfirmed) return;
+            }
         }
 
         Swal.fire({
@@ -694,19 +942,9 @@
             didOpen: () => { Swal.showLoading(); }
         });
 
-        const fileInput = document.getElementById('input_file');
-        const file = fileInput.files[0];
-        const borrarFotoFlag = document.getElementById('eliminar-foto-flag').value === "true";
-
         try {
-            if (file) {
-                data.url_evidencia = await comprimirImagen(file);
-            } else if (borrarFotoFlag) {
-                data.url_evidencia = "";
-            } else {
-                const regOriginal = todosLosDatos.find(r => r.id === id);
-                data.url_evidencia = (regOriginal && regOriginal.url_evidencia) ? regOriginal.url_evidencia : "";
-            }
+            data.evidencias = evidenciasBase64;
+            data.url_evidencia = evidenciasBase64.length > 0 ? evidenciasBase64[0] : "";
             
             await updateDoc(doc(db, "trabajo_social", id), data);
             
@@ -717,7 +955,7 @@
                 timer: 2000,
                 showConfirmButton: false
             });
-            limpiarForm();
+            window.limpiarForm();
         } catch (e) { 
             Swal.fire({
                 icon: 'error',
@@ -732,56 +970,39 @@
         const reg = todosLosDatos.find(r => r.id === id);
         if(!reg) return;
         document.getElementById('edit-id').value = id;
-        document.getElementById('eliminar-foto-flag').value = "false";
         
         listaCampos.forEach(c => {
             const el = document.getElementById(c);
             if(el) el.value = reg[c] || "";
         });
 
+        if(!reg.colonia && !reg.localidad && reg.col_loc) {
+            document.getElementById('colonia').value = reg.col_loc;
+        }
+
         window.actualizarAsuntos();
         document.getElementById('asunto').value = reg.asunto || "";
         
-        window.actualizarEspecificaciones();
+        window.evaluarVistaAsunto();
         
         if(reg.detalle_asunto) {
             const detalleSelect = document.getElementById('detalle_asunto');
             if (detalleSelect) detalleSelect.value = reg.detalle_asunto;
         }
 
-        const btnDeletePhoto = document.getElementById('btn-delete-photo');
-        if(reg.url_evidencia && reg.url_evidencia !== "") {
-            btnDeletePhoto.style.display = 'inline-flex';
+        // Carga la lista completa de fotos en el formulario para poder agregar/eliminar
+        if (Array.isArray(reg.evidencias)) {
+            evidenciasBase64 = [...reg.evidencias];
+        } else if (reg.url_evidencia) {
+            evidenciasBase64 = [reg.url_evidencia];
         } else {
-            btnDeletePhoto.style.display = 'none';
+            evidenciasBase64 = [];
         }
+        renderPreviewEvidencias();
 
         document.getElementById('btn-save').style.display = 'none';
         document.getElementById('btn-update').style.display = 'inline-flex';
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    window.quitarFotoForm = () => {
-        Swal.fire({
-            title: '¿Quitar foto actual?',
-            text: 'Deberá dar clic en Actualizar para confirmar el cambio.',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, quitar',
-            cancelButtonText: 'Cancelar',
-            confirmButtonColor: 'var(--danger)'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('eliminar-foto-flag').value = "true";
-                document.getElementById('btn-delete-photo').style.display = 'none';
-                document.getElementById('input_file').value = "";
-                
-                const txtComp = document.getElementById('txt-compresion');
-                txtComp.style.display = 'inline-block';
-                txtComp.innerHTML = '<i class="fa-solid fa-trash-can"></i> Foto marcada para eliminación.';
-                txtComp.style.color = "var(--danger)";
-            }
-        });
     };
 
     function obtenerValoresForm() {
@@ -789,7 +1010,7 @@
         listaCampos.forEach(id => {
             const el = document.getElementById(id);
             if(el) {
-                if(['numero_consecutivo', 'fecha_registro', 'usuario', 'detalle_asunto'].includes(id)) {
+                if(['numero_consecutivo', 'fecha_registro', 'fecha_nacimiento', 'edad', 'usuario', 'detalle_asunto', 'genero', 'cap_fecha', 'cap_hora', 'exp_cantidad', 'exp_fecha_entrega'].includes(id)) {
                     res[id] = el.value;
                 } else {
                     res[id] = el.value.toUpperCase();
@@ -806,18 +1027,19 @@
         });
         if(document.getElementById('input_file')) document.getElementById('input_file').value = "";
         
+        evidenciasBase64 = [];
+        renderPreviewEvidencias();
+        
         const txtComp = document.getElementById('txt-compresion');
         txtComp.style.display = 'none';
-        txtComp.style.color = "var(--success)";
         
-        document.getElementById('eliminar-foto-flag').value = "false";
-        document.getElementById('btn-delete-photo').style.display = 'none';
         document.getElementById('numero_consecutivo').value = proximoNo;
         document.getElementById('edit-id').value = "";
         document.getElementById('btn-save').style.display = 'inline-flex';
         document.getElementById('btn-update').style.display = 'none';
         document.getElementById('container-detalle-especifico').style.display = 'none';
         
+        window.evaluarVistaAsunto();
         establecerUsuarioPorDefecto();
     };
 
@@ -834,8 +1056,8 @@
             "SOLICITUD": ["APOYOS FUNCIONALES", "GESTION DE CITAS"],
             "V.D./E. SOCIOECONOMICO": ["ASILO", "ADOPCIÓN"],
             "VISITA DOMICILIARIA": ["INVESTIGACION", "CERCIORAMIENTO DE TUTOR", "ASILO"],
-            "ATENCION CIUDADANA": ["ENTREGA DE APOYOS FUNCIONALES ESTATALES", "ENTREGA DE APOYOS FUNCIONALES MUNICIPALES", "TRASLADO Y ACOMPAÑAMIENTO A CRISVER", "PLATICAS PREVENTIVAS", "PACIENTES RECURRENTES", "DESPENSA MENSUAL"],
-            "ESTUDIO SOCIOECONOMICO": ["ASILO", "DESCUENTO TRANSPORTE", "DESCUENTO CMAPS", "APOYO ATAUD", "APOYO FUNCIONAL", "ESTUDIOS CLINICOS", "TRASLADO DE CUERPO", "REGISTRO CIVIL", "TERAPIAS CRISAT", "APOYO AL INMIGRANTE", "CONDONACIÓN DE LENTES", "DESPENSA MENSUAL", "DESCUENTO SERVICIO DE AMBULANCIA", "APOYO A LA CIUDADANIA", "APOYO DE TESTAMENTO"]
+            "ATENCION CIUDADANA": ["CAPACITACION", "ENTREGA DE EXPEDIENTES DIF ESTATAL", "ENTREGA DE APOYOS FUNCIONALES ESTATALES", "ENTREGA DE APOYOS FUNCIONALES MUNICIPALES", "TRASLADO Y ACOMPAÑAMIENTO A CRISVER", "PLATICAS PREVENTIVAS", "PACIENTES RECURRENTES", "DESPENSA MENSUAL"],
+            "ESTUDIO SOCIOECONOMICO": ["ASILO", "DESCUENTO TRANSPORTE", "DESCUENTO CMAPS", "APOYO ATAUD", "APOYO FUNCIONAL MUNICIPAL", "APOYO FUNCIONAL ESTATAL", "ESTUDIOS CLINICOS", "TRASLADO DE CUERPO", "REGISTRO CIVIL", "TERAPIAS CRISAT", "APOYO AL INMIGRANTE", "CONDONACIÓN DE LENTES", "DESPENSA MENSUAL", "DESCUENTO SERVICIO DE AMBULANCIA", "APOYO A LA CIUDADANIA"]
         };
 
         if(dataAsuntos[prog]) {
@@ -845,6 +1067,7 @@
                 asuSelect.appendChild(opt);
             });
         }
+        window.evaluarVistaAsunto();
     };
 
     window.actualizarEspecificaciones = () => {
@@ -853,32 +1076,108 @@
         const contDet = document.getElementById('container-detalle-especifico');
         const asu = asuSelect.value;
 
-        const subData = {
-            "DESCUENTO TRANSPORTE":["TRANSPORTE LOS TUXTLA", "AUTOBUSES DE ORIENTE (ADO)"],
-            "APOYOS FUNCIONALES": ["SILLA DE RUEDAS ESTANDAR ADULTO", "SILLA DE RUEDAS SOBREPESO", "SILLA DE RUEDAS PCI", "SILLA DE RUEDAS PCA", "SILLA DE RUEDAS JUVENIL", "SILLA DE RUEDAS INFANTIL", "BASTÓN PUÑO ALEMÁN", "BASTÓN 4 PUNTOS", "MULETAS", "ANDADERA"],
-            "APOYO FUNCIONAL": ["SILLA DE RUEDAS ESTANDAR ADULTO", "SILLA DE RUEDAS SOBREPESO", "SILLA DE RUEDAS PCI", "SILLA DE RUEDAS PCA", "SILLA DE RUEDAS JUVENIL", "SILLA DE RUEDAS INFANTIL", "BASTÓN PUÑO ALEMÁN", "BASTÓN 4 PUNTOS", "MULETAS", "ANDADERA"],
-            "GESTION DE CITAS": ["TDH", "AUTISMO", "AUX. AUDITIVO", "PROTESIS", "CRISVER (DIVERSOS)", "SINDROME DE DOWN"]
-        };
+        const tiposApoyoFuncional = [
+            "SILLA DE RUEDAS ESTANDAR ADULTO", 
+            "SILLA DE RUEDAS SOBREPESO", 
+            "SILLA DE RUEDAS PCI", 
+            "SILLA DE RUEDAS PCA", 
+            "SILLA DE RUEDAS JUVENIL", 
+            "SILLA DE RUEDAS INFANTIL", 
+            "BASTÓN PUÑO ALEMÁN", 
+            "BASTÓN 4 PUNTOS", 
+            "MULETAS", 
+            "ANDADERA"
+        ];
 
-        if(subData[asu]) {
-            detSelect.innerHTML = '<option value="">-- SELECCIONAR ESPECIFICACIÓN --</option>';
-            subData[asu].forEach(s => {
+        if (asu && (asu.includes("APOYO") || asu.includes("APOYOS"))) {
+            detSelect.innerHTML = '<option value="">-- SELECCIONAR TIPO DE APOYO --</option>';
+            tiposApoyoFuncional.forEach(s => {
                 const o = document.createElement('option');
                 o.value = s; o.textContent = s;
                 detSelect.appendChild(o);
             });
             contDet.style.display = 'block';
-            document.getElementById('label-detalle').innerText = (asu.includes("APOYO")) ? "Tipo de Apoyo" : "Diagnóstico";
+            document.getElementById('label-detalle').innerText = "Tipo de Apoyo";
+        } else if (asu === "DESCUENTO TRANSPORTE") {
+            detSelect.innerHTML = '<option value="">-- SELECCIONAR ESPECIFICACIÓN --</option>';
+            ["TRANSPORTE LOS TUXTLA", "AUTOBUSES DE ORIENTE (ADO)"].forEach(s => {
+                const o = document.createElement('option');
+                o.value = s; o.textContent = s;
+                detSelect.appendChild(o);
+            });
+            contDet.style.display = 'block';
+            document.getElementById('label-detalle').innerText = "Diagnóstico / Especificación";
+        } else if (asu === "GESTION DE CITAS") {
+            detSelect.innerHTML = '<option value="">-- SELECCIONAR ESPECIFICACIÓN --</option>';
+            ["TDH", "AUTISMO", "AUX. AUDITIVO", "PROTESIS", "CRISVER (DIVERSOS)", "SINDROME DE DOWN"].forEach(s => {
+                const o = document.createElement('option');
+                o.value = s; o.textContent = s;
+                detSelect.appendChild(o);
+            });
+            contDet.style.display = 'block';
+            document.getElementById('label-detalle').innerText = "Diagnóstico";
         } else {
             contDet.style.display = 'none';
         }
     };
 
-    window.abrirFoto = (url) => {
-        const modal = document.getElementById('modal-foto');
+    /* LÓGICA DEL CARRUSEL / MODAL */
+    window.abrirCarrusel = (index, origen = 'FORMULARIO', idDoc = null) => {
+        if (origen === 'FORMULARIO') {
+            carruselLista = [...evidenciasBase64];
+        } else if (origen === 'TABLA') {
+            const reg = todosLosDatos.find(r => r.id === idDoc);
+            if (reg) {
+                carruselLista = Array.isArray(reg.evidencias) && reg.evidencias.length ? reg.evidencias : (reg.url_evidencia ? [reg.url_evidencia] : []);
+            }
+        }
+
+        if(!carruselLista || !carruselLista.length) return;
+        carruselIndexActual = index;
+        actualizarModalCarrusel();
+        document.getElementById('modal-foto').style.display = 'flex';
+    };
+
+    window.cambiarImagenCarrusel = (direccion) => {
+        carruselIndexActual += direccion;
+        if (carruselIndexActual < 0) {
+            carruselIndexActual = carruselLista.length - 1;
+        } else if (carruselIndexActual >= carruselLista.length) {
+            carruselIndexActual = 0;
+        }
+        actualizarModalCarrusel();
+    };
+
+    function actualizarModalCarrusel() {
         const img = document.getElementById('img-modal');
-        img.src = url;
-        modal.style.display = 'flex';
+        const thumbs = document.getElementById('modal-galeria-thumbs');
+        const prevBtn = document.querySelector('.modal-carrusel-prev');
+        const nextBtn = document.querySelector('.modal-carrusel-next');
+
+        img.src = carruselLista[carruselIndexActual];
+
+        if (carruselLista.length <= 1) {
+            prevBtn.style.display = 'none';
+            nextBtn.style.display = 'none';
+        } else {
+            prevBtn.style.display = 'block';
+            nextBtn.style.display = 'block';
+        }
+
+        thumbs.innerHTML = carruselLista.map((src, i) => `
+            <div class="thumb-box" style="border: ${i === carruselIndexActual ? '2px solid var(--primary)' : '1px solid var(--border)'}; opacity: ${i === carruselIndexActual ? '1' : '0.6'}">
+                <img src="${src}" onclick="seleccionarImagenCarrusel(${i})">
+            </div>
+        `).join('');
+    }
+
+    window.seleccionarImagenCarrusel = (i) => {
+        carruselIndexActual = i;
+        actualizarModalCarrusel();
+    };
+
+    window.cerrarCarrusel = () => {
+        document.getElementById('modal-foto').style.display = 'none';
     };
 
     window.filtrar = (resetearPagina = false) => {
@@ -899,31 +1198,72 @@
         const tbody = document.getElementById('cuerpoTabla');
         document.getElementById('info-total').innerText = `TOTAL: ${datosFiltrados.length} REGISTROS`;
         
-        tbody.innerHTML = segmento.map(reg => `
+        tbody.innerHTML = segmento.map(reg => {
+            const fotos = Array.isArray(reg.evidencias) && reg.evidencias.length ? reg.evidencias : (reg.url_evidencia ? [reg.url_evidencia] : []);
+            const esCap = reg.asunto === "CAPACITACION";
+            const esExp = reg.asunto === "ENTREGA DE EXPEDIENTES DIF ESTATAL";
+            
+            let colLocText = "";
+            if (esCap) {
+                colLocText = reg.cap_tema ? `<b>Tema:</b> ${reg.cap_tema}` : '';
+            } else if (esExp) {
+                colLocText = reg.exp_cantidad ? `<b>Cant:</b> ${reg.exp_cantidad}` : '';
+            } else if (reg.colonia || reg.localidad) {
+                colLocText = [reg.colonia, reg.localidad].filter(Boolean).join(' / ');
+            } else {
+                colLocText = reg.col_loc || '';
+            }
+
+            let campoNombre = 'N/A';
+            if (esCap) campoNombre = reg.cap_nombre || 'N/A';
+            else if (esExp) campoNombre = reg.exp_recibe ? `RECIBE: ${reg.exp_recibe}` : 'N/A';
+            else campoNombre = reg.nombre || 'N/A';
+
+            let campoDetalle1 = '';
+            if (esCap) {
+                campoDetalle1 = reg.cap_fecha ? `${reg.cap_fecha} ${reg.cap_hora || ''}` : 'N/A';
+            } else if (esExp) {
+                campoDetalle1 = reg.exp_fecha_entrega ? `Entrega: ${reg.exp_fecha_entrega}` : (reg.exp_detalle || 'N/A');
+            } else {
+                campoDetalle1 = `${reg.edad || ''} ${reg.genero ? `<br><small style="color:#64748b">${reg.genero}</small>` : ''}`;
+            }
+
+            let campoDetalle2 = '';
+            if (esCap) campoDetalle2 = reg.cap_lugar || 'N/A';
+            else if (esExp) campoDetalle2 = reg.exp_tipo ? `Tipo: ${reg.exp_tipo}` : 'N/A';
+            else campoDetalle2 = reg.nombre_solicitante || '<i style="color:#cbd5e1">MISMO</i>';
+
+            return `
             <tr>
                 <td data-label="No."><b>${reg.numero_consecutivo}</b></td>
-                <td data-label="Evidencia">
-                    ${reg.url_evidencia ? `
-                        <img src="${reg.url_evidencia}" 
-                             onclick="abrirFoto('${reg.url_evidencia}')" 
-                             alt="Evidencia" 
-                             style="max-width: 50px; max-height: 40px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid var(--border);"
-                             title="Clic para ampliar" />
-                    ` : '<span style="color:#cbd5e1; font-size:10px;">Sin foto</span>'}
+                <td data-label="Evidencia(s)">
+                    ${fotos.length > 0 ? `
+                        <div style="display:flex; gap:4px; align-items:center;">
+                            <img src="${fotos[0]}" 
+                                 onclick="abrirCarrusel(0, 'TABLA', '${reg.id}')" 
+                                 alt="Evidencia" 
+                                 style="width: 40px; height: 35px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid var(--border);"
+                                 title="Ver carrusel de imágenes" />
+                            ${fotos.length > 1 ? `<span style="font-size:10px; font-weight:600; color:var(--primary); background:#e0e7ff; padding:2px 5px; border-radius:10px; cursor:pointer;" onclick="abrirCarrusel(0, 'TABLA', '${reg.id}')">+${fotos.length - 1}</span>` : ''}
+                        </div>
+                    ` : '<span style="color:#cbd5e1; font-size:10px;">Sin fotos</span>'}
                 </td>
                 <td data-label="Fecha">${reg.fecha_registro || ''}</td>
-                <td data-label="Beneficiario"><b>${reg.nombre}</b></td>
-                <td data-label="Col / Loc">${reg.col_loc || ''}</td>
+                <td data-label="Beneficiario / Evento / Recibe"><b>${campoNombre}</b></td>
+                <td data-label="Edad / Fecha Entrega / Detalle">${campoDetalle1}</td>
+                <td data-label="Solicitante / Lugar / Tipo Exp">${campoDetalle2}</td>
+                <td data-label="Col / Loc / Tema / Cantidad">${colLocText}</td>
                 <td data-label="Programa" style="font-size:11px;">${reg.programa || ''}</td>
                 <td data-label="Asunto">${reg.asunto || ''} ${reg.detalle_asunto ? `<br><small style="color:var(--primary)">${reg.detalle_asunto}</small>` : ''}</td>
                 <td data-label="Estatus"><span class="status-badge bg-${reg.estatus?.toLowerCase().replace(" ","-") || 'pendiente'}"><i class="fa-solid fa-circle" style="font-size: 6px;"></i> ${reg.estatus || 'PENDIENTE'}</span></td>
-                <td data-label="Usuario">${reg.usuario || ''}</td>
+                <td data-label="Encargado">${reg.usuario || ''}</td>
                 <td data-label="Acciones" class="no-print" style="text-align: right;">
                     <button onclick="editarLocal('${reg.id}')" title="Editar" style="border:1px solid var(--border); background:#ffffff; cursor:pointer; padding:6px 8px; border-radius:4px; color: var(--primary); margin-right: 4px;"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button onclick="eliminarDoc('${reg.id}')" title="Eliminar" style="border:1px solid var(--border); background:#ffffff; cursor:pointer; padding:6px 8px; border-radius:4px; color: var(--danger);"><i class="fa-solid fa-trash-can"></i></button>
                 </td>
             </tr>
-        `).join('');
+            `;
+        }).join('');
 
         document.getElementById('page-info').innerText = `Página ${paginaActual} de ${totalPaginas}`;
         document.getElementById('btn-prev').disabled = paginaActual === 1;
@@ -996,7 +1336,7 @@
 
         const asuntoSelect = document.getElementById('asunto');
         if (asuntoSelect) {
-            asuntoSelect.addEventListener('change', window.actualizarEspecificaciones);
+            asuntoSelect.addEventListener('change', window.evaluarVistaAsunto);
         }
 
         const nombreInput = document.getElementById('nombre');
@@ -1009,6 +1349,16 @@
             saludoContenedor.style.display = 'inline-block';
         }
         establecerUsuarioPorDefecto();
+
+        // Control por teclado para navegabilidad del carrusel (Izquierda / Derecha / Escape)
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('modal-foto');
+            if (modal.style.display === 'flex') {
+                if (e.key === 'ArrowLeft') window.cambiarImagenCarrusel(-1);
+                if (e.key === 'ArrowRight') window.cambiarImagenCarrusel(1);
+                if (e.key === 'Escape') window.cerrarCarrusel();
+            }
+        });
     });
 
     window.cerrarSesion = async () => {
