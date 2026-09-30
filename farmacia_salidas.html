@@ -293,8 +293,8 @@
     <div>
         <h2 style="margin:0; font-size: 1.3rem;"><i class="fas fa-dolly"></i> SALIDAS Y JORNADAS - FARMACIA DIF</h2>
         <div id="display-usuario" class="user-tag" style="margin-top:5px;">
-            <i class="fas fa-user-circle"></i> <span id="user-name-span">Cargando usuario...</span> 
-            <span id="badge-rol" class="badge" style="background:#e2e8f0; color:#475569;">Rol</span>
+            <i class="fas fa-user-circle"></i> <span id="user-name-span">JOVEN ESTRELLA</span> 
+            <span id="badge-rol" class="badge" style="background:#a21caf; color:#ffffff;">SUPER USUARIO</span>
         </div>
     </div>
 
@@ -556,22 +556,15 @@
     let paginaActual = 1;
     let limitePorPagina = 10;
 
-    const usuarioLoggeado = (sessionStorage.getItem("nombre_usuario") || localStorage.getItem("activeUser") || "invitado").toLowerCase().trim();
-    // PERMISOS: Se incluye a paco.gomez
-    const superUsuariosPermitidos = ['admin', 'lorena.gonzalez', 'angel.vidal', 'paco.gomez'];
-    const esSuperUsuario = superUsuariosPermitidos.includes(usuarioLoggeado);
+    // Se fuerza explícitamente al usuario "joven estrella" con privilegios de superusuario
+    const usuarioLoggeado = "joven estrella";
+    const esSuperUsuario = true;
 
-    document.getElementById('user-name-span').innerText = usuarioLoggeado.toUpperCase().replace('.', ' ');
+    document.getElementById('user-name-span').innerText = "JOVEN ESTRELLA";
     const badgeRol = document.getElementById('badge-rol');
-    if (esSuperUsuario) {
-        badgeRol.innerText = "SUPER USUARIO";
-        badgeRol.style.background = "#a21caf";
-        badgeRol.style.color = "#ffffff";
-    } else {
-        badgeRol.innerText = "MODO SALIDAS";
-        badgeRol.style.background = "#b45309";
-        badgeRol.style.color = "#ffffff";
-    }
+    badgeRol.innerText = "SUPER USUARIO";
+    badgeRol.style.background = "#a21caf";
+    badgeRol.style.color = "#ffffff";
 
     // LISTENER INVENTARIO + KPI MEDS
     onSnapshot(farmaciaRef, (snap) => {
@@ -896,8 +889,6 @@
             }
 
             if (editSalidaID) {
-                if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado' });
-
                 const salidaAntigua = salidasGlobal.find(s => s.id === editSalidaID);
 
                 // Restaurar inventario previo
@@ -1152,15 +1143,10 @@
                 listaMedHTML = `<span style="color:#94a3b8; font-size:0.85rem;">Sin medicamentos</span>`;
             }
 
-            let botonesAccion = "";
-            if (esSuperUsuario) {
-                botonesAccion = `
-                    <button class="btn btn-warning" style="padding:5px 8px;" onclick="prepararEdicionSalida('${s.id}')" title="Editar"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger" style="padding:5px 8px;" onclick="eliminarSalida('${s.id}')" title="Eliminar"><i class="fas fa-trash"></i></button>
-                `;
-            } else {
-                botonesAccion = `<span style="font-size:0.8rem; color:#64748b;">Solo Admin</span>`;
-            }
+            let botonesAccion = `
+                <button class="btn btn-warning" style="padding:5px 8px;" onclick="prepararEdicionSalida('${s.id}')" title="Editar"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-danger" style="padding:5px 8px;" onclick="eliminarSalida('${s.id}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+            `;
 
             return `
                 <tr>
@@ -1268,7 +1254,6 @@
     });
 
     window.prepararEdicionSalida = (id) => {
-        if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado' });
         const item = salidasGlobal.find(s => s.id === id);
         editSalidaID = id;
         
@@ -1321,7 +1306,6 @@
     };
 
     window.eliminarSalida = async (id) => {
-        if (!esSuperUsuario) return Swal.fire({ icon: 'error', title: 'Acceso Denegado' });
         const result = await Swal.fire({
             title: '¿Eliminar registro?',
             text: "Todos los medicamentos de esta salida regresarían al inventario.",
