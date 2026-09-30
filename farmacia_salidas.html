@@ -183,6 +183,49 @@
             margin-top: 10px;
         }
 
+        /* PREVISUALIZACIÓN Y GESTIÓN DE FOTOS EN EDICIÓN */
+        .preview-grid-edicion {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 12px;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px dashed #cbd5e1;
+        }
+        .preview-thumb-card {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border: 2px solid white;
+        }
+        .preview-thumb-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .btn-delete-thumb {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.65rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-delete-thumb:hover { background: #dc2626; }
+
         /* MODAL GALERÍA */
         #modal-galeria { 
             display: none; 
@@ -364,20 +407,25 @@
             </div>
         </div>
 
-        <!-- SECCIÓN DE CARGA DE FOTOS REDEFINIDA -->
+        <!-- SECCIÓN DE CARGA Y GESTIÓN DE FOTOS -->
         <div class="form-grid">
             <div class="form-group full">
                 <label id="label-fotos"><i class="fas fa-camera"></i> Evidencia Fotográfica</label>
                 
+                <!-- CONTENEDOR PARA EDITAR Y ELIMINAR FOTOS EXISTENTES -->
+                <div id="contenedor-fotos-existentes" style="display:none; margin-bottom:10px;">
+                    <small style="color:#0369a1; font-weight:700;"><i class="fas fa-images"></i> Fotografías actualmente guardadas (haz clic en X para eliminar):</small>
+                    <div id="grid-fotos-existentes" class="preview-grid-edicion"></div>
+                </div>
+
                 <div class="file-drop-area" id="drop-zone">
                     <i class="fas fa-cloud-upload-alt file-drop-icon"></i>
-                    <p class="file-drop-text">Haz clic aquí o arrastra las fotos de evidencia</p>
-                    <span class="file-drop-subtext">Puedes seleccionar varios archivos (JPG o PNG)</span>
+                    <p class="file-drop-text" id="texto-dropzone">Haz clic aquí o arrastra fotos de evidencia</p>
+                    <span class="file-drop-subtext">Puedes agregar varias imágenes (JPG o PNG)</span>
                     <input type="file" id="s-fotos" accept="image/*" multiple class="file-input-hidden" onchange="mostrarIndicadorFotos(this)">
                 </div>
                 
                 <div id="indicador-archivos-seleccionados"></div>
-                <small style="color:#64748b; margin-top:4px;" id="aviso-fotos-edicion"></small>
             </div>
         </div>
         
@@ -406,7 +454,7 @@
         </div>
 
         <div id="kardex-resultado" style="display:none; margin-top:10px;">
-            <div style="background:#e0f2fe; padding:12px 15px; border-radius:8px; display:flex; justify-shadow:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px; border:1px solid #bae6fd;">
+            <div style="background:#e0f2fe; padding:12px 15px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px; border:1px solid #bae6fd;">
                 <div>
                     <h4 id="kardex-nombre-med" style="margin:0; color:#0369a1; font-size:1.1rem;">-</h4>
                     <span id="kardex-origen-med" style="font-size:0.8rem; color:#0284c7; font-weight:600;">-</span>
@@ -499,6 +547,7 @@
     let salidasGlobal = [];
     let editSalidaID = null;
     let loteMedicamentosTemp = [];
+    let fotosExistentesEdicion = []; // Mantiene las fotos acumuladas en edición
     let carruselIntervals = [];
 
     let fotosModalActuales = [];
@@ -508,7 +557,8 @@
     let limitePorPagina = 10;
 
     const usuarioLoggeado = (sessionStorage.getItem("nombre_usuario") || localStorage.getItem("activeUser") || "invitado").toLowerCase().trim();
-    const superUsuariosPermitidos = ['admin', 'lorena.gonzalez', 'angel.vidal'];
+    // PERMISOS: Se incluye a paco.gomez
+    const superUsuariosPermitidos = ['admin', 'lorena.gonzalez', 'angel.vidal', 'paco.gomez'];
     const esSuperUsuario = superUsuariosPermitidos.includes(usuarioLoggeado);
 
     document.getElementById('user-name-span').innerText = usuarioLoggeado.toUpperCase().replace('.', ' ');
@@ -528,9 +578,7 @@
         inventarioGlobal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         document.getElementById('kpi-total-meds').innerText = inventarioGlobal.length;
         
-        // Poblar selector del Kardex
         poblarSelectorKardex();
-        
         filtrarMedicamentosPorDestino();
     });
 
@@ -550,7 +598,6 @@
 
         renderizarSalidas();
         
-        // Si hay una consulta Kardex activa, refrescarla
         if (document.getElementById('kardex-select-med').value) {
             consultarKardexMedicamento();
         }
@@ -585,7 +632,6 @@
         document.getElementById('kardex-origen-med').innerText = `Origen: ${med.origen || 'N/A'}`;
         document.getElementById('kardex-stock-actual').innerText = `${med.existencia} uds`;
 
-        // Filtrar todas las salidas donde participe este medicamento
         let historialMed = [];
 
         salidasGlobal.forEach(s => {
@@ -752,16 +798,42 @@
         inputEdad.value = edad >= 0 ? edad : 0;
     };
 
-    // MOSTRAR INDICADOR DE ARCHIVOS SELECCIONADOS
+    // MOSTRAR INDICADOR DE NUEVAS FOTOS SELECCIONADAS
     window.mostrarIndicadorFotos = (input) => {
         const contenedorIndicador = document.getElementById('indicador-archivos-seleccionados');
         const total = input.files ? input.files.length : 0;
 
         if (total > 0) {
-            contenedorIndicador.innerHTML = `<span class="badge-num-files"><i class="fas fa-paperclip"></i> ${total} foto(s) lista(s) para subir</span>`;
+            contenedorIndicador.innerHTML = `<span class="badge-num-files"><i class="fas fa-plus-circle"></i> ${total} foto(s) nueva(s) para añadir</span>`;
         } else {
             contenedorIndicador.innerHTML = '';
         }
+    };
+
+    // RENDERIZAR GRID DE FOTOS EXISTENTES EN MODO EDICIÓN
+    function renderizarFotosExistentesEdicion() {
+        const contenedor = document.getElementById('contenedor-fotos-existentes');
+        const grid = document.getElementById('grid-fotos-existentes');
+
+        if (fotosExistentesEdicion.length === 0) {
+            contenedor.style.display = 'none';
+            grid.innerHTML = '';
+            return;
+        }
+
+        contenedor.style.display = 'block';
+        grid.innerHTML = fotosExistentesEdicion.map((foto, idx) => `
+            <div class="preview-thumb-card">
+                <img src="${foto}" alt="Foto ${idx + 1}">
+                <button class="btn-delete-thumb" onclick="eliminarFotoEdicion(${idx})" title="Eliminar foto">&times;</button>
+            </div>
+        `).join('');
+    }
+
+    // ELIMINAR UNA FOTO INDIVIDUAL DE LA LISTA EXISTENTE
+    window.eliminarFotoEdicion = (index) => {
+        fotosExistentesEdicion.splice(index, 1);
+        renderizarFotosExistentesEdicion();
     };
 
     // DRAG AND DROP EVENTOS
@@ -815,11 +887,11 @@
         }
 
         try {
-            let arrayFotos = [];
+            let nuevasFotosBase64 = [];
             if (inputFotos.files && inputFotos.files.length > 0) {
                 for (let file of inputFotos.files) {
                     const base64Comprimido = await comprimirImagenBase64(file, 600, 600, 0.5);
-                    if (base64Comprimido) arrayFotos.push(base64Comprimido);
+                    if (base64Comprimido) nuevasFotosBase64.push(base64Comprimido);
                 }
             }
 
@@ -828,6 +900,7 @@
 
                 const salidaAntigua = salidasGlobal.find(s => s.id === editSalidaID);
 
+                // Restaurar inventario previo
                 if (salidaAntigua.medicamentos && Array.isArray(salidaAntigua.medicamentos)) {
                     for (let item of salidaAntigua.medicamentos) {
                         const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
@@ -844,6 +917,7 @@
                     }
                 }
 
+                // Descontar nuevo inventario
                 let loteMedicamentosConTrazabilidad = [];
                 for (let item of loteMedicamentosTemp) {
                     const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
@@ -860,7 +934,8 @@
                     loteMedicamentosConTrazabilidad.push({ ...item, stockAnterior, stockPosterior });
                 }
 
-                let fotosFinales = arrayFotos.length > 0 ? arrayFotos : (salidaAntigua.fotosEvidencia || []);
+                // Combinar fotos guardadas conservadas + nuevas agregadas
+                let fotosFinales = [...fotosExistentesEdicion, ...nuevasFotosBase64];
 
                 await updateDoc(doc(db, "salidas_farmacia", editSalidaID), {
                     destino,
@@ -910,7 +985,7 @@
                     usuario: usuarioLoggeado,
                     fecha: fechaEntregaFinal,
                     timestamp: Date.now(),
-                    fotosEvidencia: arrayFotos,
+                    fotosEvidencia: nuevasFotosBase64,
                     estado: "ACTIVO"
                 });
 
@@ -933,6 +1008,9 @@
         document.getElementById('b-fecha-entrega').value = "";
         document.getElementById('s-fotos').value = "";
         document.getElementById('indicador-archivos-seleccionados').innerHTML = "";
+        fotosExistentesEdicion = [];
+        renderizarFotosExistentesEdicion();
+        document.getElementById('texto-dropzone').innerText = "Haz clic aquí o arrastra fotos de evidencia";
         loteMedicamentosTemp = [];
         actualizarTablaLoteTemporal();
         filtrarMedicamentosPorDestino();
@@ -1221,7 +1299,11 @@
 
         actualizarTablaLoteTemporal();
         
-        document.getElementById('aviso-fotos-edicion').innerText = `Este registro cuenta con ${item.fotosEvidencia ? item.fotosEvidencia.length : 0} foto(s). Si seleccionas nuevas se reemplazarán.`;
+        // CARGA Y PREVISUALIZACIÓN DE FOTOS PREVIAS EN EDICIÓN
+        fotosExistentesEdicion = item.fotosEvidencia ? [...item.fotosEvidencia] : [];
+        renderizarFotosExistentesEdicion();
+
+        document.getElementById('texto-dropzone').innerText = "Haz clic aquí o arrastra fotos para AÑADIR más evidencias";
         document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> Editar Entrega de Beneficiario';
         document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-sync"></i> ACTUALIZAR REGISTRO Y STOCK';
         document.getElementById('btn-guardar').className = 'btn btn-warning';
@@ -1232,7 +1314,6 @@
     window.cancelarEdicionSalida = () => {
         editSalidaID = null;
         limpiarFormulario();
-        document.getElementById('aviso-fotos-edicion').innerText = "";
         document.getElementById('form-title').innerHTML = '<i class="fas fa-minus-circle"></i> Registrar Entrega de Medicamentos por Beneficiario';
         document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-paper-plane"></i> REGISTRAR SALIDA';
         document.getElementById('btn-guardar').className = 'btn btn-success';
