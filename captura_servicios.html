@@ -903,7 +903,6 @@
                             <input type="number" min="0" id="cant-corte" class="form-control" placeholder="0" value="0" required>
                         </div>
 
-                        <!-- TARJETA DE IVEA CON SU ÍCONO CORRESPONDIENTE -->
                         <div class="service-card" id="card-ivea">
                             <div class="service-header">
                                 <h4><i class="fas fa-graduation-cap"></i> IVEA</h4>
@@ -1062,7 +1061,7 @@
         
         const listaServicios = ['esterilizacion', 'corte', 'ivea', 'bucal', 'medica', 'analisis', 'fisioterapia', 'psicologia'];
 
-        let jornadas = JSON.parse(localStorage.getItem('jornadas_db')) || [];
+        let jornadas = [];
         let evidenciasDB = JSON.parse(localStorage.getItem('evidencias_db')) || {};
 
         let cacheBase64 = { asistencia: [], lugar: [] };
@@ -1074,33 +1073,37 @@
         let currentSliderPhotos = [];
         let currentSliderIndex = 0;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!localStorage.getItem('jornadas_db')) {
-                const demoJornadas = [
-                    { id: '1', fecha: '2026-10-05', colonia: 'San Andrés Centro', lugar: 'Cancha Municipal', servicios: ['esterilizacion', 'corte', 'ivea', 'bucal', 'medica'] },
-                    { id: '2', fecha: '2026-10-12', colonia: 'Comoapan', lugar: 'Parque Central', servicios: ['corte', 'ivea', 'bucal', 'analisis', 'fisioterapia', 'psicologia'] },
-                    { id: '3', fecha: '2026-10-18', colonia: 'Caleria', lugar: 'Salón Ejidal', servicios: ['esterilizacion', 'medica', 'psicologia'] },
-                    { id: '4', fecha: '2026-10-26', colonia: 'El Popotal', lugar: 'Conocido', servicios: ['esterilizacion', 'corte', 'medica', 'psicologia'] }
-                ];
-                localStorage.setItem('jornadas_db', JSON.stringify(demoJornadas));
-            }
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Realizamos la petición para obtener las jornadas desde la base de datos/backend
+                const response = await fetch('/api/jornadas'); // Reemplaza '/api/jornadas' por la ruta real de tu endpoint
+                jornadas = await response.json();
 
-            const usuarioActivo = sessionStorage.getItem('usuario_campo');
-            if (usuarioActivo) {
-                mostrarSistema(usuarioActivo);
-            }
-
-            // Al cargar, aseguramos que el formulario inicie limpio y deshabilitado si no hay jornada
-            limpiarFormularioCaptura();
-
-            document.addEventListener('keydown', (e) => {
-                const modal = document.getElementById('modal-slider');
-                if (modal && modal.style.display === 'flex') {
-                    if (e.key === 'ArrowRight') cambiarFotoSlider(1);
-                    if (e.key === 'ArrowLeft') cambiarFotoSlider(-1);
-                    if (e.key === 'Escape') cerrarSlider();
+                // Validamos la respuesta de la base de datos
+                if (!jornadas || jornadas.length === 0) {
+                    console.warn('No se encontraron registros de jornadas en la base de datos.');
                 }
-            });
+
+                const usuarioActivo = sessionStorage.getItem('usuario_campo');
+                if (usuarioActivo) {
+                    mostrarSistema(usuarioActivo);
+                }
+
+                limpiarFormularioCaptura();
+
+                document.addEventListener('keydown', (e) => {
+                    const modal = document.getElementById('modal-slider');
+                    if (modal && modal.style.display === 'flex') {
+                        if (e.key === 'ArrowRight') cambiarFotoSlider(1);
+                        if (e.key === 'ArrowLeft') cambiarFotoSlider(-1);
+                        if (e.key === 'Escape') cerrarSlider();
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error al conectar con la base de datos de jornadas:', error);
+                showToast('Error al cargar las jornadas desde el servidor', 'error', 'fa-triangle-exclamation');
+            }
         });
 
         document.getElementById('form-login').addEventListener('submit', function(e) {
@@ -1141,13 +1144,12 @@
             const select = document.getElementById('select-jornada');
             select.innerHTML = '<option value="">-- Selecciona una jornada agendada --</option>';
 
-            jornadas = JSON.parse(localStorage.getItem('jornadas_db')) || [];
-
-            if (jornadas.length === 0) {
+            if (!jornadas || jornadas.length === 0) {
                 showToast('No se encontraron jornadas en el catálogo.', 'warning', 'fa-triangle-exclamation');
                 return;
             }
 
+            // Ordenar de forma descendente por fecha
             jornadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
 
             jornadas.forEach(j => {
@@ -1177,7 +1179,6 @@
             }
         }
 
-        // FUNCIÓN ROBUSTA DE ACTIVACIÓN DE SERVICIOS
         function setServiciosActivos(serviciosActivos = []) {
             listaServicios.forEach(key => {
                 const chk = document.getElementById(`chk-${key}`);
@@ -1186,7 +1187,6 @@
 
                 if (!chk || !input || !card) return;
 
-                // Si no hay arreglo específico, activamos todo; si lo hay, verificamos coincidencia normalizada
                 const activo = serviciosActivos.length === 0 || serviciosActivos.some(s => {
                     const normalizadoS = s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
                     const normalizadoKey = key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -1208,17 +1208,14 @@
             });
         }
 
-        // CARGA DE DATOS Y SELECCIÓN AUTOMÁTICA DE JORNADA
         function cargarDatosPrevios() {
             const jornadaId = document.getElementById('select-jornada').value;
             
-            // Si no hay jornada seleccionada, limpiamos y bloqueamos todo
             if (!jornadaId || jornadaId === "") {
                 limpiarFormularioCaptura();
                 return;
             }
 
-            jornadas = JSON.parse(localStorage.getItem('jornadas_db')) || [];
             const jornadaInfo = jornadas.find(j => j.id === jornadaId);
             evidenciasDB = JSON.parse(localStorage.getItem('evidencias_db')) || {};
             const datosGuardados = evidenciasDB[jornadaId];
@@ -1226,21 +1223,16 @@
             let serviciosParticipantes = [];
 
             if (datosGuardados && datosGuardados.serviciosSeleccionados && datosGuardados.serviciosSeleccionados.length > 0) {
-                // 1. Si ya se guardó una captura previa, usar esos servicios
                 serviciosParticipantes = datosGuardados.serviciosSeleccionados;
             } else if (jornadaInfo && jornadaInfo.servicios && jornadaInfo.servicios.length > 0) {
-                // 2. Si es nueva captura, usar estrictamente los servicios programados en la jornada
                 serviciosParticipantes = jornadaInfo.servicios;
             } else {
-                // 3. Respaldo general si no estuvieran definidos
                 serviciosParticipantes = [...listaServicios];
             }
 
-            // ¡Activamos visualmente las tarjetas correspondientes de inmediato!
             setServiciosActivos(serviciosParticipantes);
 
             if (datosGuardados) {
-                // Rellenar cantidades previas
                 listaServicios.forEach(key => {
                     const input = document.getElementById(`cant-${key}`);
                     if (input && !input.disabled) {
@@ -1256,7 +1248,6 @@
 
                 showToast('Jornada, servicios y evidencias previas cargadas correctamente', 'info', 'fa-circle-info');
             } else {
-                // Limpiar cantidades para una captura nueva limpia
                 listaServicios.forEach(key => {
                     const input = document.getElementById(`cant-${key}`);
                     if (input && !input.disabled) input.value = 0;
@@ -1270,7 +1261,6 @@
         }
 
         function limpiarFormularioCaptura() {
-            // Desactiva todas las tarjetas y deshabilita los inputs
             listaServicios.forEach(key => {
                 const chk = document.getElementById(`chk-${key}`);
                 const input = document.getElementById(`cant-${key}`);
@@ -1437,7 +1427,6 @@
             tbody.innerHTML = '';
 
             evidenciasDB = JSON.parse(localStorage.getItem('evidencias_db')) || {};
-            jornadas = JSON.parse(localStorage.getItem('jornadas_db')) || [];
 
             let keys = Object.keys(evidenciasDB);
 
@@ -1670,7 +1659,5 @@
             }, 3000);
         }
     </script>
-
-
 </body>
 </html>
