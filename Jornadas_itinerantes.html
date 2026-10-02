@@ -475,7 +475,7 @@
             cursor: not-allowed;
         }
 
-        /* --- NOTIFICACIONES TOAST BONITAS --- */
+        /* --- NOTIFICACIONES TOAST --- */
         #toast-container {
             position: fixed;
             bottom: 24px;
@@ -572,7 +572,7 @@
             </div>
             <div class="user-info">
                 <span><i class="fas fa-user-circle"></i> <strong id="username-display">Usuario</strong></span>
-                <button class="btn-logout" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+                <button class="btn-logout" id="btn-logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
             </div>
         </div>
 
@@ -619,7 +619,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                             <label style="margin: 0;">Servicios Participantes</label>
                             <label style="font-size: 0.78rem; color: var(--primary-dif); cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                                <input type="checkbox" id="check-todos" onchange="toggleTodos(this)"> Seleccionar todo
+                                <input type="checkbox" id="check-todos"> Seleccionar todo
                             </label>
                         </div>
                         <div class="services-container">
@@ -632,12 +632,12 @@
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Análisis Clínicos (DIF)"> Análisis Clínicos (DIF)</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Fisioterapia (DIF)"> Fisioterapia (DIF)</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Fisioterapia-CRISAT (DIF)"> Fisioterapia-CRISAT (DIF)</div>
-                            <div class="service-item"><input type="checkbox" class="check-srv" value="Pláticas de Psicología"> Pláticas de Psicología (DIF)</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Pláticas de Psicología"> Pláticas de Psicología</div>
                         </div>
                     </div>
 
                     <div class="btn-group">
-                        <button type="button" id="btn-cancelar" class="btn-cancel" onclick="resetFormulario()">Cancelar</button>
+                        <button type="button" id="btn-cancelar" class="btn-cancel">Cancelar</button>
                         <button type="submit" id="btn-guardar" class="btn-submit"><i class="fas fa-save"></i> Guardar Programación</button>
                     </div>
                 </form>
@@ -676,7 +676,7 @@
                         <h3 class="card-title"><i class="fas fa-list-check"></i> Agenda de Jornadas</h3>
                         <div class="search-box">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="input-buscar" placeholder="Buscar colonia, lugar, fecha..." oninput="filtrarTabla()">
+                            <input type="text" id="input-buscar" placeholder="Buscar colonia, lugar, fecha...">
                         </div>
                     </div>
 
@@ -708,7 +708,21 @@
         </div>
     </div>
 
-    <script>
+    <!-- SCRIPT DE CONEXIÓN CON FIREBASE DE LA BASE DE DATOS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E",
+            projectId: "poblacion-vulnerable---dif"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const jornadasRef = collection(db, "jornadas_itinerantes");
+
         // Cuentas autorizadas
         const cuentasJornadas = {
             "jornadas.itinerantes": { p: "jornadas2026", dep: "JORNADAS" },
@@ -717,19 +731,30 @@
             "angel.vidal": { p: "Angel123..", dep: "GLOBAL" }
         };
 
-        let jornadas = JSON.parse(localStorage.getItem('jornadas_db')) || [];
-        
-        // Paginación y búsqueda
+        let jornadas = [];
         const ITEMS_PER_PAGE = 10;
         const MAX_ITEMS = 100;
         let currentPage = 1;
         let busquedaFiltro = '';
 
+        // Inicio
         document.addEventListener('DOMContentLoaded', () => {
             const usuarioActivo = sessionStorage.getItem('nombre_usuario');
             if (usuarioActivo) {
                 mostrarSistema(usuarioActivo);
             }
+        });
+
+        // Escuchar datos en tiempo real desde Firestore
+        onSnapshot(jornadasRef, (snapshot) => {
+            jornadas = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            renderTabla();
+        }, (error) => {
+            console.error("Error en Firestore: ", error);
+            showToast('Error al conectar con la base de datos', 'error', 'fa-database');
         });
 
         // Evento Login
@@ -757,7 +782,7 @@
             renderTabla();
         }
 
-        function cerrarSesion() {
+        document.getElementById('btn-logout').addEventListener('click', () => {
             sessionStorage.clear();
             document.getElementById('app-content').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
@@ -765,20 +790,20 @@
             document.getElementById('login-error').style.display = 'none';
             resetFormulario();
             showToast('Sesión cerrada correctamente', 'info', 'fa-circle-info');
-        }
+        });
 
-        function toggleTodos(source) {
-            document.querySelectorAll('.check-srv').forEach(cb => cb.checked = source.checked);
-        }
+        document.getElementById('check-todos').addEventListener('change', (e) => {
+            document.querySelectorAll('.check-srv').forEach(cb => cb.checked = e.target.checked);
+        });
 
-        function filtrarTabla() {
-            busquedaFiltro = document.getElementById('input-buscar').value.toLowerCase().trim();
-            currentPage = 1; // Reiniciar a la primera página al buscar
+        document.getElementById('input-buscar').addEventListener('input', (e) => {
+            busquedaFiltro = e.target.value.toLowerCase().trim();
+            currentPage = 1;
             renderTabla();
-        }
+        });
 
-        // Formulario Guardar / Editar
-        document.getElementById('form-jornada').addEventListener('submit', function(e) {
+        // Guardar / Actualizar en Firestore
+        document.getElementById('form-jornada').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const servicios = Array.from(document.querySelectorAll('.check-srv:checked')).map(cb => cb.value);
@@ -788,50 +813,38 @@
             }
 
             const idExistente = document.getElementById('jornada-id').value;
+            const dataJornada = {
+                fecha: document.getElementById('fecha').value,
+                colonia: document.getElementById('colonia').value,
+                lugar: document.getElementById('lugar').value,
+                horaInicio: document.getElementById('hora-inicio').value,
+                horaFin: document.getElementById('hora-fin').value,
+                servicios: servicios
+            };
 
-            if (idExistente) {
-                // Actualizar Registro
-                jornadas = jornadas.map(j => {
-                    if (j.id === idExistente) {
-                        return {
-                            id: idExistente,
-                            fecha: document.getElementById('fecha').value,
-                            colonia: document.getElementById('colonia').value,
-                            lugar: document.getElementById('lugar').value,
-                            horaInicio: document.getElementById('hora-inicio').value,
-                            horaFin: document.getElementById('hora-fin').value,
-                            servicios
-                        };
+            try {
+                if (idExistente) {
+                    const docRef = doc(db, "jornadas_itinerantes", idExistente);
+                    await updateDoc(docRef, dataJornada);
+                    showToast('Jornada actualizada con éxito en la nube', 'success', 'fa-circle-check');
+                } else {
+                    if (jornadas.length >= MAX_ITEMS) {
+                        showToast(`Has alcanzado el límite máximo de ${MAX_ITEMS} jornadas.`, 'warning', 'fa-triangle-exclamation');
+                        return;
                     }
-                    return j;
-                });
-                showToast('Jornada actualizada con éxito', 'success', 'fa-circle-check');
-            } else {
-                if (jornadas.length >= MAX_ITEMS) {
-                    showToast(`Has alcanzado el límite máximo de ${MAX_ITEMS} jornadas.`, 'warning', 'fa-triangle-exclamation');
-                    return;
+
+                    await addDoc(jornadasRef, dataJornada);
+                    showToast('Jornada agendada correctamente en la nube', 'success', 'fa-circle-check');
                 }
 
-                // Crear Nuevo Registro
-                const nuevaJornada = {
-                    id: Date.now().toString(),
-                    fecha: document.getElementById('fecha').value,
-                    colonia: document.getElementById('colonia').value,
-                    lugar: document.getElementById('lugar').value,
-                    horaInicio: document.getElementById('hora-inicio').value,
-                    horaFin: document.getElementById('hora-fin').value,
-                    servicios
-                };
-                jornadas.push(nuevaJornada);
-                showToast('Jornada agendada correctamente', 'success', 'fa-circle-check');
+                resetFormulario();
+            } catch (err) {
+                console.error(err);
+                showToast('Error al guardar en la base de datos', 'error', 'fa-circle-xmark');
             }
-
-            localStorage.setItem('jornadas_db', JSON.stringify(jornadas));
-            resetFormulario();
-            renderTabla();
         });
 
-        function editarJornada(id) {
+        window.editarJornada = function(id) {
             const j = jornadas.find(item => item.id === id);
             if (!j) return;
 
@@ -843,7 +856,7 @@
             document.getElementById('hora-fin').value = j.horaFin;
 
             document.querySelectorAll('.check-srv').forEach(cb => {
-                cb.checked = j.servicios.includes(cb.value);
+                cb.checked = j.servicios && j.servicios.includes(cb.value);
             });
 
             document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> Editar Jornada';
@@ -851,7 +864,22 @@
             document.getElementById('btn-cancelar').style.display = 'block';
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+        };
+
+        window.eliminarJornada = async function(id) {
+            if (confirm('¿Eliminar esta jornada agendada de la base de datos?')) {
+                try {
+                    await deleteDoc(doc(db, "jornadas_itinerantes", id));
+                    showToast('Jornada eliminada', 'error', 'fa-trash-can');
+                    resetFormulario();
+                } catch (err) {
+                    console.error(err);
+                    showToast('Error al eliminar', 'error', 'fa-circle-xmark');
+                }
+            }
+        };
+
+        document.getElementById('btn-cancelar').addEventListener('click', resetFormulario);
 
         function resetFormulario() {
             document.getElementById('form-jornada').reset();
@@ -865,20 +893,16 @@
             document.getElementById('btn-cancelar').style.display = 'none';
         }
 
-        // RENDERIZADO DE TABLA, BUSCADOR Y PAGINACIÓN
         function renderTabla() {
             const tbody = document.getElementById('tabla-jornadas');
             tbody.innerHTML = '';
 
-            // Ordenar por fecha cronológica
             jornadas.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
-            // Aplicar límite máximo global
             const jornadasLimitadas = jornadas.slice(0, MAX_ITEMS);
 
-            // Filtrar por término de búsqueda
             const jornadasFiltradas = jornadasLimitadas.filter(j => {
-                const cadenaCompleta = `${j.colonia} ${j.lugar} ${j.fecha} ${j.servicios.join(' ')}`.toLowerCase();
+                const cadenaCompleta = `${j.colonia || ''} ${j.lugar || ''} ${j.fecha || ''} ${(j.servicios || []).join(' ')}`.toLowerCase();
                 return cadenaCompleta.includes(busquedaFiltro);
             });
 
@@ -894,11 +918,11 @@
             const paginatedItems = jornadasFiltradas.slice(start, end);
 
             if (paginatedItems.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 24px;">No se encontraron jornadas que coincidan con la búsqueda.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 24px;">No se encontraron jornadas registradas.</td></tr>`;
             } else {
                 paginatedItems.forEach(j => {
                     const tr = document.createElement('tr');
-                    const badges = j.servicios.map(s => `<span class="badge">${s}</span>`).join('');
+                    const badges = (j.servicios || []).map(s => `<span class="badge">${s}</span>`).join('');
 
                     tr.innerHTML = `
                         <td>
@@ -911,15 +935,14 @@
                         </td>
                         <td>${badges}</td>
                         <td>
-                            <button class="btn-action edit" onclick="editarJornada('${j.id}')" title="Editar"><i class="fas fa-pen"></i></button>
-                            <button class="btn-action delete" onclick="eliminarJornada('${j.id}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+                            <button class="btn-action edit" onclick="window.editarJornada('${j.id}')" title="Editar"><i class="fas fa-pen"></i></button>
+                            <button class="btn-action delete" onclick="window.eliminarJornada('${j.id}')" title="Eliminar"><i class="fas fa-trash"></i></button>
                         </td>
                     `;
                     tbody.appendChild(tr);
                 });
             }
 
-            // Actualizar Texto Informativo
             const showingStart = totalItems === 0 ? 0 : start + 1;
             const showingEnd = Math.min(end, totalItems);
             document.getElementById('page-info').innerText = `Mostrando ${showingStart}-${showingEnd} de ${totalItems} jornadas`;
@@ -929,7 +952,6 @@
             verificarAlertasProximas();
         }
 
-        // CONTROLES DE PAGINACIÓN
         function renderControlesPaginacion(totalPages) {
             const container = document.getElementById('pagination-controls');
             container.innerHTML = '';
@@ -980,7 +1002,6 @@
             }
         }
 
-        // SISTEMA DE ALERTAS Y RECORDATORIOS INTELIGENTES
         function verificarAlertasProximas() {
             const banner = document.getElementById('alert-banner');
             const bannerText = document.getElementById('alert-banner-text');
@@ -1018,23 +1039,12 @@
                 banner.className = 'alert-banner soon';
                 banner.style.display = 'flex';
                 const textoDias = diasFaltantesMin === 1 ? 'mañana' : `en ${diasFaltantesMin} días`;
-                bannerText.innerHTML = `<strong> RECORDATORIO DE JORNADA PRÓXIMA:</strong> Programada para ${textoDias} (${jornadaProxima.fecha}) en <u>${jornadaProxima.colonia}</u> (${jornadaProxima.lugar}).`;
+                bannerText.innerHTML = `<strong>RECORDATORIO DE JORNADA PRÓXIMA:</strong> Programada para ${textoDias} (${jornadaProxima.fecha}) en <u>${jornadaProxima.colonia}</u> (${jornadaProxima.lugar}).`;
             } else {
                 banner.style.display = 'none';
             }
         }
 
-        function eliminarJornada(id) {
-            if (confirm('¿Eliminar esta jornada agendada?')) {
-                jornadas = jornadas.filter(j => j.id !== id);
-                localStorage.setItem('jornadas_db', JSON.stringify(jornadas));
-                resetFormulario();
-                renderTabla();
-                showToast('Jornada eliminada', 'error', 'fa-trash-can');
-            }
-        }
-
-        // FUNCION PARA MENSAJES FLOANTES TOAST
         function showToast(mensaje, tipo = 'info', icono = 'fa-circle-info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
