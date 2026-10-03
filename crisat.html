@@ -176,7 +176,9 @@
                 <div class="field">
                     <label>Estatus Expediente</label>
                     <select id="estatus_expediente">
-                        <option value="EN TRATAMIENTO">🟢 En Tratamiento</option>
+                        <option value="NUEVO INGRESO">🟢 Nuevo Ingreso</option>
+                        <option value="REINGRESO">🔄 Reingreso</option>
+                        <option value="EN TRATAMIENTO">🟡 En Tratamiento</option>
                         <option value="ALTA POR MEJORÍAS">✨ Alta por Mejorías</option>
                         <option value="BAJA POR DESERCIÓN">⚠️ Baja por Deserción</option>
                     </select>
@@ -476,11 +478,13 @@
         </div>
         <p id="txtReprogramarInfo" style="font-size:0.9rem; margin-bottom:15px;"></p>
         
+        <!-- Fecha de la Nueva Cita -->
         <div class="field" style="margin-bottom: 12px;">
             <label>Fecha de la Nueva Cita:</label>
             <input type="date" id="reprog_fecha">
         </div>
 
+        <!-- Terapeuta Asignado -->
         <div class="field" style="margin-bottom: 12px;">
             <label>Terapeuta Asignado para la Próxima Cita:</label>
             <select id="reprog_terapeuta">
@@ -492,10 +496,11 @@
                 <option value="Luis">Luis</option>
                 <option value="Javier">Javier</option>
             </select>
-            <small style="color:#64748b;">* Puedes cambiar el terapeuta si asistirá con otro especialista.</small>
+            <small style="color:#64748b; display: block; margin-top: 4px;">* Puedes cambiar el terapeuta si asistirá con otro especialista.</small>
         </div>
 
-        <div class="modal-btn-row">
+        <!-- Botones de Acción -->
+        <div class="modal-btn-row" style="margin-top: 20px;">
             <button class="btn-modal" style="background:#e2e8f0; color:#334155;" id="btnReprogNo">No Agendar</button>
             <button class="btn-modal" style="background:var(--crisat); color:white;" id="btnReprogSi">
                 <i class="fas fa-check-circle"></i> Agendar Próxima Cita
@@ -533,10 +538,11 @@
     <div id="contenidoReporteDiarioCrisver"></div>
     <div id="contenidoReporteAltasCrisver"></div>
 </div>
+</body>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, serverTimestamp, writeBatch, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = { 
         apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", 
@@ -617,7 +623,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
         });
     };
 
-    window.solicitarReprogramacionModal = (proximaFecha, terapeutaActual, textoAccion, nombrePaciente) => {
+    window.solicitarReprogramacionModal = (proximaFecha, terapeutaActual, textoAccion, nombrePaciente, estatusActual = 'EN TRATAMIENTO') => {
         return new Promise((resolve) => {
             const modal = document.getElementById('modalReprogramar');
             document.getElementById('txtReprogramarInfo').innerText = `El paciente ${nombrePaciente} ${textoAccion} su cita.`;
@@ -634,6 +640,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
             }
             if (!encontrada) selectTerapeuta.value = "";
 
+            // 🌟 NUEVO: Preseleccionar o inyectar el estatus actual en el selector (asegúrate de tener este <select id="reprog_estatus"> en tu HTML)
+            const selectEstatus = document.getElementById('reprog_estatus');
+            if (selectEstatus) {
+                selectEstatus.value = estatusActual.toUpperCase();
+            }
+
             modal.style.display = 'flex';
 
             const btnSi = document.getElementById('btnReprogSi');
@@ -648,8 +660,17 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
             const onSi = () => {
                 const nuevaFecha = document.getElementById('reprog_fecha').value;
                 const nuevoTerapeuta = document.getElementById('reprog_terapeuta').value;
+                
+                // 🌟 NUEVO: Capturamos el estatus seleccionado al hacer clic en "Agendar"
+                const nuevoEstatus = selectEstatus ? selectEstatus.value : 'EN TRATAMIENTO';
+
                 limpiar();
-                resolve({ agendar: true, fecha: nuevaFecha, terapeuta: nuevoTerapeuta });
+                resolve({ 
+                    agendar: true, 
+                    fecha: nuevaFecha, 
+                    terapeuta: nuevoTerapeuta, 
+                    estatus_expediente: nuevoEstatus // <--- Se devuelve al sistema
+                });
             };
 
             const onNo = () => { limpiar(); resolve({ agendar: false }); };
@@ -665,47 +686,32 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
     window.calcularEdad = () => {
         const f = document.getElementById("fecha_nacimiento")?.value;
         if (!f) return;
+
         const hoy = new Date();
-        const cumple = new Date(f);
-        let edad = hoy.getFullYear() - cumple.getFullYear();
-        if (hoy.getMonth() < cumple.getMonth() || (hoy.getMonth() === cumple.getMonth() && hoy.getDate() < cumple.getDate())) edad--;
-        document.getElementById("edad").value = edad;
+        const cumple = new Date(f + "T00:00:00");
+
+        let años = hoy.getFullYear() - cumple.getFullYear();
+        let meses = hoy.getMonth() - cumple.getMonth();
+        let dias = hoy.getDate() - cumple.getDate();
+
+        if (dias < 0) {
+            meses--;
+            const diasMesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0).getDate();
+            dias += diasMesAnterior;
+        }
+
+        if (meses < 0) {
+            años--;
+            meses += 12;
+        }
+
+        const semanas = Math.floor(dias / 7);
+        const diasRestantes = dias % 7;
+
+        let edadStr = `${años} años, ${meses} meses, ${semanas} semanas y ${diasRestantes} días`;
+        const elEdad = document.getElementById("edad");
+        if (elEdad) elEdad.value = edadStr;
     };
-
-window.calcularEdad = () => {
-    const f = document.getElementById("fecha_nacimiento")?.value;
-    if (!f) return;
-
-    const hoy = new Date();
-    // Prevenimos el desfase de día por zona horaria agregando T00:00:00
-    const cumple = new Date(f + "T00:00:00");
-
-    let años = hoy.getFullYear() - cumple.getFullYear();
-    let meses = hoy.getMonth() - cumple.getMonth();
-    let dias = hoy.getDate() - cumple.getDate();
-
-    // Si el día actual es menor al día de nacimiento, ajustamos restando un mes
-    if (dias < 0) {
-        meses--;
-        const diasMesAnterior = new Date(hoy.getFullYear(), hoy.getMonth(), 0).getDate();
-        dias += diasMesAnterior;
-    }
-
-    // Si el mes actual es menor al mes de nacimiento, ajustamos restando un año
-    if (meses < 0) {
-        años--;
-        meses += 12;
-    }
-
-    // Calculamos semanas y días sobrantes
-    const semanas = Math.floor(dias / 7);
-    const diasRestantes = dias % 7;
-
-    // Asignamos el texto formateado a la variable 'edad' que requiere el input
-    let edad = `${años} años, ${meses} meses, ${semanas} semanas y ${diasRestantes} días`;
-
-    document.getElementById("edad").value = edad;
-};
 
     window.toggleCamposEspeciales = () => {
         const box = document.getElementById("box_justificante");
@@ -748,7 +754,6 @@ window.calcularEdad = () => {
         const elFechaCaptura = document.getElementById('fecha_captura');
         if (elFechaCaptura) elFechaCaptura.value = window.obtenerFechaLocal();
 
-        // Desmarcar todos los checkboxes
         document.querySelectorAll('.check-serv, .chk-dia, input[name="tipo_discapacidad"]').forEach(cb => cb.checked = false);
 
         const radioCol = document.querySelector('input[name="tipo_ubicacion"][value="COLONIA"]');
@@ -759,58 +764,56 @@ window.calcularEdad = () => {
     };
 
     // --- CONSTRUCCIÓN DEL OBJETO DE DATOS DEL FORMULARIO ---
-function obtenerDatosFormulario() {
-    const serviciosSeleccionados = Array.from(document.querySelectorAll('.check-serv:checked'))
-        .map(cb => cb.value)
-        .join(', ');
+    function obtenerDatosFormulario() {
+        const serviciosSeleccionados = Array.from(document.querySelectorAll('.check-serv:checked'))
+            .map(cb => cb.value)
+            .join(', ');
 
-    const diasSeleccionados = Array.from(document.querySelectorAll('.chk-dia:checked'))
-        .map(cb => cb.value);
+        const diasSeleccionados = Array.from(document.querySelectorAll('.chk-dia:checked'))
+            .map(cb => cb.value);
 
-    // Múltiples selecciones de limitantes independientemente de la discapacidad
-    const tiposDiscapacidad = Array.from(document.querySelectorAll('input[name="tipo_discapacidad"]:checked'))
-        .map(cb => cb.value)
-        .join(', ');
+        const tiposDiscapacidad = Array.from(document.querySelectorAll('input[name="tipo_discapacidad"]:checked'))
+            .map(cb => cb.value)
+            .join(', ');
 
-    const tipoUbicacion = document.querySelector('input[name="tipo_ubicacion"]:checked')?.value || 'COLONIA';
+        const tipoUbicacion = document.querySelector('input[name="tipo_ubicacion"]:checked')?.value || 'COLONIA';
 
-    return {
-        departamento: "CRISAT",
-        fecha_captura: document.getElementById('fecha_captura')?.value || window.obtenerFechaLocal(),
-        nombre_paciente: (document.getElementById('nombre')?.value || '').trim().toUpperCase(),
-        curp: (document.getElementById('curp')?.value || '').trim().toUpperCase(),
-        expediente: (document.getElementById('expediente')?.value || '').trim().toUpperCase(),
-        fecha_ISO: document.getElementById('fecha_cita')?.value || '',
-        hora: document.getElementById('hora_cita')?.value || '',
-        estatus: document.getElementById('estatus')?.value || 'PENDIENTE',
-        estatus_expediente: document.getElementById('estatus_expediente')?.value || 'EN TRATAMIENTO',
-        monto: parseFloat(document.getElementById('cuota')?.value) || 0,
-        diagnostico: (document.getElementById('diagnostico')?.value || '').trim().toUpperCase(),
-        localidad: document.getElementById('municipio')?.value || 'SAN ANDRÉS TUXTLA',
-        sexo: document.getElementById('sexo')?.value || 'H',
-        fecha_nacimiento: document.getElementById('fecha_nacimiento')?.value || '',
-        lugar_nacimiento: (document.getElementById('lugar_nacimiento')?.value || '').trim().toUpperCase(),
-        escolaridad: (document.getElementById('escolaridad')?.value || '').trim().toUpperCase(),
-        ocupacion: (document.getElementById('ocupacion')?.value || '').trim().toUpperCase(),
-        edad: document.getElementById('edad')?.value || '',
-        direccion: (document.getElementById('direccion')?.value || '').trim().toUpperCase(),
-        telefono: (document.getElementById('telefono')?.value || '').trim(),
-        col_loc: (document.getElementById('col_loc')?.value || '').trim().toUpperCase(),
-        justificacion: (document.getElementById('motivo_justificacion')?.value || '').trim().toUpperCase(),
-        nombre_terapeuta: (document.getElementById('nombre_terapeuta')?.value || '').trim().toUpperCase(),
-        tipo_ubicacion: tipoUbicacion,
-        servicio: serviciosSeleccionados,
-        dias_atencion: diasSeleccionados,
-        
-        // CAMPOS AUTÓNOMOS DEL MÓDULO DIAGNÓSTICO MÉDICO
-        discapacidad: document.getElementById('discapacidad')?.value || 'no',
-        tipo_discapacidad: tiposDiscapacidad,
-        grado: document.getElementById('grado')?.value || '',
-        duracion: document.getElementById('duracion')?.value || '',
-        
-        timestamp: serverTimestamp()
-    };
-}
+        return {
+            departamento: "CRISAT",
+            fecha_captura: document.getElementById('fecha_captura')?.value || window.obtenerFechaLocal(),
+            nombre_paciente: (document.getElementById('nombre')?.value || '').trim().toUpperCase(),
+            curp: (document.getElementById('curp')?.value || '').trim().toUpperCase(),
+            expediente: (document.getElementById('expediente')?.value || '').trim().toUpperCase(),
+            fecha_ISO: document.getElementById('fecha_cita')?.value || '',
+            hora: document.getElementById('hora_cita')?.value || '',
+            estatus: document.getElementById('estatus')?.value || 'PENDIENTE',
+            estatus_expediente: document.getElementById('estatus_expediente')?.value || 'EN TRATAMIENTO',
+            monto: parseFloat(document.getElementById('cuota')?.value) || 0,
+            diagnostico: (document.getElementById('diagnostico')?.value || '').trim().toUpperCase(),
+            localidad: document.getElementById('municipio')?.value || 'SAN ANDRÉS TUXTLA',
+            sexo: document.getElementById('sexo')?.value || 'H',
+            fecha_nacimiento: document.getElementById('fecha_nacimiento')?.value || '',
+            lugar_nacimiento: (document.getElementById('lugar_nacimiento')?.value || '').trim().toUpperCase(),
+            escolaridad: (document.getElementById('escolaridad')?.value || '').trim().toUpperCase(),
+            ocupacion: (document.getElementById('ocupacion')?.value || '').trim().toUpperCase(),
+            edad: document.getElementById('edad')?.value || '',
+            direccion: (document.getElementById('direccion')?.value || '').trim().toUpperCase(),
+            telefono: (document.getElementById('telefono')?.value || '').trim(),
+            col_loc: (document.getElementById('col_loc')?.value || '').trim().toUpperCase(),
+            justificacion: (document.getElementById('motivo_justificacion')?.value || '').trim().toUpperCase(),
+            nombre_terapeuta: (document.getElementById('nombre_terapeuta')?.value || '').trim().toUpperCase(),
+            tipo_ubicacion: tipoUbicacion,
+            servicio: serviciosSeleccionados,
+            dias_atencion: diasSeleccionados,
+            
+            discapacidad: document.getElementById('discapacidad')?.value || 'no',
+            tipo_discapacidad: tiposDiscapacidad,
+            grado: document.getElementById('grado')?.value || '',
+            duracion: document.getElementById('duracion')?.value || '',
+            
+            timestamp: serverTimestamp()
+        };
+    }
 
     // --- Cargar datos para edición ---
     window.prepararEdicion = (id) => {
@@ -823,7 +826,7 @@ function obtenerDatosFormulario() {
         document.getElementById('expediente').value = r.expediente || '';
         document.getElementById('fecha_cita').value = r.fecha_ISO || '';
         document.getElementById('hora_cita').value = r.hora || '';
-        document.getElementById('cuota').value = r.monto || '';
+        document.getElementById('cuota').value = r.monto !== undefined ? r.monto : '';
         document.getElementById('diagnostico').value = r.diagnostico || '';
         document.getElementById('telefono').value = r.telefono || '';
         document.getElementById('direccion').value = r.direccion || '';
@@ -834,7 +837,6 @@ function obtenerDatosFormulario() {
         document.getElementById('ocupacion').value = r.ocupacion || '';
         document.getElementById('edad').value = r.edad || '';
         document.getElementById('motivo_justificacion').value = r.justificacion || '';
-        document.getElementById('nombre_terapeuta').value = r.nombre_terapeuta || '';
         document.getElementById('estatus').value = r.estatus || 'PENDIENTE';
         document.getElementById('estatus_expediente').value = r.estatus_expediente || 'EN TRATAMIENTO';
         document.getElementById('sexo').value = r.sexo || 'H';
@@ -842,6 +844,21 @@ function obtenerDatosFormulario() {
         document.getElementById('discapacidad').value = r.discapacidad || 'no';
         document.getElementById('grado').value = r.grado || 'LEVE';
         document.getElementById('duracion').value = r.duracion || 'TEMPORAL';
+
+        // Cargar terapeuta
+        const tSelect = document.getElementById('nombre_terapeuta');
+        if (tSelect) {
+            const tGuardado = (r.nombre_terapeuta || "").toUpperCase();
+            let encontrada = false;
+            for (let i = 0; i < tSelect.options.length; i++) {
+                if (tSelect.options[i].value.toUpperCase() === tGuardado) {
+                    tSelect.value = tSelect.options[i].value;
+                    encontrada = true;
+                    break;
+                }
+            }
+            if (!encontrada) tSelect.value = ""; 
+        }
 
         // Cargar múltiples checkboxes de tipo de discapacidad
         document.querySelectorAll('input[name="tipo_discapacidad"]').forEach(cb => cb.checked = false);
@@ -871,6 +888,9 @@ function obtenerDatosFormulario() {
                 if (cb) cb.checked = true;
             });
         }
+
+        const radio = document.querySelector(`input[name="tipo_ubicacion"][value="${r.tipo_ubicacion || 'COLONIA'}"]`);
+        if (radio) radio.checked = true;
 
         window.toggleCamposEspeciales();
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -923,7 +943,6 @@ function obtenerDatosFormulario() {
         try {
             document.getElementById('fecha_captura').value = window.obtenerFechaLocal();
             
-            // 1. VALIDACIÓN DE CAMPOS TEXTO OBLIGATORIOS
             const camposRequeridos = {
                 'fecha_cita': 'Fecha de la Cita',
                 'nombre': 'Nombre del Paciente',
@@ -941,7 +960,6 @@ function obtenerDatosFormulario() {
                 }
             }
 
-            // 2. VALIDACIÓN DE CUOTA OBLIGATORIA
             const inputCuota = document.getElementById('cuota');
             const valorCuota = inputCuota ? inputCuota.value.trim() : '';
 
@@ -976,8 +994,6 @@ function obtenerDatosFormulario() {
                 }
             }
 
-// GUARDAR O ACTUALIZAR
-            let idGeneradoGuardado = idActual;
             if (idActual) {
                 await updateDoc(doc(db, "registros_generales", idActual), { ...datos, fecha_ISO: fechaCitaIndividual });
                 window.mostrarToast("Registro actualizado correctamente.", "success");
@@ -991,14 +1007,10 @@ function obtenerDatosFormulario() {
                 window.mostrarToast(`¡Éxito! Se registraron ${listaFechas.length} cita(s).`, "success");
             }
 
-            // =========================================================================
-            // REPROGRAMACIÓN DE PRÓXIMA CITA (CORREGIDO Y ASEGURADO)
-            // =========================================================================
             if (datos.estatus === "ASISTIÓ" || datos.estatus === "FALTÓ") {
                 const proximaFechaCalculada = calcularProximaFechaCita(fechaCitaIndividual, datos.dias_atencion);
                 const textoAccion = datos.estatus === "ASISTIÓ" ? "asistió a" : "faltó a";
 
-                // Llamamos de forma limpia al modal de reprogramación
                 const resReprog = await window.solicitarReprogramacionModal(
                     proximaFechaCalculada, 
                     datos.nombre_terapeuta, 
@@ -1031,90 +1043,6 @@ function obtenerDatosFormulario() {
             }
         }
     }
-
-   // --- ACCIONES Y EDICIÓN ---
-    window.prepararEdicion = (id) => {
-        const r = cacheRegistros.find(item => item.id === id);
-        if (!r) return;
-
-        document.getElementById('editId').value = id;
-        document.getElementById('nombre').value = r.nombre_paciente || "";
-        document.getElementById('curp').value = r.curp || "";
-        document.getElementById('fecha_cita').value = r.fecha_ISO || "";
-        document.getElementById('hora_cita').value = r.hora || "";
-        document.getElementById('estatus').value = r.estatus || "PENDIENTE";
-        document.getElementById('estatus_expediente').value = r.estatus_expediente || "EN TRATAMIENTO";
-        document.getElementById('expediente').value = r.expediente || "";
-        
-        const inputCuota = document.getElementById('cuota');
-        if (inputCuota) {
-            inputCuota.value = r.monto !== undefined ? r.monto : "";
-            inputCuota.style.borderColor = "#d1d5db";
-        }
-
-        document.getElementById('diagnostico').value = r.diagnostico || "";
-        document.getElementById('municipio').value = r.localidad || "SAN ANDRÉS TUXTLA";
-        document.getElementById('sexo').value = r.sexo || "H";
-        document.getElementById('fecha_nacimiento').value = r.fecha_nacimiento || "";
-        document.getElementById('lugar_nacimiento').value = r.lugar_nacimiento || "";
-        document.getElementById('escolaridad').value = r.escolaridad || "";
-        document.getElementById('ocupacion').value = r.ocupacion || "";
-        document.getElementById('edad').value = r.edad || "";
-        document.getElementById('direccion').value = r.direccion || "";
-        document.getElementById('telefono').value = r.telefono || "";
-        document.getElementById('col_loc').value = r.col_loc || "";
-        document.getElementById('motivo_justificacion').value = r.justificacion || "";
-
-        // --- CAMPOS AUTÓNOMOS DE DISCAPACIDAD Y LIMITANTES ---
-        const elDiscapacidad = document.getElementById('discapacidad');
-        if (elDiscapacidad) elDiscapacidad.value = r.discapacidad || 'no';
-
-        const elGrado = document.getElementById('grado');
-        if (elGrado) elGrado.value = r.grado || '';
-
-        const elDuracion = document.getElementById('duracion');
-        if (elDuracion) elDuracion.value = r.duracion || '';
-
-        // Checkboxes independientes de limitantes / tipo de discapacidad
-        document.querySelectorAll('input[name="tipo_discapacidad"]').forEach(cb => cb.checked = false);
-        if (r.tipo_discapacidad) {
-            const seleccionados = r.tipo_discapacidad.split(',').map(s => s.trim());
-            seleccionados.forEach(val => {
-                const cb = document.querySelector(`input[name="tipo_discapacidad"][value="${CSS.escape(val)}"]`);
-                if (cb) cb.checked = true;
-            });
-        }
-
-        // --- TERAPEUTA Y UBICACIÓN ---
-        const tSelect = document.getElementById('nombre_terapeuta');
-        if (tSelect) {
-            const tGuardado = (r.nombre_terapeuta || "").toUpperCase();
-            let encontrada = false;
-            for (let i = 0; i < tSelect.options.length; i++) {
-                if (tSelect.options[i].value.toUpperCase() === tGuardado) {
-                    tSelect.value = tSelect.options[i].value;
-                    encontrada = true;
-                    break;
-                }
-            }
-            if (!encontrada) tSelect.value = ""; 
-        }
-
-        const radio = document.querySelector(`input[name="tipo_ubicacion"][value="${r.tipo_ubicacion || 'COLONIA'}"]`);
-        if (radio) radio.checked = true;
-
-        // --- SERVICIOS Y DÍAS ---
-        const serviciosActivos = r.servicio ? r.servicio.split(', ') : [];
-        document.querySelectorAll('.check-serv').forEach(cb => cb.checked = serviciosActivos.includes(cb.value));
-
-        const diasActivos = r.dias_atencion || [];
-        document.querySelectorAll('.chk-dia').forEach(cb => cb.checked = diasActivos.includes(cb.value));
-
-        if (typeof window.toggleCamposEspeciales === 'function') {
-            window.toggleCamposEspeciales();
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
 
     window.eliminarRegistro = async (id) => {
         const confirmar = await window.mostrarConfirmacion("Eliminar Registro", "¿Estás seguro de eliminar este registro permanentemente?");
@@ -1163,10 +1091,9 @@ function obtenerDatosFormulario() {
         return racha;
     }
 
-window.abrirModalFaltas = (expediente, nombre) => {
+    window.abrirModalFaltas = (expediente, nombre) => {
         expedienteSeleccionadoModal = expediente;
         
-        // Verificamos que el elemento exista antes de modificar su texto
         const elNombreModal = document.getElementById('nombreModal');
         if (elNombreModal) {
             elNombreModal.innerText = nombre;
@@ -1234,9 +1161,26 @@ window.abrirModalFaltas = (expediente, nombre) => {
         window.filtrarYRenderizar();
     };
 
+    window.limpiarFiltroFecha = () => {
+    const inputFecha = document.getElementById('filtroFecha');
+    if (inputFecha) {
+        inputFecha.value = ''; // Limpia el valor de la fecha
+    }
+    window.filtrarYRenderizar(); // Recarga la tabla completa
+};
+
+window.prepararNuevaCitaConEstatus = function(expediente, estatusActual) {
+    const selectEstatusFormulario = document.getElementById('estatus_expediente') || document.getElementById('nuevoEstatusModal');
+
+    if (selectEstatusFormulario) {
+        selectEstatusFormulario.value = estatusActual || "EN TRATAMIENTO";
+    }
+};
+
+
 window.filtrarYRenderizar = () => {
     const termino = document.getElementById('inputBuscar')?.value.toLowerCase().trim() || '';
-    const filtroFechaValor = document.getElementById('filtroFecha')?.value || ''; // Ej: "2026-08-21"
+    const filtroFechaValor = document.getElementById('filtroFecha')?.value || ''; 
     const filtroHoraInicio = document.getElementById('filtroHoraInicio')?.value || '00:00';
     const filtroHoraFin = document.getElementById('filtroHoraFin')?.value || '23:59';
     
@@ -1246,21 +1190,17 @@ window.filtrarYRenderizar = () => {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    // 1. Filtrado por término de búsqueda, fecha y rango de hora
     let registrosFiltrados = cacheRegistros.filter(r => {
-        // Filtro por Fecha Completa
         if (filtroFechaValor) {
             const fechaISO = r.fecha_ISO || ''; 
             if (fechaISO !== filtroFechaValor) return false;
         }
 
-        // Filtro por Rango de Hora (Si la cita tiene hora registrada)
         const horaCita = r.hora || '00:00';
         if (horaCita < filtroHoraInicio || horaCita > filtroHoraFin) {
             return false;
         }
 
-        // Filtro por Término de Búsqueda (Texto)
         if (!termino) return true;
         return (r.nombre_paciente || '').toLowerCase().includes(termino) ||
                (r.expediente || '').toLowerCase().includes(termino) ||
@@ -1269,25 +1209,23 @@ window.filtrarYRenderizar = () => {
                (r.diagnostico || '').toLowerCase().includes(termino);
     });
 
-    // 2. ORDENAMIENTO POR FECHA Y HORA (De menor a mayor / cronológico)
     registrosFiltrados.sort((a, b) => {
         const fechaA = new Date((a.fecha_ISO || '1970-01-01') + 'T' + (a.hora || '00:00'));
         const fechaB = new Date((b.fecha_ISO || '1970-01-01') + 'T' + (b.hora || '00:00'));
         return fechaA - fechaB; 
     });
 
-    // 3. RENDERIZADO DIRECTO DE TODOS LOS REGISTROS FILTRADOS
     const totalRegistros = registrosFiltrados.length;
 
     if (totalRegistros === 0) {
-        cuerpo.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 25px; color:#64748b;">No se encontraron registros para este horario.</td></tr>`;
+        cuerpo.innerHTML = `<tr><td colspan="9" style="text-align:center; padding: 25px; color:#64748b;">No se encontraron registros para este filtro.</td></tr>`;
     } else {
         let htmlFilas = "";
 
         registrosFiltrados.forEach((r) => {
             const fechaCita = new Date((r.fecha_ISO || window.obtenerFechaLocal()) + "T00:00:00");
             const diferenciaDias = Math.round((fechaCita - hoy) / (1000 * 60 * 60 * 24));
-            const faltasRacha = calcularFaltasConsecutivas(r.expediente);
+            const faltasRacha = typeof calcularFaltasConsecutivas === 'function' ? calcularFaltasConsecutivas(r.expediente) : 0;
             
             let pillClass = "pill-tiempo";
             let pillTexto = "A TIEMPO";
@@ -1311,15 +1249,24 @@ window.filtrarYRenderizar = () => {
                 botonAlertaFaltas = `<button class="btn-action btn-alert no-print" title="4 Faltas Consecutivas" onclick="window.abrirModalFaltas('${r.expediente}', '${r.nombre_paciente}')">⚠️ 4 FALTAS</button>`;
             }
 
-            let badgeClass = r.estatus === "ASISTIÓ" ? "asistencia-ok" : (r.estatus === "FALTÓ" ? "alerta-roja" : "");
+            // GESTIÓN COMPLETA DEL ESTATUS DE EXPEDIENTE EN LA TABLA
             let badgeExpediente = "";
-            if (r.estatus_expediente === "ALTA POR MEJORÍAS") {
-                badgeExpediente = `<span class="pill" style="background:#dcfce7; color:#16a34a;">ALTA POR MEJORÍAS</span>`;
-            } else if (r.estatus_expediente === "BAJA POR DESERCIÓN") {
-                badgeExpediente = `<span class="pill" style="background:#fee2e2; color:#dc2626;">BAJA POR DESERCIÓN</span>`;
+            const estatusExp = (r.estatus_expediente || 'EN TRATAMIENTO').toUpperCase();
+            
+            if (estatusExp.includes('NUEVO')) {
+                badgeExpediente = `<span class="pill" style="background:#dcfce7; color:#16a34a; font-size:0.75rem;">NUEVO INGRESO</span>`;
+            } else if (estatusExp.includes('REINGRESO')) {
+                badgeExpediente = `<span class="pill" style="background:#fef9c3; color:#854d0e; font-size:0.75rem;">REINGRESO</span>`;
+            } else if (estatusExp.includes('MEJORI') || estatusExp.includes('ALTA')) {
+                badgeExpediente = `<span class="pill" style="background:#f3e8ff; color:#6b21a8; font-size:0.75rem;">ALTA POR MEJORÍAS</span>`;
+            } else if (estatusExp.includes('DESERCI') || estatusExp.includes('BAJA')) {
+                badgeExpediente = `<span class="pill" style="background:#fee2e2; color:#dc2626; font-size:0.75rem;">BAJA POR DESERCIÓN</span>`;
+            } else {
+                badgeExpediente = `<span class="pill" style="background:#e0f2fe; color:#0369a1; font-size:0.75rem;">EN TRATAMIENTO</span>`;
             }
 
-            // --- CONSTRUCCIÓN DE LA CELDA DE DISCAPACIDAD Y LIMITACIÓN ---
+            let badgeClass = r.estatus === "ASISTIÓ" ? "asistencia-ok" : (r.estatus === "FALTÓ" ? "alerta-roja" : "");
+
             const tieneDiscapacidad = (r.discapacidad || 'no').toLowerCase() === 'si';
             const badgeDiscapacidad = tieneDiscapacidad 
                 ? `<span class="badge" style="background:#fee2e2; color:#991b1b; font-size:0.7rem; font-weight:bold;">SÍ TIENE DISCAPACIDAD</span>` 
@@ -1342,15 +1289,15 @@ window.filtrarYRenderizar = () => {
                     <span class="pill ${pillClass}">${pillTexto}</span>
                     <br><small>${r.hora || ''}</small>
                 </td>
-                <td>${r.expediente || 'S/N'}<br>${badgeExpediente}</td>
+                <td><b>${r.expediente || 'S/N'}</b><br>${badgeExpediente}</td>
                 
                 <td>
                     <b>${r.nombre_paciente || 'SIN NOMBRE'}</b><br>
                     <small style="color: #475569;"><b>Dx:</b> ${r.diagnostico || 'Sin diagnóstico'}</small><br>
                     <small style="color: #64748b; font-size: 0.72rem; display: block; margin-top: 2px;">
-                        <i class="fas fa-map-marker-alt" title="Lugar de Nacimiento"></i> ${r.lugar_nacimiento || 'S/Lugar'} | 
-                        <i class="fas fa-graduation-cap" title="Escolaridad"></i> ${r.escolaridad || 'S/Esc'} | 
-                        <i class="fas fa-briefcase" title="Ocupación"></i> ${r.ocupacion || 'S/Ocup'}
+                        <i class="fas fa-map-marker-alt"></i> ${r.lugar_nacimiento || 'S/Lugar'} | 
+                        <i class="fas fa-graduation-cap"></i> ${r.escolaridad || 'S/Esc'} | 
+                        <i class="fas fa-briefcase"></i> ${r.ocupacion || 'S/Ocup'}
                     </small>
                     ${r.justificacion ? `<br><small style="color:var(--danger)"><b>Justificó:</b> ${r.justificacion}</small>` : ''}
                 </td>
@@ -1363,7 +1310,6 @@ window.filtrarYRenderizar = () => {
                     </div>
                 </td>
 
-                <!-- COLUMNA UNIFICADA DISCAPACIDAD -->
                 <td>${celdaDiscapacidad}</td>
 
                 <td>${r.servicio || '--'}</td>
@@ -1381,807 +1327,1154 @@ window.filtrarYRenderizar = () => {
     const txtInfo = document.getElementById('txtInfoPaginacion');
     const contPaginas = document.getElementById('contenedorPaginas');
     
-    if (txtInfo) {
-        txtInfo.innerText = `Mostrando ${totalRegistros} registros encontrados`;
-    }   
-    if (contPaginas) {
-        contPaginas.innerHTML = ''; 
-    }
-};
-// --- INICIALIZACIÓN DE EVENTOS ---
-document.addEventListener('DOMContentLoaded', () => {
-    const formCrisat = document.getElementById('formCrisat');
-    if (formCrisat) {
-        formCrisat.addEventListener('submit', procesarFormulario);
-    } else {
-        const btnGuardar = document.getElementById('btnGuardar');
-        if (btnGuardar) btnGuardar.addEventListener('click', procesarFormulario);
-    }
-
-    const inputCurp = document.getElementById('curp');
-    if (inputCurp) {
-        inputCurp.addEventListener('input', (e) => window.autocompletarPorCurp(e.target.value));
-    }
-
-    const elFechaCaptura = document.getElementById('fecha_captura');
-    if (elFechaCaptura) elFechaCaptura.value = window.obtenerFechaLocal();
-});
-
-// Carga de datos en tiempo real desde Firestore
-onSnapshot(query(collection(db, "registros_generales"), where("departamento", "==", "CRISAT")), (snapshot) => {
-    cacheRegistros = [];
-    snapshot.forEach((docSnap) => {
-        cacheRegistros.push({ ...docSnap.data(), id: docSnap.id });
-    });
-    window.filtrarYRenderizar();
-});
-
-    // --- CONTROL DE NAVEGACIÓN ENTRE VISTAS ---
-window.cambiarVista = (vistaSeleccionada) => {
-    // Ocultar de forma masiva todas las secciones marcadas como vistas
-    const secciones = document.querySelectorAll('.vista-seccion');
-    secciones.forEach(seccion => {
-        seccion.style.display = 'none';
-    });
-
-    // Resetear el estilo de todos los botones de navegación a su estado inactivo
-    const botonesNav = ['btnNavCitas', 'btnNavMunicipal', 'btnNavEstatal'];
-    botonesNav.forEach(idBtn => {
-        const btn = document.getElementById(idBtn);
-        if (btn) {
-            btn.style.background = 'white';
-            btn.style.color = 'var(--text)';
-        }
-    });
-
-    // Mostrar exclusivamente la sección seleccionada y activar su botón correspondiente
-    if (vistaSeleccionada === 'citas') {
-        const vistaCitas = document.getElementById('vistaCitas');
-        if (vistaCitas) vistaCitas.style.display = 'block';
-        
-        const btn = document.getElementById('btnNavCitas');
-        if (btn) {
-            btn.style.background = 'var(--crisat)';
-            btn.style.color = 'white';
-        }
-    } else if (vistaSeleccionada === 'municipal') {
-        const vistaMunicipal = document.getElementById('vistaMunicipal');
-        if (vistaMunicipal) vistaMunicipal.style.display = 'block';
-
-        const btn = document.getElementById('btnNavMunicipal');
-        if (btn) {
-            btn.style.background = 'var(--crisat)';
-            btn.style.color = 'white';
-        }
-        if (typeof window.generarReporteMunicipal === 'function') {
-            window.generarReporteMunicipal();
-        }
-    } else if (vistaSeleccionada === 'estatal') {
-        const vistaEstatal = document.getElementById('vistaEstatal');
-        if (vistaEstatal) vistaEstatal.style.display = 'block';
-
-        const btn = document.getElementById('btnNavEstatal');
-        if (btn) {
-            btn.style.background = 'var(--crisat)';
-            btn.style.color = 'white';
-        }
-        if (typeof window.generarReporteEstatal === 'function') {
-            window.generarReporteEstatal();
-        }
-    }
-
-    // Desplazar la ventana suavemente hacia arriba al cambiar de pestaña
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-// --- GENERADOR REPORTE DIF MUNICIPAL (CON FORMATO DE OFICIO Y FILTRO ROBUSTO DE ASISTENCIA) ---
-window.toggleTipoFiltroMunicipal = () => {
-    const tipo = document.getElementById('tipoFiltroMunicipal')?.value;
-    const contMes = document.getElementById('filtroContenedorMes');
-    const contRango = document.getElementById('filtroContenedorRango');
-    const contAnio = document.getElementById('filtroContenedorAnio');
-
-    // Ocultar contenedores visualmente
-    if (contMes) contMes.style.display = 'none';
-    if (contRango) contRango.style.display = 'none';
-    if (contAnio) contAnio.style.display = 'none';
-
-    // Obtener referencias a los inputs para poder limpiarlos si no se usan
-    const inputMes = document.getElementById('mesMunicipal');
-    const inputInicio = document.getElementById('fechaInicioMunicipal');
-    const inputFin = document.getElementById('fechaFinMunicipal');
-    const inputAnio = document.getElementById('anioMunicipal');
-
-    const hoy = new Date().toISOString().split('T')[0];
-    const anioActual = new Date().getFullYear();
-
-    // Activar el contenedor correspondiente y limpiar los demás para que no interfieran
-    if (tipo === 'mes' && contMes) {
-        contMes.style.display = 'block';
-        if (inputInicio) inputInicio.value = '';
-        if (inputFin) inputFin.value = '';
-        if (inputAnio) inputAnio.value = '';
-        if (inputMes && !inputMes.value) {
-            inputMes.value = hoy.substring(0, 7);
-        }
-    } else if (tipo === 'rango' && contRango) {
-        contRango.style.display = 'flex';
-        if (inputMes) inputMes.value = '';
-        if (inputAnio) inputAnio.value = '';
-        if (inputInicio && !inputInicio.value) inputInicio.value = hoy;
-        if (inputFin && !inputFin.value) inputFin.value = hoy;
-    } else if (tipo === 'anio' && contAnio) {
-        contAnio.style.display = 'block';
-        if (inputMes) inputMes.value = '';
-        if (inputInicio) inputInicio.value = '';
-        if (inputFin) inputFin.value = '';
-        if (inputAnio && !inputAnio.value) inputAnio.value = anioActual;
-    } else {
-        // Si selecciona Día u otra opción, limpiamos los campos de mes, rango y año para evitar cruces
-        if (inputMes) inputMes.value = '';
-        if (inputInicio) inputInicio.value = '';
-        if (inputFin) inputFin.value = '';
-        if (inputAnio) inputAnio.value = '';
-    }
-
-    window.generarReporteMunicipal();
+    if (txtInfo) txtInfo.innerText = `Mostrando ${totalRegistros} registros encontrados`;
+    if (contPaginas) contPaginas.innerHTML = ''; 
 };
 
-window.imprimirReporteMunicipal = () => {
-    const contenedor = document.getElementById('contenidoReporteMunicipal');
-    if (!contenedor || !contenedor.innerHTML.trim()) {
-        alert('No hay ningún reporte generado para imprimir.');
+// Ejemplo de la lógica al agendar la próxima cita
+
+window.abrirModalCambioEstatus = function(idRegistro, estatusActual) {
+    const modalEstatusEl = document.getElementById('modalCambioEstatus');
+    const selectEstatus = document.getElementById('nuevoEstatusSelect');
+    const btnConfirmar = document.getElementById('btnConfirmarCambioEstatus');
+
+    if (!modalEstatusEl || !selectEstatus || !btnConfirmar) {
+        console.warn("No se encontraron los elementos del modal de estatus en el HTML.");
         return;
     }
-    window.print();
+
+    if (estatusActual === 'Nuevo Ingreso') {
+        selectEstatus.value = 'Tratamiento'; 
+    } else {
+        selectEstatus.value = estatusActual;
+    }
+
+    const modalInstance = new bootstrap.Modal(modalEstatusEl);
+    modalInstance.show();
+
+    btnConfirmar.onclick = async () => {
+        const nuevoEstatus = selectEstatus.value;
+        await ejecutarCambioEstatus(idRegistro, nuevoEstatus, modalInstance);
+    };
 };
 
-window.generarReporteMunicipal = () => {
+async function ejecutarCambioEstatus(idRegistro, nuevoEstatus, modalInstance) {
+    try {
+        // 1. Primero obtenemos el registro actual para saber qué expediente es
+        const docRef = doc(db, "registros_generales", idRegistro);
+        const docSnap = await getDoc(docRef);
+        
+        if (!docSnap.exists()) {
+            throw new Error("El registro no existe.");
+        }
+        
+        const expedientePaciente = docSnap.data().expediente;
+
+        // 2. Actualizamos el registro actual
+        await updateDoc(docRef, {
+            estatus_expediente: nuevoEstatus, // Aseguramos que guarde el estatus del expediente
+            fechaActualizacionEstatus: new Date().toISOString()
+        });
+
+        // 3. OPCIONAL RECOMENDADO: Actualizar también todas las demás citas de este mismo expediente para que tengan el mismo estatus
+        if (expedientePaciente) {
+            const q = query(collection(db, "registros_generales"), where("expediente", "==", expedientePaciente));
+            const querySnapshot = await getDocs(q);
+            
+            const batch = writeBatch(db);
+            querySnapshot.forEach((documento) => {
+                const refRelacionada = doc(db, "registros_generales", documento.id);
+                batch.update(refRelacionada, { estatus_expediente: nuevoEstatus });
+            });
+            await batch.commit();
+        }
+
+        if (typeof mostrarToast === 'function') {
+            mostrarToast(`Estatus del expediente actualizado a "${nuevoEstatus}" con éxito`, "success");
+        } else {
+            alert(`Estatus del expediente actualizado a "${nuevoEstatus}" con éxito`);
+        }
+
+        if (modalInstance) {
+            modalInstance.hide();
+        }
+
+        if (typeof filtrarYRenderizar === 'function') {
+            filtrarYRenderizar();
+        }
+
+    } catch (error) {
+        console.error("Error al actualizar el estatus en Firestore: ", error);
+        alert("Error al actualizar el estatus: " + error.message);
+    }
+}
+
+// ==========================================
+// FUNCIONES PARA EL MODAL DE REAGENDAR Y CAMBIO DE ESTATUS
+// ==========================================
+window.abrirModalReagendarYStatus = function(idRegistro, expedienteActual, nombrePaciente, estatusActual) {
+    const contenedorModal = document.getElementById('contenidoModalReagendar');
+    if (!contenedorModal) return;
+
+    // Si el estatus actual es NUEVO INGRESO, sugerimos por defecto EN TRATAMIENTO para el select
+    const estatusSugerido = (estatusActual === 'NUEVO INGRESO') ? 'EN TRATAMIENTO' : estatusActual;
+
+    contenedorModal.innerHTML = `
+        <div style="font-family: Arial, sans-serif; padding: 10px;">
+            <h3 style="color: #0284c7; margin-top: 0;">Gestionar Cita y Estatus</h3>
+            <p><b>Paciente:</b> ${nombrePaciente} (${expedienteActual})</p>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; color: #475569;">
+                    Actualizar Estatus del Expediente:
+                </label>
+                <select id="nuevoEstatusModal" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                    <option value="EN TRATAMIENTO" ${estatusSugerido === 'EN TRATAMIENTO' ? 'selected' : ''}>EN TRATAMIENTO</option>
+                    <option value="NUEVO INGRESO" ${estatusSugerido === 'NUEVO INGRESO' ? 'selected' : ''}>NUEVO INGRESO</option>
+                    <option value="REINGRESO" ${estatusSugerido === 'REINGRESO' ? 'selected' : ''}>REINGRESO</option>
+                    <option value="ALTA POR MEJORÍAS" ${estatusSugerido.includes('MEJORI') || estatusSugerido.includes('ALTA') ? 'selected' : ''}>ALTA POR MEJORÍAS</option>
+                    <option value="BAJA POR DESERCIÓN" ${estatusSugerido.includes('DESERCI') || estatusSugerido.includes('BAJA') ? 'selected' : ''}>BAJA POR DESERCIÓN</option>
+                </select>
+                <small style="color: #64748b; font-size: 0.75rem; display: block; margin-top: 4px;">
+                    💡 Al reagendar una cita de un nuevo ingreso, cambiará automáticamente a <b>EN TRATAMIENTO</b>.
+                </small>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; color: #475569;">
+                    Nueva Fecha para Reagendar:
+                </label>
+                <input type="date" id="nuevaFechaCita" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="document.getElementById('modalReagendarContainer').style.display='none'" style="background: #64748b; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Cancelar</button>
+                <button type="button" onclick="window.guardarCambiosReagendar('${idRegistro}')" style="background: #0284c7; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Guardar Cambios</button>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('modalReagendarContainer').style.display = 'block';
+};
+
+window.guardarCambiosReagendar = async function(idRegistro) {
+    const nuevaFecha = document.getElementById('nuevaFechaCita')?.value;
+    let nuevoEstatusExp = document.getElementById('nuevoEstatusModal')?.value;
+
+    try {
+        const docRef = doc(db, "registros_generales", idRegistro);
+        const docSnap = await getDoc(docRef);
+        
+        if (!docSnap.exists()) throw new Error("El registro no existe.");
+        
+        const dataActual = docSnap.data();
+        const expedientePaciente = dataActual.expediente;
+
+        // 🌟 REGLA AUTOMÁTICA: Si el expediente estaba como NUEVO INGRESO y el usuario no seleccionó 
+        // manualmente otra opción distinta en el modal, lo cambiamos automáticamente a EN TRATAMIENTO.
+        if (dataActual.estatus_expediente === "NUEVO INGRESO" && (!nuevoEstatusExp || nuevoEstatusExp === "NUEVO INGRESO")) {
+            nuevoEstatusExp = "EN TRATAMIENTO";
+        }
+
+        const datosActualizados = {};
+        if (nuevaFecha) {
+            datosActualizados.fecha_ISO = nuevaFecha;
+            datosActualizados.estatus = "PENDIENTE";
+        }
+        if (nuevoEstatusExp) {
+            datosActualizados.estatus_expediente = nuevoEstatusExp;
+            datosActualizados.fechaActualizacionEstatus = new Date().toISOString();
+        }
+
+        // Actualizamos el registro actual
+        await updateDoc(docRef, datosActualizados);
+
+        // Actualizamos en lote todas las demás citas de este mismo expediente en Firebase
+        if (expedientePaciente && nuevoEstatusExp) {
+            const q = query(collection(db, "registros_generales"), where("expediente", "==", expedientePaciente));
+            const querySnapshot = await getDocs(q);
+            
+            const batch = writeBatch(db);
+            querySnapshot.forEach((documento) => {
+                const refRelacionada = doc(db, "registros_generales", documento.id);
+                batch.update(refRelacionada, { estatus_expediente: nuevoEstatusExp });
+            });
+            await batch.commit();
+        }
+
+        window.mostrarToast("¡Cita reagendada y estatus actualizado a En Tratamiento!", "success");
+        window.filtrarYRenderizar();
+
+    } catch (error) {
+        console.error("Error al actualizar en Firebase:", error);
+        alert("Error al guardar los cambios: " + error.message);
+    }
+};
+
+
+
+    // --- INICIALIZACIÓN DE EVENTOS ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const formCrisat = document.getElementById('formCrisat');
+        if (formCrisat) {
+            formCrisat.addEventListener('submit', procesarFormulario);
+        } else {
+            const btnGuardar = document.getElementById('btnGuardar');
+            if (btnGuardar) btnGuardar.addEventListener('click', procesarFormulario);
+        }
+
+        const inputCurp = document.getElementById('curp');
+        if (inputCurp) {
+            inputCurp.addEventListener('input', (e) => window.autocompletarPorCurp(e.target.value));
+        }
+
+        const elFechaCaptura = document.getElementById('fecha_captura');
+        if (elFechaCaptura) elFechaCaptura.value = window.obtenerFechaLocal();
+    });
+
+    // Carga de datos en tiempo real desde Firestore
+    onSnapshot(query(collection(db, "registros_generales"), where("departamento", "==", "CRISAT")), (snapshot) => {
+        cacheRegistros = [];
+        snapshot.forEach((docSnap) => {
+            cacheRegistros.push({ ...docSnap.data(), id: docSnap.id });
+        });
+        window.filtrarYRenderizar();
+    });
+
+    // --- CONTROL DE NAVEGACIÓN ENTRE VISTAS ---
+    window.cambiarVista = (vistaSeleccionada) => {
+        const secciones = document.querySelectorAll('.vista-seccion');
+        secciones.forEach(seccion => seccion.style.display = 'none');
+
+        const botonesNav = ['btnNavCitas', 'btnNavMunicipal', 'btnNavEstatal'];
+        botonesNav.forEach(idBtn => {
+            const btn = document.getElementById(idBtn);
+            if (btn) {
+                btn.style.background = 'white';
+                btn.style.color = 'var(--text)';
+            }
+        });
+
+        if (vistaSeleccionada === 'citas') {
+            const vistaCitas = document.getElementById('vistaCitas');
+            if (vistaCitas) vistaCitas.style.display = 'block';
+            
+            const btn = document.getElementById('btnNavCitas');
+            if (btn) {
+                btn.style.background = 'var(--crisat)';
+                btn.style.color = 'white';
+            }
+        } else if (vistaSeleccionada === 'municipal') {
+            const vistaMunicipal = document.getElementById('vistaMunicipal');
+            if (vistaMunicipal) vistaMunicipal.style.display = 'block';
+
+            const btn = document.getElementById('btnNavMunicipal');
+            if (btn) {
+                btn.style.background = 'var(--crisat)';
+                btn.style.color = 'white';
+            }
+            if (typeof window.generarReporteMunicipal === 'function') {
+                window.generarReporteMunicipal();
+            }
+        } else if (vistaSeleccionada === 'estatal') {
+            const vistaEstatal = document.getElementById('vistaEstatal');
+            if (vistaEstatal) vistaEstatal.style.display = 'block';
+
+            const btn = document.getElementById('btnNavEstatal');
+            if (btn) {
+                btn.style.background = 'var(--crisat)';
+                btn.style.color = 'white';
+            }
+            if (typeof window.generarReporteEstatal === 'function') {
+                window.generarReporteEstatal();
+            }
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // ==========================================
+    // FUNCIONES AUXILIARES PARA REPORTES
+    // ==========================================
+
+    window.calcularPacientesNUEVOS = (listaPacientes, fechaInicioPeriodo, fechaFinPeriodo) => {
+        const inicio = new Date(fechaInicioPeriodo).getTime();
+        const fin = new Date(fechaFinPeriodo).getTime();
+
+        const pacientesNuevos = listaPacientes.filter(paciente => {
+            if (!paciente.fechaIngreso && !paciente.fecha_ISO) return false;
+            const fechaRef = paciente.fechaIngreso || paciente.fecha_ISO;
+            const fechaIngresoPaciente = new Date(fechaRef).getTime();
+            return fechaIngresoPaciente >= inicio && fechaIngresoPaciente <= fin;
+        });
+
+        return {
+            totalNuevos: pacientesNuevos.length,
+            lista: pacientesNuevos
+        };
+    };
+
+    window.toggleTipoFiltroMunicipal = () => {
+        const tipo = document.getElementById('tipoFiltroMunicipal')?.value;
+        const contMes = document.getElementById('filtroContenedorMes');
+        const contRango = document.getElementById('filtroContenedorRango');
+        const contAnio = document.getElementById('filtroContenedorAnio');
+
+        if (contMes) contMes.style.display = 'none';
+        if (contRango) contRango.style.display = 'none';
+        if (contAnio) contAnio.style.display = 'none';
+
+        const inputMes = document.getElementById('mesMunicipal');
+        const inputInicio = document.getElementById('fechaInicioMunicipal');
+        const inputFin = document.getElementById('fechaFinMunicipal');
+        const inputAnio = document.getElementById('anioMunicipal');
+
+        const hoy = new Date().toISOString().split('T')[0];
+        const anioActual = new Date().getFullYear();
+
+        if (tipo === 'mes' && contMes) {
+            contMes.style.display = 'block';
+            if (inputInicio) inputInicio.value = '';
+            if (inputFin) inputFin.value = '';
+            if (inputAnio) inputAnio.value = '';
+            if (inputMes && !inputMes.value) inputMes.value = hoy.substring(0, 7);
+        } else if (tipo === 'rango' && contRango) {
+            contRango.style.display = 'flex';
+            if (inputMes) inputMes.value = '';
+            if (inputAnio) inputAnio.value = '';
+            if (inputInicio && !inputInicio.value) inputInicio.value = hoy;
+            if (inputFin && !inputFin.value) inputFin.value = hoy;
+        } else if (tipo === 'anio' && contAnio) {
+            contAnio.style.display = 'block';
+            if (inputMes) inputMes.value = '';
+            if (inputInicio) inputInicio.value = '';
+            if (inputFin) inputFin.value = '';
+            if (inputAnio && !inputAnio.value) inputAnio.value = anioActual;
+        } else {
+            if (inputMes) inputMes.value = '';
+            if (inputInicio) inputInicio.value = '';
+            if (inputFin) inputFin.value = '';
+            if (inputAnio) inputAnio.value = '';
+        }
+
+        window.generarReporteMunicipal();
+    };
+
+    window.imprimirReporteMunicipal = () => {
+        const contenedor = document.getElementById('contenidoReporteMunicipal');
+        if (!contenedor || !contenedor.innerHTML.trim()) {
+            alert('No hay ningún reporte generado para imprimir.');
+            return;
+        }
+        window.print();
+    };
+
+
+window.generarReporteMunicipal = function() {
     const contenedor = document.getElementById('contenidoReporteMunicipal');
     if (!contenedor) return;
 
-    if (typeof cacheRegistros === 'undefined' || !Array.isArray(cacheRegistros)) {
-        contenedor.innerHTML = '<div style="padding: 15px; color: red; background: #fff5f5; border: 1px solid #feb2b2; border-radius: 6px;"><b>Aviso:</b> cacheRegistros no está inicializado.</div>';
-        return;
-    }
+    if (!cacheRegistros || cacheRegistros.length === 0) return;
 
     const tipoFiltroRaw = document.getElementById('tipoFiltroMunicipal')?.value || '';
-    const tipoFiltro = tipoFiltroRaw.toLowerCase();
     const mesFiltro = document.getElementById('mesMunicipal')?.value || '';
     let fInicio = document.getElementById('fechaInicioMunicipal')?.value || '';
     let fFin = document.getElementById('fechaFinMunicipal')?.value || '';
     const anioFiltro = document.getElementById('anioMunicipal')?.value || '';
 
-    const normalizarFecha = (val) => {
-        if (!val) return '';
-        if (val.includes('/')) {
-            const p = val.split('/');
-            if (p.length === 3) return p[2] + '-' + p[1] + '-' + p[0];
-        }
-        return val;
-    };
-    fInicio = normalizarFecha(fInicio);
-    fFin = normalizarFecha(fFin);
-
-    const sinFiltroActivo = !tipoFiltroRaw || tipoFiltro.includes('selecciona') || (!mesFiltro && !fInicio && !anioFiltro);
+    const sinFiltroActivo = !tipoFiltroRaw || tipoFiltroRaw.toLowerCase().includes('selecciona') || (!mesFiltro && !fInicio && !anioFiltro);
 
     if (sinFiltroActivo) {
         contenedor.innerHTML = `
             <div style="background: white; padding: 25px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: Arial, sans-serif; color: #1e293b;">
                 <div style="text-align: center; border-bottom: 2px solid #0284c7; padding-bottom: 15px; margin-bottom: 20px;">
-                    <h3 style="margin: 0; color: #0f172a; font-size: 1.2rem; text-transform: uppercase;">Sistema Municipal para el Desarrollo Integral de la Familia</h3>
-                    <h4 style="margin: 5px 0 0 0; color: #0284c7; font-size: 1rem;">Informe y Concentrado Municipal - Área Administrativa</h4>
+                    <h3 style="margin: 0; color: #0f172a; font-size: 1.2rem;">SISTEMA MUNICIPAL PARA EL DESARROLLO INTEGRAL DE LA FAMILIA</h3>
+                    <h4 style="margin: 5px 0 0 0; color: #0284c7; font-size: 1rem;">Reporte Estadístico - DIF Municipal</h4>
                 </div>
-                <div style="background: #f8fafc; padding: 25px; text-align: center; border-radius: 8px; border: 1px dashed #cbd5e1; color: #64748b; margin-bottom: 20px;">
-                    <p style="margin: 0; font-size: 0.95rem;">Seleccione un criterio de filtro (Día, Mes o Año) y haga clic en <b>Actualizar Reporte</b>.</p>
-                </div>
-            </div>
-        `;
+                <p style="text-align: center; color: #64748b;">Seleccione un rango de fechas o periodo para consultar las estadísticas.</p>
+            </div>`;
         return;
     }
 
-// Forzar que si hay una fecha de inicio y NO hay fecha fin, se trate estrictamente de un filtro por Día
-    const esDia = (fInicio && !fFin) || tipoFiltro.includes('dia') || tipoFiltro.includes('fecha');
-    const esRango = (fInicio && fFin) || tipoFiltro.includes('rango');
-    const esMes = !fInicio && (tipoFiltro.includes('mes') || mesFiltro !== '');
-    const esAnio = !fInicio && !mesFiltro && (tipoFiltro.includes('anio') || anioFiltro !== '');
+    // --------------------------------------------------------------------------
+    // STEP 1: Mapear la PRIMERA FECHA HISTÓRICA de cada expediente
+    // --------------------------------------------------------------------------
+    const primeraAparicionPorExpediente = {};
 
-    const hoyLocal = typeof window.obtenerFechaLocal === 'function' ? window.obtenerFechaLocal() : new Date().toISOString().split('T')[0];
-    const fechaRef = fInicio || hoyLocal;
+    cacheRegistros.forEach(r => {
+        const idPaciente = (r.expediente || r.folio || r.curp || r.nombre_paciente || '').trim().toUpperCase();
+        const fechaReg = r.fecha_ISO || r.fecha || r.fecha_captura || '';
 
-    const anioObj = fechaRef.substring(0, 4);
-    const mesObj = fechaRef.substring(5, 7);
-
-    const mesObjetivo = mesFiltro || (anioObj + '-' + mesObj);
-    const anioObjetivo = anioFiltro || anioObj;
-
-    let registrosPeriodo = cacheRegistros.filter(r => {
-        if (!r.fecha_ISO) return false;
-        const f = r.fecha_ISO;
-        if (esRango) return f >= fInicio && f <= fFin;
-        if (esDia) return f === fechaRef;
-        if (esMes) return f.startsWith(mesObjetivo);
-        if (esAnio) return f.startsWith(anioObjetivo);
-        return false;
-    });
-
-    let totalDiario = (esDia || esRango) ? cacheRegistros.filter(r => esRango ? (r.fecha_ISO >= fInicio && r.fecha_ISO <= fFin) : r.fecha_ISO === fechaRef).reduce((acc, r) => acc + (parseFloat(r.monto || r.cuota) || 0), 0) : 0;
-    
-    let totalMensual = (esMes || esRango || esDia) ? cacheRegistros.filter(r => {
-        if (!r.fecha_ISO) return false;
-        if (esRango) return r.fecha_ISO >= fInicio && r.fecha_ISO <= fFin;
-        if (esDia) return r.fecha_ISO === fechaRef;
-        return r.fecha_ISO.startsWith(mesObjetivo);
-    }).reduce((acc, r) => acc + (parseFloat(r.monto || r.cuota) || 0), 0) : 0; 
-    
-    let totalAnual = anioObjetivo ? cacheRegistros.filter(r => (r.fecha_ISO || '').startsWith(anioObjetivo)).reduce((acc, r) => acc + (parseFloat(r.monto || r.cuota) || 0), 0) : 0;
-
-    const asistenciasDia = registrosPeriodo.filter(r => {
-        const estatusVal = (r.estatus || r.asistencia || r.estado || '').toUpperCase();
-        return estatusVal.includes('ASIST') || estatusVal === '1' || estatusVal === 'SÍ' || estatusVal === 'SI';
-    });
-
-    let primeraVez = 0;
-    let reingresos = 0;
-    let adultosCount = 0;
-    let ninosCount = 0;
-    let totalAltas = 0;
-    let totalDeserciones = 0;
-    let totalDefunciones = 0;
-    let totalTerapiasPeriodo = 0;
-
-    let geograficoUbicaciones = {}; 
-    let terapeutasMap = {}; 
-
-registrosPeriodo.forEach(r => {
-        const estExp = (r.estatus_expediente || r.tipo_ingreso || r.tipo || r.categoria || '').toUpperCase();
-        const esPrimera = estExp.includes('NUEVO') || estExp.includes('PRIMERA') || estExp.includes('1ERA') || estExp === '1';
-        if (esPrimera) primeraVez++;
-        else reingresos++;
-
-        const localidad = (r.localidad || '').trim();
-        const colonia = (r.colonia || r.col_loc || '').trim();
-        const municipio = (r.municipio || '').trim();
-        const ubicacionCompleta = [localidad, colonia, municipio].filter(Boolean).join(' / ') || 'NO ESPECIFICADO';
-        
-        geograficoUbicaciones[ubicacionCompleta] = (geograficoUbicaciones[ubicacionCompleta] || 0) + 1;
-
-        let edadNum = parseInt(r.edad) || 0;
-        if (edadNum > 0 && edadNum < 18) {
-            ninosCount++;
-        } else if (edadNum >= 18) {
-            adultosCount++;
-        }
-
-        // AQUÍ ESTABA EL ERROR: Agregamos r.estatus_expediente al inicio para que lea la opción seleccionada
-        const estadoPaciente = (r.estatus_expediente || r.estatus_paciente || r.resultado || r.observaciones_cita || '').toUpperCase();
-        
-        if (estadoPaciente.includes('ALTA') || estadoPaciente.includes('MEJORIA') || estadoPaciente.includes('MEJORÍA')) {
-            totalAltas++;
-        }
-        if (estadoPaciente.includes('DESERCIÓN') || estadoPaciente.includes('DESERCION') || estadoPaciente.includes('INASISTENCIA')) {
-            totalDeserciones++;
-        }
-        if (estadoPaciente.includes('DEFUNCIÓN') || estadoPaciente.includes('DEFUNCION') || estadoPaciente.includes('FINADO')) {
-            totalDefunciones++;
-        }
-
-        let cantSesionesT = parseFloat(r.cantidad_terapias || r.sesiones || 1) || 1;
-        totalTerapiasPeriodo += cantSesionesT;
-
-        const terapeutaNombre = (r.nombre_terapeuta || r.terapeuta || 'NO ASIGNADO').trim().toUpperCase();
-        if (!terapeutasMap[terapeutaNombre]) {
-            terapeutasMap[terapeutaNombre] = { mejorias: 0, deserciones: 0, terapias: 0 };
-        }
-        terapeutasMap[terapeutaNombre].terapias += cantSesionesT;
-        if (estadoPaciente.includes('MEJORIA') || estadoPaciente.includes('MEJORÍA') || estadoPaciente.includes('ALTA')) {
-            terapeutasMap[terapeutaNombre].mejorias++;
-        }
-        if (estadoPaciente.includes('DESERCIÓN') || estadoPaciente.includes('DESERCION')) {
-            terapeutasMap[terapeutaNombre].deserciones++;
-        }
-    });
-
-    let htmlGeografico = Object.entries(geograficoUbicaciones)
-        .map(([ub, cant]) => '<tr><td style="padding: 6px; border: 1px solid #cbd5e1;">' + ub + '</td><td style="padding: 6px; border: 1px solid #cbd5e1; text-align: right;"><b>' + cant + '</b></td></tr>')
-        .join('');
-
-    if (!htmlGeografico) {
-        htmlGeografico = '<tr><td colspan="2" style="padding: 8px; text-align: center; color: #64748b; border: 1px solid #cbd5e1;">Sin registros geográficos en este periodo.</td></tr>';
-    }
-
-    let htmlTerapeutas = Object.entries(terapeutasMap)
-        .map(([ter, data]) => '<tr><td style="padding: 6px; border: 1px solid #cbd5e1;">' + ter + '</td><td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center;">' + data.terapias + '</td><td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; color: #047857; font-weight: bold;">' + data.mejorias + '</td><td style="padding: 6px; border: 1px solid #cbd5e1; text-align: center; color: #b91c1c; font-weight: bold;">' + data.deserciones + '</td></tr>')
-        .join('');
-
-    if (!htmlTerapeutas) {
-        htmlTerapeutas = '<tr><td colspan="4" style="padding: 8px; text-align: center; color: #64748b; border: 1px solid #cbd5e1;">Sin registros de terapeutas en este periodo.</td></tr>';
-    }
-
-    let htmlAsistencias = asistenciasDia.map(a => 
-        '<tr>' +
-        '<td style="padding: 6px; border: 1px solid #cbd5e1;">' + (a.expediente || '') + '</td>' +
-        '<td style="padding: 6px; border: 1px solid #cbd5e1;">' + (a.nombre_paciente || a.nombre || 'N/D') + '</td>' +
-        '<td style="padding: 6px; border: 1px solid #cbd5e1;">' + (a.hora || a.hora_cita || '') + '</td>' +
-        '<td style="padding: 6px; border: 1px solid #cbd5e1;">' + (a.nombre_terapeuta || '') + '</td>' +
-        '</tr>'
-    ).join('');
-
-    if (!htmlAsistencias) {
-        htmlAsistencias = '<tr><td colspan="4" style="padding: 8px; text-align: center; color: #64748b; border: 1px solid #cbd5e1;">Sin asistencias registradas para este criterio.</td></tr>';
-    }
-
-    let textoCriterioInfo = tipoFiltro.toUpperCase();
-    if (esRango) textoCriterioInfo += ' (Del ' + fInicio + ' al ' + fFin + ')';
-    else if (esDia) textoCriterioInfo += ' (Fecha: ' + fechaRef + ')';
-    else if (esMes) textoCriterioInfo += ' (Mes: ' + mesObjetivo + ')';
-    else if (esAnio) textoCriterioInfo += ' (Año: ' + anioObjetivo + ')';
-
-    contenedor.innerHTML = `
-        <div style="background: white; padding: 25px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: Arial, sans-serif; color: #1e293b;">
-
-            <div style="text-align: center; border-bottom: 2px solid #0284c7; padding-bottom: 15px; margin-bottom: 20px;">
-                <h3 style="margin: 0; color: #0f172a; font-size: 1.2rem; text-transform: uppercase;">Sistema Municipal para el Desarrollo Integral de la Familia</h3>
-                <h4 style="margin: 5px 0 0 0; color: #0284c7; font-size: 1rem;">Informe y Concentrado Municipal - Área Administrativa y de Servicios</h4>
-            </div>
-
-            <div style="background: #f8fafc; border-left: 4px solid #0284c7; padding: 12px 15px; margin-bottom: 20px; font-size: 0.9rem; line-height: 1.5;">
-                <b>ASUNTO:</b> Reporte concentrado de actividades e indicadores municipales.<br>
-                <b>CRITERIO APLICADO:</b> ${textoCriterioInfo}.<br>
-                <b>TOTAL DE REGISTROS EVALUADOS:</b> <b>${registrosPeriodo.length}</b>
-            </div>
-
-            <h4 style="color: #0284c7; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-top: 25px;">1. Ingresos Monetarios (Cuotas de Recuperación)</h4>
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 25px; font-size: 0.9rem;">
-                <div style="background: #f1f5f9; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                    <span style="font-size: 0.75rem; color: #64748b;">Ganancia del Día</span>
-                    <div style="font-size: 1.15rem; font-weight: bold; color: #047857;">$${totalDiario.toFixed(2)}</div>
-                </div>
-                <div style="background: #f1f5f9; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                    <span style="font-size: 0.75rem; color: #64748b;">Ingreso Mensual</span>
-                    <div style="font-size: 1.15rem; font-weight: bold; color: #0369a1;">$${totalMensual.toFixed(2)}</div>
-                </div>
-                <div style="background: #f1f5f9; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1;">
-                    <span style="font-size: 0.75rem; color: #64748b;">Ingreso Anual</span>
-                    <div style="font-size: 1.15rem; font-weight: bold; color: #d97706;">$${totalAnual.toFixed(2)}</div>
-                </div>
-            </div>
-
-            <h4 style="color: #0284c7; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-top: 25px;">2. Reporte Mensual de Actividades DIF</h4>
-            
-            <div style="background: #f1f5f9; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 15px; font-size: 0.9rem;">
-                <b style="color: #0284c7;">A) Número de Pacientes (Ingresos)</b>
-                <p style="margin: 4px 0;">Pacientes de Primera Vez: <b>${primeraVez}</b></p>
-                <p style="margin: 4px 0;">Reingresos: <b>${reingresos}</b></p>
-                <p style="margin: 4px 0;"><b>Total Ingresos Periodo:</b> <b>${registrosPeriodo.length}</b></p>
-            </div>
-
-            <div style="background: #f1f5f9; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 15px; font-size: 0.9rem;">
-                <b style="color: #0284c7;">B) Desglose Demográfico de Ingresos</b>
-                <p style="margin: 4px 0;">Total Adultos Atendidos: <b>${adultosCount}</b></p>
-                <p style="margin: 4px 0;">Total Niños / Menores Atendidos: <b>${ninosCount}</b></p>
-            </div>
-
-            <h4 style="color: #1e293b; margin-bottom: 6px; font-size: 0.95rem;">Distribución por Localidad, Colonia y Municipio</h4>
-            <div style="max-height: 160px; overflow-y: auto; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-                    <tr style="background: #f1f5f9; position: sticky; top: 0;"><th style="padding: 6px; text-align: left; border: 1px solid #cbd5e1;">Ubicación (Localidad / Colonia / Municipio)</th><th style="padding: 6px; text-align: right; border: 1px solid #cbd5e1;">Total</th></tr>
-                    ${htmlGeografico}
-                </table>
-            </div>
-
-            <div style="background: #f1f5f9; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 15px; font-size: 0.9rem;">
-                <b style="color: #0284c7;">C) Estado Clínico General (Altas, Deserciones y Defunciones)</b>
-                <p style="margin: 4px 0;">Pacientes Dados de Alta / Con Mejoría: <b style="color: #047857;">${totalAltas}</b></p>
-                <p style="margin: 4px 0;">Deserciones Registradas: <b style="color: #b91c1c;">${totalDeserciones}</b></p>
-                <p style="margin: 4px 0;">Defunciones Registradas: <b>${totalDefunciones}</b></p>
-            </div>
-
-            <div style="background: #f1f5f9; padding: 12px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 15px; font-size: 0.9rem;">
-                <b style="color: #0284c7;">D) Indicadores de Terapias y Rendimiento</b>
-                <p style="margin: 4px 0;">Número Total de Terapias Aplicadas: <b>${totalTerapiasPeriodo}</b></p>
-                <p style="margin: 4px 0;">Total Deserciones en Terapias: <b style="color: #b91c1c;">${totalDeserciones}</b></p>
-            </div>
-
-            <h4 style="color: #1e293b; margin-bottom: 6px; font-size: 0.95rem;">Desglose por Terapeuta (Terapias, Mejorías y Deserciones)</h4>
-            <div style="max-height: 180px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 35px;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-                    <tr style="background: #f1f5f9; position: sticky; top: 0;"><th style="padding: 6px; text-align: left; border: 1px solid #cbd5e1;">Terapeuta</th><th style="padding: 6px; text-align: center; border: 1px solid #cbd5e1;">Total Terapias</th><th style="padding: 6px; text-align: center; border: 1px solid #cbd5e1;">Mejorías / Altas</th><th style="padding: 6px; text-align: center; border: 1px solid #cbd5e1;">Deserciones</th></tr>
-                    ${htmlTerapeutas}
-                </table>
-            </div>
-
-            <h4 style="color: #0284c7; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-top: 25px;">3. Detalle de Asistencias del Periodo</h4>
-            <p style="font-size: 0.9rem;">Pacientes validados como asistentes: <b>${asistenciasDia.length}</b></p>
-            <div style="max-height: 180px; overflow-y: auto; margin-bottom: 25px; border: 1px solid #cbd5e1; border-radius: 6px;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
-                    <tr style="background: #f1f5f9; position: sticky; top: 0;"><th style="padding: 6px; text-align: left; border: 1px solid #cbd5e1;">Expediente</th><th style="padding: 6px; text-align: left; border: 1px solid #cbd5e1;">Paciente</th><th style="padding: 6px; text-align: left; border: 1px solid #cbd5e1;">Hora</th><th style="padding: 6px; text-align: left; border: 1px solid #cbd5e1;">Terapeuta</th></tr>
-                    ${htmlAsistencias}
-                </table>
-            </div>
-
-        </div>
-    `;
-};
-
-
-// --- 1. REPORTE DIARIO SISP-15 ---
-window.generarReporteDiarioCrisver = () => {
-    const contenedor = document.getElementById('contenidoReporteDiarioCrisver');
-    if (!contenedor) return;
-
-    if (typeof cacheRegistros === 'undefined' || !Array.isArray(cacheRegistros)) {
-        contenedor.innerHTML = `<div style="padding: 15px; color: red;">Aviso: cacheRegistros no inicializado.</div>`;
-        return;
-    }
-
-    const fechaFiltro = document.getElementById('fechaDiariaCrisver')?.value || new Date().toISOString().split('T')[0];
-    const registrosDia = cacheRegistros.filter(r => r.fecha_ISO === fechaFiltro);
-
-    let filasHTML = '';
-    let tM = 0, tF = 0, t1a = 0, tSub = 0, tHidro = 0, tComp = 0, tPara = 0, tCrio = 0, tElectro = 0, tMecano = 0;
-
-    registrosDia.forEach((r, index) => {
-        const sexo = (r.sexo || '').toUpperCase();
-        const esM = sexo.startsWith('M') && !sexo.startsWith('MA') ? 'X' : '';
-        const esF = sexo.startsWith('F') || sexo.startsWith('MA') ? 'X' : '';
-        if (esM) tM++;
-        if (esF) tF++;
-
-        const estExp = (r.estatus_expediente || r.tipo_ingreso || '').toUpperCase();
-        const es1a = estExp.includes('NUEVO') || estExp.includes('PRIMERA') || estExp.includes('1ERA') ? 'X' : '';
-        const esSub = !es1a ? 'X' : '';
-        if (es1a) t1a++;
-        if (esSub) tSub++;
-
-        const tipoT = (r.tipo_terapia || r.servicio || r.terapia || '').toLowerCase();
-        const hidro = tipoT.includes('hidro') ? 'X' : '';
-        const comp = (tipoT.includes('compresa') || tipoT.includes('infrarrojo') || tipoT.includes('infrarojo')) ? 'X' : '';
-        const para = tipoT.includes('parafina') ? 'X' : '';
-        const crio = tipoT.includes('crio') ? 'X' : '';
-        const electro = (tipoT.includes('electro') || tipoT.includes('laser') || tipoT.includes('ultrasonido')) ? 'X' : '';
-        const mecano = (tipoT.includes('mecano') || tipoT.includes('masaje')) ? 'X' : '';
-
-        if (hidro) tHidro++;
-        if (comp) tComp++;
-        if (para) tPara++;
-        if (crio) tCrio++;
-        if (electro) tElectro++;
-        if (mecano) tMecano++;
-
-        filasHTML += `
-            <tr>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${index + 1}</td>
-                <td style="border: 1px solid #000; padding: 3px;">${r.expediente || ''}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${r.edad || ''}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esM}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esF}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${es1a}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esSub}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${hidro}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${comp}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${para}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${crio}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${electro}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${mecano}</td>
-            </tr>
-        `;
-    });
-
-    contenedor.innerHTML = `
-        <div style="background: white; padding: 15px; font-family: Arial, sans-serif; color: #000; font-size: 10px;">
-            <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
-                <div><b>SALUD / DIF NACIONAL</b><br>DIRECCIÓN GENERAL DE REHABILITACIÓN</div>
-                <div style="text-align: right;"><b>SISP-15</b><br>REGISTRO DIARIO DE TERAPIA FÍSICA</div>
-            </div>
-            <div style="margin-bottom: 8px; display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 10px; border: 1px solid #000; padding: 5px;">
-                <div><b>Fecha:</b> ${fechaFiltro}</div>
-                <div><b>Centro:</b> DIF MUNICIPAL</div>
-                <div><b>Total:</b> ${registrosDia.length}</div>
-            </div>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background: #e2e8f0;">
-                        <th style="border: 1px solid #000; padding: 3px;">No. Folio</th>
-                        <th style="border: 1px solid #000; padding: 3px;">No. Expediente</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Edad</th>
-                        <th style="border: 1px solid #000; padding: 3px;">H</th>
-                        <th style="border: 1px solid #000; padding: 3px;">M</th>
-                        <th style="border: 1px solid #000; padding: 3px;">1a Vez</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Subs.</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Hidro</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Compresas</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Parafina</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Crio</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Electro</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Mecano</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${filasHTML || '<tr><td colspan="13" style="text-align: center; border: 1px solid #000; padding: 10px;">Sin registros para esta fecha.</td></tr>'}
-                </tbody>
-                <tfoot>
-                    <tr style="background: #f1f5f9; font-weight: bold;">
-                        <td colspan="3" style="border: 1px solid #000; text-align: right; padding: 3px;">TOTAL:</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tM}</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tF}</td>
-                        <td style="border: 1px solid #000; text-align: center;">${t1a}</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tSub}</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tHidro}</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tComp}</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tPara}</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tCrio}</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tElectro}</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tMecano}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    `;
-};
-
-
-// --- 2. REPORTE MENSUAL SISP-1 (CORTE 14 AL 13) ---
-window.generarReporteEstatal = () => {
-    const contenedor = document.getElementById('contenidoReporteEstatal');
-    if (!contenedor) return;
-    if (typeof cacheRegistros === 'undefined' || !Array.isArray(cacheRegistros)) return;
-
-    const mesInput = document.getElementById('mesEstatal')?.value || '';
-    let anioEval, mesEval;
-    if (mesInput && mesInput.includes('-')) {
-        const p = mesInput.split('-');
-        anioEval = parseInt(p[0], 10);
-        mesEval = parseInt(p[1], 10);
-    } else {
-        const h = new Date();
-        anioEval = h.getFullYear();
-        mesEval = h.getMonth() + 1;
-    }
-
-    const nombresMeses = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    let anioAnt = anioEval, mesAnt = mesEval - 1;
-    if (mesAnt === 0) { mesAnt = 12; anioAnt = anioEval - 1; }
-
-    const fInicio = `${anioAnt}-${String(mesAnt).padStart(2, '0')}-14`;
-    const fFin = `${anioEval}-${String(mesEval).padStart(2, '0')}-13`;
-    const registrosCorte = cacheRegistros.filter(r => r.fecha_ISO && r.fecha_ISO >= fInicio && r.fecha_ISO <= fFin);
-
-    let hidro = 0, compInfr = 0, crio = 0, para = 0, electroTot = 0, mecanoTot = 0;
-    let fisio1a = 0, fisioSubs = 0, ocupa1a = 0, ocupaSubs = 0, lengua1a = 0, lenguaSubs = 0;
-
-    registrosCorte.forEach(r => {
-        const tipoT = (r.tipo_terapia || r.servicio || r.terapia || '').toLowerCase();
-        if (tipoT.includes('hidro')) hidro++;
-        if (tipoT.includes('compresa') || tipoT.includes('infrarrojo') || tipoT.includes('infrarojo')) compInfr++;
-        if (tipoT.includes('crio')) crio++;
-        if (tipoT.includes('parafina')) para++;
-        if (tipoT.includes('electro') || tipoT.includes('laser') || tipoT.includes('ultrasonido')) electroTot++;
-        if (tipoT.includes('mecano') || tipoT.includes('masaje')) mecanoTot++;
-
-        const area = (r.area || r.departamento || 'FISIOTERAPIA').toUpperCase();
-        const estExp = (r.estatus_expediente || r.tipo_ingreso || '').toUpperCase();
-        const es1a = estExp.includes('NUEVO') || estExp.includes('PRIMERA') || estExp.includes('1ERA');
-
-        if (area.includes('OCUPACION')) { if (es1a) ocupa1a++; else ocupaSubs++; }
-        else if (area.includes('LENGUAJE')) { if (es1a) lengua1a++; else lenguaSubs++; }
-        else { if (es1a) fisio1a++; else fisioSubs++; }
-    });
-
-    const sumaSesionesFisio = hidro + compInfr + crio + para + electroTot + mecanoTot;
-
-    let causasMap = {};
-    registrosCorte.forEach(r => {
-        const c = (r.diagnostico || r.causa_atencion || r.motivo || 'NO ESPECIFICADO').trim().toUpperCase();
-        causasMap[c] = (causasMap[c] || 0) + 1;
-    });
-    const top10 = Object.entries(causasMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
-
-    const rangos = [
-        { label: '-1 (Menor de 1)', min: 0, max: 0.99 }, { label: '1-4', min: 1, max: 4 },
-        { label: '5-9', min: 5, max: 9 }, { label: '10-14', min: 10, max: 14 },
-        { label: '15-19', min: 15, max: 19 }, { label: '20-29', min: 20, max: 29 },
-        { label: '30-39', min: 30, max: 39 }, { label: '40-49', min: 40, max: 49 },
-        { label: '50-59', min: 50, max: 59 }, { label: '60-69', min: 60, max: 69 },
-        { label: '70-79', min: 70, max: 79 }, { label: '>=80', min: 80, max: 150 }
-    ];
-
-    let tablaEdades = rangos.map(rg => ({ label: rg.label, h: 0, m: 0 }));
-    registrosCorte.forEach(r => {
-        let edad = parseFloat(r.edad);
-        if (isNaN(edad)) return;
-        const sexo = (r.sexo || '').toUpperCase();
-        const esH = sexo.startsWith('H') || sexo.startsWith('MASCULINO');
-        const esM = sexo.startsWith('M') && !esH || sexo.startsWith('FEMENINO');
-        for (let i = 0; i < rangos.length; i++) {
-            if (edad >= rangos[i].min && edad <= rangos[i].max) {
-                if (esH) tablaEdades[i].h++;
-                if (esM) tablaEdades[i].m++;
-                break;
+        if (idPaciente && fechaReg) {
+            if (!primeraAparicionPorExpediente[idPaciente] || fechaReg < primeraAparicionPorExpediente[idPaciente]) {
+                primeraAparicionPorExpediente[idPaciente] = fechaReg;
             }
         }
     });
 
+    // --------------------------------------------------------------------------
+    // STEP 2: Filtrar registros por periodo
+    // --------------------------------------------------------------------------
+    const hoyLocal = typeof window.obtenerFechaLocal === 'function' ? window.obtenerFechaLocal() : new Date().toISOString().split('T')[0];
+    const mesObjetivo = mesFiltro || (fInicio ? fInicio.substring(0, 7) : hoyLocal.substring(0, 7));
+
+    let registrosPeriodo = cacheRegistros.filter(r => {
+        const fechaReg = r.fecha_ISO || r.fecha || r.fecha_captura || '';
+        
+        if (fInicio && fFin) {
+            return fechaReg >= fInicio && fechaReg <= fFin;
+        } else if (fInicio) {
+            return fechaReg >= fInicio;
+        }
+        
+        return fechaReg.startsWith(mesObjetivo);
+    });
+
+    let primeraVez = 0;
+    let nuevosComunidades = 0;
+    let nuevosUrbanos = 0;
+
+    let conteoLocalidades = 0;
+    let conteoColonias = 0;
+
+    let asistenciasDiariasSet = new Set();
+    let pacientesDistintosSet = new Set();
+
+    // Contadores de Tratamiento
+    let conteoCompresas = 0;
+    let conteoElectro = 0;
+    let conteoMecano = 0;
+    let conteoOtrasTerapias = 0;
+
+    // CONTROL ÚNICO PARA MENORES (0 A 14 AÑOS)
+    let ninasSet = new Set();
+    let ninosSet = new Set();
+
+    let totalColonias = new Set();
+    let totalLocalidades = new Set();
+    let totalMunicipios = new Set();
+
+    let coloniasNuevos = new Set();
+    let localidadesNuevos = new Set();
+
+    let pacientesAlta = 0;
+    let pacientesDesercion = 0;
+    let pacientesMejoria = 0;
+    let totalCuotaRecuperacion = 0;
+    let terapeutasMap = {};
+
+    let nuevosContadosEnPeriodo = new Set();
+    let reingresosSetGlobal = new Set();
+
+    registrosPeriodo.forEach(r => {
+        const idFolioNombre = (r.expediente || r.folio || r.nombre_paciente || r.curp || '').trim().toUpperCase();
+        const fechaReg = r.fecha_ISO || r.fecha || r.fecha_captura || '';
+
+        if (idFolioNombre) {
+            pacientesDistintosSet.add(idFolioNombre);
+            asistenciasDiariasSet.add(`${idFolioNombre}_${fechaReg}`);
+        }
+
+        totalCuotaRecuperacion += parseFloat(r.monto || 0);
+
+        const tipoUbicacion = (r.tipo_ubicacion || '').toUpperCase();
+        const colLoc = (r.col_loc || '').trim().toUpperCase();
+        const mun = (r.municipio || r.localidad || '').trim().toUpperCase();
+        const esComunidad = tipoUbicacion.includes('LOCALIDAD') || tipoUbicacion.includes('COMUNIDAD') || tipoUbicacion.includes('RURAL');
+
+        if (mun) totalMunicipios.add(mun);
+
+        if (esComunidad) {
+            conteoLocalidades++;
+            if (colLoc) totalLocalidades.add(colLoc);
+        } else {
+            conteoColonias++;
+            if (colLoc) totalColonias.add(colLoc);
+        }
+
+        // Estatus del Expediente y Fechas
+        const txtEstatusExp = (r.estatus_expediente || '').toUpperCase();
+        const fechaPrimeraVez = primeraAparicionPorExpediente[idFolioNombre];
+        const esPrimerIngresoEnRango = fechaPrimeraVez && (fInicio && fFin ? (fechaPrimeraVez >= fInicio && fechaPrimeraVez <= fFin) : fechaPrimeraVez === fechaReg);
+        const esNuevoManual = txtEstatusExp.includes('NUEVO') || txtEstatusExp.includes('PRIMERA');
+        const esReingresoManual = txtEstatusExp.includes('REINGRESO');
+
+        // Control de Nuevos Ingresos
+        if ((esPrimerIngresoEnRango || esNuevoManual) && !nuevosContadosEnPeriodo.has(idFolioNombre)) {
+            primeraVez++;
+            if (idFolioNombre) nuevosContadosEnPeriodo.add(idFolioNombre);
+
+            if (esComunidad) {
+                nuevosComunidades++;
+                if (colLoc) localidadesNuevos.add(colLoc);
+            } else {
+                nuevosUrbanos++;
+                if (colLoc) coloniasNuevos.add(colLoc);
+            }
+        } 
+        // Control de Reingresos (Paciente con historial previo anterior al periodo que vuelve a acudir)
+        else if (esReingresoManual || (fechaPrimeraVez && fechaPrimeraVez < (fInicio || mesObjetivo))) {
+            if (idFolioNombre) {
+                reingresosSetGlobal.add(idFolioNombre);
+            }
+        }
+
+        // Plan de Tratamiento
+        const rawServicio = (r.servicio || r.tratamiento || r.plan_tratamiento || r.modalidad || '').toUpperCase();
+
+        const numCompresa = parseInt(r.compresa || r.compresas || 0, 10);
+        const numElectro = parseInt(r.electro || r.electroterapia || 0, 10);
+        const numMecano = parseInt(r.mecano || r.mecanoterapia || 0, 10);
+
+        let sumadoEnEstaCita = false;
+
+        if (numCompresa > 0 || numElectro > 0 || numMecano > 0) {
+            if (numCompresa > 0) { conteoCompresas += numCompresa; sumadoEnEstaCita = true; }
+            if (numElectro > 0) { conteoElectro += numElectro; sumadoEnEstaCita = true; }
+            if (numMecano > 0) { conteoMecano += numMecano; sumadoEnEstaCita = true; }
+        } else {
+            if (rawServicio.includes('COMPRESA') || rawServicio.includes('CHC') || rawServicio.includes('CALIENTE')) {
+                conteoCompresas++;
+                sumadoEnEstaCita = true;
+            }
+            if (rawServicio.includes('ELECTRO') || rawServicio.includes('TENS') || rawServicio.includes('EMS') || rawServicio.includes('INTERFERENCIAL')) {
+                conteoElectro++;
+                sumadoEnEstaCita = true;
+            }
+            if (rawServicio.includes('MECANO') || rawServicio.includes('TRACCION') || rawServicio.includes('BARRA') || rawServicio.includes('POLEA')) {
+                conteoMecano++;
+                sumadoEnEstaCita = true;
+            }
+        }
+
+        if (!sumadoEnEstaCita) {
+            conteoOtrasTerapias++;
+        }
+
+        // LÓGICA DE MENORES DE EDAD (0 A 14 AÑOS)
+        const edadRaw = (r.edad !== undefined && r.edad !== null) ? String(r.edad).trim() : '';
+        const edadNum = parseInt(edadRaw, 10);
+        const sexoTexto = (r.sexo || r.genero || '').toString().trim().toUpperCase();
+
+        if (idFolioNombre && !isNaN(edadNum) && edadNum >= 0 && edadNum <= 14) {
+            const esMujer = 
+                sexoTexto === 'F' || 
+                sexoTexto === 'M' || 
+                sexoTexto.includes('FEM') || 
+                sexoTexto.includes('MUJER') || 
+                sexoTexto.includes('NIÑA') || 
+                sexoTexto.includes('NINA');
+
+            const esHombre = 
+                sexoTexto === 'H' || 
+                sexoTexto.includes('MASC') || 
+                sexoTexto.includes('HOMBRE') || 
+                sexoTexto.includes('NIÑO') || 
+                sexoTexto.includes('NINO');
+
+            if (esMujer && !sexoTexto.includes('MASC')) {
+                ninasSet.add(idFolioNombre);
+            } else if (esHombre) {
+                ninosSet.add(idFolioNombre);
+            }
+        }
+
+        // ESTATUS CLÍNICO Y TERAPEUTAS (Control de Únicos por mes)
+        const esAltaMejoria = txtEstatusExp.includes('MEJORI') || txtEstatusExp.includes('ALTA');
+        const esDesercion = txtEstatusExp.includes('DESERCI') || txtEstatusExp.includes('BAJA') || txtEstatusExp.includes('FALTÓ') || txtEstatusExp.includes('FALTO');
+
+        const terapeuta = (r.nombre_terapeuta || 'SIN ASIGNAR').trim().toUpperCase();
+        if (!terapeutasMap[terapeuta]) {
+            terapeutasMap[terapeuta] = { mejoriasSet: new Set(), desercionesSet: new Set() };
+        }
+
+        if (idFolioNombre) {
+            if (esAltaMejoria && !esDesercion) {
+                terapeutasMap[terapeuta].mejoriasSet.add(idFolioNombre);
+            }
+            if (esDesercion) {
+                terapeutasMap[terapeuta].desercionesSet.add(idFolioNombre);
+            }
+        }
+    });
+
+    // CONSOLIDACIÓN GLOBAL
+    let mejoriasSetGlobal = new Set();
+    let desercionesSetGlobal = new Set();
+
+    Object.values(terapeutasMap).forEach(data => {
+        data.mejoriasSet.forEach(p => mejoriasSetGlobal.add(p));
+        data.desercionesSet.forEach(p => desercionesSetGlobal.add(p));
+    });
+
+    pacientesMejoria = mejoriasSetGlobal.size;
+    pacientesDesercion = desercionesSetGlobal.size;
+    pacientesAlta = pacientesMejoria;
+
+    const totalAsistenciasReales = asistenciasDiariasSet.size > 0 ? asistenciasDiariasSet.size : registrosPeriodo.length;
+    const totalPacientesDistintos = pacientesDistintosSet.size;
+    const totalReingresos = reingresosSetGlobal.size;
+
+    const totalNinas = ninasSet.size;
+    const totalNinos = ninosSet.size;
+    const totalMenoresUnicos = totalNinas + totalNinos;
+
+    const totalAplicacionesTratamiento = conteoCompresas + conteoElectro + conteoMecano + conteoOtrasTerapias;
+    const listaNombresMunicipios = Array.from(totalMunicipios).sort().join(', ') || 'Ninguno registrado';
+
+    let mejorTerapeuta = 'NINGUNO';
+    let maxMejorias = 0;
+    let deserciónTerapeuta = 'NINGUNO';
+    let maxDeserciones = 0;
+
+    Object.entries(terapeutasMap).forEach(([nombre, data]) => {
+        const cantMejorias = data.mejoriasSet.size;
+        const cantDeserciones = data.desercionesSet.size;
+
+        if (cantMejorias > maxMejorias) {
+            maxMejorias = cantMejorias;
+            mejorTerapeuta = `${nombre} (${cantMejorias} mejorías)`;
+        }
+        if (cantDeserciones > maxDeserciones) {
+            maxDeserciones = cantDeserciones;
+            deserciónTerapeuta = `${nombre} (${cantDeserciones} deserciones)`;
+        }
+    });
+
+    const textoPeriodo = (fInicio && fFin) 
+        ? `Del ${fInicio} al ${fFin}` 
+        : `Mes: ${mesObjetivo}`;
+
     contenedor.innerHTML = `
-        <div style="background: white; padding: 15px; font-family: Arial, sans-serif; color: #000; font-size: 10px;">
-            <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
-                <div><b>SALUD / DIF NACIONAL</b><br>UNIDAD DE ASISTENCIA E INTEGRACIÓN SOCIAL</div>
-                <div style="text-align: right;"><b>SISP-1</b><br>CORTE: 14 DE ${nombresMeses[mesAnt].toUpperCase()} AL 13 DE ${nombresMeses[mesEval].toUpperCase()} ${anioEval}</div>
+        <div style="background: white; padding: 25px; border: 1px solid #cbd5e1; border-radius: 8px; font-family: Arial, sans-serif; color: #1e293b;">
+            <div style="text-align: center; border-bottom: 2px solid #0284c7; padding-bottom: 15px; margin-bottom: 20px;">
+                <h3 style="margin: 0; color: #0f172a; text-transform: uppercase;">Sistema Municipal para el Desarrollo Integral de la Familia</h3>
+                <h4 style="margin: 5px 0 0 0; color: #0284c7;">Reporte Estadístico (${textoPeriodo})</h4>
             </div>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
-                <tr style="background: #e2e8f0;"><th colspan="4" style="border: 1px solid #000; padding: 4px;">TERAPIA FÍSICA</th></tr>
+
+            <div style="background: #e0f2fe; border: 1px solid #38bdf8; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <span style="font-size: 0.9rem; color: #0369a1; font-weight: bold;">TOTAL DE CUOTA DE RECUPERACIÓN DEL PERIODO</span>
+                <div style="font-size: 2rem; font-weight: bold; color: #0284c7; margin-top: 5px;">
+                    $${totalCuotaRecuperacion.toFixed(2)}
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px;">
+                <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                    <b style="color: #0284c7; display: block; margin-bottom: 5px;">1. Ingresos y Reingresos</b>
+                    <p style="margin: 2px 0; font-size: 1.05rem;">Nuevos Ingresos: <b>${primeraVez}</b></p>
+                    <p style="margin: 2px 0; font-size: 1.05rem;">Reingresos: <b>${totalReingresos}</b></p>
+                    <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 8px 0;">
+                    <p style="margin: 2px 0; font-size: 0.9rem; color: #334155;">
+                        <b>Nuevos en Comunidades:</b> ${nuevosComunidades} <span style="color: #64748b;">(${localidadesNuevos.size} loc.)</span>
+                    </p>
+                    <p style="margin: 2px 0; font-size: 0.9rem; color: #334155;">
+                        <b>Nuevos Urbanos:</b> ${nuevosUrbanos} <span style="color: #64748b;">(${coloniasNuevos.size} col.)</span>
+                    </p>
+                </div>
+
+                <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                    <b style="color: #0284c7; display: block; margin-bottom: 5px;">2. Total de Terapias y Asistencias</b>
+                    <p style="margin: 2px 0; font-size: 1.1rem;">Total Terapias/Asistencias (Folios): <b>${totalAsistenciasReales}</b></p>
+                    <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 8px 0;">
+                    <p style="margin: 2px 0; font-size: 0.9rem; color: #0284c7;">
+                        <b>Pacientes Únicos Atendidos:</b> ${totalPacientesDistintos}
+                    </p>
+                </div>
+            </div>
+
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <b style="color: #0284c7;">3. Plan de Tratamiento (Aplicaciones por Modalidad)</b>
+                    <span style="font-size: 0.85rem; background: #0284c7; color: white; padding: 3px 8px; border-radius: 12px; font-weight: bold;">
+                        Total Sesiones Aplicadas: ${totalAplicacionesTratamiento}
+                    </span>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
+                    <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <span style="font-size: 0.9rem; color: #64748b; font-weight: bold;">Compresas</span>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #0284c7; margin: 5px 0;">${conteoCompresas}</div>
+                    </div>
+
+                    <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <span style="font-size: 0.9rem; color: #64748b; font-weight: bold;">Electroterapia</span>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #0284c7; margin: 5px 0;">${conteoElectro}</div>
+                    </div>
+
+                    <div style="background: white; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                        <span style="font-size: 0.9rem; color: #64748b; font-weight: bold;">Mecanoterapia</span>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #0284c7; margin: 5px 0;">${conteoMecano}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 20px;">
+                <b style="color: #0284c7; display: block; margin-bottom: 5px;">4. Menores de Edad (0 a 14 años) y Cobertura Geográfica</b>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 8px;">
+                    <div>
+                        <p style="margin: 2px 0;">Niñas (Mujeres 0-14): <b>${totalNinas}</b></p>
+                        <p style="margin: 2px 0;">Niños (Hombres 0-14): <b>${totalNinos}</b></p>
+                        <p style="margin: 2px 0; color: #0284c7;"><b>Total Menores Únicos:</b> <b>${totalMenoresUnicos}</b></p>
+                    </div>
+                    <div>
+                        <p style="margin: 2px 0;">Colonias Totales Atendidas: <b>${totalColonias.size}</b></p>
+                        <p style="margin: 2px 0;">Localidades Totales Atendidas: <b>${totalLocalidades.size}</b></p>
+                        <p style="margin: 2px 0;">Municipios Distintos: <b>${totalMunicipios.size}</b></p>
+                        <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #475569;">
+                            <b>Municipios:</b> ${listaNombresMunicipios}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; border: 1px solid #cbd5e1;">
+                <b style="color: #0284c7; display: block; margin-bottom: 5px;">5. Estado del Paciente y Evaluación de Terapeutas</b>
+                <p style="margin: 3px 0;">Pacientes Dados de Alta: <b>${pacientesAlta}</b></p>
+                <p style="margin: 3px 0;">Pacientes con Mejorías: <b>${pacientesMejoria}</b></p>
+                <p style="margin: 3px 0;">Deserciones Totales: <b style="color: #dc2626;">${pacientesDesercion}</b></p>
+                
+                <hr style="border: 0; border-top: 1px solid #cbd5e1; margin: 10px 0;">
+
+                <p style="margin: 3px 0; color: #15803d;"><b>Terapeuta con Mayor Número de Mejorías:</b> ${mejorTerapeuta}</p>
+                <p style="margin: 3px 0; color: #b91c1c;"><b>Terapeuta con Mayor Número de Deserciones:</b> ${deserciónTerapeuta}</p>
+            </div>
+        </div>
+    `;
+};
+
+
+    // --- 1. REPORTE DIARIO SISP-15 ---
+    window.generarReporteDiarioCrisver = () => {
+        const contenedor = document.getElementById('contenidoReporteDiarioCrisver');
+        if (!contenedor) return;
+
+        if (typeof cacheRegistros === 'undefined' || !Array.isArray(cacheRegistros)) {
+            contenedor.innerHTML = `<div style="padding: 15px; color: red;">Aviso: cacheRegistros no inicializado.</div>`;
+            return;
+        }
+
+        const fechaFiltro = document.getElementById('fechaDiariaCrisver')?.value || new Date().toISOString().split('T')[0];
+        const registrosDia = cacheRegistros.filter(r => r.fecha_ISO === fechaFiltro);
+
+        let filasHTML = '';
+        let tM = 0, tF = 0, t1a = 0, tSub = 0, tHidro = 0, tComp = 0, tPara = 0, tCrio = 0, tElectro = 0, tMecano = 0;
+
+        registrosDia.forEach((r, index) => {
+            const sexo = (r.sexo || '').toUpperCase();
+            const esM = sexo.startsWith('M') && !sexo.startsWith('MA') ? 'X' : '';
+            const esF = sexo.startsWith('F') || sexo.startsWith('MA') ? 'X' : '';
+            if (esM) tM++;
+            if (esF) tF++;
+
+            const estExp = (r.estatus_expediente || r.tipo_ingreso || '').toUpperCase();
+            const es1a = estExp.includes('NUEVO') || estExp.includes('PRIMERA') || estExp.includes('1ERA') ? 'X' : '';
+            const esSub = !es1a ? 'X' : '';
+            if (es1a) t1a++;
+            if (esSub) tSub++;
+
+            const tipoT = (r.tipo_terapia || r.servicio || r.terapia || '').toLowerCase();
+            const hidro = tipoT.includes('hidro') ? 'X' : '';
+            const comp = (tipoT.includes('compresa') || tipoT.includes('infrarrojo') || tipoT.includes('infrarojo')) ? 'X' : '';
+            const para = tipoT.includes('parafina') ? 'X' : '';
+            const crio = tipoT.includes('crio') ? 'X' : '';
+            const electro = (tipoT.includes('electro') || tipoT.includes('laser') || tipoT.includes('ultrasonido')) ? 'X' : '';
+            const mecano = (tipoT.includes('mecano') || tipoT.includes('masaje')) ? 'X' : '';
+
+            if (hidro) tHidro++;
+            if (comp) tComp++;
+            if (para) tPara++;
+            if (crio) tCrio++;
+            if (electro) tElectro++;
+            if (mecano) tMecano++;
+
+            filasHTML += `
                 <tr>
-                    <td style="border: 1px solid #000; padding: 4px;">1a Vez: <b>${fisio1a}</b></td>
-                    <td style="border: 1px solid #000; padding: 4px;">Subs.: <b>${fisioSubs}</b></td>
-                    <td style="border: 1px solid #000; padding: 4px;">Total Personas: <b>${fisio1a + fisioSubs}</b></td>
-                    <td style="border: 1px solid #000; padding: 4px;">Sesiones Totales: <b>${sumaSesionesFisio}</b></td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${index + 1}</td>
+                    <td style="border: 1px solid #000; padding: 3px;">${r.expediente || ''}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${r.edad || ''}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esM}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esF}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${es1a}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esSub}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${hidro}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${comp}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${para}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${crio}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${electro}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${mecano}</td>
                 </tr>
-            </table>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
-                <tr style="background: #e2e8f0;"><th colspan="6" style="border: 1px solid #000; padding: 4px;">MEDIOS FÍSICOS</th></tr>
-                <tr style="text-align: center;">
-                    <td style="border: 1px solid #000; padding: 3px;">Hidro: <b>${hidro}</b></td>
-                    <td style="border: 1px solid #000; padding: 3px;">Compresas: <b>${compInfr}</b></td>
-                    <td style="border: 1px solid #000; padding: 3px;">Crio: <b>${crio}</b></td>
-                    <td style="border: 1px solid #000; padding: 3px;">Parafina: <b>${para}</b></td>
-                    <td style="border: 1px solid #000; padding: 3px;">Electro: <b>${electroTot}</b></td>
-                    <td style="border: 1px solid #000; padding: 3px;">Mecano: <b>${mecanoTot}</b></td>
-                </tr>
-            </table>
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
-                <tr style="background: #e2e8f0;"><th colspan="2" style="border: 1px solid #000; padding: 4px;">TOP 10 CAUSAS DE ATENCIÓN</th></tr>
-                ${top10.map(([c, cant]) => `<tr><td style="border: 1px solid #000; padding: 3px;">${c}</td><td style="border: 1px solid #000; padding: 3px; text-align: right;">${cant}</td></tr>`).join('') || '<tr><td colspan="2" style="border: 1px solid #000; text-align: center;">Sin registros</td></tr>'}
-            </table>
-            <table style="width: 100%; border-collapse: collapse;">
-                <tr style="background: #e2e8f0;"><th colspan="4" style="border: 1px solid #000; padding: 4px;">GRUPOS ETARIOS</th></tr>
-                <tr><th style="border: 1px solid #000; padding: 3px;">Rango</th><th style="border: 1px solid #000; padding: 3px;">Hombres</th><th style="border: 1px solid #000; padding: 3px;">Mujeres</th><th style="border: 1px solid #000; padding: 3px;">Total</th></tr>
-                ${tablaEdades.map(e => `<tr><td style="border: 1px solid #000; padding: 3px;">${e.label}</td><td style="border: 1px solid #000; padding: 3px; text-align: center;">${e.h}</td><td style="border: 1px solid #000; padding: 3px; text-align: center;">${e.m}</td><td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">${e.h + e.m}</td></tr>`).join('')}
-            </table>
-        </div>
-    `;
-};
+            `;
+        });
 
-
-// --- 3. REPORTE MENSUAL DE ALTAS SISP-19 ---
-window.generarReporteAltasCrisver = () => {
-    const contenedor = document.getElementById('contenidoReporteAltasCrisver');
-    if (!contenedor) return;
-    if (typeof cacheRegistros === 'undefined' || !Array.isArray(cacheRegistros)) return;
-
-    const mesInput = document.getElementById('mesAltasCrisver')?.value || '';
-    let anioEval, mesEval;
-    if (mesInput && mesInput.includes('-')) {
-        const p = mesInput.split('-');
-        anioEval = parseInt(p[0], 10);
-        mesEval = parseInt(p[1], 10);
-    } else {
-        const h = new Date();
-        anioEval = h.getFullYear();
-        mesEval = h.getMonth() + 1;
-    }
-
-    // Filtrar registros que sean altas en ese mes/año
-    const registrosAltas = cacheRegistros.filter(r => {
-        if (!r.fecha_ISO) return false;
-        const [raAnio, raMes] = r.fecha_ISO.split('-');
-        const esMesCorrecto = parseInt(raAnio, 10) === anioEval && parseInt(raMes, 10) === mesEval;
-        const estatus = (r.estatus_expediente || r.motivo_alta || r.tipo_ingreso || '').toUpperCase();
-        const esAlta = estatus.includes('ALTA') || estatus.includes('BAJA') || estatus.includes('DEFINTIVA') || estatus.includes('MEJORIA') || estatus.includes('DEFUNCIÓN') || estatus.includes('DEFENCION') || estatus.includes('REFERENCIA');
-        return esMesCorrecto && (esAlta || r.motivo_alta);
-    });
-
-    let filasHTML = '';
-    let tDefinitiva = 0, tMejoria = 0, tDesercion = 0, tFallecimiento = 0, tReferencia = 0;
-
-    registrosAltas.forEach((r, index) => {
-        const sexo = (r.sexo || '').toUpperCase();
-        const esH = sexo.startsWith('H') || (sexo.startsWith('M') && !sexo.startsWith('MA')) ? 'X' : '';
-        const esM = sexo.startsWith('F') || sexo.startsWith('MA') ? 'X' : '';
-
-        const motivo = (r.motivo_alta || r.estatus_expediente || '').toUpperCase();
-        const definitiva = motivo.includes('DEFINITIVA') ? 'X' : '';
-        const mejoria = motivo.includes('MEJORIA') ? 'X' : '';
-        const desercion = motivo.includes('DESERCION') ? 'X' : '';
-        const fallecimiento = motivo.includes('FALLECIMIENTO') || motivo.includes('DEFUNCIÓN') ? 'X' : '';
-        const referencia = motivo.includes('REFERENCIA') ? 'X' : '';
-
-        if (definitiva) tDefinitiva++;
-        if (mejoria) tMejoria++;
-        if (desercion) tDesercion++;
-        if (fallecimiento) tFallecimiento++;
-        if (referencia) tReferencia++;
-
-        filasHTML += `
-            <tr>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${index + 1}</td>
-                <td style="border: 1px solid #000; padding: 3px;">${r.expediente || ''}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${r.edad || ''}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esH}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esM}</td>
-                <td style="border: 1px solid #000; padding: 3px;">${r.servicio || r.tipo_terapia || 'Fisioterapia'}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${definitiva}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${mejoria}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${desercion}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${fallecimiento}</td>
-                <td style="border: 1px solid #000; text-align: center; padding: 3px;">${referencia}</td>
-            </tr>
-        `;
-    });
-
-    contenedor.innerHTML = `
-        <div style="background: white; padding: 15px; font-family: Arial, sans-serif; color: #000; font-size: 10px;">
-            <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
-                <div><b>SALUD / DIF NACIONAL</b><br>DIRECCIÓN GENERAL DE REHABILITACIÓN</div>
-                <div style="text-align: right;"><b>SISP-19</b><br>INFORME MENSUAL DE ALTAS: ${mesEval}/${anioEval}</div>
+        contenedor.innerHTML = `
+            <div style="background: white; padding: 15px; font-family: Arial, sans-serif; color: #000; font-size: 10px;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
+                    <div><b>SALUD / DIF NACIONAL</b><br>DIRECCIÓN GENERAL DE REHABILITACIÓN</div>
+                    <div style="text-align: right;"><b>SISP-15</b><br>REGISTRO DIARIO DE TERAPIA FÍSICA</div>
+                </div>
+                <div style="margin-bottom: 8px; display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 10px; border: 1px solid #000; padding: 5px;">
+                    <div><b>Fecha:</b> ${fechaFiltro}</div>
+                    <div><b>Centro:</b> DIF MUNICIPAL</div>
+                    <div><b>Total:</b> ${registrosDia.length}</div>
+                </div>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #e2e8f0;">
+                            <th style="border: 1px solid #000; padding: 3px;">No. Folio</th>
+                            <th style="border: 1px solid #000; padding: 3px;">No. Expediente</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Edad</th>
+                            <th style="border: 1px solid #000; padding: 3px;">H</th>
+                            <th style="border: 1px solid #000; padding: 3px;">M</th>
+                            <th style="border: 1px solid #000; padding: 3px;">1a Vez</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Subs.</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Hidro</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Compresas</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Parafina</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Crio</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Electro</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Mecano</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filasHTML || '<tr><td colspan="13" style="text-align: center; border: 1px solid #000; padding: 10px;">Sin registros para esta fecha.</td></tr>'}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #f1f5f9; font-weight: bold;">
+                            <td colspan="3" style="border: 1px solid #000; text-align: right; padding: 3px;">TOTAL:</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tM}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tF}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${t1a}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tSub}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tHidro}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tComp}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tPara}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tCrio}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tElectro}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tMecano}</td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
-            <table style="width: 100%; border-collapse: collapse;">
-                <thead>
-                    <tr style="background: #e2e8f0;">
-                        <th style="border: 1px solid #000; padding: 3px;">No. Folio</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Expediente</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Edad</th>
-                        <th style="border: 1px solid #000; padding: 3px;">H</th>
-                        <th style="border: 1px solid #000; padding: 3px;">M</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Servicio</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Definitiva</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Mejoría</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Deserción</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Fallecimiento</th>
-                        <th style="border: 1px solid #000; padding: 3px;">Referencia</th>
+        `;
+    };
+
+    // --- 2. REPORTE MENSUAL SISP-1 (CORTE 14 AL 13) ---
+    window.generarReporteEstatal = () => {
+        const contenedor = document.getElementById('contenidoReporteEstatal');
+        if (!contenedor) return;
+        if (typeof cacheRegistros === 'undefined' || !Array.isArray(cacheRegistros)) return;
+
+        const mesInput = document.getElementById('mesEstatal')?.value || '';
+        let anioEval, mesEval;
+        if (mesInput && mesInput.includes('-')) {
+            const p = mesInput.split('-');
+            anioEval = parseInt(p[0], 10);
+            mesEval = parseInt(p[1], 10);
+        } else {
+            const h = new Date();
+            anioEval = h.getFullYear();
+            mesEval = h.getMonth() + 1;
+        }
+
+        const nombresMeses = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        let anioAnt = anioEval, mesAnt = mesEval - 1;
+        if (mesAnt === 0) { mesAnt = 12; anioAnt = anioEval - 1; }
+
+        const fInicio = `${anioAnt}-${String(mesAnt).padStart(2, '0')}-14`;
+        const fFin = `${anioEval}-${String(mesEval).padStart(2, '0')}-13`;
+        const registrosCorte = cacheRegistros.filter(r => r.fecha_ISO && r.fecha_ISO >= fInicio && r.fecha_ISO <= fFin);
+
+        let hidro = 0, compInfr = 0, crio = 0, para = 0, electroTot = 0, mecanoTot = 0;
+        let fisio1a = 0, fisioSubs = 0, ocupa1a = 0, ocupaSubs = 0, lengua1a = 0, lenguaSubs = 0;
+
+        registrosCorte.forEach(r => {
+            const tipoT = (r.tipo_terapia || r.servicio || r.terapia || '').toLowerCase();
+            if (tipoT.includes('hidro')) hidro++;
+            if (tipoT.includes('compresa') || tipoT.includes('infrarrojo') || tipoT.includes('infrarojo')) compInfr++;
+            if (tipoT.includes('crio')) crio++;
+            if (tipoT.includes('parafina')) para++;
+            if (tipoT.includes('electro') || tipoT.includes('laser') || tipoT.includes('ultrasonido')) electroTot++;
+            if (tipoT.includes('mecano') || tipoT.includes('masaje')) mecanoTot++;
+
+            const area = (r.area || r.departamento || 'FISIOTERAPIA').toUpperCase();
+            const estExp = (r.estatus_expediente || r.tipo_ingreso || '').toUpperCase();
+            const es1a = estExp.includes('NUEVO') || estExp.includes('PRIMERA') || estExp.includes('1ERA');
+
+            if (area.includes('OCUPACION')) { if (es1a) ocupa1a++; else ocupaSubs++; }
+            else if (area.includes('LENGUAJE')) { if (es1a) lengua1a++; else lenguaSubs++; }
+            else { if (es1a) fisio1a++; else fisioSubs++; }
+        });
+
+        const sumaSesionesFisio = hidro + compInfr + crio + para + electroTot + mecanoTot;
+
+        let causasMap = {};
+        registrosCorte.forEach(r => {
+            const c = (r.diagnostico || r.causa_atencion || r.motivo || 'NO ESPECIFICADO').trim().toUpperCase();
+            causasMap[c] = (causasMap[c] || 0) + 1;
+        });
+        const top10 = Object.entries(causasMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+        const rangos = [
+            { label: '-1 (Menor de 1)', min: 0, max: 0.99 }, { label: '1-4', min: 1, max: 4 },
+            { label: '5-9', min: 5, max: 9 }, { label: '10-14', min: 10, max: 14 },
+            { label: '15-19', min: 15, max: 19 }, { label: '20-29', min: 20, max: 29 },
+            { label: '30-39', min: 30, max: 39 }, { label: '40-49', min: 40, max: 49 },
+            { label: '50-59', min: 50, max: 59 }, { label: '60-69', min: 60, max: 69 },
+            { label: '70-79', min: 70, max: 79 }, { label: '>=80', min: 80, max: 150 }
+        ];
+
+        let tablaEdades = rangos.map(rg => ({ label: rg.label, h: 0, m: 0 }));
+        registrosCorte.forEach(r => {
+            let edad = parseFloat(r.edad);
+            if (isNaN(edad)) return;
+            const sexo = (r.sexo || '').toUpperCase();
+            const esH = sexo.startsWith('H') || sexo.startsWith('MASCULINO');
+            const esM = sexo.startsWith('M') && !esH || sexo.startsWith('FEMENINO');
+            for (let i = 0; i < rangos.length; i++) {
+                if (edad >= rangos[i].min && edad <= rangos[i].max) {
+                    if (esH) tablaEdades[i].h++;
+                    if (esM) tablaEdades[i].m++;
+                    break;
+                }
+            }
+        });
+
+        contenedor.innerHTML = `
+            <div style="background: white; padding: 15px; font-family: Arial, sans-serif; color: #000; font-size: 10px;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
+                    <div><b>SALUD / DIF NACIONAL</b><br>UNIDAD DE ASISTENCIA E INTEGRACIÓN SOCIAL</div>
+                    <div style="text-align: right;"><b>SISP-1</b><br>CORTE: 14 DE ${nombresMeses[mesAnt].toUpperCase()} AL 13 DE ${nombresMeses[mesEval].toUpperCase()} ${anioEval}</div>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+                    <tr style="background: #e2e8f0;"><th colspan="4" style="border: 1px solid #000; padding: 4px;">TERAPIA FÍSICA</th></tr>
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 4px;">1a Vez: <b>${fisio1a}</b></td>
+                        <td style="border: 1px solid #000; padding: 4px;">Subs.: <b>${fisioSubs}</b></td>
+                        <td style="border: 1px solid #000; padding: 4px;">Total Personas: <b>${fisio1a + fisioSubs}</b></td>
+                        <td style="border: 1px solid #000; padding: 4px;">Sesiones Totales: <b>${sumaSesionesFisio}</b></td>
                     </tr>
-                </thead>
-                <tbody>
-                    ${filasHTML || '<tr><td colspan="11" style="text-align: center; border: 1px solid #000; padding: 10px;">Sin altas registradas para este periodo.</td></tr>'}
-                </tbody>
-                <tfoot>
-                    <tr style="background: #f1f5f9; font-weight: bold;">
-                        <td colspan="6" style="border: 1px solid #000; text-align: right; padding: 3px;">TOTALES:</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tDefinitiva}</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tMejoria}</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tDesercion}</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tFallecimiento}</td>
-                        <td style="border: 1px solid #000; text-align: center;">${tReferencia}</td>
+                </table>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+                    <tr style="background: #e2e8f0;"><th colspan="6" style="border: 1px solid #000; padding: 4px;">MEDIOS FÍSICOS</th></tr>
+                    <tr style="text-align: center;">
+                        <td style="border: 1px solid #000; padding: 3px;">Hidro: <b>${hidro}</b></td>
+                        <td style="border: 1px solid #000; padding: 3px;">Compresas: <b>${compInfr}</b></td>
+                        <td style="border: 1px solid #000; padding: 3px;">Crio: <b>${crio}</b></td>
+                        <td style="border: 1px solid #000; padding: 3px;">Parafina: <b>${para}</b></td>
+                        <td style="border: 1px solid #000; padding: 3px;">Electro: <b>${electroTot}</b></td>
+                        <td style="border: 1px solid #000; padding: 3px;">Mecano: <b>${mecanoTot}</b></td>
                     </tr>
-                </tfoot>
-            </table>
-        </div>
-    `;
+                </table>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+                    <tr style="background: #e2e8f0;"><th colspan="2" style="border: 1px solid #000; padding: 4px;">TOP 10 CAUSAS DE ATENCIÓN</th></tr>
+                    ${top10.map(([c, cant]) => `<tr><td style="border: 1px solid #000; padding: 3px;">${c}</td><td style="border: 1px solid #000; padding: 3px; text-align: right;">${cant}</td></tr>`).join('') || '<tr><td colspan="2" style="border: 1px solid #000; text-align: center;">Sin registros</td></tr>'}
+                </table>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="background: #e2e8f0;"><th colspan="4" style="border: 1px solid #000; padding: 4px;">GRUPOS ETARIOS</th></tr>
+                    <tr><th style="border: 1px solid #000; padding: 3px;">Rango</th><th style="border: 1px solid #000; padding: 3px;">Hombres</th><th style="border: 1px solid #000; padding: 3px;">Mujeres</th><th style="border: 1px solid #000; padding: 3px;">Total</th></tr>
+                    ${tablaEdades.map(e => `<tr><td style="border: 1px solid #000; padding: 3px;">${e.label}</td><td style="border: 1px solid #000; padding: 3px; text-align: center;">${e.h}</td><td style="border: 1px solid #000; padding: 3px; text-align: center;">${e.m}</td><td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">${e.h + e.m}</td></tr>`).join('')}
+                </table>
+            </div>
+        `;
+    };
+
+    // --- 3. REPORTE MENSUAL DE ALTAS SISP-19 ---
+    window.generarReporteAltasCrisver = () => {
+        const contenedor = document.getElementById('contenidoReporteAltasCrisver');
+        if (!contenedor) return;
+        if (typeof cacheRegistros === 'undefined' || !Array.isArray(cacheRegistros)) return;
+
+        const mesInput = document.getElementById('mesAltasCrisver')?.value || '';
+        let anioEval, mesEval;
+        if (mesInput && mesInput.includes('-')) {
+            const p = mesInput.split('-');
+            anioEval = parseInt(p[0], 10);
+            mesEval = parseInt(p[1], 10);
+        } else {
+            const h = new Date();
+            anioEval = h.getFullYear();
+            mesEval = h.getMonth() + 1;
+        }
+
+        const registrosAltas = cacheRegistros.filter(r => {
+            if (!r.fecha_ISO) return false;
+            const [raAnio, raMes] = r.fecha_ISO.split('-');
+            const esMesCorrecto = parseInt(raAnio, 10) === anioEval && parseInt(raMes, 10) === mesEval;
+            const estatus = (r.estatus_expediente || r.motivo_alta || r.tipo_ingreso || '').toUpperCase();
+            const esAlta = estatus.includes('ALTA') || estatus.includes('BAJA') || estatus.includes('DEFINTIVA') || estatus.includes('MEJORIA') || estatus.includes('DEFUNCIÓN') || estatus.includes('DEFENCION') || estatus.includes('REFERENCIA');
+            return esMesCorrecto && (esAlta || r.motivo_alta);
+        });
+
+        let filasHTML = '';
+        let tDefinitiva = 0, tMejoria = 0, tDesercion = 0, tFallecimiento = 0, tReferencia = 0;
+
+        registrosAltas.forEach((r, index) => {
+            const sexo = (r.sexo || '').toUpperCase();
+            const esH = sexo.startsWith('H') || (sexo.startsWith('M') && !sexo.startsWith('MA')) ? 'X' : '';
+            const esM = sexo.startsWith('F') || sexo.startsWith('MA') ? 'X' : '';
+
+            const motivo = (r.motivo_alta || r.estatus_expediente || '').toUpperCase();
+            const definitiva = motivo.includes('DEFINITIVA') ? 'X' : '';
+            const mejoria = motivo.includes('MEJORIA') ? 'X' : '';
+            const desercion = motivo.includes('DESERCION') ? 'X' : '';
+            const fallecimiento = motivo.includes('FALLECIMIENTO') || motivo.includes('DEFUNCIÓN') ? 'X' : '';
+            const referencia = motivo.includes('REFERENCIA') ? 'X' : '';
+
+            if (definitiva) tDefinitiva++;
+            if (mejoria) tMejoria++;
+            if (desercion) tDesercion++;
+            if (fallecimiento) tFallecimiento++;
+            if (referencia) tReferencia++;
+
+            filasHTML += `
+                <tr>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${index + 1}</td>
+                    <td style="border: 1px solid #000; padding: 3px;">${r.expediente || ''}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${r.edad || ''}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esH}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esM}</td>
+                    <td style="border: 1px solid #000; padding: 3px;">${r.servicio || r.tipo_terapia || 'Fisioterapia'}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${definitiva}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${mejoria}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${desercion}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${fallecimiento}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${referencia}</td>
+                </tr>
+            `;
+        });
+
+        contenedor.innerHTML = `
+            <div style="background: white; padding: 15px; font-family: Arial, sans-serif; color: #000; font-size: 10px;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
+                    <div><b>SALUD / DIF NACIONAL</b><br>DIRECCIÓN GENERAL DE REHABILITACIÓN</div>
+                    <div style="text-align: right;"><b>SISP-19</b><br>INFORME MENSUAL DE ALTAS: ${mesEval}/${anioEval}</div>
+                </div>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #e2e8f0;">
+                            <th style="border: 1px solid #000; padding: 3px;">No. Folio</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Expediente</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Edad</th>
+                            <th style="border: 1px solid #000; padding: 3px;">H</th>
+                            <th style="border: 1px solid #000; padding: 3px;">M</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Servicio</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Definitiva</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Mejoría</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Deserción</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Fallecimiento</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Referencia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filasHTML || '<tr><td colspan="11" style="text-align: center; border: 1px solid #000; padding: 10px;">Sin altas registradas para este periodo.</td></tr>'}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #f1f5f9; font-weight: bold;">
+                            <td colspan="6" style="border: 1px solid #000; text-align: right; padding: 3px;">TOTALES:</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tDefinitiva}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tMejoria}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tDesercion}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tFallecimiento}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tReferencia}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        `;
+    };
+
+    // --- FUNCIÓN DE IMPRESIÓN BLINDADA ---
+    window.imprimirSeccionReporte = (idContenedor) => {
+        const contenedor = document.getElementById(idContenedor);
+        if (!contenedor || !contenedor.innerHTML.trim()) {
+            alert('Primero genera el reporte seleccionando la fecha o periodo correspondiente.');
+            return;
+        }
+
+        const ventana = window.open('', '_blank', 'width=900,height=700');
+        if (!ventana) {
+            alert('Permite las ventanas emergentes (pop-ups) para imprimir.');
+            return;
+        }
+
+        ventana.document.open();
+        ventana.document.write('<!DOCTYPE html><html><head>');
+        ventana.document.write('<title>Reporte Oficial CRISVER</title>');
+        ventana.document.write('<style>');
+        ventana.document.write('body { font-family: Arial, sans-serif; margin: 10px; color: #000; }');
+        ventana.document.write('table { width: 100%; border-collapse: collapse; font-size: 10px; }');
+        ventana.document.write('th, td { border: 1px solid #000; padding: 3px; }');
+        ventana.document.write('@media print { body { print-color-adjust: exact; } }');
+        ventana.document.write('</style>');
+        ventana.document.write('</head><body>');
+        ventana.document.write(contenedor.innerHTML);
+        ventana.document.write('</body></html>');
+        ventana.document.close();
+
+        setTimeout(() => {
+            ventana.focus();
+            ventana.print();
+            ventana.close();
+        }, 400);
+    };
+
+    // (Aquí terminan tus otras funciones anteriores...)
+
+// ==========================================
+// NUEVA FUNCIÓN PARA GESTIONAR LA 1ª Y 2ª CITA
+// ==========================================
+window.marcarComoAsistio = async function(idRegistroCita) {
+    try {
+        const refCitaActual = doc(db, "registros_generales", idRegistroCita);
+        const snapCita = await getDoc(refCitaActual);
+        
+        if (!snapCita.exists()) return;
+        
+        const datosCita = snapCita.data();
+        const numeroExpediente = datosCita.expediente; 
+
+        const q = query(
+            collection(db, "registros_generales"), 
+            where("expediente", "==", numeroExpediente)
+        );
+        const querySnapshot = await getDocs(q);
+
+        let totalCitas = querySnapshot.size;
+        
+        let nuevoEstatusExpediente = "EN VALORACIÓN"; 
+        if (totalCitas > 1) {
+            nuevoEstatusExpediente = "EN TRATAMIENTO"; 
+        }
+
+        const batch = writeBatch(db);
+        
+        batch.update(refCitaActual, {
+            estatus: "ASISTIÓ",
+            estatus_expediente: nuevoEstatusExpediente
+        });
+
+        querySnapshot.forEach((documento) => {
+            if (documento.id !== idRegistroCita) {
+                const refDocRelacionado = doc(db, "registros_generales", documento.id);
+                batch.update(refDocRelacionado, {
+                    estatus_expediente: nuevoEstatusExpediente
+                });
+            }
+        });
+
+        await batch.commit();
+
+        window.mostrarToast(`¡Asistencia registrada! Expediente actualizado a: ${nuevoEstatusExpediente}`, "success");
+        window.filtrarYRenderizar(); 
+
+    } catch (error) {
+        console.error("Error al actualizar el estatus de la segunda cita:", error);
+        alert("Hubo un error al actualizar: " + error.message);
+    }
 };
 
-
-// --- FUNCIÓN DE IMPRESIÓN BLINDADA ---
-window.imprimirSeccionReporte = (idContenedor) => {
-    const contenedor = document.getElementById(idContenedor);
-    if (!contenedor || !contenedor.innerHTML.trim()) {
-        alert('Primero genera el reporte seleccionando la fecha o periodo correspondiente.');
-        return;
-    }
-
-    const ventana = window.open('', '_blank', 'width=900,height=700');
-    if (!ventana) {
-        alert('Permite las ventanas emergentes (pop-ups) para imprimir.');
-        return;
-    }
-
-    ventana.document.open();
-    ventana.document.write('<!DOCTYPE html><html><head>');
-    ventana.document.write('<title>Reporte Oficial CRISVER</title>');
-    ventana.document.write('<style>');
-    ventana.document.write('body { font-family: Arial, sans-serif; margin: 10px; color: #000; }');
-    ventana.document.write('table { width: 100%; border-collapse: collapse; font-size: 10px; }');
-    ventana.document.write('th, td { border: 1px solid #000; padding: 3px; }');
-    ventana.document.write('@media print { body { print-color-adjust: exact; } }');
-    ventana.document.write('</style>');
-    ventana.document.write('</head><body>');
-    ventana.document.write(contenedor.innerHTML);
-    ventana.document.write('</body></html>');
-    ventana.document.close();
-
-    setTimeout(() => {
-        ventana.focus();
-        ventana.print();
-        ventana.close();
-    }, 400);
-};
 </script>
+
 </body>
 </html>
