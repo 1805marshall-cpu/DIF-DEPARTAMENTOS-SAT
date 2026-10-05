@@ -1,1 +1,1804 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captura de Servicios y Evidencias - DIF Municipal 2026</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-dif: #a21caf; 
+            --primary-hover: #86198f;
+            --accent-gold: #b45309;  
+            --text-dark: #0f172a;
+            --bg-color: #f8fafc;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --success: #16a34a;
+            --info: #0284c7;
+            --secondary: #64748b;
+            --secondary-hover: #475569;
+        }
 
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* --- LOGIN --- */
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 16px;
+        }
+
+        .login-card {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            padding: 32px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .login-header i {
+            font-size: 2.5rem;
+            color: var(--primary-dif);
+            margin-bottom: 12px;
+        }
+
+        .login-header h2 {
+            margin: 0 0 6px 0;
+            font-size: 1.3rem;
+            color: var(--text-dark);
+        }
+
+        .login-header p {
+            margin: 0 0 24px 0;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .credentials-box {
+            background-color: #f0fdf4;
+            border: 1px dashed var(--success);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 0.8rem;
+            color: #166534;
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .error-message {
+            display: none;
+            background-color: #fef2f2;
+            color: var(--danger);
+            border: 1px solid #fee2e2;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        /* --- SISTEMA PRINCIPAL --- */
+        #app-content {
+            display: none;
+        }
+
+        .header-bar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            color: var(--primary-dif);
+            font-size: 1.1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .btn-logout {
+            background-color: #fef2f2;
+            color: var(--danger);
+            border: 1px solid #fecaca;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-logout:hover {
+            background-color: var(--danger);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 16px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: var(--primary-dif);
+        }
+
+        .table-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 9px 12px 9px 36px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            outline: none;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-dif);
+            box-shadow: 0 0 0 3px rgba(162, 28, 175, 0.12);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-dif);
+            box-shadow: 0 0 0 3px rgba(162, 28, 175, 0.12);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .service-card {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .service-card.selected {
+            border-color: var(--primary-dif);
+            background-color: #fdf4ff;
+            box-shadow: 0 0 0 2px rgba(162, 28, 175, 0.15);
+        }
+
+        .service-card.disabled {
+            opacity: 0.5;
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .service-card h4 {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .service-card h4 i {
+            color: var(--primary-dif);
+        }
+
+        .service-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        .service-toggle input[type="checkbox"] {
+            accent-color: var(--primary-dif);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .evidence-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .evidence-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            background-color: #f8fafc;
+            transition: border-color 0.2s;
+        }
+
+        .evidence-box:hover {
+            border-color: var(--primary-dif);
+        }
+
+        .file-upload-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: #ffffff;
+            color: var(--primary-dif);
+            border: 1.5px solid var(--primary-dif);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+
+        .file-upload-btn:hover {
+            background-color: var(--primary-dif);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(162, 28, 175, 0.15);
+        }
+
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 14px;
+            justify-content: center;
+        }
+
+        .preview-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .preview-img {
+            width: 85px;
+            height: 85px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+
+        .preview-wrapper:hover .preview-img {
+            transform: scale(1.03);
+        }
+
+        .btn-remove-photo {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background-color: var(--danger);
+            color: white;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+
+        .btn-remove-photo:hover {
+            background-color: var(--danger-hover);
+            transform: scale(1.15);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-dif) 0%, var(--primary-hover) 100%);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 2;
+            box-shadow: 0 4px 12px rgba(162, 28, 175, 0.25);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(162, 28, 175, 0.35);
+        }
+
+        .btn-clear-form {
+            background-color: #f1f5f9;
+            color: var(--secondary);
+            border: 1px solid #cbd5e1;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .btn-clear-form:hover {
+            background-color: #e2e8f0;
+            color: var(--secondary-hover);
+            transform: translateY(-2px);
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+            text-align: left;
+        }
+
+        .data-table th {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 700;
+            padding: 12px 16px;
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .photo-stack {
+            position: relative;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            margin: 4px 0;
+        }
+
+        .photo-stack-img {
+            position: absolute;
+            width: 52px;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .photo-stack-img:nth-child(1) { top: 0; left: 0; z-index: 3; }
+        .photo-stack-img:nth-child(2) { top: 4px; left: 6px; z-index: 2; transform: rotate(5deg); opacity: 0.9; }
+        .photo-stack-img:nth-child(3) { top: 8px; left: 12px; z-index: 1; transform: rotate(10deg); opacity: 0.75; }
+
+        .photo-stack:hover .photo-stack-img:nth-child(1) { transform: translateY(-3px) scale(1.02); }
+        .photo-stack:hover .photo-stack-img:nth-child(2) { transform: rotate(8deg) translate(4px, -2px); }
+        .photo-stack:hover .photo-stack-img:nth-child(3) { transform: rotate(15deg) translate(8px, -2px); }
+
+        .photo-count-badge {
+            position: absolute;
+            bottom: -2px;
+            right: -4px;
+            background-color: var(--primary-dif);
+            color: #ffffff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            z-index: 10;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .badge-empty {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        .badge-total {
+            background-color: #f0fdf4;
+            color: var(--success);
+            border: 1px solid #bbf7d0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .btn-action-group {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-action {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-edit {
+            background-color: #fffbeb;
+            color: var(--accent-gold);
+            border: 1px solid #fde68a;
+        }
+
+        .btn-edit:hover {
+            background-color: var(--accent-gold);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(180, 83, 9, 0.2);
+        }
+
+        .btn-delete {
+            background-color: #fef2f2;
+            color: var(--danger);
+            border: 1px solid #fecaca;
+        }
+
+        .btn-delete:hover {
+            background-color: var(--danger);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .slider-container {
+            position: relative;
+            max-width: 800px;
+            width: 90%;
+            background: #000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .slider-header {
+            width: 100%;
+            padding: 14px 20px;
+            background-color: rgba(15, 23, 42, 0.9);
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .slider-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slider-close {
+            background: none;
+            border: none;
+            color: #cbd5e1;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .slider-close:hover { color: #ffffff; }
+
+        .slider-body {
+            position: relative;
+            width: 100%;
+            height: 480px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #0f172a;
+        }
+
+        .slider-img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            user-select: none;
+            transition: opacity 0.2s;
+        }
+
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+        }
+
+        .slider-nav:hover {
+            background-color: var(--primary-dif);
+            color: #ffffff;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .slider-nav.prev { left: 16px; }
+        .slider-nav.next { right: 16px; }
+
+        .slider-footer {
+            width: 100%;
+            padding: 10px 20px;
+            background-color: rgba(15, 23, 42, 0.9);
+            color: #94a3b8;
+            font-size: 0.85rem;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .pagination-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .pagination-info {
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .btn-page {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: var(--text-dark);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-page:hover:not(:disabled) {
+            border-color: var(--primary-dif);
+            color: var(--primary-dif);
+            background-color: #fdf4ff;
+        }
+
+        .btn-page.active {
+            background-color: var(--primary-dif);
+            color: #ffffff;
+            border-color: var(--primary-dif);
+        }
+
+        .btn-page:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .per-page-select {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            background-color: #fff;
+        }
+
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            min-width: 280px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            background: #ffffff;
+            color: var(--text-dark);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-left: 5px solid var(--primary-dif);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.warning { border-left-color: var(--accent-gold); }
+
+        .toast i { font-size: 1.2rem; }
+        .toast.success i { color: var(--success); }
+        .toast.error i { color: var(--danger); }
+        .toast.warning i { color: var(--accent-gold); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        @media (max-width: 768px) {
+            .evidence-grid { grid-template-columns: 1fr; }
+            .services-grid { grid-template-columns: 1fr; }
+            .form-actions { flex-direction: column; }
+            .pagination-bar { flex-direction: column; align-items: center; text-align: center; }
+            .table-toolbar { flex-direction: column; align-items: stretch; }
+            .slider-body { height: 320px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast-container"></div>
+
+    <!-- MODAL SLIDER / CARRUSEL -->
+    <div id="modal-slider" class="modal-overlay" onclick="cerrarSliderEvent(event)">
+        <div class="slider-container">
+            <div class="slider-header">
+                <div id="slider-title" class="slider-title"><i class="fas fa-images"></i> Vista de Fotografías</div>
+                <button class="slider-close" onclick="cerrarSlider()"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="slider-body">
+                <button class="slider-nav prev" onclick="cambiarFotoSlider(-1)"><i class="fas fa-chevron-left"></i></button>
+                <img id="slider-current-img" class="slider-img" src="" alt="Fotografía Evidencia">
+                <button class="slider-nav next" onclick="cambiarFotoSlider(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div id="slider-footer" class="slider-footer">
+                Imagen 1 de 1
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="login-screen" class="login-wrapper">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-clipboard-check"></i>
+                <h2>Captura de Evidencias</h2>
+                <p>Módulo de registro de atenciones y fotografías</p>
+            </div>
+
+            <div class="credentials-box">
+                <i class="fas fa-key"></i> <strong>Acceso de Campo:</strong><br>
+                Usuario: <code>captura.campo</code><br>
+                Contraseña: <code>campo2026</code>
+            </div>
+
+            <div id="login-error" class="error-message">
+                <i class="fas fa-exclamation-circle"></i> Credenciales inválidas.
+            </div>
+
+            <form id="form-login">
+                <div class="form-group">
+                    <label for="login-usuario">Usuario</label>
+                    <input type="text" id="login-usuario" class="form-control" placeholder="captura.campo" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-pass">Contraseña</label>
+                    <input type="password" id="login-pass" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-submit" style="margin-top: 20px; width: 100%;">
+                    <i class="fas fa-right-to-bracket"></i> Acceder al Módulo
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SISTEMA PRINCIPAL -->
+    <div id="app-content">
+        <div class="header-bar">
+            <div class="brand-title">
+                <i class="fas fa-notes-medical"></i>
+                <span>DIF MUNICIPAL | Captura de Servicios y Evidencias</span>
+            </div>
+            <div class="user-info">
+                <span><i class="fas fa-user-gear"></i> <strong id="username-display">captura.campo</strong></span>
+                <button class="btn-logout" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt"></i> Salir</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="card">
+                <h3 class="card-title"><i class="fas fa-calendar-check"></i> Seleccionar Jornada Itinerante</h3>
+                
+                <div class="form-group" style="margin-top: 14px;">
+                    <label for="select-jornada">Jornada Programada</label>
+                    <select id="select-jornada" class="form-control" onchange="cargarDatosPrevios()">
+                        <option value="">-- Selecciona una jornada agendada --</option>
+                    </select>
+                </div>
+            </div>
+
+            <form id="form-evidencias">
+                <!-- CANTIDADES DE SERVICIOS -->
+                <div class="card" style="margin-top: 16px;">
+                    <h3 class="card-title"><i class="fas fa-calculator"></i> Cantidad de Atenciones por Servicio Activo</h3>
+                    
+                    <div class="services-grid" style="margin-top: 14px;">
+                        <div class="service-card" id="card-esterilizacion">
+                            <div class="service-header">
+                                <h4><i class="fas fa-paw"></i> Esterilización</h4>
+                                <label class="service-toggle">
+                                    <input type="checkbox" id="chk-esterilizacion" onchange="toggleServicio('esterilizacion')"> Activo
+                                </label>
+                            </div>
+                            <input type="number" min="0" id="cant-esterilizacion" class="form-control" placeholder="0" value="0" required>
+                        </div>
+
+                        <div class="service-card" id="card-corte">
+                            <div class="service-header">
+                                <h4><i class="fas fa-scissors"></i> Corte de Cabello</h4>
+                                <label class="service-toggle">
+                                    <input type="checkbox" id="chk-corte" onchange="toggleServicio('corte')"> Activo
+                                </label>
+                            </div>
+                            <input type="number" min="0" id="cant-corte" class="form-control" placeholder="0" value="0" required>
+                        </div>
+
+                        <div class="service-card" id="card-ivea">
+                            <div class="service-header">
+                                <h4><i class="fas fa-graduation-cap"></i> IVEA</h4>
+                                <label class="service-toggle">
+                                    <input type="checkbox" id="chk-ivea" onchange="toggleServicio('ivea')"> Activo
+                                </label>
+                            </div>
+                            <input type="number" min="0" id="cant-ivea" class="form-control" placeholder="0" value="0" required>
+                        </div>
+
+                        <div class="service-card" id="card-bucal">
+                            <div class="service-header">
+                                <h4><i class="fas fa-tooth"></i> Salud Bucal</h4>
+                                <label class="service-toggle">
+                                    <input type="checkbox" id="chk-bucal" onchange="toggleServicio('bucal')"> Activo
+                                </label>
+                            </div>
+                            <input type="number" min="0" id="cant-bucal" class="form-control" placeholder="0" value="0" required>
+                        </div>
+
+                        <div class="service-card" id="card-medica">
+                            <div class="service-header">
+                                <h4><i class="fas fa-user-doctor"></i> Salud Médica</h4>
+                                <label class="service-toggle">
+                                    <input type="checkbox" id="chk-medica" onchange="toggleServicio('medica')"> Activo
+                                </label>
+                            </div>
+                            <input type="number" min="0" id="cant-medica" class="form-control" placeholder="0" value="0" required>
+                        </div>
+
+                        <div class="service-card" id="card-analisis">
+                            <div class="service-header">
+                                <h4><i class="fas fa-vial"></i> Análisis Clínicos</h4>
+                                <label class="service-toggle">
+                                    <input type="checkbox" id="chk-analisis" onchange="toggleServicio('analisis')"> Activo
+                                </label>
+                            </div>
+                            <input type="number" min="0" id="cant-analisis" class="form-control" placeholder="0" value="0" required>
+                        </div>
+
+                        <div class="service-card" id="card-fisioterapia">
+                            <div class="service-header">
+                                <h4><i class="fas fa-diagnoses"></i> Fisioterapia</h4>
+                                <label class="service-toggle">
+                                    <input type="checkbox" id="chk-fisioterapia" onchange="toggleServicio('fisioterapia')"> Activo
+                                </label>
+                            </div>
+                            <input type="number" min="0" id="cant-fisioterapia" class="form-control" placeholder="0" value="0" required>
+                        </div>
+
+                        <div class="service-card" id="card-psicologia">
+                            <div class="service-header">
+                                <h4><i class="fas fa-brain"></i> Pláticas de Psicología</h4>
+                                <label class="service-toggle">
+                                    <input type="checkbox" id="chk-psicologia" onchange="toggleServicio('psicologia')"> Activo
+                                </label>
+                            </div>
+                            <input type="number" min="0" id="cant-psicologia" class="form-control" placeholder="0" value="0" required>
+                        </div>
+
+                        <!-- MÓDULO: OPTOMETRÍA -->
+                        <div class="service-card" id="card-optometria">
+                            <div class="service-header">
+                                <h4><i class="fas fa-glasses"></i> Optometrista</h4>
+                                <label class="service-toggle">
+                                    <input type="checkbox" id="chk-optometria" onchange="toggleServicio('optometria')"> Activo
+                                </label>
+                            </div>
+                            <input type="number" min="0" id="cant-optometria" class="form-control" placeholder="0" value="0" required>
+                        </div>
+                        <div class="service-card" id="card-especiales">
+                            <div class="service-header">
+                                <h4><i class="fas fa-star"></i> Campañas Especiales</h4>
+                                <label class="service-toggle">
+                                    <input type="checkbox" id="chk-especiales" onchange="toggleServicio('especiales')"> Activo
+                                </label>
+                            </div>
+                            <input type="number" min="0" id="cant-especiales" class="form-control" placeholder="0" value="0" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARGA DE EVIDENCIAS FOTOGRÁFICAS -->
+                <div class="card" style="margin-top: 16px;">
+                    <h3 class="card-title"><i class="fas fa-camera"></i> Adjuntar / Modificar Evidencias Fotográficas</h3>
+
+                    <div class="evidence-grid" style="margin-top: 14px;">
+                        <div class="evidence-box">
+                            <i class="fas fa-file-signature" style="font-size: 2rem; color: var(--primary-dif); margin-bottom: 8px;"></i>
+                            <h4 style="margin: 0 0 6px 0;">Listas de Asistencia</h4>
+                            <p style="font-size: 0.78rem; color: #64748b; margin-top: 0;">Sube o modifica las fotografías de las hojas de firmas.</p>
+                            
+                            <label for="fotos-asistencia" class="file-upload-btn">
+                                <i class="fas fa-file-circle-plus"></i> Agregar Fotos
+                            </label>
+                            <input type="file" id="fotos-asistencia" style="display: none;" accept="image/*" multiple onchange="previsualizarFiles('fotos-asistencia', 'asistencia')">
+                            
+                            <div id="preview-asistencia" class="preview-container"></div>
+                        </div>
+
+                        <div class="evidence-box">
+                            <i class="fas fa-images" style="font-size: 2rem; color: var(--primary-dif); margin-bottom: 8px;"></i>
+                            <h4 style="margin: 0 0 6px 0;">Fotos del Lugar / Evento</h4>
+                            <p style="font-size: 0.78rem; color: #64748b; margin-top: 0;">Fotografías panorámicas y del personal dando atención.</p>
+                            
+                            <label for="fotos-lugar" class="file-upload-btn">
+                                <i class="fas fa-file-circle-plus"></i> Agregar Fotos
+                            </label>
+                            <input type="file" id="fotos-lugar" style="display: none;" accept="image/*" multiple onchange="previsualizarFiles('fotos-lugar', 'lugar')">
+                            
+                            <div id="preview-lugar" class="preview-container"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit" id="btn-submit-form">
+                            <i class="fas fa-cloud-arrow-up"></i> Guardar Captura de Atenciones y Evidencias
+                        </button>
+                        <button type="button" class="btn-clear-form" onclick="limpiarFormularioCompleto()">
+                            <i class="fas fa-rotate-right"></i> Limpiar Formulario
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- TABLA DE REGISTROS -->
+            <div class="card" style="margin-top: 16px;">
+                <div class="card-header-flex">
+                    <h3 class="card-title"><i class="fas fa-table-list"></i> Historial de Evidencias Capturadas</h3>
+                </div>
+
+                <div class="table-toolbar">
+                    <div class="search-box">
+                        <i class="fas fa-magnifying-glass"></i>
+                        <input type="text" id="input-search" class="search-input" placeholder="Buscar por jornada, colonia, comunidad o fecha..." oninput="filtrarRegistros()">
+                    </div>
+                    <div>
+                        <span style="font-size: 0.85rem; color: #64748b; margin-right: 6px;">Mostrar:</span>
+                        <select id="select-per-page" class="per-page-select" onchange="cambiarRegistrosPorPagina()">
+                            <option value="5">5 por pág.</option>
+                            <option value="10" selected>10 por pág.</option>
+                            <option value="20">20 por pág.</option>
+                            <option value="50">50 por pág.</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Jornada / Comunidad</th>
+                                <th>Fecha Registro</th>
+                                <th>Total Atenciones</th>
+                                <th>Desglose</th>
+                                <th><i class="fas fa-file-signature"></i> Lista de Asistencia</th>
+                                <th><i class="fas fa-images"></i> Lugar / Evento</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-evidencias">
+                            <!-- Inserción dinámica por JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-bar">
+                    <div id="pagination-info" class="pagination-info">
+                        Mostrando 0 de 0 registros
+                    </div>
+                    <div id="pagination-controls" class="pagination-controls">
+                        <!-- Botones dinámicos -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script principal actualizado con autolimpieza y botón de reinicio -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E",
+            projectId: "poblacion-vulnerable---dif",
+            storageBucket: "poblacion-vulnerable---dif.appspot.com"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        const jornadasRef = collection(db, "jornadas_itinerantes");
+        const evidenciasRef = collection(db, "evidencias");
+
+        let jornadas = [];
+        let evidenciasDB = {};
+        
+        let cacheFiles = { asistencia: [], lugar: [] };
+        let cacheUrlsExistentes = { asistencia: [], lugar: [] };
+
+        let currentPage = 1;
+        let itemsPerPage = 10;
+        let searchQuery = "";
+
+        let sliderFotosActuales = [];
+        let sliderIndexActual = 0;
+
+        // Debe quedar así:
+        const listaIdsServicios = ['esterilizacion', 'corte', 'ivea', 'bucal', 'medica', 'analisis', 'fisioterapia', 'psicologia', 'optometria', 'especiales'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const usuarioActivo = sessionStorage.getItem('usuario_campo');
+            if (usuarioActivo) {
+                mostrarSistema(usuarioActivo);
+            }
+
+            cargarEvidenciasLocales();
+
+            const formLogin = document.getElementById('form-login');
+            if (formLogin) {
+                formLogin.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const user = document.getElementById('login-usuario').value.trim();
+                    const pass = document.getElementById('login-pass').value.trim();
+
+                    if (user === 'captura.campo' && pass === 'campo2026') {
+                        sessionStorage.setItem('usuario_campo', user);
+                        mostrarSistema(user);
+                    } else {
+                        const errBox = document.getElementById('login-error');
+                        if (errBox) {
+                            errBox.style.display = 'block';
+                            setTimeout(() => errBox.style.display = 'none', 3000);
+                        }
+                    }
+                });
+            }
+
+            const formEvidencias = document.getElementById('form-evidencias');
+            if (formEvidencias) {
+                formEvidencias.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const jornadaId = document.getElementById('select-jornada').value;
+                    if (!jornadaId) {
+                        showToast('Por favor selecciona una jornada itinerante', 'warning', 'fa-triangle-exclamation');
+                        return;
+                    }
+
+                    const btnSubmit = document.getElementById('btn-submit-form');
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Guardando registros e imágenes...`;
+                    }
+
+                    try {
+                        const cantidades = {};
+                        listaIdsServicios.forEach(key => {
+                            const input = document.getElementById(`cant-${key}`);
+                            if (input && !input.disabled) {
+                                cantidades[key] = parseInt(input.value) || 0;
+                            }
+                        });
+
+                        let finalUrlsAsistencia = [...cacheUrlsExistentes.asistencia, ...cacheFiles.asistencia];
+                        let finalUrlsLugar = [...cacheUrlsExistentes.lugar, ...cacheFiles.lugar];
+
+                        const payload = {
+                            jornadaId: jornadaId,
+                            cantidades: cantidades,
+                            fotosAsistencia: finalUrlsAsistencia,
+                            fotosLugar: finalUrlsLugar,
+                            fechaRegistro: new Date().toISOString()
+                        };
+
+                        const registroExistente = evidenciasDB[jornadaId];
+                        
+                        try {
+                            if (registroExistente && registroExistente.docId && !registroExistente.docId.startsWith('local_')) {
+                                await updateDoc(doc(db, "evidencias", registroExistente.docId), payload);
+                                payload.docId = registroExistente.docId;
+                            } else {
+                                const docRef = await addDoc(evidenciasRef, payload);
+                                payload.docId = docRef.id;
+                            }
+                        } catch (firebaseErr) {
+                            console.warn("Trabajando offline, guardando en local:", firebaseErr);
+                            if (!payload.docId) payload.docId = registroExistente?.docId || ("local_" + Date.now());
+                        }
+
+                        evidenciasDB[jornadaId] = payload;
+                        guardarEvidenciasLocales();
+
+                        showToast('¡Datos e imágenes guardados con éxito!', 'success', 'fa-cloud-arrow-up');
+
+                        // LIMPIAR FORMULARIO AUTOMÁTICAMENTE TRAS GUARDAR CON ÉXITO
+                        limpiarFormularioCompleto();
+                        renderizarTablaEvidencias();
+
+                    } catch (error) {
+                        console.error("Error al procesar evidencias:", error);
+                        showToast('Error al guardar la información', 'error', 'fa-triangle-exclamation');
+                    } finally {
+                        if (btnSubmit) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerHTML = `<i class="fas fa-cloud-arrow-up"></i> Guardar Captura de Atenciones y Evidencias`;
+                        }
+                    }
+                });
+            }
+        });
+
+        function mostrarSistema(usuario) {
+            const loginScreen = document.getElementById('login-screen');
+            const appContent = document.getElementById('app-content');
+            const userDisplay = document.getElementById('username-display');
+
+            if (loginScreen) loginScreen.style.display = 'none';
+            if (appContent) appContent.style.display = 'block';
+            if (userDisplay) userDisplay.textContent = usuario;
+        }
+
+        window.cerrarSesion = function() {
+            sessionStorage.removeItem('usuario_campo');
+            location.reload();
+        };
+
+        onSnapshot(jornadasRef, (snapshot) => {
+            jornadas = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            guardarJornadasLocales();
+            cargarOpcionesJornadas();
+        }, (error) => {
+            cargarJornadasLocales();
+        });
+
+        onSnapshot(evidenciasRef, (snapshot) => {
+            snapshot.forEach((docSnap) => {
+                const data = docSnap.data();
+                const key = data.jornadaId || docSnap.id;
+                if (!evidenciasDB[key] || new Date(data.fechaRegistro) >= new Date(evidenciasDB[key].fechaRegistro || 0)) {
+                    evidenciasDB[key] = { docId: docSnap.id, ...data };
+                }
+            });
+            guardarEvidenciasLocales();
+            renderizarTablaEvidencias();
+        }, (error) => {
+            cargarEvidenciasLocales();
+        });
+
+        function guardarJornadasLocales() {
+            try { localStorage.setItem('dif_jornadas_cache', JSON.stringify(jornadas)); } catch (e) { console.error(e); }
+        }
+
+        function cargarJornadasLocales() {
+            try {
+                const cached = localStorage.getItem('dif_jornadas_cache');
+                if (cached) {
+                    jornadas = JSON.parse(cached);
+                    cargarOpcionesJornadas();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function guardarEvidenciasLocales() {
+            try { localStorage.setItem('dif_evidencias_cache', JSON.stringify(evidenciasDB)); } catch (e) { console.error(e); }
+        }
+
+        function cargarEvidenciasLocales() {
+            try {
+                const cached = localStorage.getItem('dif_evidencias_cache');
+                if (cached) {
+                    evidenciasDB = JSON.parse(cached);
+                    renderizarTablaEvidencias();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function cargarOpcionesJornadas() {
+            const select = document.getElementById('select-jornada');
+            if (!select) return;
+            
+            const valorActual = select.value;
+            select.innerHTML = '<option value="">-- Selecciona una jornada agendada --</option>';
+
+            jornadas.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            jornadas.forEach(j => {
+                const option = document.createElement('option');
+                option.value = j.id;
+                option.textContent = `${j.fecha || 'Sin fecha'} | ${j.colonia || 'Colonia'} (${j.lugar || 'Lugar'})`;
+                select.appendChild(option);
+            });
+
+            if (valorActual) select.value = valorActual;
+        }
+
+        window.cargarDatosPrevios = function() {
+            const jornadaId = document.getElementById('select-jornada').value;
+            
+            if (!jornadaId) {
+                limpiarFormularioCaptura();
+                return;
+            }
+
+            const jornadaSeleccionada = jornadas.find(j => j.id === jornadaId);
+            const datosGuardados = evidenciasDB[jornadaId];
+
+            let serviciosParaActivar = [];
+            if (jornadaSeleccionada && jornadaSeleccionada.servicios) {
+                serviciosParaActivar = jornadaSeleccionada.servicios;
+            }
+
+            actualizarTarjetasServicios(serviciosParaActivar);
+
+            cacheFiles = { asistencia: [], lugar: [] };
+
+            if (datosGuardados) {
+                listaIdsServicios.forEach(key => {
+                    const input = document.getElementById(`cant-${key}`);
+                    if (input && !input.disabled) {
+                        input.value = (datosGuardados.cantidades && datosGuardados.cantidades[key]) || 0;
+                    }
+                });
+
+                cacheUrlsExistentes.asistencia = [...(datosGuardados.fotosAsistencia || [])];
+                cacheUrlsExistentes.lugar = [...(datosGuardados.fotosLugar || [])];
+                renderPreview();
+
+                showToast('Jornada y evidencias previas cargadas', 'info', 'fa-circle-info');
+            } else {
+                listaIdsServicios.forEach(key => {
+                    const input = document.getElementById(`cant-${key}`);
+                    if (input && !input.disabled) input.value = 0;
+                });
+                cacheUrlsExistentes = { asistencia: [], lugar: [] };
+                renderPreview();
+                showToast(`Jornada cargada: ${serviciosParaActivar.length} servicios habilitados.`, 'success', 'fa-calendar-check');
+            }
+        };
+
+        function actualizarTarjetasServicios(serviciosProgramados = []) {
+            const equivalencias = {
+                'optometria': ['optometrista', 'optometria'],
+                'salud-medica': ['salud medica'],
+                'salud-bucal': ['salud bucal'],
+                'analisis': ['analisis clinicos'],
+                'fisioterapia': ['fisioterapia'],
+                'psicologia': ['psicologia', 'platicas de psicologia'],
+                'ivea': ['ivea'],
+                'esterilizacion': ['campana de esterilizacion'],
+                'jurisdiccion': ['jurisdiccion sanitaria'],
+                'especiales': ['campanas especiales'] // <- Agregado aquí
+            };
+
+
+            listaIdsServicios.forEach(key => {
+                const chk = document.getElementById(`chk-${key}`);
+                const input = document.getElementById(`cant-${key}`);
+                const card = document.getElementById(`card-${key}`);
+
+                if (!chk || !input || !card) return;
+
+                const estaProgramado = serviciosProgramados.some(s => {
+                    if (!s) return false;
+                    const normS = s.toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .replace(/\s*\(.*?\)/g, "")
+                        .trim();
+
+                    const normKey = key.toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .trim();
+
+                    if (equivalencias[normKey]) {
+                        return equivalencias[normKey].some(eq => normS.includes(eq));
+                    }
+                    return normS === normKey || normS.includes(normKey) || normKey.includes(normS);
+                });
+
+                chk.checked = estaProgramado;
+
+                if (estaProgramado) {
+                    card.classList.add('selected');
+                    card.classList.remove('disabled');
+                    input.disabled = false;
+                } else {
+                    card.classList.remove('selected');
+                    card.classList.add('disabled');
+                    input.value = 0;
+                    input.disabled = true;
+                }
+            });
+        }
+
+        window.toggleServicio = function(key) {
+            const chk = document.getElementById(`chk-${key}`);
+            const input = document.getElementById(`cant-${key}`);
+            const card = document.getElementById(`card-${key}`);
+
+            if (!chk || !input || !card) return;
+
+            if (chk.checked) {
+                card.classList.add('selected');
+                card.classList.remove('disabled');
+                input.disabled = false;
+            } else {
+                card.classList.remove('selected');
+                card.classList.add('disabled');
+                input.value = 0;
+                input.disabled = true;
+            }
+        };
+
+        function limpiarFormularioCaptura() {
+            const selectJornada = document.getElementById('select-jornada');
+            if (selectJornada) selectJornada.value = "";
+
+            listaIdsServicios.forEach(key => {
+                const chk = document.getElementById(`chk-${key}`);
+                const input = document.getElementById(`cant-${key}`);
+                const card = document.getElementById(`card-${key}`);
+
+                if (chk) chk.checked = false;
+                if (card) {
+                    card.classList.remove('selected');
+                    card.classList.add('disabled');
+                }
+                if (input) {
+                    input.value = 0;
+                    input.disabled = true;
+                }
+            });
+
+            cacheFiles = { asistencia: [], lugar: [] };
+            cacheUrlsExistentes = { asistencia: [], lugar: [] };
+            renderPreview();
+        }
+
+        window.limpiarFormularioCompleto = function() {
+            limpiarFormularioCaptura();
+            showToast('Formulario limpiado correctamente', 'info', 'fa-rotate-right');
+        };
+
+        function comprimirYConvertirImagen(file, maxWidth = 900, quality = 0.65) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        resolve(dataUrl);
+                    };
+                    img.onerror = (error) => reject(error);
+                };
+                reader.onerror = (error) => reject(error);
+            });
+        }
+
+        window.previsualizarFiles = async function(inputId, tipo) {
+            const inputFiles = document.getElementById(inputId);
+            if (!inputFiles || !inputFiles.files) return;
+
+            showToast('Procesando y comprimiendo imágenes...', 'info', 'fa-compress');
+
+            for (let file of Array.from(inputFiles.files)) {
+                try {
+                    const base64String = await comprimirYConvertirImagen(file, 900, 0.65);
+                    cacheFiles[tipo].push(base64String);
+                } catch (err) {
+                    console.error("Error al procesar archivo:", err);
+                }
+            }
+
+            inputFiles.value = '';
+            renderPreview();
+            showToast('Imágenes listas para guardar', 'success', 'fa-check');
+        };
+
+        window.eliminarFotoExistente = function(tipo, index) {
+            cacheUrlsExistentes[tipo].splice(index, 1);
+            renderPreview();
+        };
+
+        window.eliminarFotoNueva = function(tipo, index) {
+            cacheFiles[tipo].splice(index, 1);
+            renderPreview();
+        };
+
+        function renderPreview() {
+            ['asistencia', 'lugar'].forEach(tipo => {
+                const container = document.getElementById(`preview-${tipo}`);
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                cacheUrlsExistentes[tipo].forEach((url, index) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'preview-wrapper';
+                    wrapper.innerHTML = `
+                        <img src="${url}" class="preview-img" alt="Preview Existente">
+                        <button type="button" class="btn-remove-photo" onclick="eliminarFotoExistente('${tipo}', ${index})">
+                            <i class="fas fa-xmark"></i>
+                        </button>
+                    `;
+                    container.appendChild(wrapper);
+                });
+
+                cacheFiles[tipo].forEach((base64Str, index) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'preview-wrapper';
+                    wrapper.innerHTML = `
+                        <img src="${base64Str}" class="preview-img" alt="Preview Comprimido">
+                        <button type="button" class="btn-remove-photo" onclick="eliminarFotoNueva('${tipo}', ${index})">
+                            <i class="fas fa-xmark"></i>
+                        </button>
+                    `;
+                    container.appendChild(wrapper);
+                });
+            });
+        }
+
+        function renderizarTablaEvidencias() {
+            const tbody = document.getElementById('tbody-evidencias');
+            if (!tbody) return;
+
+            const query = (searchQuery || '').toLowerCase();
+            const registrosFiltrados = Object.values(evidenciasDB).filter(ev => {
+                const jornada = jornadas.find(j => j.id === ev.jornadaId);
+                if (!jornada) return true;
+                const textoJornada = `${jornada.fecha || ''} ${jornada.colonia || ''} ${jornada.lugar || ''}`.toLowerCase();
+                return textoJornada.includes(query);
+            });
+
+            const totalRegistros = registrosFiltrados.length;
+            const totalPages = Math.ceil(totalRegistros / itemsPerPage) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const registrosPagina = registrosFiltrados.slice(start, end);
+
+            tbody.innerHTML = '';
+
+            if (registrosPagina.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 24px;">No se encontraron registros de evidencias.</td></tr>`;
+                actualizarPaginacionUI(0, 0, 1);
+                return;
+            }
+
+            registrosPagina.forEach(ev => {
+                const jornada = jornadas.find(j => j.id === ev.jornadaId) || { fecha: 'N/A', colonia: 'Jornada Local / Externa', lugar: 'N/A' };
+                
+                let totalAtenciones = 0;
+                let desgloseHTML = '<div style="font-size: 0.78rem; color: #475569;">';
+                if (ev.cantidades) {
+                    Object.entries(ev.cantidades).forEach(([k, v]) => {
+                        totalAtenciones += Number(v) || 0;
+                        if (v > 0) desgloseHTML += `• ${k}: <b>${v}</b><br>`;
+                    });
+                }
+                desgloseHTML += '</div>';
+
+                const fechaFormateada = new Date(ev.fechaRegistro || Date.now()).toLocaleString('es-MX', {
+                    dateStyle: 'medium',
+                    timeStyle: 'short'
+                });
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <strong>${jornada.colonia || 'Sin Colonia'}</strong><br>
+                        <span style="font-size: 0.78rem; color: #64748b;">${jornada.lugar || ''}</span>
+                    </td>
+                    <td style="white-space: nowrap; font-size: 0.82rem;">${fechaFormateada}</td>
+                    <td><span class="badge-total">${totalAtenciones} Atenciones</span></td>
+                    <td>${desgloseHTML}</td>
+                    <td>${renderFotoStack(ev.fotosAsistencia, 'Listas de Asistencia')}</td>
+                    <td>${renderFotoStack(ev.fotosLugar, 'Lugar / Evento')}</td>
+                    <td>
+                        <div class="btn-action-group">
+                            <button class="btn-action btn-edit" onclick="editarRegistro('${ev.jornadaId}')" title="Editar o Modificar">
+                                <i class="fas fa-pen-to-square"></i> Editar
+                            </button>
+                            <button class="btn-action btn-delete" onclick="eliminarRegistro('${ev.docId}', '${ev.jornadaId}')" title="Eliminar Registro">
+                                <i class="fas fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            actualizarPaginacionUI(totalRegistros, start + 1, Math.min(end, totalRegistros));
+        }
+
+        function renderFotoStack(fotosArray, titulo) {
+            if (!fotosArray || fotosArray.length === 0) {
+                return `<span class="badge-empty">Sin fotos</span>`;
+            }
+
+            const safeJson = JSON.stringify(fotosArray).replace(/"/g, '&quot;');
+            let html = `<div class="photo-stack" onclick="abrirSlider('${titulo}', ${safeJson}, 0)">`;
+            
+            const maxMostrar = Math.min(fotosArray.length, 3);
+            for (let i = 0; i < maxMostrar; i++) {
+                html += `<img src="${fotosArray[i]}" class="photo-stack-img" alt="Foto">`;
+            }
+            if (fotosArray.length > 1) {
+                html += `<span class="photo-count-badge">${fotosArray.length}</span>`;
+            }
+            html += `</div>`;
+            return html;
+        }
+
+        window.filtrarRegistros = function() {
+            const input = document.getElementById('input-search');
+            if (input) searchQuery = input.value;
+            currentPage = 1;
+            renderizarTablaEvidencias();
+        };
+
+        window.cambiarRegistrosPorPagina = function() {
+            const select = document.getElementById('select-per-page');
+            if (select) itemsPerPage = parseInt(select.value) || 10;
+            currentPage = 1;
+            renderizarTablaEvidencias();
+        };
+
+        function actualizarPaginacionUI(total, desde, hasta) {
+            const info = document.getElementById('pagination-info');
+            const controls = document.getElementById('pagination-controls');
+            if (!info || !controls) return;
+
+            if (total === 0) {
+                info.textContent = "Mostrando 0 de 0 registros";
+                controls.innerHTML = '';
+                return;
+            }
+
+            info.textContent = `Mostrando ${desde} a ${hasta} de ${total} registros`;
+            const totalPages = Math.ceil(total / itemsPerPage);
+
+            let html = `
+                <button class="btn-page" ${currentPage === 1 ? 'disabled' : ''} onclick="cambiarPagina(${currentPage - 1})"><i class="fas fa-chevron-left"></i></button>
+            `;
+
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    html += `<button class="btn-page ${i === currentPage ? 'active' : ''}" onclick="cambiarPagina(${i})">${i}</button>`;
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    html += `<span style="padding: 0 4px; color: #94a3b8;">...</span>`;
+                }
+            }
+
+            html += `
+                <button class="btn-page" ${currentPage === totalPages ? 'disabled' : ''} onclick="cambiarPagina(${currentPage + 1})"><i class="fas fa-chevron-right"></i></button>
+            `;
+            controls.innerHTML = html;
+        }
+
+        window.cambiarPagina = function(p) {
+            currentPage = p;
+            renderizarTablaEvidencias();
+        };
+
+        window.editarRegistro = function(jornadaId) {
+            const select = document.getElementById('select-jornada');
+            if (select) {
+                select.value = jornadaId;
+                window.cargarDatosPrevios();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showToast('Modo edición activado para esta jornada', 'info', 'fa-pen-to-square');
+            }
+        };
+
+        window.eliminarRegistro = async function(docId, jornadaId) {
+            if (confirm('¿Estás seguro de eliminar este registro de evidencias?')) {
+                try {
+                    if (docId && !docId.startsWith('local_')) {
+                        await deleteDoc(doc(db, "evidencias", docId));
+                    }
+                    delete evidenciasDB[jornadaId];
+                    guardarEvidenciasLocales();
+                    renderizarTablaEvidencias();
+                    showToast('Registro eliminado correctamente', 'success', 'fa-trash-can');
+                } catch (error) {
+                    console.error("Error al eliminar registro:", error);
+                    delete evidenciasDB[jornadaId];
+                    guardarEvidenciasLocales();
+                    renderizarTablaEvidencias();
+                    showToast('Registro eliminado localmente', 'warning', 'fa-triangle-exclamation');
+                }
+            }
+        };
+
+        window.abrirSlider = function(titulo, fotosArray, index = 0) {
+            sliderFotosActuales = fotosArray || [];
+            sliderIndexActual = index;
+
+            const modal = document.getElementById('modal-slider');
+            const titleEl = document.getElementById('slider-title');
+            if (modal) {
+                titleEl.innerHTML = `<i class="fas fa-images"></i> ${titulo} (${sliderFotosActuales.length} fotos)`;
+                modal.style.display = 'flex';
+                actualizarImagenSlider();
+            }
+        };
+
+        window.cerrarSlider = function() {
+            const modal = document.getElementById('modal-slider');
+            if (modal) modal.style.display = 'none';
+        };
+
+        window.cerrarSliderEvent = function(e) {
+            if (e.target.id === 'modal-slider') cerrarSlider();
+        };
+
+        window.cambiarFotoSlider = function(dir) {
+            if (sliderFotosActuales.length === 0) return;
+            sliderIndexActual += dir;
+            if (sliderIndexActual < 0) sliderIndexActual = sliderFotosActuales.length - 1;
+            if (sliderIndexActual >= sliderFotosActuales.length) sliderIndexActual = 0;
+            actualizarImagenSlider();
+        };
+
+        function actualizarImagenSlider() {
+            const imgEl = document.getElementById('slider-current-img');
+            const footerEl = document.getElementById('slider-footer');
+            if (imgEl && sliderFotosActuales.length > 0) {
+                imgEl.src = sliderFotosActuales[sliderIndexActual];
+                footerEl.textContent = `Fotografía ${sliderIndexActual + 1} de ${sliderFotosActuales.length}`;
+            }
+        }
+
+        function showToast(mensaje, tipo = 'info', icono = 'fa-circle-info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${tipo}`;
+            toast.innerHTML = `<i class="fas ${icono}"></i><span>${mensaje}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
