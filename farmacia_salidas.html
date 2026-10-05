@@ -364,6 +364,21 @@
             </table>
         </div>
 
+        <!-- SECCIÓN CONDICIONAL: DATOS DE JORNADA ITINERANTE -->
+        <div class="seccion-usuario" id="contenedor-datos-jornada" style="display:none; border-color: #f59e0b; background: #fffbeb;">
+            <h4 style="margin-top:0; color:#b45309; font-size:0.95rem;"><i class="fas fa-map-marked-alt"></i> Datos Específicos de la Jornada Itinerante</h4>
+            <div class="form-grid" style="margin-bottom:0;">
+                <div class="form-group">
+                    <label>Lugar de la Jornada (Localidad / Colonia)</label>
+                    <input type="text" id="jornada-lugar" placeholder="Ej. Ejido El Hato o Col. Centro">
+                </div>
+                <div class="form-group">
+                    <label>Fecha de la Jornada</label>
+                    <input type="date" id="jornada-fecha">
+                </div>
+            </div>
+        </div>
+
         <!-- SECCIÓN BENEFICIARIO -->
         <div class="seccion-usuario" id="contenedor-beneficiario">
             <h4 style="margin-top:0; color:var(--primary); font-size:0.95rem;"><i class="fas fa-user-injured"></i> <span id="titulo-seccion-datos">Datos del Beneficiario</span></h4>
@@ -389,7 +404,7 @@
                     </select>
                 </div>
                 <div class="form-group" id="grupo-localidad">
-                    <label>Localidad / Colonia</label>
+                    <label>Localidad / Colonia del Beneficiario</label>
                     <input type="text" id="b-localidad" placeholder="Ej. Centro o El Hato">
                 </div>
                 <div class="form-group" id="grupo-municipio">
@@ -401,7 +416,7 @@
                     <input type="text" id="b-receta" placeholder="Ej. REC-2026-001">
                 </div>
                 <div class="form-group" id="grupo-fecha-entrega">
-                    <label>Fecha de Entrega / Salida</label>
+                    <label>Fecha de Registro / Captura</label>
                     <input type="date" id="b-fecha-entrega">
                 </div>
             </div>
@@ -468,8 +483,8 @@
             <table>
                 <thead>
                     <tr style="background:#0284c7; color:white;">
-                        <th>Fecha</th>
-                        <th>Destino</th>
+                        <th>Fecha Registro</th>
+                        <th>Destino / Jornada</th>
                         <th>Beneficiario</th>
                         <th>Cant. Retirada</th>
                         <th>Trazabilidad de Stock</th>
@@ -547,7 +562,7 @@
     let salidasGlobal = [];
     let editSalidaID = null;
     let loteMedicamentosTemp = [];
-    let fotosExistentesEdicion = []; // Mantiene las fotos acumuladas en edición
+    let fotosExistentesEdicion = []; 
     let carruselIntervals = [];
 
     let fotosModalActuales = [];
@@ -628,12 +643,17 @@
         let historialMed = [];
 
         salidasGlobal.forEach(s => {
+            let infoDestinoTxt = s.destino || 'JORNADA';
+            if (s.destino === 'JORNADA ITINERANTE' && s.jornadaLugar) {
+                infoDestinoTxt += ` (${s.jornadaLugar} - ${s.jornadaFecha || 'S/F'})`;
+            }
+
             if (s.medicamentos && Array.isArray(s.medicamentos)) {
                 s.medicamentos.forEach(m => {
                     if (m.medicamentoId === medId || m.medicamentoNombre === med.nombre) {
                         historialMed.push({
                             fecha: s.fecha || 'Sin fecha',
-                            destino: s.destino || 'JORNADA',
+                            destinoTxt: infoDestinoTxt,
                             beneficiario: s.beneficiarioNombre || 'N/A',
                             cantidad: m.cantidad || 0,
                             stockAnterior: m.stockAnterior,
@@ -645,7 +665,7 @@
             } else if (s.medicamentoId === medId || s.medicamentoNombre === med.nombre || s.nombreMedicamento === med.nombre) {
                 historialMed.push({
                     fecha: s.fecha || 'Sin fecha',
-                    destino: s.destino || 'JORNADA',
+                    destinoTxt: infoDestinoTxt,
                     beneficiario: s.beneficiarioNombre || 'N/A',
                     cantidad: s.cantidad || 1,
                     stockAnterior: undefined,
@@ -669,7 +689,7 @@
                 return `
                     <tr>
                         <td><b>${h.fecha}</b></td>
-                        <td><span class="badge origen-propio">${h.destino}</span></td>
+                        <td><span class="badge origen-propio">${h.destinoTxt}</span></td>
                         <td>${h.beneficiario}</td>
                         <td><b style="color:#ef4444;">-${h.cantidad} uds</b></td>
                         <td>${textoTraza}</td>
@@ -682,6 +702,15 @@
     };
 
     window.cambiarDestino = () => {
+        const destino = document.getElementById('s-destino').value;
+        const contenedorJornada = document.getElementById('contenedor-datos-jornada');
+
+        if (destino === 'JORNADA ITINERANTE') {
+            contenedorJornada.style.display = 'block';
+        } else {
+            contenedorJornada.style.display = 'none';
+        }
+
         filtrarMedicamentosPorDestino();
     };
 
@@ -791,7 +820,6 @@
         inputEdad.value = edad >= 0 ? edad : 0;
     };
 
-    // MOSTRAR INDICADOR DE NUEVAS FOTOS SELECCIONADAS
     window.mostrarIndicadorFotos = (input) => {
         const contenedorIndicador = document.getElementById('indicador-archivos-seleccionados');
         const total = input.files ? input.files.length : 0;
@@ -803,7 +831,6 @@
         }
     };
 
-    // RENDERIZAR GRID DE FOTOS EXISTENTES EN MODO EDICIÓN
     function renderizarFotosExistentesEdicion() {
         const contenedor = document.getElementById('contenedor-fotos-existentes');
         const grid = document.getElementById('grid-fotos-existentes');
@@ -823,13 +850,11 @@
         `).join('');
     }
 
-    // ELIMINAR UNA FOTO INDIVIDUAL DE LA LISTA EXISTENTE
     window.eliminarFotoEdicion = (index) => {
         fotosExistentesEdicion.splice(index, 1);
         renderizarFotosExistentesEdicion();
     };
 
-    // DRAG AND DROP EVENTOS
     document.addEventListener('DOMContentLoaded', () => {
         const dropZone = document.getElementById('drop-zone');
         const fileInput = document.getElementById('s-fotos');
@@ -863,6 +888,18 @@
     window.procesarSalida = async () => {
         const destino = document.getElementById('s-destino').value;
         const inputFotos = document.getElementById('s-fotos');
+        
+        let jornadaLugar = "";
+        let jornadaFecha = "";
+
+        if (destino === 'JORNADA ITINERANTE') {
+            jornadaLugar = document.getElementById('jornada-lugar').value.toUpperCase().trim();
+            jornadaFecha = document.getElementById('jornada-fecha').value;
+
+            if (!jornadaLugar || !jornadaFecha) {
+                return Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Por favor indique el lugar y la fecha de la jornada itinerante.' });
+            }
+        }
         
         const beneficiarioNombre = document.getElementById('b-nombre').value.toUpperCase().trim();
         const fechaNacimiento = document.getElementById('b-fecha-nacimiento').value;
@@ -925,11 +962,12 @@
                     loteMedicamentosConTrazabilidad.push({ ...item, stockAnterior, stockPosterior });
                 }
 
-                // Combinar fotos guardadas conservadas + nuevas agregadas
                 let fotosFinales = [...fotosExistentesEdicion, ...nuevasFotosBase64];
 
                 await updateDoc(doc(db, "salidas_farmacia", editSalidaID), {
                     destino,
+                    jornadaLugar,
+                    jornadaFecha,
                     medicamentos: loteMedicamentosConTrazabilidad,
                     beneficiarioNombre,
                     fechaNacimiento,
@@ -965,6 +1003,8 @@
 
                 await addDoc(salidasRef, {
                     destino,
+                    jornadaLugar,
+                    jornadaFecha,
                     medicamentos: loteMedicamentosConTrazabilidad,
                     beneficiarioNombre,
                     fechaNacimiento,
@@ -991,6 +1031,8 @@
 
     function limpiarFormulario() {
         document.getElementById('s-cantidad').value = "1";
+        document.getElementById('jornada-lugar').value = "";
+        document.getElementById('jornada-fecha').value = "";
         document.getElementById('b-nombre').value = "";
         document.getElementById('b-fecha-nacimiento').value = "";
         document.getElementById('b-edad').value = "";
@@ -1004,7 +1046,7 @@
         document.getElementById('texto-dropzone').innerText = "Haz clic aquí o arrastra fotos de evidencia";
         loteMedicamentosTemp = [];
         actualizarTablaLoteTemporal();
-        filtrarMedicamentosPorDestino();
+        cambiarDestino();
     }
 
     window.cambiarLimitePaginacion = () => {
@@ -1103,6 +1145,12 @@
                 `;
             }
 
+            let destinoBadgeText = s.destino || 'JORNADA';
+            let infoJornadaHtml = '';
+            if (s.destino === 'JORNADA ITINERANTE' && s.jornadaLugar) {
+                infoJornadaHtml = `<br><small style="color:#b45309; font-weight:600;"><i class="fas fa-map-marker-alt"></i> Jornada: ${s.jornadaLugar} (${s.jornadaFecha || 'S/F'})</small>`;
+            }
+
             let detalleTexto = `
                 <b>${s.beneficiarioNombre || 'N/A'}</b><br>
                 <small style="color:#64748b">Localidad: ${s.beneficiarioLocalidad || s.localidad || 'S/N'}</small><br>
@@ -1150,7 +1198,7 @@
 
             return `
                 <tr>
-                    <td><b>${s.fecha || 'Sin Fecha'}</b><br><span class="badge origen-propio">${s.destino || 'JORNADA'}</span></td>
+                    <td><b>${s.fecha || 'Sin Fecha'}</b><br><span class="badge origen-propio">${destinoBadgeText}</span>${infoJornadaHtml}</td>
                     <td>${detalleTexto}</td>
                     <td>${listaMedHTML}</td>
                     <td><span class="badge" style="background:#e0f2fe; color:#0369a1;">${totalPiezas} uds</span></td>
@@ -1258,7 +1306,12 @@
         editSalidaID = id;
         
         document.getElementById('s-destino').value = item.destino || 'JORNADA ITINERANTE';
-        filtrarMedicamentosPorDestino();
+        cambiarDestino();
+
+        if (item.destino === 'JORNADA ITINERANTE') {
+            document.getElementById('jornada-lugar').value = item.jornadaLugar || '';
+            document.getElementById('jornada-fecha').value = item.jornadaFecha || '';
+        }
 
         document.getElementById('b-nombre').value = item.beneficiarioNombre || '';
         document.getElementById('b-fecha-nacimiento').value = item.fechaNacimiento || '';
@@ -1284,7 +1337,6 @@
 
         actualizarTablaLoteTemporal();
         
-        // CARGA Y PREVISUALIZACIÓN DE FOTOS PREVIAS EN EDICIÓN
         fotosExistentesEdicion = item.fotosEvidencia ? [...item.fotosEvidencia] : [];
         renderizarFotosExistentesEdicion();
 
