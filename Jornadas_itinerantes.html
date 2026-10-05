@@ -1,1 +1,1182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jornadas Itinerantes - Sistema DIF 2026 - 2029</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-dif: #a21caf; 
+            --primary-hover: #86198f;
+            --accent-gold: #b45309;  
+            --text-dark: #0f172a;
+            --bg-color: #f8fafc;
+            --danger: #dc2626;
+            --success: #16a34a;
+        }
 
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* --- PANTALLA DE LOGIN --- */
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 16px;
+        }
+
+        .login-card {
+            background: #ffffff;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            padding: 32px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .login-header i {
+            font-size: 2.5rem;
+            color: var(--primary-dif);
+            margin-bottom: 12px;
+        }
+
+        .login-header h2 {
+            margin: 0 0 6px 0;
+            font-size: 1.3rem;
+            color: var(--text-dark);
+        }
+
+        .login-header p {
+            margin: 0 0 24px 0;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .error-message {
+            display: none;
+            background-color: #fef2f2;
+            color: var(--danger);
+            border: 1px solid #fee2e2;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        /* --- SISTEMA PRINCIPAL --- */
+        #app-content {
+            display: none;
+        }
+
+        .header-bar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            color: var(--primary-dif);
+            font-size: 1.1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .btn-logout {
+            background-color: #f1f5f9;
+            color: var(--danger);
+            border: 1px solid #e2e8f0;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: #fef2f2;
+            border-color: #fee2e2;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 16px;
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 24px;
+        }
+
+        /* --- BANNER DE ALARMA / RECORDATORIO --- */
+        .alert-banner {
+            display: none;
+            max-width: 1200px;
+            margin: 20px auto 0 auto;
+            padding: 14px 20px;
+            border-radius: 12px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .alert-banner.today {
+            background-color: #fdf2f8;
+            border: 1px solid #fbcfe8;
+            color: #9d174d;
+        }
+
+        .alert-banner.soon {
+            background-color: #fffbebfb;
+            border: 1px solid #fde68a;
+            color: #92400e;
+        }
+
+        .alert-banner i {
+            font-size: 1.3rem;
+        }
+
+        /* METRICAS / CONTABILIZACION */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .metric-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .metric-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background-color: #fdf4ff;
+            color: var(--primary-dif);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .metric-data h4 {
+            margin: 0;
+            font-size: 0.78rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-data .value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-top: 2px;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: var(--primary-dif);
+        }
+
+        /* SECCIÓN DE CAMPAÑA Y CAMPOS DINÁMICOS */
+        .campaign-box {
+            background-color: #faf5ff;
+            border: 1px solid #f3e8ff;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+
+        .campaign-box .campaign-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary-dif);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* BUSCADOR DENTRO DE LA TABLA */
+        .search-box {
+            position: relative;
+            min-width: 240px;
+        }
+
+        .search-box input {
+            padding-left: 36px;
+            height: 38px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.85rem;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary-dif);
+            box-shadow: 0 0 0 3px rgba(162, 28, 175, 0.08);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.85rem;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-dif);
+            box-shadow: 0 0 0 3px rgba(162, 28, 175, 0.08);
+        }
+
+        .row-time {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .services-container {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 12px;
+            max-height: 180px;
+            overflow-y: auto;
+            background-color: #f8fafc;
+        }
+
+        .service-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: #334155;
+        }
+
+        .service-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            background-color: var(--primary-dif);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-cancel {
+            background-color: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: none;
+        }
+
+        .btn-cancel:hover {
+            background-color: #e2e8f0;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.88rem;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            text-align: left;
+            padding: 10px 12px;
+            color: #475569;
+            font-weight: 600;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            margin: 2px;
+        }
+
+        .badge-campana {
+            display: inline-block;
+            background-color: #fdf4ff;
+            color: var(--primary-dif);
+            border: 1px solid #f5d0fe;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px 8px;
+            border-radius: 6px;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .btn-action.edit:hover {
+            color: var(--primary-dif);
+            background-color: #fdf4ff;
+        }
+
+        .btn-action.delete:hover {
+            color: var(--danger);
+            background-color: #fef2f2;
+        }
+
+        /* --- ESTILOS DE PAGINACIÓN --- */
+        .pagination-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .btn-page {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-page:hover:not(:disabled) {
+            border-color: var(--primary-dif);
+            color: var(--primary-dif);
+            background-color: #fdf4ff;
+        }
+
+        .btn-page.active {
+            background-color: var(--primary-dif);
+            color: #ffffff;
+            border-color: var(--primary-dif);
+        }
+
+        .btn-page:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* --- NOTIFICACIONES TOAST --- */
+        #toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            min-width: 280px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            background: #ffffff;
+            color: var(--text-dark);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-left: 5px solid var(--primary-dif);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.warning { border-left-color: var(--accent-gold); }
+
+        .toast i { font-size: 1.2rem; }
+        .toast.success i { color: var(--success); }
+        .toast.error i { color: var(--danger); }
+        .toast.warning i { color: var(--accent-gold); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+            .metrics-grid { grid-template-columns: 1fr; }
+            .pagination-container { flex-direction: column; gap: 12px; text-align: center; }
+            .card-header-flex { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CONTENEDOR DE NOTIFICACIONES TOAST -->
+    <div id="toast-container"></div>
+
+    <!-- PANTALLA 1: LOGIN -->
+    <div id="login-screen" class="login-wrapper">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-truck-medical"></i>
+                <h2>Jornadas Itinerantes</h2>
+                <p>Ingresa tus credenciales para acceder</p>
+            </div>
+
+            <div id="login-error" class="error-message">
+                <i class="fas fa-exclamation-circle"></i> Usuario o contraseña incorrectos.
+            </div>
+
+            <form id="form-login">
+                <div class="form-group">
+                    <label for="login-usuario">Usuario</label>
+                    <input type="text" id="login-usuario" class="form-control" placeholder="Ej. jornadas.itinerantes" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-pass">Contraseña</label>
+                    <input type="password" id="login-pass" class="form-control" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-submit" style="margin-top: 20px;">
+                    <i class="fas fa-right-to-bracket"></i> Iniciar Sesión
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- PANTALLA 2: CONTENIDO DEL SISTEMA -->
+    <div id="app-content">
+        <div class="header-bar">
+            <div class="brand-title">
+                <i class="fas fa-truck-medical"></i>
+                <span>DIF MUNICIPAL | Jornadas Itinerantes 2026</span>
+            </div>
+            <div class="user-info">
+                <span><i class="fas fa-user-circle"></i> <strong id="username-display">Usuario</strong></span>
+                <button class="btn-logout" id="btn-logout"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
+            </div>
+        </div>
+
+        <!-- BANNER DE ALARMA / RECORDATORIO PRÓXIMA JORNADA -->
+        <div id="alert-banner" class="alert-banner">
+            <i class="fas fa-bell fa-bounce"></i>
+            <span id="alert-banner-text">Cargando recordatorios...</span>
+        </div>
+
+        <div class="container">
+            <!-- Formulario de Registro / Edición -->
+            <div class="card">
+                <h3 class="card-title" id="form-title" style="margin-bottom: 20px;"><i class="fas fa-calendar-plus"></i> Agendar Jornada</h3>
+                <form id="form-jornada">
+                    <input type="hidden" id="jornada-id">
+
+                    <!-- SECCIÓN DE CAMPAÑA -->
+                    <div class="campaign-box">
+                        <div class="campaign-title">
+                            <i class="fas fa-bullhorn"></i> Configuración de Campaña
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label for="tipo-campana">Tipo de Campaña</label>
+                            <select id="tipo-campana" class="form-control">
+                                <option value="standard">Campaña Estándar (General)</option>
+                                <option value="custom_theme">Campaña Temática (Personalizada)</option>
+                                <option value="seasonal">Campaña de Temporada</option>
+                            </select>
+                        </div>
+
+                        <!-- Campos condicionales para el tema (ocultos por defecto) -->
+                        <div id="themeFields" class="hidden">
+                            <div class="form-group" style="margin-bottom: 10px;">
+                                <label for="nombre-tema">Nombre del Tema / Campaña</label>
+                                <input type="text" id="nombre-tema" class="form-control" placeholder="Ej. Jornada Rosa / Salud Integral">
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="descripcion-tema">Descripción del Tema</label>
+                                <textarea id="descripcion-tema" class="form-control" rows="2" placeholder="Describe brevemente el objetivo o concepto del tema..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fecha">Fecha de la Jornada</label>
+                        <input type="date" id="fecha" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="colonia">Colonia / Localidad</label>
+                        <input type="text" id="colonia" class="form-control" placeholder="Ej. San Antonio" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lugar">Lugar Específico</label>
+                        <input type="text" id="lugar" class="form-control" placeholder="Ej. Cancha Municipal / Domo" required>
+                    </div>
+
+                    <div class="row-time form-group">
+                        <div>
+                            <label for="hora-inicio">Hora Inicio</label>
+                            <input type="time" id="hora-inicio" class="form-control" value="09:00" required>
+                        </div>
+                        <div>
+                            <label for="hora-fin">Hora Fin</label>
+                            <input type="time" id="hora-fin" class="form-control" value="13:00" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <label style="margin: 0;">Servicios Participantes</label>
+                            <label style="font-size: 0.78rem; color: var(--primary-dif); cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                <input type="checkbox" id="check-todos"> Seleccionar todo
+                            </label>
+                        </div>
+                        <div class="services-container">
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Jurisdicción Sanitaria No. X"> Jurisdicción Sanitaria No. X</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Campaña de Esterilización"> Campaña de Esterilización</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Cortes de Cabello"> Cortes de Cabello</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="IVEA"> Instituto Veracruzano de Educación para los Adultos (IVEA)</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Optometrista (DIF)"> Optometrista (DIF)</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Salud Bucal (DIF)"> Salud Bucal (DIF)</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Salud Médica (DIF)"> Salud Médica (DIF)</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Análisis Clínicos (DIF)"> Análisis Clínicos (DIF)</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Fisioterapia-CRISAT (DIF)"> Fisioterapia-CRISAT (DIF)</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Pláticas de Psicología"> Pláticas de Psicología</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Campañas Especiales"> Campañas Especiales</div>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="button" id="btn-cancelar" class="btn-cancel">Cancelar</button>
+                        <button type="submit" id="btn-guardar" class="btn-submit"><i class="fas fa-save"></i> Guardar Programación</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Panel Derecho: Métricas, Buscador y Agenda -->
+            <div>
+                <!-- TARJETAS DE CONTABILIZACIÓN -->
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-truck-field"></i></div>
+                        <div class="metric-data">
+                            <h4>Total Jornadas</h4>
+                            <div class="value" id="metric-total">0 / 100</div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-calendar-day"></i></div>
+                        <div class="metric-data">
+                            <h4>Próxima Jornada</h4>
+                            <div class="value" id="metric-proxima" style="font-size: 1.05rem;">--</div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-hand-holding-medical"></i></div>
+                        <div class="metric-data">
+                            <h4>Servicios Convocados</h4>
+                            <div class="value" id="metric-servicios">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLA DE AGENDA CON BUSCADOR Y PAGINACIÓN -->
+                <div class="card">
+                    <div class="card-header-flex">
+                        <h3 class="card-title"><i class="fas fa-list-check"></i> Agenda de Jornadas</h3>
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="input-buscar" placeholder="Buscar colonia, tema, lugar, fecha...">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Campaña & Fecha</th>
+                                    <th>Ubicación</th>
+                                    <th>Servicios Convocados</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-jornadas">
+                                <!-- Carga dinámica -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- BARRA DE PAGINACIÓN -->
+                    <div class="pagination-container">
+                        <span id="page-info">Mostrando 0-0 de 0 jornadas</span>
+                        <div class="pagination-controls" id="pagination-controls">
+                            <!-- Botones dinámicos -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE CONEXIÓN CON FIREBASE DE LA BASE DE DATOS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E",
+            projectId: "poblacion-vulnerable---dif"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const jornadasRef = collection(db, "jornadas_itinerantes");
+
+        // Cuentas autorizadas (Nota: Recomendado mover autenticación a Firebase Auth)
+        const cuentasJornadas = {
+            "jornadas.itinerantes": { p: "jornadas2026", dep: "JORNADAS" },
+            "admin": { p: "master2026", dep: "GLOBAL" },
+            "lorena.gonzalez": { p: "logoke.15", dep: "GLOBAL" },
+            "angel.vidal": { p: "Angel123..", dep: "GLOBAL" }
+        };
+
+        let jornadas = [];
+        const ITEMS_PER_PAGE = 10;
+        const MAX_ITEMS = 100;
+        let currentPage = 1;
+        let busquedaFiltro = '';
+
+        // Inicio
+        document.addEventListener('DOMContentLoaded', () => {
+            const usuarioActivo = sessionStorage.getItem('nombre_usuario');
+            if (usuarioActivo) {
+                mostrarSistema(usuarioActivo);
+            }
+        });
+
+        // Escuchar cambios en el selector de tipo de campaña
+        document.getElementById('tipo-campana').addEventListener('change', toggleThemeFields);
+
+        function toggleThemeFields() {
+            const tipoCampana = document.getElementById('tipo-campana').value;
+            const themeFields = document.getElementById('themeFields');
+
+            if (tipoCampana === 'custom_theme' || tipoCampana === 'seasonal') {
+                themeFields.classList.remove('hidden');
+                themeFields.classList.add('fade-in');
+            } else {
+                themeFields.classList.add('hidden');
+                themeFields.classList.remove('fade-in');
+                document.getElementById('nombre-tema').value = '';
+                document.getElementById('descripcion-tema').value = '';
+            }
+        }
+
+        // Escuchar datos en tiempo real desde Firestore
+        onSnapshot(jornadasRef, (snapshot) => {
+            jornadas = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            renderTabla();
+        }, (error) => {
+            console.error("Error en Firestore: ", error);
+            showToast('Error al conectar con la base de datos', 'error', 'fa-database');
+        });
+
+        // Evento Login
+        document.getElementById('form-login').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const user = document.getElementById('login-usuario').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+            const errorBox = document.getElementById('login-error');
+
+            if (cuentasJornadas[user] && cuentasJornadas[user].p === pass) {
+                errorBox.style.display = 'none';
+                sessionStorage.setItem('nombre_usuario', user);
+                sessionStorage.setItem('dep_usuario', cuentasJornadas[user].dep);
+                mostrarSistema(user);
+                showToast(`¡Bienvenido/a, ${user}!`, 'success', 'fa-circle-check');
+            } else {
+                errorBox.style.display = 'block';
+            }
+        });
+
+        function mostrarSistema(usuario) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-content').style.display = 'block';
+            document.getElementById('username-display').innerText = usuario;
+            renderTabla();
+        }
+
+        document.getElementById('btn-logout').addEventListener('click', () => {
+            sessionStorage.clear();
+            document.getElementById('app-content').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('form-login').reset();
+            document.getElementById('login-error').style.display = 'none';
+            resetFormulario();
+            showToast('Sesión cerrada correctamente', 'info', 'fa-circle-info');
+        });
+
+        document.getElementById('check-todos').addEventListener('change', (e) => {
+            document.querySelectorAll('.check-srv').forEach(cb => cb.checked = e.target.checked);
+        });
+
+        document.getElementById('input-buscar').addEventListener('input', (e) => {
+            busquedaFiltro = e.target.value.toLowerCase().trim();
+            currentPage = 1;
+            renderTabla();
+        });
+
+        // Guardar / Actualizar en Firestore
+        document.getElementById('form-jornada').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const servicios = Array.from(document.querySelectorAll('.check-srv:checked')).map(cb => cb.value);
+            if (servicios.length === 0) {
+                showToast('Por favor selecciona al menos un servicio.', 'warning', 'fa-triangle-exclamation');
+                return;
+            }
+
+            const tipoCampana = document.getElementById('tipo-campana').value;
+            const nombreTema = document.getElementById('nombre-tema').value.trim();
+            const descripcionTema = document.getElementById('descripcion-tema').value.trim();
+
+            if ((tipoCampana === 'custom_theme' || tipoCampana === 'seasonal') && !nombreTema) {
+                showToast('Ingresa el nombre del tema para la campaña.', 'warning', 'fa-triangle-exclamation');
+                return;
+            }
+
+            const idExistente = document.getElementById('jornada-id').value;
+            const dataJornada = {
+                tipoCampana: tipoCampana,
+                nombreTema: (tipoCampana !== 'standard') ? nombreTema : '',
+                descripcionTema: (tipoCampana !== 'standard') ? descripcionTema : '',
+                fecha: document.getElementById('fecha').value,
+                colonia: document.getElementById('colonia').value,
+                lugar: document.getElementById('lugar').value,
+                horaInicio: document.getElementById('hora-inicio').value,
+                horaFin: document.getElementById('hora-fin').value,
+                servicios: servicios
+            };
+
+            try {
+                if (idExistente) {
+                    const docRef = doc(db, "jornadas_itinerantes", idExistente);
+                    await updateDoc(docRef, dataJornada);
+                    showToast('Jornada actualizada con éxito en la nube', 'success', 'fa-circle-check');
+                } else {
+                    if (jornadas.length >= MAX_ITEMS) {
+                        showToast(`Has alcanzado el límite máximo de ${MAX_ITEMS} jornadas.`, 'warning', 'fa-triangle-exclamation');
+                        return;
+                    }
+
+                    await addDoc(jornadasRef, dataJornada);
+                    showToast('Jornada agendada correctamente en la nube', 'success', 'fa-circle-check');
+                }
+
+                resetFormulario();
+            } catch (err) {
+                console.error(err);
+                showToast('Error al guardar en la base de datos', 'error', 'fa-circle-xmark');
+            }
+        });
+
+        window.editarJornada = function(id) {
+            const j = jornadas.find(item => item.id === id);
+            if (!j) return;
+
+            document.getElementById('jornada-id').value = j.id;
+            document.getElementById('tipo-campana').value = j.tipoCampana || 'standard';
+            toggleThemeFields();
+
+            document.getElementById('nombre-tema').value = j.nombreTema || '';
+            document.getElementById('descripcion-tema').value = j.descripcionTema || '';
+            document.getElementById('fecha').value = j.fecha;
+            document.getElementById('colonia').value = j.colonia;
+            document.getElementById('lugar').value = j.lugar;
+            document.getElementById('hora-inicio').value = j.horaInicio;
+            document.getElementById('hora-fin').value = j.horaFin;
+
+            document.querySelectorAll('.check-srv').forEach(cb => {
+                cb.checked = j.servicios && j.servicios.includes(cb.value);
+            });
+
+            document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> Editar Jornada';
+            document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-sync-alt"></i> Actualizar Programación';
+            document.getElementById('btn-cancelar').style.display = 'block';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.eliminarJornada = async function(id) {
+            if (confirm('¿Eliminar esta jornada agendada de la base de datos?')) {
+                try {
+                    await deleteDoc(doc(db, "jornadas_itinerantes", id));
+                    showToast('Jornada eliminada', 'error', 'fa-trash-can');
+                    resetFormulario();
+                } catch (err) {
+                    console.error(err);
+                    showToast('Error al eliminar', 'error', 'fa-circle-xmark');
+                }
+            }
+        };
+
+        document.getElementById('btn-cancelar').addEventListener('click', resetFormulario);
+
+        function resetFormulario() {
+            document.getElementById('form-jornada').reset();
+            document.getElementById('jornada-id').value = '';
+            document.getElementById('tipo-campana').value = 'standard';
+            toggleThemeFields();
+            document.getElementById('check-todos').checked = false;
+            document.getElementById('hora-inicio').value = '09:00';
+            document.getElementById('hora-fin').value = '13:00';
+            
+            document.getElementById('form-title').innerHTML = '<i class="fas fa-calendar-plus"></i> Agendar Jornada';
+            document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-save"></i> Guardar Programación';
+            document.getElementById('btn-cancelar').style.display = 'none';
+        }
+
+        function renderTabla() {
+            const tbody = document.getElementById('tabla-jornadas');
+            tbody.innerHTML = '';
+
+            // ORDENAR POR FECHA DE MENOR A MAYOR (ASCENDENTE)
+            jornadas.sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''));
+
+            const jornadasLimitadas = jornadas.slice(0, MAX_ITEMS);
+
+            const jornadasFiltradas = jornadasLimitadas.filter(j => {
+                const cadenaCompleta = `${j.colonia || ''} ${j.lugar || ''} ${j.fecha || ''} ${j.nombreTema || ''} ${j.descripcionTema || ''} ${(j.servicios || []).join(' ')}`.toLowerCase();
+                return cadenaCompleta.includes(busquedaFiltro);
+            });
+
+            const totalItems = jornadasFiltradas.length;
+            const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE) || 1;
+
+            if (currentPage > totalPages) {
+                currentPage = totalPages;
+            }
+
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
+            const paginatedItems = jornadasFiltradas.slice(start, end);
+
+            if (paginatedItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 24px;">No se encontraron jornadas registradas.</td></tr>`;
+            } else {
+                paginatedItems.forEach(j => {
+                    const tr = document.createElement('tr');
+                    const badges = (j.servicios || []).map(s => `<span class="badge">${s}</span>`).join('');
+                    
+                    let etiquetaCampana = '';
+                    if (j.tipoCampana && j.tipoCampana !== 'standard' && j.nombreTema) {
+                        etiquetaCampana = `<span class="badge-campana"><i class="fas fa-bullhorn"></i> ${j.nombreTema}</span><br>`;
+                    }
+
+                    tr.innerHTML = `
+                        <td>
+                            ${etiquetaCampana}
+                            <strong>${j.fecha}</strong><br>
+                            <small style="color: #64748b;"><i class="far fa-clock"></i> ${j.horaInicio} - ${j.horaFin}</small>
+                        </td>
+                        <td>
+                            <strong>${j.colonia}</strong><br>
+                            <small style="color: #64748b;">${j.lugar}</small>
+                        </td>
+                        <td>${badges}</td>
+                        <td>
+                            <button class="btn-action edit" onclick="window.editarJornada('${j.id}')" title="Editar"><i class="fas fa-pen"></i></button>
+                            <button class="btn-action delete" onclick="window.eliminarJornada('${j.id}')" title="Eliminar"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            const showingStart = totalItems === 0 ? 0 : start + 1;
+            const showingEnd = Math.min(end, totalItems);
+            document.getElementById('page-info').innerText = `Mostrando ${showingStart}-${showingEnd} de ${totalItems} jornadas`;
+
+            renderControlesPaginacion(totalPages);
+            actualizarContabilizacion();
+            verificarAlertasProximas();
+        }
+
+        function renderControlesPaginacion(totalPages) {
+            const container = document.getElementById('pagination-controls');
+            container.innerHTML = '';
+
+            const btnPrev = document.createElement('button');
+            btnPrev.className = 'btn-page';
+            btnPrev.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            btnPrev.disabled = currentPage === 1;
+            btnPrev.onclick = () => cambiarPagina(currentPage - 1);
+            container.appendChild(btnPrev);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btnPage = document.createElement('button');
+                btnPage.className = `btn-page ${i === currentPage ? 'active' : ''}`;
+                btnPage.innerText = i;
+                btnPage.onclick = () => cambiarPagina(i);
+                container.appendChild(btnPage);
+            }
+
+            const btnNext = document.createElement('button');
+            btnNext.className = 'btn-page';
+            btnNext.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            btnNext.disabled = currentPage === totalPages || totalPages === 0;
+            btnNext.onclick = () => cambiarPagina(currentPage + 1);
+            container.appendChild(btnNext);
+        }
+
+        function cambiarPagina(nuevaPagina) {
+            currentPage = nuevaPagina;
+            renderTabla();
+        }
+
+        function actualizarContabilizacion() {
+            document.getElementById('metric-total').innerText = `${jornadas.length} / ${MAX_ITEMS}`;
+
+            const totalServicios = jornadas.reduce((acc, j) => acc + (j.servicios ? j.servicios.length : 0), 0);
+            document.getElementById('metric-servicios').innerText = totalServicios;
+
+            const hoy = new Date().toISOString().split('T')[0];
+            const futuras = jornadas.filter(j => j.fecha >= hoy);
+            
+            if (futuras.length > 0) {
+                document.getElementById('metric-proxima').innerText = futuras[0].fecha;
+            } else if (jornadas.length > 0) {
+                document.getElementById('metric-proxima').innerText = jornadas[jornadas.length - 1].fecha;
+            } else {
+                document.getElementById('metric-proxima').innerText = '--';
+            }
+        }
+
+        function verificarAlertasProximas() {
+            const banner = document.getElementById('alert-banner');
+            const bannerText = document.getElementById('alert-banner-text');
+
+            if (jornadas.length === 0) {
+                banner.style.display = 'none';
+                return;
+            }
+
+            // Comparación por cadenas YYYY-MM-DD para evitar desfases de zona horaria
+            const hoyStr = new Date().toLocaleDateString('sv-SE'); // Formato ISO local YYYY-MM-DD
+            const hoyObj = new Date(hoyStr + 'T00:00:00');
+
+            let jornadaHoy = null;
+            let jornadaProxima = null;
+            let diasFaltantesMin = Infinity;
+
+            jornadas.forEach(j => {
+                const fechaJornada = new Date(j.fecha + 'T00:00:00');
+                const diffTime = fechaJornada - hoyObj;
+                const diffDias = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDias === 0) {
+                    jornadaHoy = j;
+                } else if (diffDias > 0 && diffDias < diasFaltantesMin) {
+                    diasFaltantesMin = diffDias;
+                    jornadaProxima = j;
+                }
+            });
+
+            if (jornadaHoy) {
+                banner.className = 'alert-banner today';
+                banner.style.display = 'flex';
+                bannerText.innerHTML = `<strong>¡ATENCIÓN! HOY ES LA JORNADA ITINERANTE</strong> en <u>${jornadaHoy.colonia}</u> (${jornadaHoy.lugar}) de ${jornadaHoy.horaInicio} a ${jornadaHoy.horaFin} hrs.`;
+            } else if (jornadaProxima && diasFaltantesMin <= 3) {
+                banner.className = 'alert-banner soon';
+                banner.style.display = 'flex';
+                const textoDias = diasFaltantesMin === 1 ? 'mañana' : `en ${diasFaltantesMin} días`;
+                bannerText.innerHTML = `<strong>RECORDATORIO DE JORNADA PRÓXIMA:</strong> Programada para ${textoDias} (${jornadaProxima.fecha}) en <u>${jornadaProxima.colonia}</u> (${jornadaProxima.lugar}).`;
+            } else {
+                banner.style.display = 'none';
+            }
+        }
+
+        function showToast(mensaje, tipo = 'info', icono = 'fa-circle-info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${tipo}`;
+            toast.innerHTML = `<i class="fas ${icono}"></i> <span>${mensaje}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
