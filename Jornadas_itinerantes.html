@@ -129,7 +129,7 @@
             margin: 20px auto;
             padding: 0 16px;
             display: grid;
-            grid-template-columns: 400px 1fr;
+            grid-template-columns: 420px 1fr;
             gap: 24px;
         }
 
@@ -239,6 +239,38 @@
 
         .card-title i {
             color: var(--primary-dif);
+        }
+
+        /* SECCIÓN DE CAMPAÑA Y CAMPOS DINÁMICOS */
+        .campaign-box {
+            background-color: #faf5ff;
+            border: 1px solid #f3e8ff;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+
+        .campaign-box .campaign-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary-dif);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* BUSCADOR DENTRO DE LA TABLA */
@@ -406,6 +438,18 @@
             border-radius: 12px;
             font-size: 0.75rem;
             margin: 2px;
+        }
+
+        .badge-campana {
+            display: inline-block;
+            background-color: #fdf4ff;
+            color: var(--primary-dif);
+            border: 1px solid #f5d0fe;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 4px;
         }
 
         .btn-action {
@@ -589,6 +633,35 @@
                 <form id="form-jornada">
                     <input type="hidden" id="jornada-id">
 
+                    <!-- SECCIÓN DE CAMPAÑA -->
+                    <div class="campaign-box">
+                        <div class="campaign-title">
+                            <i class="fas fa-bullhorn"></i> Configuración de Campaña
+                        </div>
+
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label for="tipo-campana">Tipo de Campaña</label>
+                            <select id="tipo-campana" class="form-control">
+                                <option value="standard">Campaña Estándar (General)</option>
+                                <option value="custom_theme">Campaña Temática (Personalizada)</option>
+                                <option value="seasonal">Campaña de Temporada</option>
+                            </select>
+                        </div>
+
+                        <!-- Campos condicionales para el tema (ocultos por defecto) -->
+                        <div id="themeFields" class="hidden">
+                            <div class="form-group" style="margin-bottom: 10px;">
+                                <label for="nombre-tema">Nombre del Tema / Campaña</label>
+                                <input type="text" id="nombre-tema" class="form-control" placeholder="Ej. Jornada Rosa / Salud Integral">
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="descripcion-tema">Descripción del Tema</label>
+                                <textarea id="descripcion-tema" class="form-control" rows="2" placeholder="Describe brevemente el objetivo o concepto del tema..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="fecha">Fecha de la Jornada</label>
                         <input type="date" id="fecha" class="form-control" required>
@@ -627,12 +700,13 @@
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Campaña de Esterilización"> Campaña de Esterilización</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Cortes de Cabello"> Cortes de Cabello</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="IVEA"> Instituto Veracruzano de Educación para los Adultos (IVEA)</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Optometrista (DIF)"> Optometrista (DIF)</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Salud Bucal (DIF)"> Salud Bucal (DIF)</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Salud Médica (DIF)"> Salud Médica (DIF)</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Análisis Clínicos (DIF)"> Análisis Clínicos (DIF)</div>
-                            <div class="service-item"><input type="checkbox" class="check-srv" value="Fisioterapia (DIF)"> Fisioterapia (DIF)</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Fisioterapia-CRISAT (DIF)"> Fisioterapia-CRISAT (DIF)</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Pláticas de Psicología"> Pláticas de Psicología</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Campañas Especiales"> Campañas Especiales</div>
                         </div>
                     </div>
 
@@ -676,7 +750,7 @@
                         <h3 class="card-title"><i class="fas fa-list-check"></i> Agenda de Jornadas</h3>
                         <div class="search-box">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="input-buscar" placeholder="Buscar colonia, lugar, fecha...">
+                            <input type="text" id="input-buscar" placeholder="Buscar colonia, tema, lugar, fecha...">
                         </div>
                     </div>
 
@@ -684,7 +758,7 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Fecha & Horario</th>
+                                    <th>Campaña & Fecha</th>
                                     <th>Ubicación</th>
                                     <th>Servicios Convocados</th>
                                     <th>Acciones</th>
@@ -723,7 +797,7 @@
         const db = getFirestore(app);
         const jornadasRef = collection(db, "jornadas_itinerantes");
 
-        // Cuentas autorizadas
+        // Cuentas autorizadas (Nota: Recomendado mover autenticación a Firebase Auth)
         const cuentasJornadas = {
             "jornadas.itinerantes": { p: "jornadas2026", dep: "JORNADAS" },
             "admin": { p: "master2026", dep: "GLOBAL" },
@@ -744,6 +818,24 @@
                 mostrarSistema(usuarioActivo);
             }
         });
+
+        // Escuchar cambios en el selector de tipo de campaña
+        document.getElementById('tipo-campana').addEventListener('change', toggleThemeFields);
+
+        function toggleThemeFields() {
+            const tipoCampana = document.getElementById('tipo-campana').value;
+            const themeFields = document.getElementById('themeFields');
+
+            if (tipoCampana === 'custom_theme' || tipoCampana === 'seasonal') {
+                themeFields.classList.remove('hidden');
+                themeFields.classList.add('fade-in');
+            } else {
+                themeFields.classList.add('hidden');
+                themeFields.classList.remove('fade-in');
+                document.getElementById('nombre-tema').value = '';
+                document.getElementById('descripcion-tema').value = '';
+            }
+        }
 
         // Escuchar datos en tiempo real desde Firestore
         onSnapshot(jornadasRef, (snapshot) => {
@@ -812,8 +904,20 @@
                 return;
             }
 
+            const tipoCampana = document.getElementById('tipo-campana').value;
+            const nombreTema = document.getElementById('nombre-tema').value.trim();
+            const descripcionTema = document.getElementById('descripcion-tema').value.trim();
+
+            if ((tipoCampana === 'custom_theme' || tipoCampana === 'seasonal') && !nombreTema) {
+                showToast('Ingresa el nombre del tema para la campaña.', 'warning', 'fa-triangle-exclamation');
+                return;
+            }
+
             const idExistente = document.getElementById('jornada-id').value;
             const dataJornada = {
+                tipoCampana: tipoCampana,
+                nombreTema: (tipoCampana !== 'standard') ? nombreTema : '',
+                descripcionTema: (tipoCampana !== 'standard') ? descripcionTema : '',
                 fecha: document.getElementById('fecha').value,
                 colonia: document.getElementById('colonia').value,
                 lugar: document.getElementById('lugar').value,
@@ -849,6 +953,11 @@
             if (!j) return;
 
             document.getElementById('jornada-id').value = j.id;
+            document.getElementById('tipo-campana').value = j.tipoCampana || 'standard';
+            toggleThemeFields();
+
+            document.getElementById('nombre-tema').value = j.nombreTema || '';
+            document.getElementById('descripcion-tema').value = j.descripcionTema || '';
             document.getElementById('fecha').value = j.fecha;
             document.getElementById('colonia').value = j.colonia;
             document.getElementById('lugar').value = j.lugar;
@@ -884,6 +993,8 @@
         function resetFormulario() {
             document.getElementById('form-jornada').reset();
             document.getElementById('jornada-id').value = '';
+            document.getElementById('tipo-campana').value = 'standard';
+            toggleThemeFields();
             document.getElementById('check-todos').checked = false;
             document.getElementById('hora-inicio').value = '09:00';
             document.getElementById('hora-fin').value = '13:00';
@@ -897,12 +1008,13 @@
             const tbody = document.getElementById('tabla-jornadas');
             tbody.innerHTML = '';
 
-            jornadas.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+            // ORDENAR POR FECHA DE MENOR A MAYOR (ASCENDENTE)
+            jornadas.sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''));
 
             const jornadasLimitadas = jornadas.slice(0, MAX_ITEMS);
 
             const jornadasFiltradas = jornadasLimitadas.filter(j => {
-                const cadenaCompleta = `${j.colonia || ''} ${j.lugar || ''} ${j.fecha || ''} ${(j.servicios || []).join(' ')}`.toLowerCase();
+                const cadenaCompleta = `${j.colonia || ''} ${j.lugar || ''} ${j.fecha || ''} ${j.nombreTema || ''} ${j.descripcionTema || ''} ${(j.servicios || []).join(' ')}`.toLowerCase();
                 return cadenaCompleta.includes(busquedaFiltro);
             });
 
@@ -923,9 +1035,15 @@
                 paginatedItems.forEach(j => {
                     const tr = document.createElement('tr');
                     const badges = (j.servicios || []).map(s => `<span class="badge">${s}</span>`).join('');
+                    
+                    let etiquetaCampana = '';
+                    if (j.tipoCampana && j.tipoCampana !== 'standard' && j.nombreTema) {
+                        etiquetaCampana = `<span class="badge-campana"><i class="fas fa-bullhorn"></i> ${j.nombreTema}</span><br>`;
+                    }
 
                     tr.innerHTML = `
                         <td>
+                            ${etiquetaCampana}
                             <strong>${j.fecha}</strong><br>
                             <small style="color: #64748b;"><i class="far fa-clock"></i> ${j.horaInicio} - ${j.horaFin}</small>
                         </td>
@@ -1011,8 +1129,9 @@
                 return;
             }
 
-            const hoyObj = new Date();
-            hoyObj.setHours(0, 0, 0, 0);
+            // Comparación por cadenas YYYY-MM-DD para evitar desfases de zona horaria
+            const hoyStr = new Date().toLocaleDateString('sv-SE'); // Formato ISO local YYYY-MM-DD
+            const hoyObj = new Date(hoyStr + 'T00:00:00');
 
             let jornadaHoy = null;
             let jornadaProxima = null;
@@ -1021,7 +1140,7 @@
             jornadas.forEach(j => {
                 const fechaJornada = new Date(j.fecha + 'T00:00:00');
                 const diffTime = fechaJornada - hoyObj;
-                const diffDias = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const diffDias = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
                 if (diffDias === 0) {
                     jornadaHoy = j;
