@@ -16,6 +16,8 @@
             --danger-hover: #b91c1c;
             --success: #16a34a;
             --info: #0284c7;
+            --secondary: #64748b;
+            --secondary-hover: #475569;
         }
 
         body {
@@ -410,6 +412,12 @@
             transform: scale(1.15);
         }
 
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
         .btn-submit {
             background: linear-gradient(135deg, var(--primary-dif) 0%, var(--primary-hover) 100%);
             color: white;
@@ -424,13 +432,36 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            width: 100%;
+            flex: 2;
             box-shadow: 0 4px 12px rgba(162, 28, 175, 0.25);
         }
 
         .btn-submit:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(162, 28, 175, 0.35);
+        }
+
+        .btn-clear-form {
+            background-color: #f1f5f9;
+            color: var(--secondary);
+            border: 1px solid #cbd5e1;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .btn-clear-form:hover {
+            background-color: #e2e8f0;
+            color: var(--secondary-hover);
+            transform: translateY(-2px);
         }
 
         .table-responsive {
@@ -783,6 +814,7 @@
         @media (max-width: 768px) {
             .evidence-grid { grid-template-columns: 1fr; }
             .services-grid { grid-template-columns: 1fr; }
+            .form-actions { flex-direction: column; }
             .pagination-bar { flex-direction: column; align-items: center; text-align: center; }
             .table-toolbar { flex-direction: column; align-items: stretch; }
             .slider-body { height: 320px; }
@@ -839,7 +871,7 @@
                     <label for="login-pass">Contraseña</label>
                     <input type="password" id="login-pass" class="form-control" placeholder="••••••••" required>
                 </div>
-                <button type="submit" class="btn-submit" style="margin-top: 20px;">
+                <button type="submit" class="btn-submit" style="margin-top: 20px; width: 100%;">
                     <i class="fas fa-right-to-bracket"></i> Acceder al Módulo
                 </button>
             </form>
@@ -956,6 +988,26 @@
                             </div>
                             <input type="number" min="0" id="cant-psicologia" class="form-control" placeholder="0" value="0" required>
                         </div>
+
+                        <!-- MÓDULO: OPTOMETRÍA -->
+                        <div class="service-card" id="card-optometria">
+                            <div class="service-header">
+                                <h4><i class="fas fa-glasses"></i> Optometrista</h4>
+                                <label class="service-toggle">
+                                    <input type="checkbox" id="chk-optometria" onchange="toggleServicio('optometria')"> Activo
+                                </label>
+                            </div>
+                            <input type="number" min="0" id="cant-optometria" class="form-control" placeholder="0" value="0" required>
+                        </div>
+                        <div class="service-card" id="card-especiales">
+                            <div class="service-header">
+                                <h4><i class="fas fa-star"></i> Campañas Especiales</h4>
+                                <label class="service-toggle">
+                                    <input type="checkbox" id="chk-especiales" onchange="toggleServicio('especiales')"> Activo
+                                </label>
+                            </div>
+                            <input type="number" min="0" id="cant-especiales" class="form-control" placeholder="0" value="0" required>
+                        </div>
                     </div>
                 </div>
 
@@ -972,7 +1024,7 @@
                             <label for="fotos-asistencia" class="file-upload-btn">
                                 <i class="fas fa-file-circle-plus"></i> Agregar Fotos
                             </label>
-                            <input type="file" id="fotos-asistencia" style="display: none;" accept="image/*" multiple onchange="previsualizar('fotos-asistencia', 'asistencia')">
+                            <input type="file" id="fotos-asistencia" style="display: none;" accept="image/*" multiple onchange="previsualizarFiles('fotos-asistencia', 'asistencia')">
                             
                             <div id="preview-asistencia" class="preview-container"></div>
                         </div>
@@ -985,15 +1037,20 @@
                             <label for="fotos-lugar" class="file-upload-btn">
                                 <i class="fas fa-file-circle-plus"></i> Agregar Fotos
                             </label>
-                            <input type="file" id="fotos-lugar" style="display: none;" accept="image/*" multiple onchange="previsualizar('fotos-lugar', 'lugar')">
+                            <input type="file" id="fotos-lugar" style="display: none;" accept="image/*" multiple onchange="previsualizarFiles('fotos-lugar', 'lugar')">
                             
                             <div id="preview-lugar" class="preview-container"></div>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-submit">
-                        <i class="fas fa-cloud-arrow-up"></i> Guardar Captura de Atenciones y Evidencias
-                    </button>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit" id="btn-submit-form">
+                            <i class="fas fa-cloud-arrow-up"></i> Guardar Captura de Atenciones y Evidencias
+                        </button>
+                        <button type="button" class="btn-clear-form" onclick="limpiarFormularioCompleto()">
+                            <i class="fas fa-rotate-right"></i> Limpiar Formulario
+                        </button>
+                    </div>
                 </div>
             </form>
 
@@ -1050,14 +1107,15 @@
         </div>
     </div>
 
-    <!-- Script principal con Firebase y lógica modularizada -->
+    <!-- Script principal actualizado con autolimpieza y botón de reinicio -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E",
-            projectId: "poblacion-vulnerable---dif"
+            projectId: "poblacion-vulnerable---dif",
+            storageBucket: "poblacion-vulnerable---dif.appspot.com"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -1068,17 +1126,19 @@
 
         let jornadas = [];
         let evidenciasDB = {};
-        let cacheBase64 = { asistencia: [], lugar: [] };
+        
+        let cacheFiles = { asistencia: [], lugar: [] };
+        let cacheUrlsExistentes = { asistencia: [], lugar: [] };
 
         let currentPage = 1;
         let itemsPerPage = 10;
         let searchQuery = "";
 
-        // Variables para el visor de imágenes (Slider)
         let sliderFotosActuales = [];
         let sliderIndexActual = 0;
 
-        const listaIdsServicios = ['esterilizacion', 'corte', 'ivea', 'bucal', 'medica', 'analisis', 'fisioterapia', 'psicologia'];
+        // Debe quedar así:
+        const listaIdsServicios = ['esterilizacion', 'corte', 'ivea', 'bucal', 'medica', 'analisis', 'fisioterapia', 'psicologia', 'optometria', 'especiales'];
 
         document.addEventListener('DOMContentLoaded', () => {
             const usuarioActivo = sessionStorage.getItem('usuario_campo');
@@ -1086,7 +1146,8 @@
                 mostrarSistema(usuarioActivo);
             }
 
-            // Manejo de Inicio de Sesión
+            cargarEvidenciasLocales();
+
             const formLogin = document.getElementById('form-login');
             if (formLogin) {
                 formLogin.addEventListener('submit', (e) => {
@@ -1107,7 +1168,6 @@
                 });
             }
 
-            // Manejo de Envío de Formulario de Evidencias
             const formEvidencias = document.getElementById('form-evidencias');
             if (formEvidencias) {
                 formEvidencias.addEventListener('submit', async (e) => {
@@ -1118,34 +1178,64 @@
                         return;
                     }
 
-                    const cantidades = {};
-                    listaIdsServicios.forEach(key => {
-                        const input = document.getElementById(`cant-${key}`);
-                        if (input && !input.disabled) {
-                            cantidades[key] = parseInt(input.value) || 0;
-                        }
-                    });
-
-                    const payload = {
-                        jornadaId: jornadaId,
-                        cantidades: cantidades,
-                        fotosAsistencia: cacheBase64.asistencia,
-                        fotosLugar: cacheBase64.lugar,
-                        fechaRegistro: new Date().toISOString()
-                    };
+                    const btnSubmit = document.getElementById('btn-submit-form');
+                    if (btnSubmit) {
+                        btnSubmit.disabled = true;
+                        btnSubmit.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Guardando registros e imágenes...`;
+                    }
 
                     try {
+                        const cantidades = {};
+                        listaIdsServicios.forEach(key => {
+                            const input = document.getElementById(`cant-${key}`);
+                            if (input && !input.disabled) {
+                                cantidades[key] = parseInt(input.value) || 0;
+                            }
+                        });
+
+                        let finalUrlsAsistencia = [...cacheUrlsExistentes.asistencia, ...cacheFiles.asistencia];
+                        let finalUrlsLugar = [...cacheUrlsExistentes.lugar, ...cacheFiles.lugar];
+
+                        const payload = {
+                            jornadaId: jornadaId,
+                            cantidades: cantidades,
+                            fotosAsistencia: finalUrlsAsistencia,
+                            fotosLugar: finalUrlsLugar,
+                            fechaRegistro: new Date().toISOString()
+                        };
+
                         const registroExistente = evidenciasDB[jornadaId];
-                        if (registroExistente && registroExistente.docId) {
-                            await updateDoc(doc(db, "evidencias", registroExistente.docId), payload);
-                            showToast('Evidencias actualizadas exitosamente', 'success', 'fa-cloud-arrow-up');
-                        } else {
-                            await addDoc(evidenciasRef, payload);
-                            showToast('Evidencias guardadas exitosamente', 'success', 'fa-cloud-arrow-up');
+                        
+                        try {
+                            if (registroExistente && registroExistente.docId && !registroExistente.docId.startsWith('local_')) {
+                                await updateDoc(doc(db, "evidencias", registroExistente.docId), payload);
+                                payload.docId = registroExistente.docId;
+                            } else {
+                                const docRef = await addDoc(evidenciasRef, payload);
+                                payload.docId = docRef.id;
+                            }
+                        } catch (firebaseErr) {
+                            console.warn("Trabajando offline, guardando en local:", firebaseErr);
+                            if (!payload.docId) payload.docId = registroExistente?.docId || ("local_" + Date.now());
                         }
+
+                        evidenciasDB[jornadaId] = payload;
+                        guardarEvidenciasLocales();
+
+                        showToast('¡Datos e imágenes guardados con éxito!', 'success', 'fa-cloud-arrow-up');
+
+                        // LIMPIAR FORMULARIO AUTOMÁTICAMENTE TRAS GUARDAR CON ÉXITO
+                        limpiarFormularioCompleto();
+                        renderizarTablaEvidencias();
+
                     } catch (error) {
-                        console.error("Error al guardar en Firestore:", error);
-                        showToast('Error al guardar los datos en la base de datos', 'error', 'fa-triangle-exclamation');
+                        console.error("Error al procesar evidencias:", error);
+                        showToast('Error al guardar la información', 'error', 'fa-triangle-exclamation');
+                    } finally {
+                        if (btnSubmit) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerHTML = `<i class="fas fa-cloud-arrow-up"></i> Guardar Captura de Atenciones y Evidencias`;
+                        }
                     }
                 });
             }
@@ -1166,28 +1256,58 @@
             location.reload();
         };
 
-        // 1. Sincronización en tiempo real de las jornadas
         onSnapshot(jornadasRef, (snapshot) => {
             jornadas = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
+            guardarJornadasLocales();
             cargarOpcionesJornadas();
         }, (error) => {
-            console.error("Error al leer jornadas:", error);
-            showToast('Error al conectar con la base de datos de jornadas', 'error', 'fa-triangle-exclamation');
+            cargarJornadasLocales();
         });
 
-        // 2. Sincronización en tiempo real de las evidencias
         onSnapshot(evidenciasRef, (snapshot) => {
-            evidenciasDB = {};
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 const key = data.jornadaId || docSnap.id;
-                evidenciasDB[key] = { docId: docSnap.id, ...data };
+                if (!evidenciasDB[key] || new Date(data.fechaRegistro) >= new Date(evidenciasDB[key].fechaRegistro || 0)) {
+                    evidenciasDB[key] = { docId: docSnap.id, ...data };
+                }
             });
+            guardarEvidenciasLocales();
             renderizarTablaEvidencias();
+        }, (error) => {
+            cargarEvidenciasLocales();
         });
+
+        function guardarJornadasLocales() {
+            try { localStorage.setItem('dif_jornadas_cache', JSON.stringify(jornadas)); } catch (e) { console.error(e); }
+        }
+
+        function cargarJornadasLocales() {
+            try {
+                const cached = localStorage.getItem('dif_jornadas_cache');
+                if (cached) {
+                    jornadas = JSON.parse(cached);
+                    cargarOpcionesJornadas();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function guardarEvidenciasLocales() {
+            try { localStorage.setItem('dif_evidencias_cache', JSON.stringify(evidenciasDB)); } catch (e) { console.error(e); }
+        }
+
+        function cargarEvidenciasLocales() {
+            try {
+                const cached = localStorage.getItem('dif_evidencias_cache');
+                if (cached) {
+                    evidenciasDB = JSON.parse(cached);
+                    renderizarTablaEvidencias();
+                }
+            } catch (e) { console.error(e); }
+        }
 
         function cargarOpcionesJornadas() {
             const select = document.getElementById('select-jornada');
@@ -1208,7 +1328,6 @@
             if (valorActual) select.value = valorActual;
         }
 
-        // 3. Al seleccionar la jornada, activar servicios correspondientes
         window.cargarDatosPrevios = function() {
             const jornadaId = document.getElementById('select-jornada').value;
             
@@ -1227,6 +1346,8 @@
 
             actualizarTarjetasServicios(serviciosParaActivar);
 
+            cacheFiles = { asistencia: [], lugar: [] };
+
             if (datosGuardados) {
                 listaIdsServicios.forEach(key => {
                     const input = document.getElementById(`cant-${key}`);
@@ -1235,10 +1356,9 @@
                     }
                 });
 
-                cacheBase64.asistencia = [...(datosGuardados.fotosAsistencia || [])];
-                cacheBase64.lugar = [...(datosGuardados.fotosLugar || [])];
-                renderPreview('asistencia');
-                renderPreview('lugar');
+                cacheUrlsExistentes.asistencia = [...(datosGuardados.fotosAsistencia || [])];
+                cacheUrlsExistentes.lugar = [...(datosGuardados.fotosLugar || [])];
+                renderPreview();
 
                 showToast('Jornada y evidencias previas cargadas', 'info', 'fa-circle-info');
             } else {
@@ -1246,14 +1366,27 @@
                     const input = document.getElementById(`cant-${key}`);
                     if (input && !input.disabled) input.value = 0;
                 });
-                cacheBase64 = { asistencia: [], lugar: [] };
-                renderPreview('asistencia');
-                renderPreview('lugar');
+                cacheUrlsExistentes = { asistencia: [], lugar: [] };
+                renderPreview();
                 showToast(`Jornada cargada: ${serviciosParaActivar.length} servicios habilitados.`, 'success', 'fa-calendar-check');
             }
         };
 
         function actualizarTarjetasServicios(serviciosProgramados = []) {
+            const equivalencias = {
+                'optometria': ['optometrista', 'optometria'],
+                'salud-medica': ['salud medica'],
+                'salud-bucal': ['salud bucal'],
+                'analisis': ['analisis clinicos'],
+                'fisioterapia': ['fisioterapia'],
+                'psicologia': ['psicologia', 'platicas de psicologia'],
+                'ivea': ['ivea'],
+                'esterilizacion': ['campana de esterilizacion'],
+                'jurisdiccion': ['jurisdiccion sanitaria'],
+                'especiales': ['campanas especiales'] // <- Agregado aquí
+            };
+
+
             listaIdsServicios.forEach(key => {
                 const chk = document.getElementById(`chk-${key}`);
                 const input = document.getElementById(`cant-${key}`);
@@ -1261,10 +1394,23 @@
 
                 if (!chk || !input || !card) return;
 
-                const estaProgramado = serviciosProgramados.length === 0 || serviciosProgramados.some(s => {
-                    const normS = s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                    const normKey = key.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-                    return normS.includes(normKey) || normKey.includes(normS);
+                const estaProgramado = serviciosProgramados.some(s => {
+                    if (!s) return false;
+                    const normS = s.toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .replace(/\s*\(.*?\)/g, "")
+                        .trim();
+
+                    const normKey = key.toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .trim();
+
+                    if (equivalencias[normKey]) {
+                        return equivalencias[normKey].some(eq => normS.includes(eq));
+                    }
+                    return normS === normKey || normS.includes(normKey) || normKey.includes(normS);
                 });
 
                 chk.checked = estaProgramado;
@@ -1302,6 +1448,9 @@
         };
 
         function limpiarFormularioCaptura() {
+            const selectJornada = document.getElementById('select-jornada');
+            if (selectJornada) selectJornada.value = "";
+
             listaIdsServicios.forEach(key => {
                 const chk = document.getElementById(`chk-${key}`);
                 const input = document.getElementById(`cant-${key}`);
@@ -1318,51 +1467,111 @@
                 }
             });
 
-            cacheBase64 = { asistencia: [], lugar: [] };
-            renderPreview('asistencia');
-            renderPreview('lugar');
+            cacheFiles = { asistencia: [], lugar: [] };
+            cacheUrlsExistentes = { asistencia: [], lugar: [] };
+            renderPreview();
         }
 
-        // Gestión de Previsualización y Carga de Imágenes a Base64
-        window.previsualizar = function(inputId, tipo) {
+        window.limpiarFormularioCompleto = function() {
+            limpiarFormularioCaptura();
+            showToast('Formulario limpiado correctamente', 'info', 'fa-rotate-right');
+        };
+
+        function comprimirYConvertirImagen(file, maxWidth = 900, quality = 0.65) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        resolve(dataUrl);
+                    };
+                    img.onerror = (error) => reject(error);
+                };
+                reader.onerror = (error) => reject(error);
+            });
+        }
+
+        window.previsualizarFiles = async function(inputId, tipo) {
             const inputFiles = document.getElementById(inputId);
             if (!inputFiles || !inputFiles.files) return;
 
-            Array.from(inputFiles.files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    cacheBase64[tipo].push(e.target.result);
-                    renderPreview(tipo);
-                };
-                reader.readAsDataURL(file);
-            });
+            showToast('Procesando y comprimiendo imágenes...', 'info', 'fa-compress');
+
+            for (let file of Array.from(inputFiles.files)) {
+                try {
+                    const base64String = await comprimirYConvertirImagen(file, 900, 0.65);
+                    cacheFiles[tipo].push(base64String);
+                } catch (err) {
+                    console.error("Error al procesar archivo:", err);
+                }
+            }
+
             inputFiles.value = '';
+            renderPreview();
+            showToast('Imágenes listas para guardar', 'success', 'fa-check');
         };
 
-        window.eliminarFotoCache = function(tipo, index) {
-            cacheBase64[tipo].splice(index, 1);
-            renderPreview(tipo);
+        window.eliminarFotoExistente = function(tipo, index) {
+            cacheUrlsExistentes[tipo].splice(index, 1);
+            renderPreview();
         };
 
-        function renderPreview(tipo) {
-            const container = document.getElementById(`preview-${tipo}`);
-            if (!container) return;
+        window.eliminarFotoNueva = function(tipo, index) {
+            cacheFiles[tipo].splice(index, 1);
+            renderPreview();
+        };
 
-            container.innerHTML = '';
-            cacheBase64[tipo].forEach((base64, index) => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'preview-wrapper';
-                wrapper.innerHTML = `
-                    <img src="${base64}" class="preview-img" alt="Preview">
-                    <button type="button" class="btn-remove-photo" onclick="eliminarFotoCache('${tipo}', ${index})">
-                        <i class="fas fa-xmark"></i>
-                    </button>
-                `;
-                container.appendChild(wrapper);
+        function renderPreview() {
+            ['asistencia', 'lugar'].forEach(tipo => {
+                const container = document.getElementById(`preview-${tipo}`);
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                cacheUrlsExistentes[tipo].forEach((url, index) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'preview-wrapper';
+                    wrapper.innerHTML = `
+                        <img src="${url}" class="preview-img" alt="Preview Existente">
+                        <button type="button" class="btn-remove-photo" onclick="eliminarFotoExistente('${tipo}', ${index})">
+                            <i class="fas fa-xmark"></i>
+                        </button>
+                    `;
+                    container.appendChild(wrapper);
+                });
+
+                cacheFiles[tipo].forEach((base64Str, index) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'preview-wrapper';
+                    wrapper.innerHTML = `
+                        <img src="${base64Str}" class="preview-img" alt="Preview Comprimido">
+                        <button type="button" class="btn-remove-photo" onclick="eliminarFotoNueva('${tipo}', ${index})">
+                            <i class="fas fa-xmark"></i>
+                        </button>
+                    `;
+                    container.appendChild(wrapper);
+                });
             });
         }
 
-        // Renderizado del Historial en Tabla con Paginación y Búsqueda
         function renderizarTablaEvidencias() {
             const tbody = document.getElementById('tbody-evidencias');
             if (!tbody) return;
@@ -1370,8 +1579,8 @@
             const query = (searchQuery || '').toLowerCase();
             const registrosFiltrados = Object.values(evidenciasDB).filter(ev => {
                 const jornada = jornadas.find(j => j.id === ev.jornadaId);
-                if (!jornada) return false;
-                const textoJornada = `${jornada.fecha} ${jornada.colonia} ${jornada.lugar}`.toLowerCase();
+                if (!jornada) return true;
+                const textoJornada = `${jornada.fecha || ''} ${jornada.colonia || ''} ${jornada.lugar || ''}`.toLowerCase();
                 return textoJornada.includes(query);
             });
 
@@ -1392,7 +1601,7 @@
             }
 
             registrosPagina.forEach(ev => {
-                const jornada = jornadas.find(j => j.id === ev.jornadaId) || { fecha: 'N/A', colonia: 'Desconocida', lugar: 'N/A' };
+                const jornada = jornadas.find(j => j.id === ev.jornadaId) || { fecha: 'N/A', colonia: 'Jornada Local / Externa', lugar: 'N/A' };
                 
                 let totalAtenciones = 0;
                 let desgloseHTML = '<div style="font-size: 0.78rem; color: #475569;">';
@@ -1404,13 +1613,18 @@
                 }
                 desgloseHTML += '</div>';
 
+                const fechaFormateada = new Date(ev.fechaRegistro || Date.now()).toLocaleString('es-MX', {
+                    dateStyle: 'medium',
+                    timeStyle: 'short'
+                });
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
                         <strong>${jornada.colonia || 'Sin Colonia'}</strong><br>
                         <span style="font-size: 0.78rem; color: #64748b;">${jornada.lugar || ''}</span>
                     </td>
-                    <td style="white-space: nowrap; font-size: 0.82rem;">${new Date(ev.fechaRegistro || Date.now()).toLocaleDateString()}</td>
+                    <td style="white-space: nowrap; font-size: 0.82rem;">${fechaFormateada}</td>
                     <td><span class="badge-total">${totalAtenciones} Atenciones</span></td>
                     <td>${desgloseHTML}</td>
                     <td>${renderFotoStack(ev.fotosAsistencia, 'Listas de Asistencia')}</td>
@@ -1420,7 +1634,7 @@
                             <button class="btn-action btn-edit" onclick="editarRegistro('${ev.jornadaId}')" title="Editar o Modificar">
                                 <i class="fas fa-pen-to-square"></i> Editar
                             </button>
-                            <button class="btn-action btn-delete" onclick="eliminarRegistro('${ev.docId}')" title="Eliminar Registro">
+                            <button class="btn-action btn-delete" onclick="eliminarRegistro('${ev.docId}', '${ev.jornadaId}')" title="Eliminar Registro">
                                 <i class="fas fa-trash-can"></i>
                             </button>
                         </div>
@@ -1512,19 +1726,26 @@
             }
         };
 
-        window.eliminarRegistro = async function(docId) {
+        window.eliminarRegistro = async function(docId, jornadaId) {
             if (confirm('¿Estás seguro de eliminar este registro de evidencias?')) {
                 try {
-                    await deleteDoc(doc(db, "evidencias", docId));
+                    if (docId && !docId.startsWith('local_')) {
+                        await deleteDoc(doc(db, "evidencias", docId));
+                    }
+                    delete evidenciasDB[jornadaId];
+                    guardarEvidenciasLocales();
+                    renderizarTablaEvidencias();
                     showToast('Registro eliminado correctamente', 'success', 'fa-trash-can');
                 } catch (error) {
                     console.error("Error al eliminar registro:", error);
-                    showToast('No se pudo eliminar el registro', 'error', 'fa-triangle-exclamation');
+                    delete evidenciasDB[jornadaId];
+                    guardarEvidenciasLocales();
+                    renderizarTablaEvidencias();
+                    showToast('Registro eliminado localmente', 'warning', 'fa-triangle-exclamation');
                 }
             }
         };
 
-        // Funciones del Modal Slider / Carrusel
         window.abrirSlider = function(titulo, fotosArray, index = 0) {
             sliderFotosActuales = fotosArray || [];
             sliderIndexActual = index;
