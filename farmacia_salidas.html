@@ -115,93 +115,31 @@
         .med-header { display: flex; justify-content: space-between; gap: 10px; }
         .med-stock-info { font-size: 0.72rem; color: #0284c7; font-weight: 500; background: #ffffff; padding: 2px 6px; border-radius: 4px; border: 1px solid #bae6fd; display: inline-block; width: fit-content; }
 
-        /* ZONA MEJORADA DE CARGA DE EVIDENCIA FOTOGRÁFICA */
-        .file-drop-area {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 24px 16px;
-            border: 2px dashed #0284c7;
+        /* ZONA ESTILIZADA IDÉNTICA A TU CAPTURA */
+        #drop-zone {
+            border: 2px dashed #38bdf8;
             border-radius: 12px;
-            background-color: #f0f9ff;
-            cursor: pointer;
-            transition: all 0.25s ease;
+            padding: 25px 20px;
             text-align: center;
-            margin-top: 6px;
+            background: #ffffff;
+            transition: all 0.3s ease;
+        }
+        #drop-zone.dragover {
+            border-color: #0284c7;
+            background: #f0f9ff;
         }
 
-        .file-drop-area:hover, .file-drop-area.dragover {
-            background-color: #e0f2fe;
-            border-color: #0369a1;
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
-        }
-
-        .file-drop-icon {
-            font-size: 2.2rem;
-            color: #0284c7;
-            margin-bottom: 8px;
-            transition: transform 0.2s ease;
-        }
-
-        .file-drop-area:hover .file-drop-icon {
-            transform: translateY(-3px);
-        }
-
-        .file-drop-text {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #0369a1;
-            margin: 0;
-        }
-
-        .file-drop-subtext {
-            font-size: 0.78rem;
-            color: #64748b;
-            margin-top: 4px;
-        }
-
-        .file-input-hidden {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .badge-num-files {
-            display: inline-block;
-            background: #0284c7;
-            color: white;
-            font-size: 0.78rem;
-            font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 20px;
-            margin-top: 10px;
-        }
-
-        /* PREVISUALIZACIÓN Y GESTIÓN DE FOTOS EN EDICIÓN */
-        .preview-grid-edicion {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 12px;
-            padding: 10px;
-            background: #f8fafc;
-            border-radius: 8px;
-            border: 1px dashed #cbd5e1;
-        }
+        /* ESTILOS PARA MINIATURAS DE PREVISUALIZACIÓN Y EDICIÓN */
         .preview-thumb-card {
             position: relative;
-            width: 80px;
-            height: 80px;
+            display: inline-block;
+            width: 75px;
+            height: 75px;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            border: 2px solid white;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
         .preview-thumb-card img {
             width: 100%;
@@ -210,19 +148,20 @@
         }
         .btn-delete-thumb {
             position: absolute;
-            top: 3px;
-            right: 3px;
+            top: 2px;
+            right: 2px;
             background: rgba(239, 68, 68, 0.9);
             color: white;
             border: none;
             border-radius: 50%;
             width: 20px;
             height: 20px;
-            font-size: 0.65rem;
+            font-size: 11px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background 0.2s;
         }
         .btn-delete-thumb:hover { background: #dc2626; }
 
@@ -422,29 +361,45 @@
             </div>
         </div>
 
-        <!-- SECCIÓN DE CARGA Y GESTIÓN DE FOTOS -->
+        <!-- SECCIÓN DE CARGA Y GESTIÓN DE FOTOS (ESTILO IDÉNTICO A TU IMAGEN) -->
         <div class="form-grid">
             <div class="form-group full">
-                <label id="label-fotos"><i class="fas fa-camera"></i> Evidencia Fotográfica</label>
-                
-                <!-- CONTENEDOR PARA EDITAR Y ELIMINAR FOTOS EXISTENTES -->
-                <div id="contenedor-fotos-existentes" style="display:none; margin-bottom:10px;">
-                    <small style="color:#0369a1; font-weight:700;"><i class="fas fa-images"></i> Fotografías actualmente guardadas (haz clic en X para eliminar):</small>
-                    <div id="grid-fotos-existentes" class="preview-grid-edicion"></div>
+                <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">
+                    Evidencia Fotográfica
+                </label>
+
+                <!-- Zona de arrastre idéntica a tu captura -->
+                <div id="drop-zone">
+                    <i class="fas fa-cloud-arrow-up" style="font-size: 2.2rem; color: #0284c7; margin-bottom: 8px;"></i>
+                    <p style="margin: 0 0 8px 0; color: #0f172a; font-weight: 600; font-size: 0.95rem;">
+                        Haz clic aquí o arrastra fotos de evidencia
+                    </p>
+                    <p style="margin: 0 0 12px 0; color: #64748b; font-size: 0.8rem;">
+                        Puedes agregar varias imágenes (JPG o PNG)
+                    </p>
+                    
+                    <!-- Input file oculto pero funcional -->
+                    <input type="file" id="s-fotos" accept="image/*" capture="environment" multiple style="display: none;" onchange="mostrarIndicadorFotos(this)">
+                    
+                    <!-- Botón clásico "Elegir archivos" estilo input file nativo -->
+                    <label for="s-fotos" style="display: inline-block; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 0.85rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                        Elegir archivos
+                    </label>
+                    <span id="texto-estado-archivo" style="font-size: 0.85rem; color: #64748b; margin-left: 8px;">Sin archivos seleccionados</span>
                 </div>
 
-                <div class="file-drop-area" id="drop-zone">
-                    <i class="fas fa-cloud-upload-alt file-drop-icon"></i>
-                    <p class="file-drop-text" id="texto-dropzone">Haz clic aquí o arrastra fotos de evidencia</p>
-                    <span class="file-drop-subtext">Puedes agregar varias imágenes (JPG o PNG)</span>
-                    <input type="file" id="s-fotos" accept="image/*" multiple class="file-input-hidden" onchange="mostrarIndicadorFotos(this)">
+                <!-- Contenedor donde aparecerán las miniaturas de las fotos nuevas seleccionadas -->
+                <div id="indicador-archivos-seleccionados" style="margin-top: 10px;"></div>
+
+                <!-- Contenedor para fotos existentes (en caso de edición) -->
+                <div id="contenedor-fotos-existentes" style="margin-top: 12px; display: none;">
+                    <span style="font-size: 0.85rem; color: #475569; font-weight: 600; display: block; margin-bottom: 5px;">Fotos guardadas previamente:</span>
+                    <div id="grid-fotos-existentes" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
                 </div>
-                
-                <div id="indicador-archivos-seleccionados"></div>
             </div>
         </div>
         
-        <div style="display:flex; gap:10px;">
+        <div style="display:flex; gap:10px; margin-top: 10px;">
             <button class="btn btn-success" id="btn-guardar" onclick="procesarSalida()">
                 <i class="fas fa-paper-plane"></i> REGISTRAR SALIDA
             </button>
@@ -565,15 +520,16 @@
     let fotosExistentesEdicion = []; 
     let carruselIntervals = [];
 
+    // Arreglo global para acumular las nuevas fotos seleccionadas o capturadas
+    let archivosNuevosSeleccionados = [];
+
     let fotosModalActuales = [];
     let indiceFotoModal = 0;
 
     let paginaActual = 1;
     let limitePorPagina = 10;
 
-    // Se fuerza explícitamente al usuario "joven estrella" con privilegios de superusuario
     const usuarioLoggeado = "joven estrella";
-    const esSuperUsuario = true;
 
     document.getElementById('user-name-span').innerText = "JOVEN ESTRELLA";
     const badgeRol = document.getElementById('badge-rol');
@@ -588,6 +544,7 @@
         
         poblarSelectorKardex();
         filtrarMedicamentosPorDestino();
+        cambiarDestino();
     });
 
     // LISTENER SALIDAS + KPI TOTAL ENTREGADOS
@@ -820,15 +777,59 @@
         inputEdad.value = edad >= 0 ? edad : 0;
     };
 
+    // ==========================================
+    // GESTIÓN DE FOTOS MÚLTIPLES (ACUMULATIVAS)
+    // ==========================================
     window.mostrarIndicadorFotos = (input) => {
-        const contenedorIndicador = document.getElementById('indicador-archivos-seleccionados');
-        const total = input.files ? input.files.length : 0;
-
-        if (total > 0) {
-            contenedorIndicador.innerHTML = `<span class="badge-num-files"><i class="fas fa-plus-circle"></i> ${total} foto(s) nueva(s) para añadir</span>`;
-        } else {
-            contenedorIndicador.innerHTML = '';
+        const textoEstado = document.getElementById('texto-estado-archivo');
+        if (input.files && input.files.length > 0) {
+            const nuevosArchivos = Array.from(input.files);
+            archivosNuevosSeleccionados = archivosNuevosSeleccionados.concat(nuevosArchivos);
+            
+            if (archivosNuevosSeleccionados.length === 1) {
+                textoEstado.innerText = archivosNuevosSeleccionados[0].name;
+            } else {
+                textoEstado.innerText = `${archivosNuevosSeleccionados.length} archivos seleccionados`;
+            }
+            
+            input.value = '';
+            renderizarPrevisualizacionNuevasFotos();
         }
+    };
+
+    function renderizarPrevisualizacionNuevasFotos() {
+        const contenedorIndicador = document.getElementById('indicador-archivos-seleccionados');
+        const textoEstado = document.getElementById('texto-estado-archivo');
+        
+        if (archivosNuevosSeleccionados.length === 0) {
+            textoEstado.innerText = "Sin archivos seleccionados";
+            contenedorIndicador.innerHTML = '';
+            return;
+        }
+
+        let htmlPreviews = `<div style="display: flex; flex-wrap: wrap; gap: 8px;">`;
+        archivosNuevosSeleccionados.forEach((file, idx) => {
+            const urlTemp = URL.createObjectURL(file);
+            htmlPreviews += `
+                <div class="preview-thumb-card">
+                    <img src="${urlTemp}" alt="Preview ${idx + 1}">
+                    <button type="button" class="btn-delete-thumb" onclick="eliminarFotoNueva(${idx})" title="Eliminar foto">&times;</button>
+                </div>
+            `;
+        });
+        htmlPreviews += `</div>`;
+
+        contenedorIndicador.innerHTML = `
+            <div style="font-size: 0.85rem; color: #0284c7; font-weight: 600; margin-bottom: 6px;">
+                <i class="fas fa-check-circle"></i> ${archivosNuevosSeleccionados.length} foto(s) lista(s) para subir:
+            </div>
+            ${htmlPreviews}
+        `;
+    }
+
+    window.eliminarFotoNueva = (index) => {
+        archivosNuevosSeleccionados.splice(index, 1);
+        renderizarPrevisualizacionNuevasFotos();
     };
 
     function renderizarFotosExistentesEdicion() {
@@ -855,10 +856,10 @@
         renderizarFotosExistentesEdicion();
     };
 
+    // Drag and Drop support
     document.addEventListener('DOMContentLoaded', () => {
         const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('s-fotos');
-        if (!dropZone || !fileInput) return;
+        if (!dropZone) return;
 
         ['dragenter', 'dragover'].forEach(eventName => {
             dropZone.addEventListener(eventName, (e) => {
@@ -879,15 +880,21 @@
         dropZone.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
             if (dt.files && dt.files.length > 0) {
-                fileInput.files = dt.files;
-                window.mostrarIndicadorFotos(fileInput);
+                const nuevosArchivos = Array.from(dt.files);
+                archivosNuevosSeleccionados = archivosNuevosSeleccionados.concat(nuevosArchivos);
+                const textoEstado = document.getElementById('texto-estado-archivo');
+                if (archivosNuevosSeleccionados.length === 1) {
+                    textoEstado.innerText = archivosNuevosSeleccionados[0].name;
+                } else {
+                    textoEstado.innerText = `${archivosNuevosSeleccionados.length} archivos seleccionados`;
+                }
+                renderizarPrevisualizacionNuevasFotos();
             }
         }, false);
     });
 
     window.procesarSalida = async () => {
         const destino = document.getElementById('s-destino').value;
-        const inputFotos = document.getElementById('s-fotos');
         
         let jornadaLugar = "";
         let jornadaFecha = "";
@@ -918,8 +925,8 @@
 
         try {
             let nuevasFotosBase64 = [];
-            if (inputFotos.files && inputFotos.files.length > 0) {
-                for (let file of inputFotos.files) {
+            if (archivosNuevosSeleccionados.length > 0) {
+                for (let file of archivosNuevosSeleccionados) {
                     const base64Comprimido = await comprimirImagenBase64(file, 600, 600, 0.5);
                     if (base64Comprimido) nuevasFotosBase64.push(base64Comprimido);
                 }
@@ -1039,11 +1046,13 @@
         document.getElementById('b-localidad').value = "";
         document.getElementById('b-receta').value = "";
         document.getElementById('b-fecha-entrega').value = "";
-        document.getElementById('s-fotos').value = "";
+        
+        archivosNuevosSeleccionados = [];
+        document.getElementById('texto-estado-archivo').innerText = "Sin archivos seleccionados";
         document.getElementById('indicador-archivos-seleccionados').innerHTML = "";
+        
         fotosExistentesEdicion = [];
         renderizarFotosExistentesEdicion();
-        document.getElementById('texto-dropzone').innerText = "Haz clic aquí o arrastra fotos de evidencia";
         loteMedicamentosTemp = [];
         actualizarTablaLoteTemporal();
         cambiarDestino();
@@ -1340,7 +1349,6 @@
         fotosExistentesEdicion = item.fotosEvidencia ? [...item.fotosEvidencia] : [];
         renderizarFotosExistentesEdicion();
 
-        document.getElementById('texto-dropzone').innerText = "Haz clic aquí o arrastra fotos para AÑADIR más evidencias";
         document.getElementById('form-title').innerHTML = '<i class="fas fa-edit"></i> Editar Entrega de Beneficiario';
         document.getElementById('btn-guardar').innerHTML = '<i class="fas fa-sync"></i> ACTUALIZAR REGISTRO Y STOCK';
         document.getElementById('btn-guardar').className = 'btn btn-warning';
