@@ -154,6 +154,165 @@ canvas { flex-grow:1; }
         background-color: #ffffff;
         box-shadow: 0 0 0 3px rgba(138, 21, 56, 0.1);
     }
+
+    /* ================================================================= */
+/* AJUSTES RESPONSIVE GLOBALES Y MEJORADOS                          */
+/* ================================================================= */
+
+/* Contenedor principal adaptable */
+body {
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    background: var(--bg);
+    margin: 0;
+    display: flex;
+    height: 100vh;
+    height: 100dvh; /* Soporte para navegadores móviles modernos */
+    overflow: hidden;
+    color: #1e293b;
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+.main-content {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .main-content {
+        padding: 25px;
+    }
+}
+
+/* Barra Superior adaptativa */
+.top-bar {
+    background: #fff;
+    padding: 10px 15px;
+    min-height: 70px;
+    display: flex;
+    flex-wrap: wrap; /* Permite que los elementos bajen si no caben */
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+}
+
+@media (min-width: 992px) {
+    .top-bar {
+        padding: 0 30px;
+        flex-wrap: nowrap;
+    }
+}
+
+/* Contenedores de búsqueda y filtros fluidos */
+.top-bar .search-container, 
+.top-bar input[type="text"], 
+.top-bar select {
+    flex: 1 1 100%;
+}
+
+@media (min-width: 768px) {
+    .top-bar input[id*="search"], 
+    .top-bar select {
+        max-width: 220px;
+    }
+}
+
+/* Grillas de estadísticas ultra flexibles */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+@media (min-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+}
+
+/* Paneles de tarjetas distribuidos */
+.panel-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+@media (min-width: 992px) {
+    .panel-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+    }
+}
+
+/* Tablas con desplazamiento horizontal obligatorio en móviles */
+.table-responsive, div[style*="overflow-x: auto"] {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Sidebar Responsive */
+.sidebar {
+    width: 260px;
+    background: var(--sidebar-bg);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+    z-index: 1100;
+    position: fixed;
+    top: 0;
+    left: -260px; /* Oculto por defecto en celulares */
+    height: 100vh;
+    height: 100dvh;
+}
+
+.sidebar.collapsed {
+    left: 0; /* Se muestra al presionar el toggle en celulares */
+}
+
+@media (min-width: 768px) {
+    .sidebar {
+        position: relative;
+        left: 0;
+    }
+    .sidebar.collapsed {
+        width: 70px;
+        left: 0;
+    }
+    .sidebar.collapsed .sidebar-header h3, 
+    .sidebar.collapsed .sidebar-header small,
+    .sidebar.collapsed .nav-item span,
+    .sidebar.collapsed .user-profile-box :is(span, div, p),
+    .sidebar.collapsed .nav-exit span {
+        display: none;
+    }
+}
+
+/* Ajuste de gráficos canvas para que no excedan el contenedor */
+canvas {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
     </style>
 </head>
 <body>
@@ -174,6 +333,7 @@ canvas { flex-grow:1; }
             <div id="nav-crisat" class="nav-item" onclick="showView('crisat', this)"><i class="fas fa-diagnoses"></i> <span>Crisat</span></div>
             <div id="nav-direccion" class="nav-item" onclick="showView('direccion', this)"><i class="fa-solid fa-building"></i> <span>Direccion</span></div>
             <div id="nav-apoyo_direccion" class="nav-item" onclick="showView('apoyo_direccion', this)"><i class="fa-solid fa-hands-holding"></i> <span>Apoyos Direccion</span></div>
+            <div id="nav-jornadas-itinerantes" class="nav-item" onclick="showView('jornadas_itinerantes', this)"><i class="fa-solid fa-truck-medical me-2"></i> <span>Jornadas Itinerantes</span></div>
             <div id="nav-territorial" class="nav-item" onclick="showView('territorial', this)"><i class="fas fa-city"></i> <span>Resumen Territorial</span></div>
             <div id="nav-estadisticas" class="nav-item" onclick="showView('estadisticas', this)"><i class="fa-solid fa-chart-line"></i> <span>Estadistico</span></div>
         </nav>
@@ -245,7 +405,136 @@ canvas { flex-grow:1; }
             </div>
 <div id="reloj" class="badge bg-light text-dark border px-3 py-2 shadow-sm" style="font-size: 13px; font-weight: 700; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums;"></div>
 </div>  
-      
+
+<!-- ========================================== -->
+<!-- PANEL DE ESTADÍSTICAS Y MÉTRICAS: JORNADA ITINERANTE -->
+<!-- ========================================== -->
+<div id="view-jornadas-itinerantes" class="view-container" style="display: none;">
+    <!-- Tarjeta de Acceso o Encabezado del Panel -->
+<div class="access-card d-flex justify-content-between align-items-center p-3 mb-4 bg-white shadow-sm rounded">
+        <div>
+            <b><i class="fa-solid fa-truck-medical me-2"></i> Panel Global Jornadas Itinerantes</b>
+            <div style="font-size: 11px; opacity: 0.9; margin-top: 3px;" class="text-muted">Resumen y métricas generales de las Jornadas Itinerantes</div>
+        </div>
+        <a href="Jornadas_itinerantes.html" class="btn-open">Abrir Módulo de Captura</a>
+    </div>
+  </div>
+  <!-- ========================================== -->
+<!-- PANEL DE ESTADÍSTICAS Y MÉTRICAS: FARMACIA -->
+<!-- ========================================== -->
+<div id="view-farmacia" class="view-container" style="display: none;">
+    <!-- Tarjeta de Acceso o Encabezado del Panel -->
+    <div class="access-card d-flex justify-content-between align-items-center p-3 mb-4 bg-white shadow-sm rounded">
+        <div>
+            <b><i class="fa-solid fa-pills text-danger mr-2"></i> Salidas y Control de Farmacia</b>
+            <div style="font-size: 11px; opacity: 0.9; margin-top: 3px;" class="text-muted">Resumen gerencial de inventarios, caducidades y movimientos</div>
+        </div>
+        <a href="farmacia_salidas.html" class="btn-open">Abrir Módulo de Captura</a>
+    </div>
+
+    <!-- KPIs / Tarjetas de Estadísticas Principales -->
+    <div class="stats-grid">
+        <div class="stat-box" style="border-top: 4px solid var(--primary);">
+            <small>Tipos de Medicamentos</small>
+            <div id="farm-total-tipos" style="color: var(--primary);">0</div>
+        </div>
+        <div class="stat-box" style="border-top: 4px solid var(--success);">
+            <small>Stock Total en Bodega</small>
+            <div id="farm-stock-total" style="color: var(--success);">0 <small style="font-size:0.75rem;">pzas</small></div>
+        </div>
+        <div class="stat-box" style="border-top: 4px solid var(--warning);">
+            <small>Salidas Registradas</small>
+            <div id="farm-total-salidas" style="color: var(--warning);">0</div>
+        </div>
+        <div class="stat-box" style="border-top: 4px solid var(--danger);">
+            <small>Próximos a Caducar</small>
+            <div id="farm-total-caducos" style="color: var(--danger);">0</div>
+        </div>
+    </div>
+
+    <!-- Paneles de Listados Distribuidos (Cambiado a 5 columnas para evitar que se corten) -->
+    <div class="panel-grid" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 20px;">
+        
+        <!-- 1. Top 10 Más Salidos -->
+        <div class="panel card p-2 shadow-sm h-100">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+                <b style="font-size: 0.75rem;"><i class="fa-solid fa-fire text-danger mr-1"></i> Más Salidos</b>
+                <span class="badge bg-danger-subtle text-danger" style="font-size: 0.6rem;" id="badge-count-salidos">0</span>
+            </div>
+            <div id="farm-list-salidos" style="max-height: 260px; overflow-y: auto; margin-top: 6px; font-size: 0.75rem;">
+                <div style="color: #94a3b8; text-align: center; padding: 20px;">Sin salidas</div>
+            </div>
+        </div>
+
+        <!-- 2. Top 10 Localidades / Municipios -->
+        <div class="panel card p-2 shadow-sm h-100">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+                <b style="font-size: 0.75rem;"><i class="fa-solid fa-map-location-dot text-success mr-1"></i> Localidades</b>
+                <span class="badge bg-success-subtle text-success" style="font-size: 0.6rem;" id="badge-count-localidades">0</span>
+            </div>
+            <div id="farm-list-localidades" style="max-height: 260px; overflow-y: auto; margin-top: 6px; font-size: 0.75rem;">
+                <div style="color: #94a3b8; text-align: center; padding: 20px;">Sin registros</div>
+            </div>
+        </div>
+
+        <!-- 3. Top 10 Próximos a Caducar -->
+        <div class="panel card p-2 shadow-sm h-100">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+                <b style="font-size: 0.75rem;"><i class="fa-solid fa-hourglass-half text-warning mr-1"></i> Por Caducar</b>
+                <span class="badge bg-warning-subtle text-warning" style="font-size: 0.6rem;" id="badge-count-caducos">0</span>
+            </div>
+            <div id="farm-list-caducos" style="max-height: 260px; overflow-y: auto; margin-top: 6px; font-size: 0.75rem;">
+                <div style="color: #94a3b8; text-align: center; padding: 20px;">Sin alertas</div>
+            </div>
+        </div>
+
+        <!-- 4. Top 10 Lo que Falta (Stock Bajo) -->
+        <div class="panel card p-2 shadow-sm h-100">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+                <b style="font-size: 0.75rem;"><i class="fa-solid fa-triangle-exclamation text-info mr-1"></i> Faltantes</b>
+                <span class="badge bg-info-subtle text-info" style="font-size: 0.6rem;" id="badge-count-faltantes">0</span>
+            </div>
+            <div id="farm-list-faltantes" style="max-height: 260px; overflow-y: auto; margin-top: 6px; font-size: 0.75rem;">
+                <div style="color: #94a3b8; text-align: center; padding: 20px;">Sin faltantes</div>
+            </div>
+        </div>
+
+        <!-- 5. Top 10 Lo que Sobra (Excedentes) -->
+        <div class="panel card p-2 shadow-sm h-100">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+                <b style="font-size: 0.75rem;"><i class="fa-solid fa-box-archive text-secondary mr-1"></i> Excedentes</b>
+                <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.6rem;" id="badge-count-sobran">0</span>
+            </div>
+            <div id="farm-list-sobran" style="max-height: 260px; overflow-y: auto; margin-top: 6px; font-size: 0.75rem;">
+                <div style="color: #94a3b8; text-align: center; padding: 20px;">Sin excedentes</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tabla de Inventario General Completo -->
+    <div class="card p-3 shadow-sm mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <b><i class="fa-solid fa-database text-secondary mr-1"></i> Inventario General de Farmacia</b>
+            <input type="text" id="buscador-inventario-farmacia" placeholder="Buscar medicamento..." class="form-control form-control-sm" style="width: 250px;" onkeyup="filtrarInventarioFarmacia()">
+        </div>
+        <div class="table-responsive" style="max-height: 320px; overflow-y: auto;">
+            <table class="table table-hover align-middle mb-0" style="font-size: 0.82rem;">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th>Medicamento</th>
+                        <th>Origen</th>
+                        <th>Existencia</th>
+                        <th>Caducidad</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-inventario-general">
+                    <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Cargando inventario...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 <!-- ========================================== -->
 <!-- PANEL DE ESTADÍSTICAS Y MÉTRICAS: DIRECCIÓN / FINANZAS -->
@@ -318,112 +607,6 @@ canvas { flex-grow:1; }
                     <div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-
-  <!-- ========================================== -->
-<!-- PANEL DE ESTADÍSTICAS Y MÉTRICAS: FARMACIA -->
-<!-- ========================================== -->
-<div id="view-farmacia" class="view-container" style="display: none;">
-    <!-- Tarjeta de Acceso o Encabezado del Panel -->
-    <div class="access-card d-flex justify-content-between align-items-center p-3 mb-4 bg-white shadow-sm rounded">
-        <div>
-            <b><i class="fa-solid fa-pills text-danger mr-2"></i> Salidas y Control de Farmacia</b>
-            <div style="font-size: 11px; opacity: 0.9; margin-top: 3px;" class="text-muted">Resumen gerencial de inventarios, caducidades y movimientos</div>
-        </div>
-        <a href="farmacia_salidas.html" class="btn-open">Abrir Módulo de Captura</a>
-    </div>
-
-    <!-- KPIs / Tarjetas de Estadísticas Principales (Estilo stat-box) -->
-    <div class="stats-grid">
-        <div class="stat-box" style="border-top: 4px solid var(--primary);">
-            <small>Tipos de Medicamentos</small>
-            <div id="farm-total-tipos" style="color: var(--primary);">0</div>
-        </div>
-        <div class="stat-box" style="border-top: 4px solid var(--success);">
-            <small>Stock Total en Bodega</small>
-            <div id="farm-stock-total" style="color: var(--success);">0 <small style="font-size:0.75rem;">pzas</small></div>
-        </div>
-        <div class="stat-box" style="border-top: 4px solid var(--warning);">
-            <small>Salidas Registradas</small>
-            <div id="farm-total-salidas" style="color: var(--warning);">0</div>
-        </div>
-        <div class="stat-box" style="border-top: 4px solid var(--danger);">
-            <small>Próximos a Caducar</small>
-            <div id="farm-total-caducos" style="color: var(--danger);">0</div>
-        </div>
-    </div>
-
-    <!-- Paneles de Listados Distribuidos (Estilo panel-grid con Top 10) -->
-    <div class="panel-grid" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 15px; margin-bottom: 20px;">
-        
-        <!-- 1. Top 10 Más Salidos -->
-        <div class="panel card p-3 shadow-sm h-100">
-            <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
-                <b><i class="fa-solid fa-fire text-danger mr-1"></i> Top 10 Más Salidos</b>
-                <span class="badge bg-danger-subtle text-danger" style="font-size: 0.65rem;" id="badge-count-salidos">0</span>
-            </div>
-            <div id="farm-list-salidos" style="max-height: 260px; overflow-y: auto; margin-top: 8px; font-size: 0.8rem;">
-                <div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin salidas registradas</div>
-            </div>
-        </div>
-
-        <!-- 2. Top 10 Próximos a Caducar -->
-        <div class="panel card p-3 shadow-sm h-100">
-            <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
-                <b><i class="fa-solid fa-hourglass-half text-warning mr-1"></i> Por Caducar (Top 10)</b>
-                <span class="badge bg-warning-subtle text-warning" style="font-size: 0.65rem;" id="badge-count-caducos">0</span>
-            </div>
-            <div id="farm-list-caducos" style="max-height: 260px; overflow-y: auto; margin-top: 8px; font-size: 0.8rem;">
-                <div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin alertas</div>
-            </div>
-        </div>
-
-        <!-- 3. Top 10 Lo que Falta (Stock Bajo / Agotados) -->
-        <div class="panel card p-3 shadow-sm h-100">
-            <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
-                <b><i class="fa-solid fa-triangle-exclamation text-info mr-1"></i> Lo que Falta (Top 10)</b>
-                <span class="badge bg-info-subtle text-info" style="font-size: 0.65rem;" id="badge-count-faltantes">0</span>
-            </div>
-            <div id="farm-list-faltantes" style="max-height: 260px; overflow-y: auto; margin-top: 8px; font-size: 0.8rem;">
-                <div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin faltantes</div>
-            </div>
-        </div>
-
-        <!-- 4. Top 10 Lo que Sobra (Sin Movimiento / Rezagados) -->
-        <div class="panel card p-3 shadow-sm h-100">
-            <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
-                <b><i class="fa-solid fa-box-archive text-purple mr-1"></i> Lo que Sobra (Top 10)</b>
-                <span class="badge bg-secondary-subtle text-secondary" style="font-size: 0.65rem;" id="badge-count-sobran">0</span>
-            </div>
-            <div id="farm-list-sobran" style="max-height: 260px; overflow-y: auto; margin-top: 8px; font-size: 0.8rem;">
-                <div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin excedentes</div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Tabla de Inventario General Completo -->
-    <div class="card p-3 shadow-sm mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <b><i class="fa-solid fa-database text-secondary mr-1"></i> Inventario General de Farmacia</b>
-            <input type="text" id="buscador-inventario-farmacia" placeholder="Buscar medicamento..." class="form-control form-control-sm" style="width: 250px;" onkeyup="filtrarInventarioFarmacia()">
-        </div>
-        <div class="table-responsive" style="max-height: 320px; overflow-y: auto;">
-            <table class="table table-hover align-middle mb-0" style="font-size: 0.82rem;">
-                <thead class="table-light sticky-top">
-                    <tr>
-                        <th>Medicamento</th>
-                        <th>Origen</th>
-                        <th>Existencia</th>
-                        <th>Caducidad</th>
-                    </tr>
-                </thead>
-                <tbody id="tabla-inventario-general">
-                    <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Cargando inventario...</td></tr>
-                </tbody>
-            </table>
         </div>
     </div>
 </div>
@@ -567,7 +750,33 @@ canvas { flex-grow:1; }
             </div>
         </div> <!-- CORREGIDO: Cierre correcto de view-vulnerable al final de su contenido -->
 
- <div id="view-social" class="view-container" style="display:none;">
+
+
+        <div id="view-procuraduria" class="view-container" style="display:none;">
+            <div class="access-card" style="background: var(--procu-color);">
+                <div><b>Procuraduría</b></div>
+                <a href="procuraduria.html" class="btn-open">Abrir Módulo de Captura</a>
+            </div>
+            <div class="filter-bar"></div>
+            
+            <!-- Estadísticas / KPIs Ampliados -->
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+                <div class="stat-box"><small>Expedientes</small><div id="pr-total">0</div></div>
+                <div class="stat-box"><small>H. Mixtos</small><div id="pr-mixtos">0</div></div>
+                <div class="stat-box"><small>Menores</small><div id="pr-menores-kpi">0</div></div>
+                <div class="stat-box"><small>Embarazadas</small><div id="pr-embarazadas-kpi">0</div></div>
+            </div>
+
+            <!-- Paneles de Desglose y Listados -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; margin-top: 20px;">
+                <div class="panel"><b>Asuntos</b><div id="pr-conteo-tabla"></div></div>
+                <div class="panel"><b>Género</b><div id="pr-conteo-genero"></div></div>
+                <div class="panel"><b>Listado de Casos</b><div id="pr-list-casos"></div></div>
+                <div class="panel"><b>Zonas / Domicilios</b><div id="pr-list-geo"></div></div>
+            </div>
+        </div>
+
+<div id="view-social" class="view-container" style="display:none;">
     <div class="access-card" style="background: var(--social-color);">
         <div><b>Trabajo Social</b></div>
         <a href="social.html" class="btn-open">Abrir Módulo de Captura</a>
@@ -576,54 +785,85 @@ canvas { flex-grow:1; }
     <!-- Estadísticas Principales -->
     <div class="stats-grid">
         <div class="stat-box"><small>Total Casos</small><div id="s-total">0</div></div>
+        <div class="stat-box"><small>Beneficiarios</small><div id="s-beneficiarios">0</div></div>
+        <div class="stat-box"><small>Mujeres</small><div id="s-mujeres" style="color:var(--pink, #db2777)">0</div></div>
+        <div class="stat-box"><small>Hombres</small><div id="s-hombres" style="color:var(--blue, #2563eb)">0</div></div>
         <div class="stat-box"><small>Atendidos</small><div id="s-atendidos" style="color:var(--success)">0</div></div>
         <div class="stat-box"><small>Pendientes</small><div id="s-pendientes" style="color:var(--warning)">0</div></div>
-        
     </div>
-    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
-    <div class="stat-box">
-        <small>Programas</small>
-        <div id="stat-programa" style="font-size:14px; font-weight:bold;">0</div>
+
+    <!-- Contadores numéricos estilo anterior -->
+    <div class="stats-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 20px;">
+        <div class="stat-box">
+            <small>Programas</small>
+            <div id="stat-programa" style="font-size:14px; font-weight:bold;">0</div>
+        </div>
+        <div class="stat-box">
+            <small>Asuntos</small>
+            <div id="stat-asunto" style="font-size:14px; font-weight:bold;">0</div>
+        </div>
+        <div class="stat-box">
+            <small>Detalles</small>
+            <div id="stat-detalle" style="font-size:14px; font-weight:bold;">0</div>
+        </div>
+        <div class="stat-box">
+            <small>Género</small>
+            <div id="stat-genero" style="font-size:14px; font-weight:bold;">0</div>
+        </div>
+        <div class="stat-box">
+            <small>Rangos Edad</small>
+            <div id="stat-edades" style="font-size:14px; font-weight:bold;">0</div>
+        </div>
     </div>
-    <div class="stat-box">
-        <small>Asuntos</small>
-        <div id="stat-asunto" style="font-size:14px; font-weight:bold;">0</div>
-    </div>
-    <div class="stat-box">
-        <small>Detalles</small>
-        <div id="stat-detalle" style="font-size:14px; font-weight:bold;">0</div>
-    </div>
- </div>
 
     <!-- Contabilidad (Stat Boxes Dinámicas) -->
     <div id="s-reporte-contable" class="stats-grid" style="margin-bottom: 20px;"></div>
 
     <!-- Paneles de Columnas -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
         <div class="panel"><b>Últimos Registros</b><div id="col-1"></div></div>
         <div class="panel"><b>Asunto / Programa</b><div id="col-2"></div></div>
         <div class="panel"><b>Zona / Localidad</b><div id="col-3"></div></div>
     </div>
 
-    <div class="panel-pastel-social" style="margin-top: 15px; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #10b981; font-family: sans-serif;">
-    <b style="font-size: 12px; color: #1e293b; display: block; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
-        <i class="fas fa-chart-pie" style="color:#10b981; margin-right: 5px;"></i> Impacto y Distribución por Beneficiario
-    </b>
-    <div id="social-pastel-contenedor" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
-        </div>
+    <!-- SECCIÓN DE GRÁFICAS ABAJO (CON MÁS ESPACIO Y SEPARACIÓN) -->
+    <div class="panel" style="margin-bottom: 25px; padding: 20px;">
+        <b style="font-size: 13px; color: #1e293b; display: block; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 0.5px;">
+            <i class="fas fa-chart-pie" style="color:#10b981; margin-right: 8px;"></i> Desglose Analítico por Campos
+        </b>
+        
+        <!-- Cuadrícula con mayor separación (gap: 24px y minmax más amplio) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+            
+            <!-- Programa -->
+            <div id="grafico-programa-contenedor" style="background: #ffffff; padding: 16px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);"></div>
+            
+            <!-- Asuntos -->
+            <div id="grafico-asunto-contenedor" style="background: #ffffff; padding: 16px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);"></div>
+            
+            <!-- Detalles -->
+            <div id="grafico-detalle-contenedor" style="background: #ffffff; padding: 16px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);"></div>
+            
+            <!-- Género -->
+            <div id="grafico-genero-contenedor" style="background: #ffffff; padding: 16px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);"></div>
+            
+            <!-- Rangos de Edad -->
+            <div id="grafico-edades-contenedor" style="background: #ffffff; padding: 16px; border-radius: 10px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02);"></div>
+
         </div>
     </div>
 
-        <div id="view-procuraduria" class="view-container" style="display:none;">
-            <div class="access-card" style="background: var(--procu-color);"><div><b>Procuraduría</b></div><a href="procuraduria.html" class="btn-open">Abrir Módulo de Captura</a></div>
-            <div class="filter-bar"></div>
-            <div class="stats-grid"><div class="stat-box"><small>Expedientes</small><div id="pr-total">0</div></div><div class="stat-box"><small>H. Mixtos</small><div id="pr-mixtos">0</div></div></div>
-            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px;">
-                <div class="panel"><b>Asuntos</b><div id="pr-conteo-tabla"></div></div>
-                <div class="panel"><b>Listado</b><div id="pr-list-casos"></div></div>
-                <div class="panel"><b>Zonas</b><div id="pr-list-geo"></div></div>
-            </div>
+
+    <!-- Panel Gráfico General de Impacto (Personal) -->
+    <div class="panel-pastel-social" style="background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid #10b981; font-family: sans-serif;">
+        <b style="font-size: 12px; color: #1e293b; display: block; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+            <i class="fas fa-chart-pie" style="color:#10b981; margin-right: 5px;"></i> Impacto y Distribución por Personal / Beneficiario
+        </b>
+        <div id="social-pastel-contenedor" style="display: flex; flex-direction: column; align-items: center; gap: 15px;">
+            <!-- Renderizado dinámico vía JS -->
         </div>
+    </div>
+</div>
 
 
  <div id="view-historial" class="view-container" style="display:none;">
@@ -1566,6 +1806,331 @@ window.reprocesarCrisat = function() {
     renderizarListaZona('crisat-list-colonias', porColonia, 'fa-city');
     renderizarListaZona('crisat-list-localidades', porLocalidad, 'fa-map-marker-alt');
 };
+
+// =============================================================================
+// MÓDULO: TRABAJO SOCIAL (ESTILOS CLÁSICOS + GRÁFICAS INFERIORES)
+// =============================================================================
+window.reprocesarTrabSoc = function() {
+    const col1 = document.getElementById('col-1');
+    if (!col1) return;
+
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
+    const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
+    const mes = document.getElementById('global-month-filter')?.value || "all";
+    const anio = document.getElementById('global-year-filter')?.value || "all";
+
+    const dataSocial = store.social || [];
+
+    const obtenerAnioMes = (fechaCruda) => {
+        if (!fechaCruda) return { anio: "", mes: "" };
+        let f = fechaCruda;
+        if (typeof f === 'object' && f !== null) {
+            if (f.seconds) f = new Date(f.seconds * 1000);
+            else if (f instanceof Date) f = f;
+        }
+        let fStr = "";
+        if (f instanceof Date) {
+            fStr = f.toISOString().split('T')[0];
+        } else {
+            fStr = String(f).trim().split(' ')[0];
+        }
+        let anioReg = "", mesReg = "";
+        if (fStr.includes('-')) {
+            const p = fStr.split('-');
+            if (p[0].length === 4) { anioReg = p[0]; mesReg = p[1] || ""; } 
+            else if (p[2] && p[2].length === 4) { anioReg = p[2]; mesReg = p[1] || ""; }
+        } else if (fStr.includes('/')) {
+            const p = fStr.split('/');
+            if (p[0].length === 4) { anioReg = p[0]; mesReg = p[1] || ""; } 
+            else if (p[2] && p[2].length === 4) { anioReg = p[2]; mesReg = p[1] || ""; }
+        }
+        return { anio: anioReg, mes: mesReg ? String(mesReg).padStart(2, '0') : "" };
+    };
+
+    const filtrados = dataSocial.filter(item => {
+        const nombre = (item.nombre || item.fullName || "").toLowerCase();
+        const programa = (item.programa || item.supportType || "").toLowerCase();
+        const asunto = (item.asunto || "").toLowerCase();
+        const detalleAsunto = (item.detalle_asunto || "").toLowerCase();
+        const z = (item.col_loc || item.locality || "").toLowerCase();
+        const direccion = (item.direccion || "").toLowerCase();
+        
+        const fechaRaw = item.fecha_registro || item.fecha || item.date || "";
+        const { anio: anioRegistro, mes: mesRegistro } = obtenerAnioMes(fechaRaw);
+        
+        const coincideBusqueda = busqueda === "" || 
+                                 nombre.includes(busqueda) || 
+                                 programa.includes(busqueda) || 
+                                 asunto.includes(busqueda) || 
+                                 detalleAsunto.includes(busqueda);
+                                 
+        const cumpleZona = zona === "" || z.includes(zona) || direccion.includes(zona);
+        const cumpleAnio = (anio === 'all' || anioRegistro === "" || anioRegistro === anio);
+        const cumpleMes = (mes === 'all' || mesRegistro === "" || mesRegistro === mes);
+
+        return coincideBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+    });
+
+    const limpiarModulosSinDatos = () => {
+        ['s-total', 's-beneficiarios', 's-mujeres', 's-hombres', 's-atendidos', 's-pendientes', 'stat-programa', 'stat-asunto', 'stat-detalle', 'stat-genero', 'stat-edades'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = '0';
+        });
+        col1.innerHTML = `<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin registros</div>`;
+        const col2 = document.getElementById('col-2');
+        if (col2) col2.innerHTML = `<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin datos cruzados</div>`;
+        const col3 = document.getElementById('col-3');
+        if (col3) col3.innerHTML = `<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin registros geográficos</div>`;
+        
+        ['grafico-programa-contenedor', 'grafico-asunto-contenedor', 'grafico-detalle-contenedor', 'grafico-genero-contenedor', 'grafico-edades-contenedor', 'social-pastel-contenedor'].forEach(id => {
+            const cont = document.getElementById(id);
+            if (cont) cont.innerHTML = '<div style="text-align:center; padding:10px; color:#64748b; font-size:10px;">Sin datos</div>';
+        });
+    };
+
+    if (filtrados.length === 0) {
+        limpiarModulosSinDatos();
+        return;
+    }
+
+    const totalRegistros = filtrados.length;
+    const unicosSet = new Set(filtrados.map(i => (i.nombre || i.fullName || '').trim().toUpperCase()));
+    const totalBeneficiarios = unicosSet.size;
+
+    const mujeres = filtrados.filter(i => {
+        const g = (i.gender || i.genero || "").toLowerCase().trim();
+        return g === 'femenino' || g === 'f' || g === 'mujer';
+    }).length;
+
+    const hombres = filtrados.filter(i => {
+        const g = (i.gender || i.genero || "").toLowerCase().trim();
+        return g === 'masculino' || g === 'm' || g === 'hombre';
+    }).length;
+
+    const atendidosCount = filtrados.filter(d => {
+        const est = (d.estatus || "").trim().toUpperCase();
+        return ['ATENDIDO', 'ENTREGADO', 'REALIZADO', 'VALIDADO'].includes(est);
+    }).length;
+
+    const pendientesCount = filtrados.filter(d => {
+        const est = (d.estatus || "").trim().toUpperCase();
+        return ['PENDIENTE', 'EN PROCESO'].includes(est);
+    }).length;
+
+    // Contadores analíticos
+    const contPrograma = {}, contAsunto = {}, contDetalle = {}, contPersonal = {}, contGenero = {}, contEdades = { "0-17 (Menores)": 0, "18-29 (Jóvenes)": 0, "30-59 (Adultos)": 0, "60+ (Adultos Mayores)": 0, "No especificada": 0 };
+    
+    filtrados.forEach(i => {
+        const p = (i.programa || i.supportType || "SIN PROG.").trim().toUpperCase();
+        const a = (i.asunto || "SIN ASUNTO").trim().toUpperCase();
+        const d = (i.detalle_asunto || "SIN DETALLE").trim().toUpperCase();
+        const trabajador = (i.usuario_atendio || i.usuario || i.atendido_por || "NO ASIGNADO").trim().toUpperCase();
+        
+        const g = (i.gender || i.genero || "NO ESPECIFICADO").trim().toUpperCase();
+        contGenero[g] = (contGenero[g] || 0) + 1;
+
+        let edad = parseInt(i.edad || i.age || 0, 10);
+        if (!edad && i.fecha_nacimiento) {
+            const anioNac = new Date(i.fecha_nacimiento).getFullYear();
+            if (!isNaN(anioNac)) edad = new Date().getFullYear() - anioNac;
+        }
+
+        if (isNaN(edad) || edad <= 0) {
+            contEdades["No especificada"]++;
+        } else if (edad < 18) {
+            contEdades["0-17 (Menores)"]++;
+        } else if (edad <= 29) {
+            contEdades["18-29 (Jóvenes)"]++;
+        } else if (edad <= 59) {
+            contEdades["30-59 (Adultos)"]++;
+        } else {
+            contEdades["60+ (Adultos Mayores)"]++;
+        }
+
+        contPrograma[p] = (contPrograma[p] || 0) + 1;
+        contAsunto[a] = (contAsunto[a] || 0) + 1;
+        contDetalle[d] = (contDetalle[d] || 0) + 1;
+        contPersonal[trabajador] = (contPersonal[trabajador] || 0) + 1;
+    });
+
+    // Actualización de KPIs y números estilo anterior
+    if (document.getElementById('s-total')) document.getElementById('s-total').innerText = totalRegistros;
+    if (document.getElementById('s-beneficiarios')) document.getElementById('s-beneficiarios').innerText = totalBeneficiarios;
+    if (document.getElementById('s-mujeres')) document.getElementById('s-mujeres').innerText = mujeres;
+    if (document.getElementById('s-hombres')) document.getElementById('s-hombres').innerText = hombres;
+    if (document.getElementById('s-atendidos')) document.getElementById('s-atendidos').innerText = atendidosCount;
+    if (document.getElementById('s-pendientes')) document.getElementById('s-pendientes').innerText = pendientesCount;
+    
+    if (document.getElementById('stat-programa')) document.getElementById('stat-programa').innerText = Object.keys(contPrograma).length;
+    if (document.getElementById('stat-asunto')) document.getElementById('stat-asunto').innerText = Object.keys(contAsunto).length;
+    if (document.getElementById('stat-detalle')) document.getElementById('stat-detalle').innerText = Object.keys(contDetalle).length;
+    if (document.getElementById('stat-genero')) document.getElementById('stat-genero').innerText = Object.keys(contGenero).length;
+    if (document.getElementById('stat-edades')) document.getElementById('stat-edades').innerText = Object.keys(contEdades).length;
+
+    const getColor = (e) => {
+        const est = (e || "").trim().toUpperCase();
+        const colores = {
+            'ATENDIDO': '#16a34a', 'ENTREGADO': '#16a34a', 'REALIZADO': '#16a34a', 'VALIDADO': '#16a34a',
+            'PENDIENTE': '#ea580c', 'EN PROCESO': '#2563eb', 'CANCELADO': '#dc2626'
+        };
+        return colores[est] || '#64748b';
+    };
+
+    // Función para renderizar los gráficos circulares en la sección inferior
+    const renderGraficoInferior = (containerId, titulo, objetoConteo, totalBase) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const ordenado = Object.entries(objetoConteo).sort((a, b) => b[1] - a[1]);
+        const coloresPaleta = ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#14b8a6', '#f43f5e', '#a855f7'];
+
+        let gradienteEstilo = "conic-gradient(";
+        let acumuladoPorcentaje = 0;
+        let htmlLeyenda = "";
+
+        ordenado.forEach(([nombre, cantidad], indice) => {
+            const porcentaje = totalBase > 0 ? (cantidad / totalBase) * 100 : 0;
+            const colorAsignado = coloresPaleta[indice % coloresPaleta.length];
+
+            const inicioAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
+            acumuladoPorcentaje += porcentaje;
+            const finAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
+
+            gradienteEstilo += `${colorAsignado} ${inicioAngulo}deg ${finAngulo}deg${indice < ordenado.length - 1 ? ', ' : ''}`;
+
+            htmlLeyenda += `
+                <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #475569; padding: 2px 0; border-bottom: 1px solid #e2e8f0;">
+                    <div style="display: flex; align-items: center; gap: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%;">
+                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${colorAsignado}; flex-shrink: 0;"></span>
+                        <span title="${nombre}" style="overflow: hidden; text-overflow: ellipsis; font-weight: 700;">${nombre}</span>
+                    </div>
+                    <span style="font-family: monospace; color: #1e293b; font-weight: bold; flex-shrink: 0; margin-left: 5px;">${cantidad} (${porcentaje.toFixed(0)}%)</span>
+                </div>
+            `;
+        });
+
+        gradienteEstilo += ")";
+
+        container.innerHTML = `
+            <div style="font-size: 11px; font-weight: 800; color: #1e293b; margin-bottom: 10px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1; padding-bottom: 4px;">
+                ${titulo}
+            </div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="width: 80px; height: 80px; border-radius: 50%; background: ${gradienteEstilo}; box-shadow: inset 0 0 3px rgba(0,0,0,0.1); flex-shrink: 0;"></div>
+                <div style="flex-grow: 1; max-height: 110px; overflow-y: auto; padding-right: 4px;">
+                    ${htmlLeyenda}
+                </div>
+            </div>
+        `;
+    };
+
+    renderGraficoInferior('grafico-programa-contenedor', 'Programas', contPrograma, totalRegistros);
+    renderGraficoInferior('grafico-asunto-contenedor', 'Asuntos', contAsunto, totalRegistros);
+    renderGraficoInferior('grafico-detalle-contenedor', 'Detalles', contDetalle, totalRegistros);
+    renderGraficoInferior('grafico-genero-contenedor', 'Género', contGenero, totalRegistros);
+    renderGraficoInferior('grafico-edades-contenedor', 'Rangos de Edad', contEdades, totalRegistros);
+
+    // Listados en columnas principales
+    const contCruzado = {};
+    filtrados.forEach(i => {
+        const asuntoVal = (i.asunto || "SIN ASUNTO").trim();
+        const programaVal = (i.programa || i.supportType || "SIN PROG.").trim();
+        const detalleVal = (i.detalle_asunto || "SIN DETALLE").trim();
+        const key = `${asuntoVal}|${programaVal}|${detalleVal}`;
+        contCruzado[key] = (contCruzado[key] || 0) + 1;
+    });
+    const ordenadoCruzado = Object.entries(contCruzado).sort((a, b) => b[1] - a[1]);
+
+    col1.innerHTML = filtrados.slice(-15).reverse().map(i => `
+        <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
+            <div style="flex-grow:1; overflow:hidden;">
+                <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.nombre || i.fullName || 'N/A'}</div>
+                <div style="font-size:9px; color:#64748b;">${i.fecha_registro || i.fecha || ''}</div>
+                <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${i.asunto || i.programa || ''}</div>
+                <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus || 'SIN ESTADO'}</div>
+            </div>
+        </div>
+    `).join('');
+    
+    const col2 = document.getElementById('col-2');
+    if (col2) {
+        col2.innerHTML = ordenadoCruzado.length === 0
+            ? `<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin datos cruzados</div>`
+            : ordenadoCruzado.map(([key, count]) => {
+                const [asunto, programa, detalle] = key.split('|');
+                return `
+                    <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+                        <div style="flex-grow:1; overflow:hidden;">
+                            <div style="font-weight:800; font-size:11px; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${asunto}">${asunto}</div>
+                            <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${programa}</div>
+                            <div style="font-size:9px; color:#64748b; font-style:italic;">${detalle}</div>
+                        </div>
+                        <div style="background:#f8fafc; padding:2px 8px; border-radius:10px; font-weight:800; font-size:12px; border:1px solid #e2e8f0; margin-left:10px; flex-shrink:0;">${count}</div>
+                    </div>`;
+            }).join('');
+    }
+
+    const col3 = document.getElementById('col-3');
+    if (col3) {
+        col3.innerHTML = filtrados.slice(-15).reverse().map(i => `
+            <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
+                <div style="flex-grow:1; overflow:hidden;">
+                    <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.col_loc || i.locality || 'N/A'}</div>
+                    <div style="font-size:9px; color:#64748b;">${i.direccion || ''}</div>
+                    <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus || 'SIN ESTADO'}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Gráfico General (Personal)
+    const contenedorPastel = document.getElementById('social-pastel-contenedor');
+    if (contenedorPastel) {
+        contenedorPastel.innerHTML = '';
+        const personalOrdenado = Object.entries(contPersonal).sort((a, b) => b[1] - a[1]);
+
+        if (totalRegistros > 0) {
+            const coloresPaleta = ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#14b8a6', '#f43f5e', '#a855f7'];
+            let gradienteEstilo = "conic-gradient(";
+            let acumuladoPorcentaje = 0;
+            
+            let htmlLeyenda = `<div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1; max-height: 160px; overflow-y: auto; padding-right: 5px; width: 60%;">`;
+
+            personalOrdenado.forEach(([trabajador, cantidad], indice) => {
+                const porcentaje = (cantidad / totalRegistros) * 100;
+                const colorAsignado = coloresPaleta[indice % coloresPaleta.length];
+
+                const inicioAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
+                acumuladoPorcentaje += porcentaje;
+                const finAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
+
+                gradienteEstilo += `${colorAsignado} ${inicioAngulo}deg ${finAngulo}deg${indice < personalOrdenado.length - 1 ? ', ' : ''}`;
+
+                htmlLeyenda += `
+                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #475569; padding: 2px 0; border-bottom: 1px solid #f1f5f9;">
+                        <div style="display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%;">
+                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${colorAsignado}; flex-shrink: 0;"></span>
+                            <span title="${trabajador}" style="overflow: hidden; text-overflow: ellipsis; font-weight: 700;">${trabajador}</span>
+                        </div>
+                        <span style="font-family: monospace; color: #1e293b; font-weight: bold; flex-shrink: 0; margin-left: 10px;">${cantidad} (${porcentaje.toFixed(1)}%)</span>
+                    </div>
+                `;
+            });
+
+            gradienteEstilo += ")";
+            htmlLeyenda += `</div>`;
+
+            contenedorPastel.style.cssText = "display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 20px; width: 100%;";
+            contenedorPastel.innerHTML = `
+                <div style="width: 160px; height: 160px; border-radius: 50%; background: ${gradienteEstilo}; box-shadow: inset 0 0 5px rgba(0,0,0,0.05), 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0;"></div>
+                ${htmlLeyenda}
+            `;
+        } else {
+            contenedorPastel.style.cssText = "display: flex; justify-content: center; width: 100%;";
+            contenedorPastel.innerHTML = '<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin acciones registradas para graficar.</div>';
+        }
+    }
+};
+
 
 // =============================================================================
 // FUNCIÓN PRINCIPAL DE PROCESAMIENTO POBLACION VULNERABLE
@@ -2590,7 +3155,7 @@ window.reprocesarJefatura = function() {
     }
 };
 // =============================================================================
-// MÓDULO: PROCURADURÍA
+// MÓDULO: PROCURADURÍA (ESTADÍSTICAS AMPLIADAS)
 // =============================================================================
 window.reprocesarProcuraduria = function() {
     const contenedorCasos = document.getElementById('pr-list-casos');
@@ -2622,7 +3187,7 @@ window.reprocesarProcuraduria = function() {
         return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
     });
 
-    // Actualización segura de KPIs superiores
+    // --- 1. ACTUALIZACIÓN DE KPIS SUPERIORES ---
     if (document.getElementById('pr-total')) {
         document.getElementById('pr-total').innerText = filtrados.length;
     }
@@ -2634,7 +3199,23 @@ window.reprocesarProcuraduria = function() {
         }).length;
     }
 
-    // --- CONTEO Y DESGLOSE DE ASUNTOS ---
+    // Nuevo KPI: Total de casos con menores involucrados
+    if (document.getElementById('pr-menores-kpi')) {
+        document.getElementById('pr-menores-kpi').innerText = filtrados.filter(d => {
+            const val = (d.menor_edad || "").toString().toLowerCase().trim();
+            return val === 'si' || val === 'sí' || val === 'true' || val === '1';
+        }).length;
+    }
+
+    // Nuevo KPI: Total de embarazadas
+    if (document.getElementById('pr-embarazadas-kpi')) {
+        document.getElementById('pr-embarazadas-kpi').innerText = filtrados.filter(d => {
+            const val = (d.embarazada || "").toString().toLowerCase().trim();
+            return val === 'si' || val === 'sí' || val === 'true' || val === '1';
+        }).length;
+    }
+
+    // --- 2. CONTEO Y DESGLOSE DE ASUNTOS ---
     const conteoAsuntos = {};
     filtrados.forEach(d => { 
         const a = (d.asuntos || "S/ASUNTO").trim().toUpperCase(); 
@@ -2659,17 +3240,39 @@ window.reprocesarProcuraduria = function() {
         }
     }
 
-    // --- RENDERIZADO DE LISTA PRINCIPAL DE CASOS (Últimos 15) ---
+    // --- 3. CONTEO Y DESGLOSE DE GÉNERO ---
+    const conteoGenero = {};
+    filtrados.forEach(d => {
+        const g = (d.genero || "NO ESPECIFICADO").trim().toUpperCase();
+        conteoGenero[g] = (conteoGenero[g] || 0) + 1;
+    });
+
+    const contenedorGenero = document.getElementById('pr-conteo-genero');
+    if (contenedorGenero) {
+        const generosOrdenados = Object.entries(conteoGenero).sort((a, b) => b[1] - a[1]);
+        contenedorGenero.innerHTML = generosOrdenados.length === 0 
+            ? `<small style="color:#94a3b8; font-size:10px;">Sin datos</small>`
+            : generosOrdenados.map(([genero, count]) => `
+                <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+                    <div style="flex:1;">
+                        <div style="font-weight:800; font-size:11px; color:#1e293b; text-transform: uppercase;">${genero}</div>
+                        <div style="font-size:10px; color:var(--primary, #0284c7); font-weight:700;">TOTAL: ${count}</div>
+                    </div>
+                </div>
+            `).join('');
+    }
+
+    // --- 4. RENDERIZADO DE LISTA PRINCIPAL DE CASOS (Últimos 15) ---
     contenedorCasos.innerHTML = filtrados.slice(-15).reverse().map(d => `
         <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
             <div style="flex:1;">
                 <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.nombre || 'SIN NOMBRE'}</div>
-                <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${d.asuntos || 'S/A'}</div>
+                <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${d.asuntos || 'S/A'} - <span style="color:#64748b;">${d.genero || ''}</span></div>
             </div>
         </div>
     `).join('');
 
-    // --- RENDERIZADO DE LISTA GEOGRÁFICA / DOMICILIOS (Últimos 15) ---
+    // --- 5. RENDERIZADO DE LISTA GEOGRÁFICA / DOMICILIOS (Últimos 15) ---
     const contenedorGeo = document.getElementById('pr-list-geo');
     if (contenedorGeo) {
         contenedorGeo.innerHTML = filtrados.slice(-15).reverse().map(d => `
@@ -2682,231 +3285,9 @@ window.reprocesarProcuraduria = function() {
         `).join('');
     }
 };
-/// =============================================================================
-// MÓDULO: TRABAJO SOCIAL
-// =============================================================================
-window.reprocesarTrabSoc = function() {
-    // Guarda defensiva: Evita procesar si las columnas de este módulo no están montadas
-    const col1 = document.getElementById('col-1');
-    if (!col1) return;
 
-    // Lectura segura de inputs de filtrado global (búsqueda, zona, mes y año)
-    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
-    const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
-    const mes = document.getElementById('global-month-filter')?.value || "all";
-    const anio = document.getElementById('global-year-filter')?.value || "all";
 
-    const dataSocial = store.social || [];
 
-    const filtrados = dataSocial.filter(item => {
-        const nombre = (item.nombre || "").toLowerCase();
-        const programa = (item.programa || "").toLowerCase();
-        const asunto = (item.asunto || "").toLowerCase();
-        const detalleAsunto = (item.detalle_asunto || "").toLowerCase();
-        const z = (item.col_loc || "").toLowerCase();
-        const direccion = (item.direccion || "").toLowerCase();
-        
-        const fecha = (item.fecha_registro || "").trim();
-        const partes = fecha.split('-');
-        const anioRegistro = partes.length >= 1 ? partes[0] : "";
-        const mesRegistro = partes.length >= 2 ? partes[1] : "";
-        
-        const coincideBusqueda = nombre.includes(busqueda) || 
-                                 programa.includes(busqueda) || 
-                                 asunto.includes(busqueda) || 
-                                 detalleAsunto.includes(busqueda);
-                                 
-        const cumpleZona = z.includes(zona) || direccion.includes(zona);
-        const cumpleAnio = (anio === 'all' || anioRegistro === anio);
-        const cumpleMes = (mes === 'all' || mesRegistro === mes);
-
-        return coincideBusqueda && cumpleZona && cumpleAnio && cumpleMes;
-    });
-
-    // Conteo global y por personal operativo
-    const contPrograma = {}, contAsunto = {}, contDetalle = {}, contPersonal = {};
-    
-    filtrados.forEach(i => {
-        const p = (i.programa || "SIN PROG.").trim().toUpperCase();
-        const a = (i.asunto || "SIN ASUNTO").trim().toUpperCase();
-        const d = (i.detalle_asunto || "SIN DETALLE").trim().toUpperCase();
-        const trabajador = (i.usuario_atendio || i.usuario || i.atendido_por || "NO ASIGNADO").trim().toUpperCase();
-
-        contPrograma[p] = (contPrograma[p] || 0) + 1;
-        contAsunto[a] = (contAsunto[a] || 0) + 1;
-        contDetalle[d] = (contDetalle[d] || 0) + 1;
-        contPersonal[trabajador] = (contPersonal[trabajador] || 0) + 1;
-    });
-
-    // Actualización segura de marcadores KPIs principales
-    if (document.getElementById('s-total')) {
-        document.getElementById('s-total').innerText = filtrados.length;
-    }
-    
-    if (document.getElementById('s-atendidos')) {
-        document.getElementById('s-atendidos').innerText = filtrados.filter(d => {
-            const est = (d.estatus || "").trim().toUpperCase();
-            return ['ATENDIDO', 'ENTREGADO', 'REALIZADO', 'VALIDADO'].includes(est);
-        }).length;
-    }
-    
-    if (document.getElementById('s-pendientes')) {
-        document.getElementById('s-pendientes').innerText = filtrados.filter(d => {
-            const est = (d.estatus || "").trim().toUpperCase();
-            return ['PENDIENTE', 'EN PROCESO'].includes(est);
-        }).length;
-    }
-    
-    const getColor = (e) => {
-        const est = (e || "").trim().toUpperCase();
-        const colores = {
-            'ATENDIDO': '#16a34a', 'ENTREGADO': '#16a34a', 'REALIZADO': '#16a34a', 'VALIDADO': '#16a34a',
-            'PENDIENTE': '#ea580c', 'EN PROCESO': '#2563eb', 'CANCELADO': '#dc2626'
-        };
-        return colores[est] || '#64748b';
-    };
-
-    // Renderizado dinámico de estadísticas secundarias
-    const renderStatCompleto = (id, titulo, objetoConteo) => {
-        const container = document.getElementById(id);
-        if (!container) return;
-        const ordenado = Object.entries(objetoConteo).sort((a, b) => b[1] - a[1]);
-        
-        if (ordenado.length === 0) {
-            container.innerHTML = `
-                <div style="font-size: 10px; font-weight: 800; color: #64748b; margin-bottom: 5px; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px;">
-                    ${titulo} (0)
-                </div>
-                <small style="color:#94a3b8; font-size:9px;">Sin datos disponibles</small>
-            `;
-            return;
-        }
-
-        container.innerHTML = `
-            <div style="font-size: 10px; font-weight: 800; color: #64748b; margin-bottom: 5px; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px;">
-                ${titulo} (${Object.keys(objetoConteo).length})
-            </div>
-            <div style="max-height: 120px; overflow-y: auto;">
-                ${ordenado.map(([nombre, cant]) => `
-                    <div style="display:flex; justify-content:space-between; font-size:9px; margin-bottom:2px; padding-right:5px;">
-                        <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px;" title="${nombre}">${nombre}</span>
-                        <b style="color:var(--primary, #0284c7);">${cant}</b>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-    };
-    renderStatCompleto('stat-programa', 'PROGRAMAS', contPrograma);
-    renderStatCompleto('stat-asunto', 'ASUNTOS', contAsunto);
-    renderStatCompleto('stat-detalle', 'DETALLES', contDetalle);
-
-    // Agrupación cruzada para Columna 2
-    const contCruzado = {};
-    filtrados.forEach(i => {
-        const asuntoVal = (i.asunto || "SIN ASUNTO").trim();
-        const programaVal = (i.programa || "SIN PROG.").trim();
-        const detalleVal = (i.detalle_asunto || "SIN DETALLE").trim();
-        const key = `${asuntoVal}|${programaVal}|${detalleVal}`;
-        contCruzado[key] = (contCruzado[key] || 0) + 1;
-    });
-    const ordenadoCruzado = Object.entries(contCruzado).sort((a, b) => b[1] - a[1]);
-
-    // Inyección en Columnas 1, 2 y 3
-    col1.innerHTML = filtrados.length === 0 
-        ? `<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin registros</div>`
-        : filtrados.slice(-15).reverse().map(i => `
-            <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
-                <div style="flex-grow:1; overflow:hidden;">
-                    <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.nombre || 'N/A'}</div>
-                    <div style="font-size:9px; color:#64748b;">${i.fecha_registro || ''}</div>
-                    <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${i.asunto || ''}</div>
-                    <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus || 'SIN ESTADO'}</div>
-                </div>
-            </div>
-        `).join('');
-    
-    const col2 = document.getElementById('col-2');
-    if (col2) {
-        col2.innerHTML = ordenadoCruzado.length === 0
-            ? `<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin datos cruzados</div>`
-            : ordenadoCruzado.map(([key, count]) => {
-                const [asunto, programa, detalle] = key.split('|');
-                return `
-                    <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
-                        <div style="flex-grow:1; overflow:hidden;">
-                            <div style="font-weight:800; font-size:11px; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${asunto}">${asunto}</div>
-                            <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${programa}</div>
-                            <div style="font-size:9px; color:#64748b; font-style:italic;">${detalle}</div>
-                        </div>
-                        <div style="background:#f8fafc; padding:2px 8px; border-radius:10px; font-weight:800; font-size:12px; border:1px solid #e2e8f0; margin-left:10px; flex-shrink:0;">${count}</div>
-                    </div>`;
-            }).join('');
-    }
-
-    const col3 = document.getElementById('col-3');
-    if (col3) {
-        col3.innerHTML = filtrados.length === 0
-            ? `<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin registros geográficos</div>`
-            : filtrados.slice(-15).reverse().map(i => `
-                <div class="member-line" style="margin-bottom:10px; padding-bottom:8px; border-bottom: 1px solid #f1f5f9;">
-                    <div style="flex-grow:1; overflow:hidden;">
-                        <div style="font-weight:800; font-size:11px; color:#1e293b;">${i.col_loc || 'N/A'}</div>
-                        <div style="font-size:9px; color:#64748b;">${i.direccion || ''}</div>
-                        <div style="font-size:8px; color:${getColor(i.estatus)}; font-weight:900; margin-top:2px; text-transform:uppercase;">${i.estatus || 'SIN ESTADO'}</div>
-                    </div>
-                </div>
-            `).join('');
-    }
-
-    // Gráfico de pastel CSS Puro (Personal Operativo)
-    const contenedorPastel = document.getElementById('social-pastel-contenedor');
-    if (contenedorPastel) {
-        contenedorPastel.innerHTML = '';
-        const personalOrdenado = Object.entries(contPersonal).sort((a, b) => b[1] - a[1]);
-        const totalRegistros = filtrados.length;
-
-        if (totalRegistros > 0) {
-            const coloresPaleta = ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#14b8a6', '#f43f5e', '#a855f7'];
-            let gradienteEstilo = "conic-gradient(";
-            let acumuladoPorcentaje = 0;
-            
-            let htmlLeyenda = `<div style="display: flex; flex-direction: column; gap: 6px; flex-grow: 1; max-height: 160px; overflow-y: auto; padding-right: 5px; width: 60%;">`;
-
-            personalOrdenado.forEach(([trabajador, cantidad], indice) => {
-                const porcentaje = (cantidad / totalRegistros) * 100;
-                const colorAsignado = coloresPaleta[indice % coloresPaleta.length];
-
-                const inicioAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
-                acumuladoPorcentaje += porcentaje;
-                const finAngulo = (acumuladoPorcentaje * 3.6).toFixed(1);
-
-                gradienteEstilo += `${colorAsignado} ${inicioAngulo}deg ${finAngulo}deg${indice < personalOrdenado.length - 1 ? ', ' : ''}`;
-
-                htmlLeyenda += `
-                    <div style="display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #475569; padding: 2px 0; border-bottom: 1px solid #f1f5f9;">
-                        <div style="display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 70%;">
-                            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${colorAsignado}; flex-shrink: 0;"></span>
-                            <span title="${trabajador}" style="overflow: hidden; text-overflow: ellipsis; font-weight: 700;">${trabajador}</span>
-                        </div>
-                        <span style="font-family: monospace; color: #1e293b; font-weight: bold; flex-shrink: 0; margin-left: 10px;">${cantidad} (${porcentaje.toFixed(1)}%)</span>
-                    </div>
-                `;
-            });
-
-            gradienteEstilo += ")";
-            htmlLeyenda += `</div>`;
-
-            contenedorPastel.style.cssText = "display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 20px; width: 100%;";
-            contenedorPastel.innerHTML = `
-                <div style="width: 160px; height: 160px; border-radius: 50%; background: ${gradienteEstilo}; box-shadow: inset 0 0 5px rgba(0,0,0,0.05), 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0;"></div>
-                ${htmlLeyenda}
-            `;
-        } else {
-            contenedorPastel.style.cssText = "display: flex; justify-content: center; width: 100%;";
-            contenedorPastel.innerHTML = '<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin acciones registradas para graficar.</div>';
-        }
-    }
-};
 // =============================================================
 // MÓDULO: REPORTE DE DESPENSAS
 // =============================================================
@@ -3132,7 +3513,7 @@ window.reprocesarFarmacia = function() {
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
 
-    // --- CORRECCIÓN: Filtro unificado para Próximos a Caducar (30 días) ---
+    // Filtro para Próximos a Caducar (30 días)
     const inventarioCaducosProximos = inventarioFiltrado.filter(item => {
         if (!item.caducidad) return false;
         const fechaCad = new Date(item.caducidad + "T00:00:00");
@@ -3152,58 +3533,165 @@ window.reprocesarFarmacia = function() {
     let sobranHTML = '';
     topSobran.forEach(item => {
         sobranHTML += `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 11px;">
-                <span style="color: #334155; font-weight: 500; max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.nombre}">${item.nombre || 'Sin nombre'}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="color: #334155; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.nombre}">${item.nombre || 'Sin nombre'}</span>
                 <span class="badge" style="background: #f1f5f9; color: #475569; font-weight: 800;">${item.existencia || 0} uds</span>
             </div>
         `;
     });
-    if (document.getElementById('farm-list-sobran')) document.getElementById('farm-list-sobran').innerHTML = sobranHTML || '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin excedentes</div>';
+    if (document.getElementById('farm-list-sobran')) document.getElementById('farm-list-sobran').innerHTML = sobranHTML || '<div style="color: #94a3b8; text-align: center; padding: 15px;">Sin excedentes</div>';
     if (document.getElementById('badge-count-sobran')) document.getElementById('badge-count-sobran').textContent = topSobran.length;
 
-    // Próximos a Caducar (Top 10 usando la misma base)
+    // Top Próximos a Caducar
     const topCaducos = [...inventarioCaducosProximos].sort((a, b) => new Date(a.caducidad) - new Date(b.caducidad)).slice(0, 10);
     let caducosHTML = '';
     topCaducos.forEach(item => {
         caducosHTML += `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 11px;">
-                <span style="color: #334155; font-weight: 500; max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.nombre}">${item.nombre || 'Sin nombre'}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="color: #334155; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.nombre}">${item.nombre || 'Sin nombre'}</span>
                 <span class="badge" style="background: #fef3c7; color: #b45309; font-weight: 800;">${item.caducidad}</span>
             </div>
         `;
     });
-    if (document.getElementById('farm-list-caducos')) document.getElementById('farm-list-caducos').innerHTML = caducosHTML || '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin alertas de caducidad</div>';
+    if (document.getElementById('farm-list-caducos')) document.getElementById('farm-list-caducos').innerHTML = caducosHTML || '<div style="color: #94a3b8; text-align: center; padding: 15px;">Sin alertas</div>';
     if (document.getElementById('badge-count-caducos')) document.getElementById('badge-count-caducos').textContent = topCaducos.length;
 
-    // Stock Bajo (Faltantes)
+    // Top Stock Bajo (Faltantes)
     const topFaltantes = inventarioFiltrado.filter(item => Number(item.existencia) <= 3)
                                         .sort((a, b) => Number(a.existencia) - Number(b.existencia)).slice(0, 10);
 
     let faltantesHTML = '';
     topFaltantes.forEach(item => {
         faltantesHTML += `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 11px;">
-                <span style="color: #334155; font-weight: 500; max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.nombre}">${item.nombre || 'Sin nombre'}</span>
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="color: #334155; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.nombre}">${item.nombre || 'Sin nombre'}</span>
                 <span class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 800;">${item.existencia || 0} uds</span>
             </div>
         `;
     });
-    if (document.getElementById('farm-list-faltantes')) document.getElementById('farm-list-faltantes').innerHTML = faltantesHTML || '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Buen nivel de stock</div>';
+    if (document.getElementById('farm-list-faltantes')) document.getElementById('farm-list-faltantes').innerHTML = faltantesHTML || '<div style="color: #94a3b8; text-align: center; padding: 15px;">Sin faltantes</div>';
     if (document.getElementById('badge-count-faltantes')) document.getElementById('badge-count-faltantes').textContent = topFaltantes.length;
 
-    // Salidas Recientes
-    const topSalidos = [...salidasCrudas].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).slice(0, 10);
+    // =============================================================
+    // 1. SALIDAS RECIENTES (Agrupadas por Beneficiario, Cantidad Total y Medicamentos abajo)
+    // =============================================================
+    let mapaBeneficiarios = {};
+
+    salidasCrudas.forEach(salida => {
+        const nombreBeneficiario = (salida.beneficiarioNombre || salida.beneficiario || salida.paciente || 'Público general').trim();
+        const localidadBeneficiario = salida.beneficiarioLocalidad || salida.localidad || 'S/N';
+        const edadBeneficiario = salida.beneficiarioEdad || salida.edad || 'S/E';
+        const generoBeneficiario = salida.beneficiarioGenero || salida.genero || 'S/G';
+        const timestamp = Number(salida.timestamp) || new Date(salida.fecha || '').getTime() || 0;
+
+        if (!mapaBeneficiarios[nombreBeneficiario]) {
+            mapaBeneficiarios[nombreBeneficiario] = {
+                beneficiario: nombreBeneficiario,
+                localidad: localidadBeneficiario,
+                edad: edadBeneficiario,
+                genero: generoBeneficiario,
+                timestamp: timestamp,
+                totalCantidad: 0,
+                medicamentos: []
+            };
+        }
+
+        // Actualizar datos si hay una fecha más reciente
+        if (timestamp > mapaBeneficiarios[nombreBeneficiario].timestamp) {
+            mapaBeneficiarios[nombreBeneficiario].timestamp = timestamp;
+        }
+
+        if (Array.isArray(salida.medicamentos) && salida.medicamentos.length > 0) {
+            salida.medicamentos.forEach(med => {
+                const nombreMed = med.medicamentoNombre || med.nombre || 'Sin medicamento';
+                const cant = Number(med.cantidad) || 0;
+                mapaBeneficiarios[nombreBeneficiario].totalCantidad += cant;
+                mapaBeneficiarios[nombreBeneficiario].medicamentos.push(`• ${nombreMed} (${cant} pzas)`);
+            });
+        } else {
+            const nombreMed = salida.nombre || salida.medicamento || salida.nombreMedicamento || 'Sin medicamento';
+            const cant = Number(salida.cantidad || salida.cantidadEntregada || salida.piezas || salida.stock) || 0;
+            mapaBeneficiarios[nombreBeneficiario].totalCantidad += cant;
+            mapaBeneficiarios[nombreBeneficiario].medicamentos.push(`• ${nombreMed} (${cant} pzas)`);
+        }
+    });
+
+    let topSalidos = Object.values(mapaBeneficiarios)
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, 10);
+
     let salidosHTML = '';
     topSalidos.forEach(item => {
+        let listaMedsHTML = item.medicamentos.join('<br>');
         salidosHTML += `
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 11px;">
-                <span style="color: #334155; font-weight: 500; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.medicamentoNombre}">${item.medicamentoNombre || 'Sin nombre'}</span>
-                <span class="badge" style="background: #fee2e2; color: #b91c1c; font-weight: 800;">Retiro: ${item.cantidad || 0} uds</span>
+            <div style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #0f172a; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;" title="${item.beneficiario}">${item.beneficiario}</span>
+                    <span class="badge" style="background: #fee2e2; color: #b91c1c; font-weight: 800; font-size: 9px;">Total: ${item.totalCantidad} pzas</span>
+                </div>
+                <span style="color: #475569; font-size: 9px; display: block; margin-top: 1px;">📍 ${item.localidad} | Edad: ${item.edad} | ${item.genero}</span>
+                <div style="color: #64748b; font-size: 9px; margin-top: 3px; background: #f8fafc; padding: 3px 6px; border-radius: 4px; line-height: 1.2;">
+                    ${listaMedsHTML}
+                </div>
             </div>
         `;
     });
-    if (document.getElementById('farm-list-salidos')) document.getElementById('farm-list-salidos').innerHTML = salidosHTML || '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin salidas recientes</div>';
-    if (document.getElementById('badge-count-salidos')) document.getElementById('badge-count-salidos').textContent = topSalidos.length;
+
+    if (document.getElementById('farm-list-salidos')) {
+        document.getElementById('farm-list-salidos').innerHTML = salidosHTML || '<div style="color: #94a3b8; text-align: center; padding: 15px;">Sin salidas</div>';
+    }
+    if (document.getElementById('badge-count-salidos')) {
+        document.getElementById('badge-count-salidos').textContent = topSalidos.length;
+    }
+
+    // =============================================================
+    // 2. NUEVA COLUMNA: TOP LOCALIDADES / COLONIAS CON MÁS BENEFICIARIOS
+    // =============================================================
+    let mapaLocalidades = {};
+    salidasCrudas.forEach(salida => {
+        let loc = (salida.beneficiarioLocalidad || salida.localidad || 'SIN ESPECIFICAR').trim().toUpperCase();
+        let mun = (salida.beneficiarioMunicipio || salida.municipio || 'SAN ANDRÉS TUXTLA').trim().toUpperCase();
+        let llaveZona = `${loc} (${mun})`;
+
+        if (!mapaLocalidades[llaveZona]) {
+            mapaLocalidades[llaveZona] = { totalPersonas: 0, totalMedicamentos: 0 };
+        }
+        mapaLocalidades[llaveZona].totalPersonas += 1;
+        
+        let cantMeds = 0;
+        if (Array.isArray(salida.medicamentos)) {
+            salida.medicamentos.forEach(m => cantMeds += Number(m.cantidad || 0));
+        } else {
+            cantMeds = Number(salida.cantidad || 1);
+        }
+        mapaLocalidades[llaveZona].totalMedicamentos += cantMeds;
+    });
+
+    let arrayLocalidades = Object.keys(mapaLocalidades).map(zona => ({
+        zona: zona,
+        personas: mapaLocalidades[zona].totalPersonas,
+        medicamentos: mapaLocalidades[zona].totalMedicamentos
+    })).sort((a, b) => b.personas - a.personas).slice(0, 10);
+
+    let localidadesHTML = '';
+    arrayLocalidades.forEach(item => {
+        localidadesHTML += `
+            <div style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+                <span style="color: #0f172a; font-weight: 600; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${item.zona}">🏠 ${item.zona}</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2px; font-size: 9px;">
+                    <span style="color: #047857; font-weight: 700;">👥 ${item.personas} personas</span>
+                    <span style="color: #0369a1; font-weight: 700;">💊 ${item.medicamentos} pzas</span>
+                </div>
+            </div>
+        `;
+    });
+
+    if (document.getElementById('farm-list-localidades')) {
+        document.getElementById('farm-list-localidades').innerHTML = localidadesHTML || '<div style="color: #94a3b8; text-align: center; padding: 15px;">Sin datos zonales</div>';
+    }
+    if (document.getElementById('badge-count-localidades')) {
+        document.getElementById('badge-count-localidades').textContent = arrayLocalidades.length;
+    }
 
     // Tabla General de Inventario
     const tbodyInventario = document.getElementById('tabla-inventario-general');
@@ -3222,6 +3710,7 @@ window.reprocesarFarmacia = function() {
         }
     }
 };
+
 // =============================================================================
 // MÓDULO: ESTADÍSTICAS GENERALES Y GRÁFICOS DIF (COMPLETO Y BLINDADO)
 // =============================================================================
