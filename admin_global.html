@@ -7,123 +7,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-:root { --primary:#8a1538; --secondary:#c5a059; --accent:#5a7d65; --accent-light:#eef2ef; --bg:#f8fafc; --sidebar-bg:#2d1e22; --vulnerable-color:var(--primary); --psico-color:var(--primary); --procu-color:var(--primary); --med-color:var(--primary); --social-color:var(--primary); --genloc-color:var(--primary); --escolar-color:var(--primary); }
-
-*, *::before, *::after { box-sizing: border-box; }
-body { font-family:'Inter','Segoe UI',sans-serif; background:var(--bg); margin:0; display:flex; height:100vh; height:100dvh; overflow:hidden; color:#1e293b; }
-
-/* Layout Base */
-.app-container { display:flex; flex-direction:column; height:100vh; width:100%; overflow:hidden; }
-.main-content { flex-grow:1; overflow-y:auto; display:flex; flex-direction:column; padding:10px; width:100%; }
-.view-container { padding:15px; display:none; }
-.view-container.active { display:block; animation:fadeIn 0.4s ease; }
-
-/* Sidebar & Nav */
-.sidebar { width:260px; background:var(--sidebar-bg); color:#fff; display:flex; flex-direction:column; flex-shrink:0; transition:all 0.3s ease; z-index:1050; position:fixed; top:0; left:-260px; height:100vh; height:100dvh; }
-.sidebar.collapsed, .sidebar.active { left:0 !important; }
-.sidebar-header { padding:20px 15px; text-align:center; border-bottom:1px solid #1e293b; }
-.sidebar-header h3 { font-size:1.1rem; margin:0; letter-spacing:1px; font-weight:800; }
-
-/* Botón Ocultar Menú (Oculto por defecto en Escritorio) */
-.sidebar-close-btn { display: none !important; }
-
-.nav-menu { flex-grow:1; padding:10px 0; overflow-y:auto; }
-.nav-item { padding:12px 20px; display:flex; align-items:center; gap:15px; color:#94a3b8; cursor:pointer; transition:0.3s; font-size:13px; border-left:4px solid transparent; }
-.nav-item:hover, .nav-item.active { background:#1e293b; color:#fff; border-left-color:var(--primary); }
-
-.user-profile-box { padding:20px; display:flex; align-items:center; gap:12px; background:rgba(0,0,0,0.15); border-top:1px solid #1e293b; color:#fff; margin-top:auto; }
-
-.nav-exit { padding:15px 25px; display:flex; align-items:center; gap:15px; background:#7f1d1d; color:#f87171; cursor:pointer; transition:all 0.3s ease; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.5px; }
-.nav-exit i { font-size:16px; }
-.nav-exit:hover { background:#ef4444; color:#fff; }
-
-/* Header & Filtros */
-.top-bar { background:#fff; padding:10px 15px 10px 65px; min-height:70px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px; box-shadow:0 1px 2px rgba(0,0,0,0.05); position:sticky; top:0; z-index:1000; }
-.search-container { display:flex; gap:15px; flex-grow:1; max-width:900px; margin:0 15px; flex:1 1 100%; }
-.search-wrapper { position:relative; flex:1; }
-.search-wrapper i { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#94a3b8; font-size:14px; }
-.search-wrapper input { width:100%; padding:10px 15px 10px 40px; border-radius:10px; border:1px solid #e2e8f0; outline:none; font-size:12px; font-weight:600; transition:0.2s; background:#f8fafc; }
-.search-wrapper input:focus { border-color:var(--primary); background:#fff; box-shadow:0 0 0 3px rgba(37,99,235,0.1); }
-.filter-bar { display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
-
-.top-bar-filter-item select { width:100%; padding:8px 12px; border-radius:10px; border:1px solid #cbd5e1; background-color:#f8fafc; color:#1e293b; font-size:12px; font-weight:700; outline:none; cursor:pointer; transition:all 0.2s ease; box-shadow:0 1px 2px rgba(0,0,0,0.03); }
-.top-bar-filter-item select:hover { border-color:var(--primary); background-color:#fff; }
-.top-bar-filter-item select:focus { border-color:var(--primary); background-color:#fff; box-shadow:0 0 0 3px rgba(138,21,56,0.1); }
-
-/* Tarjetas, Paneles & Métricas */
-.access-card { padding:18px 25px; border-radius:15px; display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; color:#fff; background:var(--primary); border-bottom:3px solid var(--secondary); box-shadow:0 4px 12px rgba(0,0,0,0.1); }
-.access-card b { font-size:16px; letter-spacing:0.5px; }
-.btn-open { background:rgba(255,255,255,0.2); color:#fff; padding:8px 18px; border-radius:8px; text-decoration:none; font-size:11px; font-weight:800; border:1px solid rgba(255,255,255,0.4); transition:0.3s; text-transform:uppercase; }
-.btn-open:hover { background:#fff; color:#0f172a; }
-
-.panel-grid { display:grid; grid-template-columns:1fr; gap:15px; margin-top:20px; }
-.panel { display:flex; flex-direction:column; background:#fff; border-radius:15px; padding:20px; border:1px solid #e2e8f0; height:480px; overflow-y:auto; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
-.panel b { display:block; margin-bottom:15px; font-size:10px; text-transform:uppercase; color:#94a3b8; border-bottom:2px solid #f8fafc; padding-bottom:10px; letter-spacing:1px; }
-
-.card { background:#fff; padding:20px; border-radius:15px; border-top:5px solid #991b1b; box-shadow:0 2px 4px rgba(0,0,0,0.05); }
-.card.money { border-top-color:#059669; }
-.card.valid { border-top-color:#0369a1; }
-.monto { font-size:20px; font-weight:800; display:block; margin-top:5px; }
-
-.stats-grid, #stats-dinamicas { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-bottom:20px; }
-.stat-box { background:#fff; padding:15px; border-radius:12px; border:1px solid #e2e8f0; text-align:center; }
-.stat-box small { color:#64748b; font-weight:800; text-transform:uppercase; font-size:9px; letter-spacing:0.5px; margin-bottom:5px; display:block; }
-.stat-box div { font-size:22px; font-weight:800; color:#0f172a; transition:color 0.3s ease; }
-
-/* Responsive Media Queries */
-@media (max-width: 767px) {
-    .sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100vh; height: 100dvh; z-index: 1050; transition: left 0.3s ease; }
-    .sidebar.active { left: 0 !important; }
-    
-    /* Botón Ocultar Menú Centrado y Visible en Móvil */
-    .sidebar-close-btn { display: flex !important; justify-content: center !important; align-items: center !important; padding: 10px 15px !important; margin: 10px 15px !important; gap: 8px; color: #cbd5e1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 700; text-align: center; }
-    .sidebar-close-btn:hover { background: rgba(255, 255, 255, 0.15) !important; color: #ffffff !important; }
-}
-
-@media (min-width: 768px) {
-    .app-container { flex-direction:row; }
-    .sidebar { position:relative; left:0; width:260px; height:100vh; height:100dvh; z-index:1000; }
-    .sidebar.collapsed { width:70px; }
-    .sidebar.collapsed .sidebar-header h3, .sidebar.collapsed .sidebar-header small, .sidebar.collapsed .nav-item span, .sidebar.collapsed .user-profile-box :is(span, div, p), .sidebar.collapsed .nav-exit span { display:none !important; }
-    .sidebar.collapsed .nav-item, .sidebar.collapsed .user-profile-box, .sidebar.collapsed .nav-exit { justify-content:center !important; padding:15px 0 !important; }
-    .main-content { padding:25px; }
-}
-
-/* BOTÓN HAMBURGUESA FLOTANTE FUERA DEL SIDEBAR (SIEMPRE VISIBLE) */
-#btn-toggle {
-    position: fixed !important;
-    top: 14px;
-    left: 15px;
-    z-index: 999999 !important;
-    background: var(--sidebar-bg, #2d1e22);
-    color: #ffffff;
-    width: 42px;
-    height: 42px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    transition: background 0.2s ease, transform 0.2s ease;
-}
-
-#btn-toggle:hover {
-    background: var(--primary, #8a1538);
-    transform: scale(1.05);
-}
+:root{--primary:#8a1538;--secondary:#c5a059;--accent:#5a7d65;--bg:#f8fafc;--sidebar-bg:#2d1e22}*,*::before,*::after{box-sizing:border-box}body{font-family:'Inter','Segoe UI',sans-serif;background:var(--bg);margin:0;display:flex;height:100vh;height:100dvh;overflow:hidden;color:#1e293b}.app-container{display:flex;flex-direction:column;height:100vh;width:100%;overflow:hidden}.main-content{flex-grow:1;overflow-y:auto;display:flex;flex-direction:column;padding:15px;width:100%;gap:20px}.view-container{padding:15px;display:none;flex-direction:column;gap:20px}.view-container.active{display:flex;animation:fadeIn .4s ease}.sidebar{width:260px;background:var(--sidebar-bg);color:#fff;display:flex;flex-direction:column;flex-shrink:0;transition:all .3s ease;z-index:1050;position:fixed;top:0;left:-260px;height:100vh;height:100dvh}.sidebar.collapsed,.sidebar.active{left:0!important}.sidebar-header{padding:20px 15px;text-align:center;border-bottom:1px solid #1e293b}.sidebar-header h3{font-size:1.1rem;margin:0;letter-spacing:1px;font-weight:800}.sidebar-close-btn{display:none!important}.nav-menu{flex-grow:1;padding:10px 0;overflow-y:auto}.nav-item{padding:12px 20px;display:flex;align-items:center;gap:15px;color:#94a3b8;cursor:pointer;transition:.3s;font-size:13px;border-left:4px solid transparent}.nav-item:hover,.nav-item.active{background:#1e293b;color:#fff;border-left-color:var(--primary)}.user-profile-box{padding:20px;display:flex;align-items:center;gap:12px;background:rgba(0,0,0,.15);border-top:1px solid #1e293b;color:#fff;margin-top:auto}.nav-exit{padding:15px 25px;display:flex;align-items:center;gap:15px;background:#7f1d1d;color:#f87171;cursor:pointer;transition:all .3s ease;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}.nav-exit i{font-size:16px}.nav-exit:hover{background:#ef4444;color:#fff}.top-bar{background:#fff;padding:10px 15px 10px 65px;min-height:70px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;box-shadow:0 1px 2px rgba(0,0,0,.05);position:sticky;top:0;z-index:1000}.search-container{display:flex;gap:15px;flex-grow:1;max-width:900px;margin:0 15px;flex:1 1 100%}.search-wrapper{position:relative;flex:1}.search-wrapper i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:14px}.search-wrapper input{width:100%;padding:10px 15px 10px 40px;border-radius:10px;border:1px solid #e2e8f0;outline:none;font-size:12px;font-weight:600;transition:.2s;background:#f8fafc}.search-wrapper input:focus{border-color:var(--primary);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.1)}.filter-bar{display:flex;flex-direction:column;gap:15px;margin-bottom:20px}.top-bar-filter-item select{width:100%;padding:8px 12px;border-radius:10px;border:1px solid #cbd5e1;background-color:#f8fafc;color:#1e293b;font-size:12px;font-weight:700;outline:none;cursor:pointer;transition:all .2s ease;box-shadow:0 1px 2px rgba(0,0,0,.03)}.top-bar-filter-item select:hover{border-color:var(--primary);background-color:#fff}.top-bar-filter-item select:focus{border-color:var(--primary);background-color:#fff;box-shadow:0 0 0 3px rgba(138,21,56,.1)}.access-card{padding:18px 25px;border-radius:15px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;color:#fff;background:var(--primary);border-bottom:3px solid var(--secondary);box-shadow:0 4px 12px rgba(0,0,0,.1)}.access-card b{font-size:16px;letter-spacing:.5px}.btn-open{background:rgba(255,255,255,.2);color:#fff;padding:8px 18px;border-radius:8px;text-decoration:none;font-size:11px;font-weight:800;border:1px solid rgba(255,255,255,.4);transition:.3s;text-transform:uppercase}.btn-open:hover{background:#fff;color:#0f172a}.panel-grid,.stats-grid,#stats-dinamicas,.grid-container{display:flex;flex-direction:column;gap:15px;width:100%;margin-top:20px}.panel{display:flex;flex-direction:column;background:#fff;border-radius:15px;padding:20px;border:1px solid #e2e8f0;min-height:420px;max-height:500px;overflow-y:auto;box-shadow:0 1px 3px rgba(0,0,0,.1);margin-bottom:20px}.panel b{display:block;margin-bottom:15px;font-size:10px;text-transform:uppercase;color:#94a3b8;border-bottom:2px solid #f8fafc;padding-bottom:10px;letter-spacing:1px}.card{background:#fff;padding:20px;border-radius:15px;border-top:5px solid #991b1b;box-shadow:0 2px 4px rgba(0,0,0,.05);margin-bottom:20px}.card.money{border-top-color:#059669}.card.valid{border-top-color:#0369a1}.monto{font-size:20px;font-weight:800;display:block;margin-top:5px}.stat-box{background:#fff;padding:15px;border-radius:12px;border:1px solid #e2e8f0;text-align:center;margin-bottom:15px}.stat-box small{color:#64748b;font-weight:800;text-transform:uppercase;font-size:9px;letter-spacing:.5px;margin-bottom:5px;display:block}.stat-box div{font-size:22px;font-weight:800;color:#0f172a;transition:color .3s ease}@media (max-width:767px){.sidebar{position:fixed;top:0;left:-260px;width:260px;height:100vh;height:100dvh;z-index:1050;transition:left .3s ease}.sidebar.active{left:0!important}.sidebar-close-btn{display:flex!important;justify-content:center!important;align-items:center!important;padding:10px 15px!important;margin:10px 15px!important;gap:8px;color:#cbd5e1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;font-size:12px;font-weight:700;text-align:center}.sidebar-close-btn:hover{background:rgba(255,255,255,.15)!important;color:#fff!important}.panel,.card,.stat-box,.access-card{width:100%!important;margin:0 0 15px 0!important}div[style*="grid-template-columns"]{display:flex!important;flex-direction:column!important;gap:15px!important}}@media (min-width:768px){.app-container{flex-direction:row}.sidebar{position:relative;left:0;width:260px;height:100vh;height:100dvh;z-index:1000}.sidebar.collapsed{width:70px}.sidebar.collapsed .sidebar-header h3,.sidebar.collapsed .sidebar-header small,.sidebar.collapsed .nav-item span,.sidebar.collapsed .user-profile-box :is(span,div,p),.sidebar.collapsed .nav-exit span{display:none!important}.sidebar.collapsed .nav-item,.sidebar.collapsed .user-profile-box,.sidebar.collapsed .nav-exit{justify-content:center!important;padding:15px 0!important}.main-content{padding:25px}}#btn-toggle{position:fixed!important;top:14px;left:15px;z-index:999999!important;background:var(--sidebar-bg,#2d1e22);color:#fff;width:42px;height:42px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 10px rgba(0,0,0,.3);transition:background .2s ease,transform .2s ease}#btn-toggle:hover{background:var(--primary,#8a1538);transform:scale(1.05)}
     </style>
 </head>
 <body>
-</head>
-<body>
-
-<!-- BOTÓN HAMBURGUESA FLOTANTE FUERA DEL SIDEBAR Y TOP-BAR -->
-<!-- BOTÓN HAMBURGUESA FUERA DEL MENÚ LATERAL -->
+<!-- BOTÓN HAMBURGUESA FUERA DEL MENÚ LATERAL Y TOP-BAR -->
 <div id="btn-toggle" onclick="toggleSidebar()" title="Abrir / Ocultar Menú">
     <i class="fas fa-bars" style="font-size: 18px;"></i>
 </div>
-
 <!-- BARRA LATERAL (SIDEBAR) -->
 <div class="sidebar">
     <div class="sidebar-header">
@@ -178,35 +69,34 @@ body { font-family:'Inter','Segoe UI',sans-serif; background:var(--bg); margin:0
                     onkeyup="window.reprocesarTodo()" 
                     style="width: 90%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
             </div>
-         <div class="top-bar-filter-item" style="margin: 0 5px; flex: 1; min-width: 140px;">
-                        <select id="global-month-filter" onchange="window.reprocesarTodo()">
-                    <option value="all">📅 TODOS LOS MESES</option>
-                    <option value="01">Enero</option>
-                    <option value="02">Febrero</option>
-                    <option value="03">Marzo</option>
-                    <option value="04">Abril</option>
-                    <option value="05">Mayo</option>
-                    <option value="06">Junio</option>
-                    <option value="07">Julio</option>
-                    <option value="08">Agosto</option>
-                    <option value="09">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
-                </select>
-            </div>
+        <div class="top-bar-filter-item">
+            <select id="global-month-filter" onchange="window.reprocesarTodo()">
+                <option value="all">📅 TODOS LOS MESES</option>
+                <option value="01">Enero</option>
+                <option value="02">Febrero</option>
+                <option value="03">Marzo</option>
+                <option value="04">Abril</option>
+                <option value="05">Mayo</option>
+                <option value="06">Junio</option>
+                <option value="07">Julio</option>
+                <option value="08">Agosto</option>
+                <option value="09">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+            </select>
+        </div>
 
-                        <!-- Filtro de Año NUEVO -->
-            <div class="top-bar-filter-item" style="margin: 0 5px; flex: 1; min-width: 140px;">
-                    <select id="global-year-filter" onchange="window.reprocesarTodo()">
-                    <option value="all">📆 TODOS LOS AÑOS</option>
-                    <option value="2025">2025</option>
-                    <option value="2026" selected>2026</option>
-                    <option value="2027">2027</option>
-                </select>
-            </div>
-<div id="reloj" class="badge bg-light text-dark border px-3 py-2 shadow-sm" style="font-size: 13px; font-weight: 700; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums;"></div>
-</div>  
+        <div class="top-bar-filter-item">
+            <select id="global-year-filter" onchange="window.reprocesarTodo()">
+                <option value="all">📆 TODOS LOS AÑOS</option>
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+            </select>
+        </div>
+        <div id="reloj" class="badge bg-light text-dark border px-3 py-2 shadow-sm" style="font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;"></div>
+        </div>
 
 <!-- ========================================== -->
 <!-- PANEL DE ESTADÍSTICAS Y MÉTRICAS: JORNADA ITINERANTE -->
@@ -1598,10 +1488,59 @@ window.reprocesarDireccion = function() {
     }
 };
 // =============================================================================
-// FUNCIÓN PRINCIPAL DE CRISAT
+// FUNCIÓN PRINCIPAL DE CRISAT (CON FILTRO DE MES Y AÑO INTEGRADO)
 // =============================================================================
 window.reprocesarCrisat = function() {
-    const datos = window.store.crisat || [];
+    const datosCrudos = window.store.crisat || [];
+    
+    // 🌟 Lectura de filtros globales (búsqueda, zona, mes y año)
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
+    const zonaFiltro = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
+    const mes = document.getElementById('global-month-filter')?.value || "all";
+    const anio = document.getElementById('global-year-filter')?.value || "all";
+
+    // Función auxiliar para extraer año y mes de cualquier formato de fecha
+    const obtenerAnioMes = (fechaCruda) => {
+        if (!fechaCruda) return { anio: "", mes: "" };
+        let f = fechaCruda;
+        if (typeof f === 'object' && f !== null) {
+            if (f.seconds) f = new Date(f.seconds * 1000);
+            else if (f instanceof Date) f = f;
+        }
+        let fStr = "";
+        if (f instanceof Date) {
+            fStr = f.toISOString().split('T')[0];
+        } else {
+            fStr = String(f).trim().split(' ')[0];
+        }
+        let anioReg = "", mesReg = "";
+        if (fStr.includes('-')) {
+            const p = fStr.split('-');
+            if (p[0].length === 4) { anioReg = p[0]; mesReg = p[1] || ""; } 
+            else if (p[2] && p[2].length === 4) { anioReg = p[2]; mesReg = p[1] || ""; }
+        } else if (fStr.includes('/')) {
+            const p = fStr.split('/');
+            if (p[0].length === 4) { anioReg = p[0]; mesReg = p[1] || ""; } 
+            else if (p[2] && p[2].length === 4) { anioReg = p[2]; mesReg = p[1] || ""; }
+        }
+        return { anio: anioReg, mes: mesReg ? String(mesReg).padStart(2, '0') : "" };
+    };
+
+    // Filtrar los registros de CRISAT según los selectores globales
+    const datos = datosCrudos.filter(item => {
+        const paciente = (item.paciente || item.nombre || item.nombre_paciente || item.pacienteNombre || "").toLowerCase();
+        const z = (item.col_loc || item.colonia || item.localidad || item.zona || item.comunidad || item.domicilio || "").toLowerCase();
+        
+        const fechaRaw = item.fecha || item.fecha_registro || item.timestamp || item.date || "";
+        const { anio: anioRegistro, mes: mesRegistro } = obtenerAnioMes(fechaRaw);
+        
+        const cumpleBusqueda = busqueda === "" || paciente.includes(busqueda);
+        const cumpleZona = zonaFiltro === "" || z.includes(zonaFiltro);
+        const cumpleAnio = (anio === 'all' || anioRegistro === "" || anioRegistro === anio);
+        const cumpleMes = (mes === 'all' || mesRegistro === "" || mesRegistro === mes);
+
+        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+    });
     
     let totalActividades = datos.length;
     let totalAltas = 0;
@@ -1748,6 +1687,7 @@ window.reprocesarCrisat = function() {
     renderizarListaZona('crisat-list-colonias', porColonia, 'fa-city');
     renderizarListaZona('crisat-list-localidades', porLocalidad, 'fa-map-marker-alt');
 };
+
 
 // =============================================================================
 // MÓDULO: TRABAJO SOCIAL (ESTILOS CLÁSICOS + GRÁFICAS INFERIORES)
@@ -3741,7 +3681,7 @@ window.reprocesarDespensas = function() {
 };
 
 // =============================================================
-// MÓDULO: REPORTE Y CONTROL DE FARMACIA (DEFINITIVO)
+// MÓDULO: REPORTE Y CONTROL DE FARMACIA (CON FILTRO DE MES Y AÑO)
 // =============================================================
 window.reprocesarFarmacia = function() {
     const storeObj = window.store || {};
@@ -3779,9 +3719,17 @@ window.reprocesarFarmacia = function() {
         return coincideBusqueda && cumpleAnio && cumpleMes;
     });
 
+    // 🌟 Filtrar también las salidas según el mes y año seleccionados
+    const salidasFiltradas = salidasCrudas.filter(salida => {
+        const { anio: anioReg, mes: mesReg } = obtenerAnioMesRegistro(salida);
+        const cumpleAnio = (anioFiltro === 'all' || anioReg === "" || anioReg === anioFiltro);
+        const cumpleMes = (mesFiltro === 'all' || mesReg === "" || mesReg === mesFiltro);
+        return cumpleAnio && cumpleMes;
+    });
+
     let totalTipos = inventarioFiltrado.length;
     let stockTotal = inventarioFiltrado.reduce((acc, item) => acc + (Number(item.existencia) || 0), 0);
-    let totalSalidas = salidasCrudas.length; 
+    let totalSalidas = salidasFiltradas.length; // Usa las salidas ya filtradas por fecha
 
     const hoy = new Date();
     hoy.setHours(0, 0, 0, 0);
@@ -3846,11 +3794,11 @@ window.reprocesarFarmacia = function() {
     if (document.getElementById('badge-count-faltantes')) document.getElementById('badge-count-faltantes').textContent = topFaltantes.length;
 
     // =============================================================
-    // 1. SALIDAS RECIENTES (Agrupadas por Beneficiario, Cantidad Total y Medicamentos abajo)
+    // 1. SALIDAS RECIENTES (Usando salidasFiltradas)
     // =============================================================
     let mapaBeneficiarios = {};
 
-    salidasCrudas.forEach(salida => {
+    salidasFiltradas.forEach(salida => {
         const nombreBeneficiario = (salida.beneficiarioNombre || salida.beneficiario || salida.paciente || 'Público general').trim();
         const localidadBeneficiario = salida.beneficiarioLocalidad || salida.localidad || 'S/N';
         const edadBeneficiario = salida.beneficiarioEdad || salida.edad || 'S/E';
@@ -3869,7 +3817,6 @@ window.reprocesarFarmacia = function() {
             };
         }
 
-        // Actualizar datos si hay una fecha más reciente
         if (timestamp > mapaBeneficiarios[nombreBeneficiario].timestamp) {
             mapaBeneficiarios[nombreBeneficiario].timestamp = timestamp;
         }
@@ -3918,10 +3865,10 @@ window.reprocesarFarmacia = function() {
     }
 
     // =============================================================
-    // 2. NUEVA COLUMNA: TOP LOCALIDADES / COLONIAS CON MÁS BENEFICIARIOS
+    // 2. TOP LOCALIDADES / COLONIAS (Usando salidasFiltradas)
     // =============================================================
     let mapaLocalidades = {};
-    salidasCrudas.forEach(salida => {
+    salidasFiltradas.forEach(salida => {
         let loc = (salida.beneficiarioLocalidad || salida.localidad || 'SIN ESPECIFICAR').trim().toUpperCase();
         let mun = (salida.beneficiarioMunicipio || salida.municipio || 'SAN ANDRÉS TUXTLA').trim().toUpperCase();
         let llaveZona = `${loc} (${mun})`;
@@ -3983,6 +3930,7 @@ window.reprocesarFarmacia = function() {
         }
     }
 };
+
 
 // =============================================================================
 // MÓDULO: ESTADÍSTICAS GENERALES Y GRÁFICOS DIF (COMPLETO Y BLINDADO)
