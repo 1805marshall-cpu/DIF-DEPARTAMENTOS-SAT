@@ -400,7 +400,6 @@
             <div id="contenidoReporteMunicipal"></div>
         </div>
     </div>
-
     <!-- VISTA 3: Reporte DIF Estatal -->
     <div id="vistaEstatal" class="vista-seccion" style="display: none; margin-top: 20px;">
         <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0;">
@@ -411,7 +410,7 @@
                 <div style="display: flex; gap: 4px; align-items: center;">
                     <label style="font-size: 11px; font-weight: bold; color: #334155;">SISP-15 (Diario):</label>
                     <input type="date" id="fechaDiariaCrisver" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;" />
-                    <button type="button" onclick="generarReporteDiarioCrisver(); imprimirSeccionReporte('contenidoReporteDiarioCrisver');" style="background: #0284c7; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">🖨️ Diario</button>
+                    <button type="button" onclick="generarReporteDiarioCrisver()" style="background: #0284c7; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">📊 Ver Diario</button>
                 </div>
 
                 <div style="border-left: 1px solid #cbd5e1; height: 25px;"></div>
@@ -419,7 +418,7 @@
                 <div style="display: flex; gap: 4px; align-items: center;">
                     <label style="font-size: 11px; font-weight: bold; color: #334155;">SISP-1 (Mensual):</label>
                     <input type="month" id="mesEstatal" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;" />
-                    <button type="button" onclick="generarReporteEstatal(); imprimirSeccionReporte('contenidoReporteEstatal');" style="background: #0d9488; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">🖨️ Mensual</button>
+                    <button type="button" onclick="generarReporteEstatal()" style="background: #0d9488; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">📊 Ver Mensual</button>
                 </div>
 
                 <div style="border-left: 1px solid #cbd5e1; height: 25px;"></div>
@@ -427,16 +426,15 @@
                 <div style="display: flex; gap: 4px; align-items: center;">
                     <label style="font-size: 11px; font-weight: bold; color: #334155;">SISP-19 (Altas):</label>
                     <input type="month" id="mesAltasCrisver" style="padding: 5px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 11px;" />
-                    <button type="button" onclick="generarReporteAltasCrisver(); imprimirSeccionReporte('contenidoReporteAltasCrisver');" style="background: #7c3aed; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: 500;">🖨️ Altas</button>
+                    <button type="button" onclick="generarReporteAltasCrisver()" style="background: #7c3aed; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">📊 Ver Altas</button>
                 </div>
             </div>
 
             <div id="contenidoReporteEstatal" style="border: 1px solid #cbd5e1; border-radius: 6px; padding: 15px; background: #fff;">
-                <p style="text-align: center; color: #94a3b8; padding: 20px;">Haz clic en los botones superiores para generar y visualizar los formatos.</p>
+                <p style="text-align: center; color: #94a3b8; padding: 20px;">Haz clic en cualquiera de los botones superiores para visualizar el formato aquí.</p>
             </div>
         </div>
     </div>
-</div>
 
 <!-- MODALES -->
 <div id="modalConfirm" class="modal">
@@ -1732,33 +1730,263 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
     };
 
     // ==========================================
-    // REPORTE DIF ESTATAL (CORTE DEL 14 AL 13)
+    // REPORTE DIF ESTATAL (VISUALIZACIÓN PREVIA E IMPRESIÓN)
     // ==========================================
+
+    // 1. REPORTE DIARIO SISP-15 (Muestra vista previa)
     window.generarReporteDiarioCrisver = () => {
-        const contenedor = document.getElementById('contenidoReporteDiarioCrisver');
+        const contenedor = document.getElementById('contenidoReporteEstatal');
         if (!contenedor) return;
-        const fechaFiltro = document.getElementById('fechaDiariaCrisver')?.value || new Date().toISOString().split('T')[0];
+
+        const fechaFiltro = document.getElementById('fechaDiariaCrisver')?.value || window.obtenerFechaLocal();
         const registrosDia = cacheRegistros.filter(r => r.fecha_ISO === fechaFiltro);
 
         let filasHTML = '';
+        let tM = 0, tF = 0, t1a = 0, tSub = 0, tHidro = 0, tComp = 0, tPara = 0, tCrio = 0, tElectro = 0, tMecano = 0;
+
         registrosDia.forEach((r, index) => {
+            const sexo = (r.sexo || '').toUpperCase();
+            const esM = sexo.startsWith('H') || (sexo.startsWith('M') && !sexo.startsWith('MA')) ? 'X' : '';
+            const esF = sexo.startsWith('F') || sexo.startsWith('MA') ? 'X' : '';
+            if (esM) tM++;
+            if (esF) tF++;
+
+            const estExp = (r.estatus_expediente || '').toUpperCase();
+            const es1a = estExp.includes('NUEVO') || estExp.includes('PRIMERA') ? 'X' : '';
+            const esSub = !es1a ? 'X' : '';
+            if (es1a) t1a++;
+            if (esSub) tSub++;
+
+            const tipoT = (r.servicio || r.tipo_terapia || '').toLowerCase();
+            const hidro = tipoT.includes('hidro') ? 'X' : '';
+            const comp = (tipoT.includes('compresa') || tipoT.includes('infrarrojo') || tipoT.includes('infrarojo')) ? 'X' : '';
+            const para = tipoT.includes('parafina') ? 'X' : '';
+            const crio = tipoT.includes('crio') ? 'X' : '';
+            const electro = (tipoT.includes('electro') || tipoT.includes('laser') || tipoT.includes('ultrasonido')) ? 'X' : '';
+            const mecano = (tipoT.includes('mecano') || tipoT.includes('masaje')) ? 'X' : '';
+
+            if (hidro) tHidro++;
+            if (comp) tComp++;
+            if (para) tPara++;
+            if (crio) tCrio++;
+            if (electro) tElectro++;
+            if (mecano) tMecano++;
+
             filasHTML += `
                 <tr>
                     <td style="border: 1px solid #000; text-align: center; padding: 3px;">${index + 1}</td>
                     <td style="border: 1px solid #000; padding: 3px;">${r.expediente || ''}</td>
                     <td style="border: 1px solid #000; text-align: center; padding: 3px;">${r.edad || ''}</td>
-                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${r.sexo === 'H' ? 'X' : ''}</td>
-                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${r.sexo === 'F' ? 'X' : ''}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esM}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esF}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${es1a}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esSub}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${hidro}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${comp}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${para}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${crio}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${electro}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${mecano}</td>
                 </tr>
             `;
         });
-        contenedor.innerHTML = `<table style="width: 100%; border-collapse: collapse;">${filasHTML}</table>`;
+
+        contenedor.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;" class="no-print">
+                <h3 style="margin: 0; color: #0284c7;"><i class="fas fa-file-alt"></i> Vista Previa: SISP-15 (Diario)</h3>
+                <button type="button" onclick="window.imprimirSeccionReporte('contenidoReporteEstatal')" style="background: #0284c7; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                    <i class="fas fa-print"></i> Imprimir Este Reporte
+                </button>
+            </div>
+            <div style="background: white; padding: 15px; font-family: Arial, sans-serif; color: #000; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
+                    <div><b>SALUD / DIF NACIONAL</b><br>DIRECCIÓN GENERAL DE REHABILITACIÓN</div>
+                    <div style="text-align: right;"><b>SISP-15</b><br>REGISTRO DIARIO DE TERAPIA FÍSICA</div>
+                </div>
+                <div style="margin-bottom: 8px; display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 10px; border: 1px solid #000; padding: 5px;">
+                    <div><b>Fecha:</b> ${fechaFiltro}</div>
+                    <div><b>Centro:</b> CRISAT - DIF MUNICIPAL</div>
+                    <div><b>Total:</b> ${registrosDia.length}</div>
+                </div>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #e2e8f0;">
+                            <th style="border: 1px solid #000; padding: 3px;">No. Folio</th>
+                            <th style="border: 1px solid #000; padding: 3px;">No. Expediente</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Edad</th>
+                            <th style="border: 1px solid #000; padding: 3px;">H</th>
+                            <th style="border: 1px solid #000; padding: 3px;">M</th>
+                            <th style="border: 1px solid #000; padding: 3px;">1a Vez</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Subs.</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Hidro</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Compresas</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Parafina</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Crio</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Electro</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Mecano</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filasHTML || '<tr><td colspan="13" style="text-align: center; border: 1px solid #000; padding: 10px;">Sin registros para esta fecha.</td></tr>'}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #f1f5f9; font-weight: bold;">
+                            <td colspan="3" style="border: 1px solid #000; text-align: right; padding: 3px;">TOTAL:</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tM}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tF}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${t1a}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tSub}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tHidro}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tComp}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tPara}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tCrio}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tElectro}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tMecano}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        `;
     };
 
+    // 2. REPORTE MENSUAL SISP-1 (Muestra vista previa)
     window.generarReporteEstatal = () => {
         const contenedor = document.getElementById('contenidoReporteEstatal');
         if (!contenedor) return;
+
         const mesInput = document.getElementById('mesEstatal')?.value || '';
+        let anioEval, mesEval;
+        if (mesInput && mesInput.includes('-')) {
+            const p = mesInput.split('-');
+            anioEval = parseInt(p[0], 10);
+            mesEval = parseInt(p[1], 10);
+        } else {
+            const h = new Date();
+            anioEval = h.getFullYear();
+            mesEval = h.getMonth() + 1;
+        }
+
+        const nombresMeses = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        
+        let anioAnt = anioEval, mesAnt = mesEval - 1;
+        if (mesAnt === 0) { mesAnt = 12; anioAnt = anioEval - 1; }
+
+        const fInicio = `${anioAnt}-${String(mesAnt).padStart(2, '0')}-14`;
+        const fFin = `${anioEval}-${String(mesEval).padStart(2, '0')}-13`;
+
+        const registrosCorte = cacheRegistros.filter(r => r.fecha_ISO && r.fecha_ISO >= fInicio && r.fecha_ISO <= fFin);
+
+        let hidro = 0, compInfr = 0, crio = 0, para = 0, electroTot = 0, mecanoTot = 0;
+        let fisio1a = 0, fisioSubs = 0;
+
+        registrosCorte.forEach(r => {
+            const tipoT = (r.servicio || r.tipo_terapia || '').toLowerCase();
+            if (tipoT.includes('hidro')) hidro++;
+            if (tipoT.includes('compresa') || tipoT.includes('infrarrojo') || tipoT.includes('infrarojo')) compInfr++;
+            if (tipoT.includes('crio')) crio++;
+            if (tipoT.includes('parafina')) para++;
+            if (tipoT.includes('electro') || tipoT.includes('laser') || tipoT.includes('ultrasonido')) electroTot++;
+            if (tipoT.includes('mecano') || tipoT.includes('masaje')) mecanoTot++;
+
+            const estExp = (r.estatus_expediente || '').toUpperCase();
+            if (estExp.includes('NUEVO') || estExp.includes('PRIMERA')) fisio1a++; else fisioSubs++;
+        });
+
+        const sumaSesionesFisio = hidro + compInfr + crio + para + electroTot + mecanoTot;
+
+        let causasMap = {};
+        registrosCorte.forEach(r => {
+            const c = (r.diagnostico || 'NO ESPECIFICADO').trim().toUpperCase();
+            causasMap[c] = (causasMap[c] || 0) + 1;
+        });
+        const top5Causas = Object.entries(causasMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+        const rangos = [
+            { label: '-1 (Menor de 1)', min: 0, max: 0.99 },
+            { label: '1-4', min: 1, max: 4 },
+            { label: '5-9', min: 5, max: 9 },
+            { label: '10-14', min: 10, max: 14 },
+            { label: '15-19', min: 15, max: 19 },
+            { label: '20-29', min: 20, max: 29 },
+            { label: '30-39', min: 30, max: 39 },
+            { label: '40-49', min: 40, max: 49 },
+            { label: '50-59', min: 50, max: 59 },
+            { label: '60-69', min: 60, max: 69 },
+            { label: '70-79', min: 70, max: 79 },
+            { label: '>=80', min: 80, max: 150 }
+        ];
+
+        let tablaEdades = rangos.map(rg => ({ label: rg.label, h: 0, m: 0 }));
+        registrosCorte.forEach(r => {
+            let edad = parseFloat(r.edad);
+            if (isNaN(edad)) return;
+            const sexo = (r.sexo || '').toUpperCase();
+            const esH = sexo.startsWith('H') || (sexo.startsWith('M') && !sexo.startsWith('MA'));
+            const esM = sexo.startsWith('F') || sexo.startsWith('MA');
+            for (let i = 0; i < rangos.length; i++) {
+                if (edad >= rangos[i].min && edad <= rangos[i].max) {
+                    if (esH) tablaEdades[i].h++;
+                    if (esM) tablaEdades[i].m++;
+                    break;
+                }
+            }
+        });
+
+        contenedor.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;" class="no-print">
+                <h3 style="margin: 0; color: #0d9488;"><i class="fas fa-file-medical-alt"></i> Vista Previa: SISP-1 (Mensual)</h3>
+                <button type="button" onclick="window.imprimirSeccionReporte('contenidoReporteEstatal')" style="background: #0d9488; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                    <i class="fas fa-print"></i> Imprimir Este Reporte
+                </button>
+            </div>
+            <div style="background: white; padding: 20px; font-family: Arial, sans-serif; color: #000; font-size: 11px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
+                    <div><b>SALUD / DIF NACIONAL</b><br>UNIDAD DE ASISTENCIA E INTEGRACIÓN SOCIAL</div>
+                    <div style="text-align: right;"><b>SISP-1 (REGISTRO MENSUAL DE UBR)</b><br>PERIODO: 14 DE ${nombresMeses[mesAnt].toUpperCase()} AL 13 DE ${nombresMeses[mesEval].toUpperCase()} DE ${anioEval}</div>
+                </div>
+
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px;">
+                    <tr style="background: #e2e8f0;"><th colspan="4" style="border: 1px solid #000; padding: 5px;">TERAPIA FÍSICA</th></tr>
+                    <tr style="text-align: center;">
+                        <td style="border: 1px solid #000; padding: 5px;">1a. Vez: <b>${fisio1a}</b></td>
+                        <td style="border: 1px solid #000; padding: 5px;">Subs.: <b>${fisioSubs}</b></td>
+                        <td style="border: 1px solid #000; padding: 5px;">Total Personas: <b>${fisio1a + fisioSubs}</b></td>
+                        <td style="border: 1px solid #000; padding: 5px;">Sesiones Totales: <b>${sumaSesionesFisio}</b></td>
+                    </tr>
+                </table>
+
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px;">
+                    <tr style="background: #e2e8f0;"><th colspan="6" style="border: 1px solid #000; padding: 5px;">TIPO DE ATENCIÓN (MODALIDADES DE TERAPIA FÍSICA)</th></tr>
+                    <tr style="text-align: center;">
+                        <td style="border: 1px solid #000; padding: 5px;">Hidroterapia: <b>${hidro}</b></td>
+                        <td style="border: 1px solid #000; padding: 5px;">C.H.C / Infrarrojo: <b>${compInfr}</b></td>
+                        <td style="border: 1px solid #000; padding: 5px;">Crioterapia: <b>${crio}</b></td>
+                        <td style="border: 1px solid #000; padding: 5px;">Parafina: <b>${para}</b></td>
+                        <td style="border: 1px solid #000; padding: 5px;">Electroterapia: <b>${electroTot}</b></td>
+                        <td style="border: 1px solid #000; padding: 5px;">Mecanoterapia: <b>${mecanoTot}</b></td>
+                    </tr>
+                </table>
+
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px;">
+                    <tr style="background: #e2e8f0;"><th colspan="2" style="border: 1px solid #000; padding: 5px;">PRINCIPALES CAUSAS DE ATENCIÓN (TOP 5)</th></tr>
+                    ${top5Causas.map(([c, cant]) => `<tr><td style="border: 1px solid #000; padding: 4px;">${c}</td><td style="border: 1px solid #000; padding: 4px; text-align: right;"><b>${cant}</b></td></tr>`).join('') || '<tr><td colspan="2" style="border: 1px solid #000; text-align: center;">Sin registros en este rango de fechas</td></tr>'}
+                </table>
+
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr style="background: #e2e8f0;"><th colspan="4" style="border: 1px solid #000; padding: 5px;">GRUPOS ETARIOS</th></tr>
+                    <tr><th style="border: 1px solid #000; padding: 4px;">Rango de Edad</th><th style="border: 1px solid #000; padding: 4px;">Hombres (H)</th><th style="border: 1px solid #000; padding: 4px;">Mujeres (M)</th><th style="border: 1px solid #000; padding: 4px;">Total</th></tr>
+                    ${tablaEdades.map(e => `<tr><td style="border: 1px solid #000; padding: 3px;">${e.label}</td><td style="border: 1px solid #000; padding: 3px; text-align: center;">${e.h}</td><td style="border: 1px solid #000; padding: 3px; text-align: center;">${e.m}</td><td style="border: 1px solid #000; padding: 3px; text-align: center; font-weight: bold;">${e.h + e.m}</td></tr>`).join('')}
+                </table>
+            </div>
+        `;
+    };
+
+    // 3. REPORTE MENSUAL DE ALTAS SISP-19 (Muestra vista previa)
+    window.generarReporteAltasCrisver = () => {
+        const contenedor = document.getElementById('contenidoReporteEstatal');
+        if (!contenedor) return;
+
+        const mesInput = document.getElementById('mesAltasCrisver')?.value || '';
         let anioEval, mesEval;
         if (mesInput && mesInput.includes('-')) {
             const p = mesInput.split('-');
@@ -1776,25 +2004,132 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         const fInicio = `${anioAnt}-${String(mesAnt).padStart(2, '0')}-14`;
         const fFin = `${anioEval}-${String(mesEval).padStart(2, '0')}-13`;
 
-        const registrosCorte = cacheRegistros.filter(r => r.fecha_ISO && r.fecha_ISO >= fInicio && r.fecha_ISO <= fFin);
-        contenedor.innerHTML = `<div style="padding:15px; font-family:Arial;">Reporte Estatal del 14/${mesAnt}/${anioAnt} al 13/${mesEval}/${anioEval} generado (${registrosCorte.length} registros).</div>`;
+        const registrosAltas = cacheRegistros.filter(r => {
+            if (!r.fecha_ISO) return false;
+            const esRangoCorrecto = r.fecha_ISO >= fInicio && r.fecha_ISO <= fFin;
+            const estatus = (r.estatus_expediente || r.motivo_alta || '').toUpperCase();
+            const esAlta = estatus.includes('ALTA') || estatus.includes('BAJA') || estatus.includes('MEJORIA') || estatus.includes('DEFUNCIÓN') || estatus.includes('REFERENCIA');
+            return esRangoCorrecto && esAlta;
+        });
+
+        let filasHTML = '';
+        let tDefinitiva = 0, tMejoria = 0, tDesercion = 0, tFallecimiento = 0, tReferencia = 0;
+
+        registrosAltas.forEach((r, index) => {
+            const sexo = (r.sexo || '').toUpperCase();
+            const esH = sexo.startsWith('H') || (sexo.startsWith('M') && !sexo.startsWith('MA')) ? 'X' : '';
+            const esM = sexo.startsWith('F') || sexo.startsWith('MA') ? 'X' : '';
+
+            const motivo = (r.estatus_expediente || r.motivo_alta || '').toUpperCase();
+            const definitiva = motivo.includes('DEFINITIVA') ? 'X' : '';
+            const mejoria = motivo.includes('MEJORI') || motivo.includes('ALTA') ? 'X' : '';
+            const desercion = motivo.includes('DESERCI') || motivo.includes('BAJA') ? 'X' : '';
+            const fallecimiento = motivo.includes('FALLECIMIENTO') || motivo.includes('DEFUNCIÓN') ? 'X' : '';
+            const referencia = motivo.includes('REFERENCIA') ? 'X' : '';
+
+            if (definitiva) tDefinitiva++;
+            if (mejoria) tMejoria++;
+            if (desercion) tDesercion++;
+            if (fallecimiento) tFallecimiento++;
+            if (referencia) tReferencia++;
+
+            filasHTML += `
+                <tr>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${index + 1}</td>
+                    <td style="border: 1px solid #000; padding: 3px;">${r.expediente || ''}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${r.edad || ''}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esH}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${esM}</td>
+                    <td style="border: 1px solid #000; padding: 3px;">${r.servicio || 'Fisioterapia'}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${definitiva}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${mejoria}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${desercion}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${fallecimiento}</td>
+                    <td style="border: 1px solid #000; text-align: center; padding: 3px;">${referencia}</td>
+                </tr>
+            `;
+        });
+
+        contenedor.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;" class="no-print">
+                <h3 style="margin: 0; color: #7c3aed;"><i class="fas fa-file-invoice"></i> Vista Previa: SISP-19 (Altas)</h3>
+                <button type="button" onclick="window.imprimirSeccionReporte('contenidoReporteEstatal')" style="background: #7c3aed; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                    <i class="fas fa-print"></i> Imprimir Este Reporte
+                </button>
+            </div>
+            <div style="background: white; padding: 15px; font-family: Arial, sans-serif; color: #000; font-size: 10px; border: 1px solid #cbd5e1; border-radius: 6px;">
+                <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
+                    <div><b>SALUD / DIF NACIONAL</b><br>DIRECCIÓN GENERAL DE REHABILITACIÓN</div>
+                    <div style="text-align: right;"><b>SISP-19</b><br>INFORME MENSUAL DE ALTAS (DEL 14 AL 13)</div>
+                </div>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #e2e8f0;">
+                            <th style="border: 1px solid #000; padding: 3px;">No. Folio</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Expediente</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Edad</th>
+                            <th style="border: 1px solid #000; padding: 3px;">H</th>
+                            <th style="border: 1px solid #000; padding: 3px;">M</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Servicio</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Definitiva</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Mejoría</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Deserción</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Fallecimiento</th>
+                            <th style="border: 1px solid #000; padding: 3px;">Referencia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filasHTML || '<tr><td colspan="11" style="text-align: center; border: 1px solid #000; padding: 10px;">Sin altas registradas para este periodo.</td></tr>'}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #f1f5f9; font-weight: bold;">
+                            <td colspan="6" style="border: 1px solid #000; text-align: right; padding: 3px;">TOTALES:</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tDefinitiva}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tMejoria}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tDesercion}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tFallecimiento}</td>
+                            <td style="border: 1px solid #000; text-align: center;">${tReferencia}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        `;
     };
 
-    window.generarReporteAltasCrisver = () => {
-        const contenedor = document.getElementById('contenidoReporteAltasCrisver');
-        if (!contenedor) return;
-        contenedor.innerHTML = `<div style="padding:15px;">Reporte de Altas SISP-19 generado correctamente.</div>`;
-    };
-
+    // Función de impresión optimizada para imprimir únicamente el contenedor seleccionado
     window.imprimirSeccionReporte = (idContenedor) => {
         const contenedor = document.getElementById(idContenedor);
         if (!contenedor) return;
-        const ventana = window.open('', '_blank', 'width=900,height=700');
-        ventana.document.write('<html><head><style>body{font-family:Arial;}</style></head><body>' + contenedor.innerHTML + '</body></html>');
+        
+        // Abre una ventana limpia para impresión directa basada en el HTML actual de la vista previa
+        const ventana = window.open('', '_blank', 'width=950,height=800');
+        ventana.document.write(`
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <title>Impresión de Reporte - DIF Estatal</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 0; padding: 15px; color: #000; }
+                    .no-print { display: none !important; }
+                    @media print {
+                        @page { size: landscape; margin: 1cm; }
+                    }
+                </style>
+            </head>
+            <body>
+                ${contenedor.innerHTML}
+                <script>
+                    window.onload = function() {
+                        window.print();
+                        window.onafterprint = function() { window.close(); };
+                    };
+                <\/script>
+            </body>
+            </html>
+        `);
         ventana.document.close();
-        setTimeout(() => { ventana.print(); ventana.close(); }, 300);
     };
 </script>
-
 </body>
 </html>
