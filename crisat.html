@@ -1136,6 +1136,9 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         }
     };
 
+    // ==========================================
+    // 1. FUNCIÓN DE RENDERIZADO Y TABLA
+    // ==========================================
     window.filtrarYRenderizar = () => {
         const termino = document.getElementById('inputBuscar')?.value.toLowerCase().trim() || '';
         const filtroFechaValor = document.getElementById('filtroFecha')?.value || ''; 
@@ -1297,7 +1300,10 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         if (contPaginas) contPaginas.innerHTML = ''; 
     };
 
-    // --- ACCIONES RÁPIDAS DE ASISTENCIA Y FALTA (CON MODAL DE REPROGRAMACIÓN) ---
+
+    // ==========================================
+    // 2. ACCIÓN: ASISTIÓ (Modal para programar próxima cita)
+    // ==========================================
     window.marcarComoAsistio = async function(idRegistroCita) {
         try {
             const refCitaActual = doc(db, "registros_generales", idRegistroCita);
@@ -1325,32 +1331,191 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
             window.mostrarToast("¡Asistencia registrada con éxito!", "success");
             window.filtrarYRenderizar(); 
 
-            // SOLICITAR MODAL DE REPROGRAMAR CITA
-            const proximaFecha = calcularProximaFechaCita(datosCita.fecha_ISO, datosCita.dias_atencion);
-            const resReprog = await window.solicitarReprogramacionModal(
-                proximaFecha, 
-                datosCita.nombre_terapeuta, 
-                "asistió a", 
-                datosCita.nombre_paciente
-            );
+            const proximaFechaCalculada = calcularProximaFechaCita(datosCita.fecha_ISO, datosCita.dias_atencion);
+            const modalContainer = document.getElementById('modalReprogramar');
+            if (!modalContainer) return;
 
-            if (resReprog.agendar) {
-                await addDoc(collection(db, "registros_generales"), {
-                    ...datosCita,
-                    fecha_ISO: resReprog.fecha,
-                    nombre_terapeuta: (resReprog.terapeuta || datosCita.nombre_terapeuta).toUpperCase(),
-                    estatus: "PENDIENTE",
-                    justificacion: "",
-                    timestamp: serverTimestamp()
-                });
-                window.mostrarToast(`✅ Próxima cita agendada para el ${resReprog.fecha}.`, "success");
-            }
+            modalContainer.innerHTML = `
+                <div class="modal-content" style="font-family: Arial, sans-serif;">
+                    <div class="modal-header" style="color: #10b981;">
+                        <i class="fas fa-check-circle"></i> Asistencia Registrada: ${datosCita.nombre_paciente}
+                    </div>
+                    <p style="font-size: 0.9rem; margin-bottom: 15px; color: #475569;">
+                        La asistencia fue guardada. ¿Qué fecha deseas agendar para la <b>próxima cita</b>?
+                    </p>
+                    
+                    <div class="field" style="margin-bottom: 15px;">
+                        <label style="font-size: 0.85rem; font-weight: bold; color: #334155;">Fecha sugerida próxima cita:</label>
+                        <input type="date" id="modal_asistio_fecha" value="${proximaFechaCalculada}" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                    </div>
+
+                    <div class="field" style="margin-bottom: 15px;">
+                        <label style="font-size: 0.85rem; font-weight: bold; color: #334155;">Terapeuta Asignado:</label>
+                        <input type="text" id="modal_asistio_terapeuta" value="${datosCita.nombre_terapeuta || ''}" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; text-transform: uppercase;">
+                    </div>
+
+                    <div class="modal-btn-row" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                        <button type="button" class="btn-modal" style="background:#fee2e2; color:#991b1b; padding: 8px 14px;" onclick="window.revertirEstatusPendiente('${idRegistroCita}')">
+                            <i class="fas fa-undo"></i> Cancelar / Revertir
+                        </button>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="btn-modal" style="background:#e2e8f0; color:#334155; padding: 8px 14px;" onclick="document.getElementById('modalReprogramar').style.display='none'">Omitir</button>
+                            <button type="button" class="btn-modal" style="background:#10b981; color:white; padding: 8px 14px;" onclick="window.confirmarAgendarDesdeAsistio('${idRegistroCita}')">
+                                <i class="fas fa-calendar-plus"></i> Agendar Próxima
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modalContainer.style.display = 'flex';
 
         } catch (error) {
             window.mostrarToast("Error al actualizar la asistencia: " + error.message, "danger");
         }
     };
 
+    window.confirmarAgendarDesdeAsistio = async function(idRegistroCita) {
+        const nuevaFecha = document.getElementById('modal_asistio_fecha')?.value;
+        const nuevoTerapeuta = document.getElementById('modal_asistio_terapeuta')?.value.trim().toUpperCase();
+
+        try {
+            const refCita = doc(db, "registros_generales", idRegistroCita);
+            const snap = await getDoc(refCita);
+            if (!snap.exists()) return;
+            const datosCita = snap.data();
+
+            if (nuevaFecha) {
+                await addDoc(collection(db, "registros_generales"), {
+                    ...datosCita,
+                    fecha_ISO: nuevaFecha,
+                    nombre_terapeuta: nuevoTerapeuta || datosCita.nombre_terapeuta,
+                    estatus: "PENDIENTE",
+                    justificacion: "",
+                    timestamp: serverTimestamp()
+                });
+                window.mostrarToast(`✅ Próxima cita agendada con éxito para el ${nuevaFecha}.`, "success");
+            }
+            document.getElementById('modalReprogramar').style.display = 'none';
+            window.filtrarYRenderizar();
+        } catch (e) {
+            window.mostrarToast("Error al agendar: " + e.message, "danger");
+        }
+    };
+
+
+    // ==========================================
+    // 3. ACCIÓN: JUSTIFICAR (Modal con leyenda y estatus)
+    // ==========================================
+    window.abrirModalReagendarYStatus = function(idRegistro, expedienteActual, nombrePaciente, estatusActual) {
+        const modalContainer = document.getElementById('modalReprogramar');
+        if (!modalContainer) return;
+
+        const r = cacheRegistros.find(item => item.id === idRegistro);
+        const fechaISO = r ? r.fecha_ISO : window.obtenerFechaLocal();
+        const diasAtencion = r ? r.dias_atencion : [];
+        const proximaFechaCalculada = calcularProximaFechaCita(fechaISO, diasAtencion);
+        const estatusSugerido = (estatusActual === 'NUEVO INGRESO') ? 'EN TRATAMIENTO' : estatusActual;
+
+        modalContainer.innerHTML = `
+            <div class="modal-content" style="font-family: Arial, sans-serif;">
+                <div class="modal-header" style="color: #ca8a04;">
+                    <i class="fas fa-file-signature"></i> Justificar Falta: ${nombrePaciente}
+                </div>
+                <p style="font-size: 0.85rem; margin-bottom: 12px; color: #475569;">Expediente: <b>${expedienteActual}</b></p>
+                
+                <div class="field" style="margin-bottom: 12px;">
+                    <label style="font-size: 0.85rem; font-weight: bold; color: #334155;">Leyenda de Justificación:</label>
+                    <input type="text" id="modal_motivo_justificacion" value="FALTA JUSTIFICADA POR ADMINISTRACIÓN" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; text-transform: uppercase;">
+                </div>
+
+                <div class="field" style="margin-bottom: 12px;">
+                    <label style="font-size: 0.85rem; font-weight: bold; color: #334155;">Actualizar Estatus del Expediente:</label>
+                    <select id="modal_nuevo_estatus_exp" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                        <option value="EN TRATAMIENTO" ${estatusSugerido === 'EN TRATAMIENTO' ? 'selected' : ''}>EN TRATAMIENTO</option>
+                        <option value="NUEVO INGRESO" ${estatusSugerido === 'NUEVO INGRESO' ? 'selected' : ''}>NUEVO INGRESO</option>
+                        <option value="REINGRESO" ${estatusSugerido === 'REINGRESO' ? 'selected' : ''}>REINGRESO</option>
+                        <option value="ALTA POR MEJORÍAS" ${estatusSugerido.includes('MEJORI') || estatusSugerido.includes('ALTA') ? 'selected' : ''}>ALTA POR MEJORÍAS</option>
+                        <option value="BAJA POR DESERCIÓN" ${estatusSugerido.includes('DESERCI') || estatusSugerido.includes('BAJA') ? 'selected' : ''}>BAJA POR DESERCIÓN</option>
+                    </select>
+                </div>
+
+                <div class="field" style="margin-bottom: 15px;">
+                    <label style="font-size: 0.85rem; font-weight: bold; color: #334155;">¿Deseas reagendar una nueva cita? (Opcional):</label>
+                    <input type="date" id="modal_justifica_fecha" value="${proximaFechaCalculada}" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                </div>
+
+                <div class="modal-btn-row" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                    <button type="button" class="btn-modal" style="background:#fee2e2; color:#991b1b; padding: 8px 14px;" onclick="window.revertirEstatusPendiente('${idRegistro}')">
+                        <i class="fas fa-undo"></i> Cancelar / Revertir
+                    </button>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn-modal" style="background:#e2e8f0; color:#334155; padding: 8px 14px;" onclick="document.getElementById('modalReprogramar').style.display='none'">Cerrar</button>
+                        <button type="button" class="btn-modal" style="background:#ca8a04; color:white; padding: 8px 14px;" onclick="window.guardarJustificacionYReagendar('${idRegistro}')">
+                            <i class="fas fa-check-circle"></i> Guardar Justificación
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        modalContainer.style.display = 'flex';
+    };
+
+    window.guardarJustificacionYReagendar = async function(idRegistro) {
+        const motivo = document.getElementById('modal_motivo_justificacion')?.value.trim().toUpperCase() || 'FALTA JUSTIFICADA';
+        const nuevoEstatusExp = document.getElementById('modal_nuevo_estatus_exp')?.value;
+        const nuevaFechaCita = document.getElementById('modal_justifica_fecha')?.value;
+
+        try {
+            const docRef = doc(db, "registros_generales", idRegistro);
+            const docSnap = await getDoc(docRef);
+            if (!docSnap.exists()) throw new Error("El registro no existe.");
+
+            const dataActual = docSnap.data();
+            const expedientePaciente = dataActual.expediente;
+
+            await updateDoc(docRef, {
+                justificacion: motivo,
+                estatus_expediente: nuevoEstatusExp,
+                estatus: "FALTÓ"
+            });
+
+            if (expedientePaciente && nuevoEstatusExp) {
+                const q = query(collection(db, "registros_generales"), where("expediente", "==", expedientePaciente));
+                const querySnapshot = await getDocs(q);
+                
+                const batch = writeBatch(db);
+                querySnapshot.forEach((documento) => {
+                    batch.update(doc(db, "registros_generales", documento.id), { estatus_expediente: nuevoEstatusExp });
+                });
+                await batch.commit();
+            }
+
+            if (nuevaFechaCita) {
+                await addDoc(collection(db, "registros_generales"), {
+                    ...dataActual,
+                    fecha_ISO: nuevaFechaCita,
+                    estatus: "PENDIENTE",
+                    justificacion: "",
+                    estatus_expediente: nuevoEstatusExp,
+                    timestamp: serverTimestamp()
+                });
+                window.mostrarToast(`✅ Falta justificada y nueva cita agendada para el ${nuevaFechaCita}.`, "success");
+            } else {
+                window.mostrarToast("✅ Falta justificada correctamente.", "success");
+            }
+
+            document.getElementById('modalReprogramar').style.display = 'none';
+            window.filtrarYRenderizar();
+
+        } catch (error) {
+            window.mostrarToast("Error al procesar: " + error.message, "danger");
+        }
+    };
+
+
+    // ==========================================
+    // 4. ACCIÓN: FALTÓ (Confirma la falta y pregunta si desea reagendar)
+    // ==========================================
     window.marcarComoFalto = async function(idRegistroCita) {
         try {
             const refCitaActual = doc(db, "registros_generales", idRegistroCita);
@@ -1358,72 +1523,94 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
             if (!snapCita.exists()) return;
 
             const datosCita = snapCita.data();
+            const proximaFechaCalculada = calcularProximaFechaCita(datosCita.fecha_ISO, datosCita.dias_atencion);
+            const modalContainer = document.getElementById('modalReprogramar');
+            if (!modalContainer) return;
 
-            await updateDoc(refCitaActual, { estatus: "FALTÓ" });
-            window.mostrarToast("Cita marcada como FALTÓ.", "warning");
-            window.filtrarYRenderizar();
+            modalContainer.innerHTML = `
+                <div class="modal-content" style="font-family: Arial, sans-serif;">
+                    <div class="modal-header" style="color: #dc2626;">
+                        <i class="fas fa-user-times"></i> Confirmar Inasistencia: ${datosCita.nombre_paciente}
+                    </div>
+                    <p style="font-size: 0.9rem; margin-bottom: 12px; color: #475569;">
+                        ¿Deseas <b>confirmar la falta</b> de este paciente a la cita del ${datosCita.fecha_ISO} y <b>reagendar</b> una nueva cita para otro día?
+                    </p>
+                    
+                    <div class="field" style="margin-bottom: 15px;">
+                        <label style="font-size: 0.85rem; font-weight: bold; color: #334155;">Nueva fecha para reagendar (Opcional):</label>
+                        <input type="date" id="modal_falto_fecha" value="${proximaFechaCalculada}" style="width: 100%; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px;">
+                    </div>
 
-            // SOLICITAR MODAL DE REPROGRAMAR CITA
-            const proximaFecha = calcularProximaFechaCita(datosCita.fecha_ISO, datosCita.dias_atencion);
-            const resReprog = await window.solicitarReprogramacionModal(
-                proximaFecha, 
-                datosCita.nombre_terapeuta, 
-                "faltó a", 
-                datosCita.nombre_paciente
-            );
+                    <div class="modal-btn-row" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                        <button type="button" class="btn-modal" style="background:#fee2e2; color:#991b1b; padding: 8px 14px;" onclick="window.revertirEstatusPendiente('${idRegistroCita}')">
+                            <i class="fas fa-undo"></i> Cancelar / Revertir
+                        </button>
+                        <div style="display: flex; gap: 8px;">
+                            <button type="button" class="btn-modal" style="background:#e2e8f0; color:#334155; padding: 8px 14px;" onclick="document.getElementById('modalReprogramar').style.display='none'">Cerrar</button>
+                            <button type="button" class="btn-modal" style="background:#dc2626; color:white; padding: 8px 14px;" onclick="window.confirmarFaltaYReagendar('${idRegistroCita}')">
+                                <i class="fas fa-check"></i> Confirmar Falta y Reagendar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            modalContainer.style.display = 'flex';
 
-            if (resReprog.agendar) {
+        } catch (error) {
+            window.mostrarToast("Error al procesar la falta: " + error.message, "danger");
+        }
+    };
+
+    window.confirmarFaltaYReagendar = async function(idRegistroCita) {
+        const nuevaFecha = document.getElementById('modal_falto_fecha')?.value;
+
+        try {
+            const refCita = doc(db, "registros_generales", idRegistroCita);
+            const snap = await getDoc(refCita);
+            if (!snap.exists()) return;
+            const datosCita = snap.data();
+
+            await updateDoc(refCita, { estatus: "FALTÓ" });
+
+            if (nuevaFecha) {
                 await addDoc(collection(db, "registros_generales"), {
                     ...datosCita,
-                    fecha_ISO: resReprog.fecha,
-                    nombre_terapeuta: (resReprog.terapeuta || datosCita.nombre_terapeuta).toUpperCase(),
+                    fecha_ISO: nuevaFecha,
                     estatus: "PENDIENTE",
                     justificacion: "",
                     timestamp: serverTimestamp()
                 });
-                window.mostrarToast(`✅ Próxima cita agendada para el ${resReprog.fecha}.`, "success");
+                window.mostrarToast(`✅ Falta confirmada y nueva cita agendada para el ${nuevaFecha}.`, "success");
+            } else {
+                window.mostrarToast("⚠️ Falta confirmada correctamente.", "warning");
             }
 
-        } catch (error) {
-            window.mostrarToast("Error al marcar falta: " + error.message, "danger");
+            document.getElementById('modalReprogramar').style.display = 'none';
+            window.filtrarYRenderizar();
+
+        } catch (e) {
+            window.mostrarToast("Error al guardar: " + e.message, "danger");
         }
     };
 
-    // --- MODAL DE REAGENDAR Y CAMBIO DE ESTATUS (JUSTIFICAR / REAGENDAR) ---
-    window.abrirModalReagendarYStatus = function(idRegistro, expedienteActual, nombrePaciente, estatusActual) {
-        const modalContainer = document.getElementById('modalReprogramar');
-        if (!modalContainer) return;
 
-        const r = cacheRegistros.find(item => item.id === idRegistro);
-        const terapeutaActual = r ? r.nombre_terapeuta : '';
-        const fechaISO = r ? r.fecha_ISO : window.obtenerFechaLocal();
-        const diasAtencion = r ? r.dias_atencion : [];
-
-        const proximaFechaCalculada = calcularProximaFechaCita(fechaISO, diasAtencion);
-
-        window.solicitarReprogramacionModal(
-            proximaFechaCalculada, 
-            terapeutaActual, 
-            "justificó / reagendó", 
-            nombrePaciente, 
-            estatusActual
-        ).then(async (resReprog) => {
-            if (resReprog.agendar) {
-                if (r) {
-                    await addDoc(collection(db, "registros_generales"), {
-                        ...r,
-                        fecha_ISO: resReprog.fecha,
-                        nombre_terapeuta: (resReprog.terapeuta || terapeutaActual).toUpperCase(),
-                        estatus: "PENDIENTE",
-                        estatus_expediente: resReprog.estatus_expediente || estatusActual,
-                        justificacion: "",
-                        timestamp: serverTimestamp()
-                    });
-                    window.mostrarToast(`✅ Cita reagendada para el ${resReprog.fecha}.`, "success");
-                }
-            }
-        });
+    // ==========================================
+    // 5. FUNCIÓN AUXILIAR: REVERTIR ESTATUS A PENDIENTE
+    // ==========================================
+    window.revertirEstatusPendiente = async function(idRegistroCita) {
+        try {
+            const refCita = doc(db, "registros_generales", idRegistroCita);
+            await updateDoc(refCita, { estatus: "PENDIENTE", justificacion: "" });
+            
+            document.getElementById('modalReprogramar').style.display = 'none';
+            window.mostrarToast("↩️ Estatus revertido a PENDIENTE correctamente.", "info");
+            window.filtrarYRenderizar();
+        } catch (error) {
+            window.mostrarToast("Error al revertir estatus: " + error.message, "danger");
+        }
     };
+
+
 
     // --- INICIALIZACIÓN DE EVENTOS ---
     document.addEventListener('DOMContentLoaded', () => {
