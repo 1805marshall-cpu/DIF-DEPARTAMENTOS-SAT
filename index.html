@@ -242,7 +242,8 @@
         "juanita.campechano": { nombre: "JUANITA C. CAMPECHANO QUEZADA", titulo: "LIC." },
         "monse.plata": { nombre: "MONSERRAT PLATA FLORES", titulo: "LTS." },
         "social": { nombre: "JUANITA C. CAMPECHANO QUEZADA", titulo: "LIC." },
-        "angel.vidal": { nombre: "MIGUEL ANGEL VIDAL PUCHETA", titulo: "ING." },
+        "angel.vidal": { nombre: "ANGEL DE JESUS VIDAL ARANGO", titulo: "ING." },
+        "lorena.gonzalez": { nombre: "LORENA GONZALEZ KEGEL", titulo: "LIC." },
         "admin": { nombre: "ADMINISTRADOR GENERAL", titulo: "ADMIN" }
     };
 
@@ -314,17 +315,21 @@
         if (cuentas[user] && cuentas[user].p === pass) {
             error.style.display = 'none';
             
+            // OBTENER EL PERFIL COMPLETO (NOMBRE Y TÍTULO)
+            const perfil = perfilesUsuarios[user] || { nombre: user.toUpperCase(), titulo: "LIC." };
+
             sessionStorage.setItem('sesion_activa', 'true'); 
-            sessionStorage.setItem('nombre_usuario', user);
+            sessionStorage.setItem('nombre_usuario', perfil.nombre);
             sessionStorage.setItem('dep_usuario', cuentas[user].dep);
             sessionStorage.setItem('departamento', cuentas[user].dep);
 
-            // GUARDAMOS NOMBRE Y TÍTULO COMPLETO PARA EL ENCABEZADO
-            const perfil = perfilesUsuarios[user] || { nombre: user.toUpperCase(), titulo: "LIC." };
             sessionStorage.setItem('social_nombre', perfil.nombre);
             sessionStorage.setItem('social_titulo', perfil.titulo);
             
-            localStorage.setItem('activeUser', user);
+            // CONSTRUIR EL NOMBRE MOSTRADO (TÍTULO + NOMBRE COMPLETO)
+            const nombreMostrado = `${perfil.titulo} ${perfil.nombre}`.trim();
+            
+            localStorage.setItem('activeUser', nombreMostrado);
             localStorage.setItem('userDep', cuentas[user].dep);
 
             btn.disabled = true;
