@@ -80,6 +80,7 @@
     </style>
 </head>
 <body>
+
 <div class="user-session-bar no-print">
     <div class="user-session-bar-info">
         <span class="badge-sesion">
@@ -91,6 +92,7 @@
         <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
     </button>
 </div>
+
 <div class="form-container no-print">
     <div id="toastContainer"></div>
 
@@ -110,14 +112,17 @@
             <i class="fas fa-landmark"></i> Reporte DIF Estatal
         </button>
     </div>
+
     <!-- VISTA 1: Citas y Registro -->
     <div id="vistaCitas" class="vista-seccion">
         <form id="formCrisat" onsubmit="procesarFormulario(event)">
-            <input type="hidden" id="editId" value="">        
+            <input type="hidden" id="editId" value="">
+            
             <fieldset>
                 <legend><i class="fas fa-calendar-check"></i> Control de Cita y Frecuencia</legend>
                 <div class="field"><label>Fecha Captura</label><input type="date" id="fecha_captura" readonly></div>
-                <div class="field"><label>Fecha Cita *</label><input type="date" id="fecha_cita" required></div> 
+                <div class="field"><label>Fecha Cita *</label><input type="date" id="fecha_cita" required></div>
+                
                 <div class="field">
                     <label>Hora Cita *</label>
                     <select id="hora_cita" required>
@@ -133,6 +138,7 @@
                         <option value="16:00">16:00 hrs</option>
                     </select>
                 </div>
+                
                 <div class="field"><label>No. Expediente *</label><input type="text" id="expediente" placeholder="CR-000"></div>
                 <div class="field">
                     <label>Estatus Cita</label>
@@ -164,6 +170,7 @@
                         <option value="BAJA POR DESERCIÓN">⚠️ Baja por Deserción</option>
                     </select>
                 </div>
+
                 <div class="field span-2">
                     <label>Días Habituales de Atención:</label>
                     <div class="dias-box">
@@ -174,11 +181,13 @@
                         <label><input type="checkbox" class="chk-dia" value="5"> Vie</label>
                     </div>
                 </div>
+
                 <div class="field span-2" id="box_justificante" style="display: none;">
                     <label style="color: var(--danger);">Justificación de Falta:</label>
                     <input type="text" id="motivo_justificacion" placeholder="Escriba la causa de la inasistencia...">
                 </div>
-            </fieldset> 
+            </fieldset>
+            
             <fieldset>
                 <legend><i class="fas fa-user-injured"></i> Datos Personales</legend>
                 <div class="field span-2"><label>CURP</label><input type="text" id="curp" style="text-transform:uppercase;"></div>
@@ -206,10 +215,12 @@
                         </div>
                         <input type="text" id="col_loc" placeholder="Nombre de la colonia o localidad..." style="flex-grow: 1;">
                     </div>
-                </div> 
+                </div>
+                
                 <div class="field span-2"><label>Dirección</label><input type="text" id="direccion"></div>
                 <div class="field span-2"><label>Teléfono</label><input type="tel" id="telefono"></div>
             </fieldset>
+
             <fieldset>
                 <legend><i class="fas fa-file-medical"></i> Valoración Clínica</legend>
                 <div class="field full-width"><label for="diagnostico">Diagnóstico Médico</label><textarea id="diagnostico" rows="2"></textarea></div>
@@ -222,6 +233,7 @@
                             <option value="si">Sí</option>
                         </select>
                     </div>
+
                     <div class="field field-main">
                         <label>Tipo Limitación</label>
                         <div class="checkbox-group-inline">
@@ -231,6 +243,7 @@
                             <label class="checkbox-item"><input type="checkbox" name="tipo_discapacidad" value="LENGUAJE"> Lenguaje</label>
                         </div>
                     </div>
+
                     <div class="field field-sm">
                         <label for="grado">Grado</label>
                         <select id="grado">
@@ -768,7 +781,7 @@ async function procesarFormulario(e) {
         const fechaCitaIndividual = document.getElementById('fecha_cita').value;
         let datos = obtenerDatosFormulario();
 
-        if (idActual) {
+        if (idActual && idActual.trim() !== "") {
             await updateDoc(doc(db, "registros_generales", idActual), { ...datos, fecha_ISO: fechaCitaIndividual });
             window.mostrarToast("Registro actualizado correctamente.", "success");
         } else {
@@ -855,7 +868,7 @@ window.resolverFaltas = async (accion) => {
 };
 
 // ==========================================
-// ASISTENCIA Y CAMBIO DE ESTATUS A 2DA CITA
+// ACCIONES RÁPIDAS CON MODAL DE REPROGRAMACIÓN
 // ==========================================
 window.marcarComoAsistio = async function(idRegistroCita) {
     try {
@@ -889,6 +902,23 @@ window.marcarComoAsistio = async function(idRegistroCita) {
 
         await batch.commit();
         window.mostrarToast(`¡Asistencia registrada!`, "success");
+
+        // Abrir modal para reprogramar la próxima cita
+        const proximaFechaCalculada = calcularProximaFechaCita(datosCita.fecha_ISO, datosCita.dias_atencion);
+        const resReprog = await window.solicitarReprogramacionModal(proximaFechaCalculada, datosCita.nombre_terapeuta, "asistió a", datosCita.nombre_paciente);
+
+        if (resReprog.agendar) {
+            await addDoc(collection(db, "registros_generales"), {
+                ...datosCita,
+                fecha_ISO: resReprog.fecha,
+                nombre_terapeuta: (resReprog.terapeuta || datosCita.nombre_terapeuta || '').toUpperCase(),
+                estatus: "PENDIENTE",
+                justificacion: "",
+                timestamp: serverTimestamp()
+            });
+            window.mostrarToast(`✅ Próxima cita agendada para el ${resReprog.fecha}.`, "success");
+        }
+
         window.filtrarYRenderizar(); 
     } catch (error) {
         alert("Error al actualizar: " + error.message);
@@ -898,8 +928,31 @@ window.marcarComoAsistio = async function(idRegistroCita) {
 window.marcarComoFalto = async function(idRegistroCita) {
     try {
         const refCitaActual = doc(db, "registros_generales", idRegistroCita);
+        const snapCita = await getDoc(refCitaActual);
+
+        if (!snapCita.exists()) return;
+
+        const datosCita = snapCita.data();
+
         await updateDoc(refCitaActual, { estatus: "FALTÓ" });
         window.mostrarToast("Inasistencia registrada.", "warning");
+
+        // Abrir modal para reprogramar la próxima cita
+        const proximaFechaCalculada = calcularProximaFechaCita(datosCita.fecha_ISO, datosCita.dias_atencion);
+        const resReprog = await window.solicitarReprogramacionModal(proximaFechaCalculada, datosCita.nombre_terapeuta, "faltó a", datosCita.nombre_paciente);
+
+        if (resReprog.agendar) {
+            await addDoc(collection(db, "registros_generales"), {
+                ...datosCita,
+                fecha_ISO: resReprog.fecha,
+                nombre_terapeuta: (resReprog.terapeuta || datosCita.nombre_terapeuta || '').toUpperCase(),
+                estatus: "PENDIENTE",
+                justificacion: "",
+                timestamp: serverTimestamp()
+            });
+            window.mostrarToast(`✅ Próxima cita agendada para el ${resReprog.fecha}.`, "success");
+        }
+
         window.filtrarYRenderizar();
     } catch (error) {
         alert("Error al actualizar: " + error.message);
@@ -909,8 +962,31 @@ window.marcarComoFalto = async function(idRegistroCita) {
 window.marcarComoJustificado = async function(idRegistroCita) {
     try {
         const refCitaActual = doc(db, "registros_generales", idRegistroCita);
+        const snapCita = await getDoc(refCitaActual);
+
+        if (!snapCita.exists()) return;
+
+        const datosCita = snapCita.data();
+
         await updateDoc(refCitaActual, { estatus: "FALTÓ", justificacion: "FALTA JUSTIFICADA" });
         window.mostrarToast("Falta marcada como justificada.", "info");
+
+        // Abrir modal para reprogramar la próxima cita
+        const proximaFechaCalculada = calcularProximaFechaCita(datosCita.fecha_ISO, datosCita.dias_atencion);
+        const resReprog = await window.solicitarReprogramacionModal(proximaFechaCalculada, datosCita.nombre_terapeuta, "justificó su falta a", datosCita.nombre_paciente);
+
+        if (resReprog.agendar) {
+            await addDoc(collection(db, "registros_generales"), {
+                ...datosCita,
+                fecha_ISO: resReprog.fecha,
+                nombre_terapeuta: (resReprog.terapeuta || datosCita.nombre_terapeuta || '').toUpperCase(),
+                estatus: "PENDIENTE",
+                justificacion: "",
+                timestamp: serverTimestamp()
+            });
+            window.mostrarToast(`✅ Próxima cita agendada para el ${resReprog.fecha}.`, "success");
+        }
+
         window.filtrarYRenderizar();
     } catch (error) {
         alert("Error al actualizar: " + error.message);
