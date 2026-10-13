@@ -27,7 +27,7 @@
         .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 0.7rem; display: inline-block; margin-top: 5px; }
         .asistencia-ok { background: #dcfce7; color: #166534; }
         .alerta-roja { background: #fee2e2; color: #991b1b; }
-        .btn-action { border: none; padding: 8px 10px; margin: 0 2px; border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .btn-action { border: none; padding: 6px 8px; margin: 2px 1px; border-radius: 6px; cursor: pointer; transition: 0.2s; font-size: 0.75rem; }
         .btn-edit { background: #fef3c7; color: #92400e; }
         .btn-delete { background: #fee2e2; color: #991b1b; }
         .btn-alert { background: #dc2626; color: white; font-weight: bold; animation: pulse 1.5s infinite; }
@@ -80,7 +80,6 @@
     </style>
 </head>
 <body>
-
 <div class="user-session-bar no-print">
     <div class="user-session-bar-info">
         <span class="badge-sesion">
@@ -92,7 +91,6 @@
         <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
     </button>
 </div>
-
 <div class="form-container no-print">
     <div id="toastContainer"></div>
 
@@ -112,17 +110,14 @@
             <i class="fas fa-landmark"></i> Reporte DIF Estatal
         </button>
     </div>
-
     <!-- VISTA 1: Citas y Registro -->
     <div id="vistaCitas" class="vista-seccion">
         <form id="formCrisat" onsubmit="procesarFormulario(event)">
-            <input type="hidden" id="editId" value="">
-            
+            <input type="hidden" id="editId" value="">        
             <fieldset>
                 <legend><i class="fas fa-calendar-check"></i> Control de Cita y Frecuencia</legend>
                 <div class="field"><label>Fecha Captura</label><input type="date" id="fecha_captura" readonly></div>
-                <div class="field"><label>Fecha Cita *</label><input type="date" id="fecha_cita" required></div>
-                
+                <div class="field"><label>Fecha Cita *</label><input type="date" id="fecha_cita" required></div> 
                 <div class="field">
                     <label>Hora Cita *</label>
                     <select id="hora_cita" required>
@@ -138,7 +133,6 @@
                         <option value="16:00">16:00 hrs</option>
                     </select>
                 </div>
-                
                 <div class="field"><label>No. Expediente *</label><input type="text" id="expediente" placeholder="CR-000"></div>
                 <div class="field">
                     <label>Estatus Cita</label>
@@ -170,7 +164,6 @@
                         <option value="BAJA POR DESERCIÓN">⚠️ Baja por Deserción</option>
                     </select>
                 </div>
-
                 <div class="field span-2">
                     <label>Días Habituales de Atención:</label>
                     <div class="dias-box">
@@ -181,13 +174,11 @@
                         <label><input type="checkbox" class="chk-dia" value="5"> Vie</label>
                     </div>
                 </div>
-
                 <div class="field span-2" id="box_justificante" style="display: none;">
                     <label style="color: var(--danger);">Justificación de Falta:</label>
                     <input type="text" id="motivo_justificacion" placeholder="Escriba la causa de la inasistencia...">
                 </div>
-            </fieldset>
-            
+            </fieldset> 
             <fieldset>
                 <legend><i class="fas fa-user-injured"></i> Datos Personales</legend>
                 <div class="field span-2"><label>CURP</label><input type="text" id="curp" style="text-transform:uppercase;"></div>
@@ -215,12 +206,10 @@
                         </div>
                         <input type="text" id="col_loc" placeholder="Nombre de la colonia o localidad..." style="flex-grow: 1;">
                     </div>
-                </div>
-                
+                </div> 
                 <div class="field span-2"><label>Dirección</label><input type="text" id="direccion"></div>
                 <div class="field span-2"><label>Teléfono</label><input type="tel" id="telefono"></div>
             </fieldset>
-
             <fieldset>
                 <legend><i class="fas fa-file-medical"></i> Valoración Clínica</legend>
                 <div class="field full-width"><label for="diagnostico">Diagnóstico Médico</label><textarea id="diagnostico" rows="2"></textarea></div>
@@ -233,7 +222,6 @@
                             <option value="si">Sí</option>
                         </select>
                     </div>
-
                     <div class="field field-main">
                         <label>Tipo Limitación</label>
                         <div class="checkbox-group-inline">
@@ -243,7 +231,6 @@
                             <label class="checkbox-item"><input type="checkbox" name="tipo_discapacidad" value="LENGUAJE"> Lenguaje</label>
                         </div>
                     </div>
-
                     <div class="field field-sm">
                         <label for="grado">Grado</label>
                         <select id="grado">
@@ -334,7 +321,7 @@
                             <th style="width: 160px;">Valoración Discapacidad</th>
                             <th style="width: 150px;">Terapias</th>
                             <th style="width: 110px;">Cuota / Est.</th>
-                            <th style="width: 130px;" class="no-print">Acciones</th>
+                            <th style="width: 145px;" class="no-print">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="cuerpoTabla"></tbody>
@@ -740,6 +727,11 @@ window.prepararEdicion = (id) => {
     document.getElementById('grado').value = r.grado || 'LEVE';
     document.getElementById('duracion').value = r.duracion || 'TEMPORAL';
 
+    // Marcar días habituales guardados
+    document.querySelectorAll('.chk-dia').forEach(cb => {
+        cb.checked = r.dias_atencion && r.dias_atencion.includes(cb.value);
+    });
+
     window.toggleCamposEspeciales();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
@@ -896,11 +888,32 @@ window.marcarComoAsistio = async function(idRegistroCita) {
         });
 
         await batch.commit();
-        window.mostrarToast(`¡Asistencia registrada! Expediente actualizado a: ${nuevoEstatusExpediente}`, "success");
+        window.mostrarToast(`¡Asistencia registrada!`, "success");
         window.filtrarYRenderizar(); 
     } catch (error) {
-        console.error("Error al actualizar el estatus:", error);
-        alert("Hubo un error al actualizar: " + error.message);
+        alert("Error al actualizar: " + error.message);
+    }
+};
+
+window.marcarComoFalto = async function(idRegistroCita) {
+    try {
+        const refCitaActual = doc(db, "registros_generales", idRegistroCita);
+        await updateDoc(refCitaActual, { estatus: "FALTÓ" });
+        window.mostrarToast("Inasistencia registrada.", "warning");
+        window.filtrarYRenderizar();
+    } catch (error) {
+        alert("Error al actualizar: " + error.message);
+    }
+};
+
+window.marcarComoJustificado = async function(idRegistroCita) {
+    try {
+        const refCitaActual = doc(db, "registros_generales", idRegistroCita);
+        await updateDoc(refCitaActual, { estatus: "FALTÓ", justificacion: "FALTA JUSTIFICADA" });
+        window.mostrarToast("Falta marcada como justificada.", "info");
+        window.filtrarYRenderizar();
+    } catch (error) {
+        alert("Error al actualizar: " + error.message);
     }
 };
 
@@ -956,11 +969,13 @@ window.filtrarYRenderizar = () => {
                 <td><div style="font-weight:600; color:var(--crisat); font-size:0.75rem;"><i class="fas fa-user-md"></i> ${r.nombre_terapeuta || 'SIN ASIGNAR'}</div></td>
                 <td><span style="font-size:0.7rem;"><b>Discapacidad:</b> ${r.discapacidad || 'no'}</span><br><small>${r.tipo_discapacidad || ''}</small></td>
                 <td>${r.servicio || '--'}</td>
-                <td>$${parseFloat(r.monto || 0).toFixed(2)}<br><span class="badge ${r.estatus === "ASISTIÓ" ? "asistencia-ok" : "alerta-roja"}">${r.estatus}</span></td>
+                <td>$${parseFloat(r.monto || 0).toFixed(2)}<br><span class="badge ${r.estatus === "ASISTIÓ" ? "asistencia-ok" : "alerta-roja"}">${r.estatus}</span> ${r.justificacion ? `<br><small style="color:var(--danger)">(${r.justificacion})</small>` : ''}</td>
                 <td class="no-print">
                     ${botonAlertaFaltas}
-                    <button class="btn-action" style="background:#dcfce7; color:#166534;" onclick="window.marcarComoAsistio('${r.id}')" title="Marcar Asistencia">✅</button>
-                    <button class="btn-action btn-edit" onclick="window.prepararEdicion('${r.id}')" title="Editar">✏️</button>
+                    <button class="btn-action" style="background:#dcfce7; color:#166534;" onclick="window.marcarComoAsistio('${r.id}')" title="Marcar Asistió">✅ Asistió</button>
+                    <button class="btn-action" style="background:#fef3c7; color:#92400e;" onclick="window.marcarComoJustificado('${r.id}')" title="Justificar Falta">📝 Justificar</button>
+                    <button class="btn-action" style="background:#fee2e2; color:#991b1b;" onclick="window.marcarComoFalto('${r.id}')" title="Marcar Faltó">❌ Faltó</button>
+                    <button class="btn-action btn-edit" onclick="window.prepararEdicion('${r.id}')" title="Editar">✏️ Editar</button>
                     <button class="btn-action btn-delete" onclick="window.eliminarRegistro('${r.id}')" title="Eliminar">🗑️</button>
                 </td>
             </tr>`;
