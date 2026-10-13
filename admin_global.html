@@ -47,13 +47,13 @@
             <div id="nav-estadisticas" class="nav-item" onclick="showView('estadisticas', this)"><i class="fa-solid fa-chart-line"></i> <span>Estadístico</span></div>
         </nav>
 
-        <div class="user-profile-box">
-            <i class="fas fa-user-circle" style="font-size: 20px;"></i> 
-            <div> 
-                <b id="nombre-usuario-activo" style="display:block; font-size:11px;">Admin_Global</b>
-                <small style="color: #94a3b8;">Sistema DIF</small>
-            </div>
-        </div>
+<div class="user-profile-box">
+    <i class="fas fa-user-circle" style="font-size: 20px;"></i> 
+    <div> 
+        <b id="nombre-usuario-activo" style="display:block; font-size:11px;">Cargando...</b>
+        <small id="dep-usuario-activo" style="color: #94a3b8;">Cargando...</small>
+    </div>
+</div>
 
         <div class="nav-exit" onclick="window.cerrarSesion()" style="cursor: pointer;">
             <i class="fas fa-sign-out-alt"></i>
@@ -1168,33 +1168,39 @@ window.cerrarSesion = function() {
     window.location.href = "index.html";
 };
 function iniciarSistema() {
-    const usuario = localStorage.getItem('activeUser');
-    const departamento = localStorage.getItem('userDep');
+    // 1. Obtener usuario y departamento desde almacenamiento
+    const usuario = localStorage.getItem('activeUser') || sessionStorage.getItem('social_nombre') || sessionStorage.getItem('nombre_usuario') || 'ADMINISTRADOR';
+    const departamento = localStorage.getItem('userDep') || sessionStorage.getItem('dep_usuario') || 'SISTEMA DIF';
     
-    if (usuario) {
-        const elemUser = document.getElementById("user-name-display");
-        const elemRole = document.getElementById("user-role-display");
-        
-        if (elemUser) elemUser.innerText = usuario.toUpperCase();
-        if (elemRole) elemRole.innerText = departamento || "SISTEMA DIF";
-        
-        aplicarRestriccionesDeDepartamento();
-        conectarNavegacion();
-        window.mostrarVista('view-bienvenida');
+    // 2. Buscar los elementos exactos de tu HTML
+    const elemUser = document.getElementById("nombre-usuario-activo") || document.getElementById("user-name-display");
+    const elemRole = document.getElementById("dep-usuario-activo") || document.getElementById("user-role-display") || document.querySelector(".user-profile-box small");
+    
+    // 3. Inyectar los datos en el menú lateral
+    if (elemUser) {
+        elemUser.innerText = usuario.toUpperCase();
+    }
+    if (elemRole) {
+        elemRole.innerText = departamento.toUpperCase();
+    }
+    
+    // 4. Continuar con la inicialización del dashboard
+    if (typeof aplicarRestriccionesDeDepartamento === 'function') aplicarRestriccionesDeDepartamento();
+    if (typeof conectarNavegacion === 'function') conectarNavegacion();
+    if (typeof window.mostrarVista === 'function') window.mostrarVista('view-bienvenida');
 
-        // --- LÓGICA DEL TOGGLE ---
-        const btnToggle = document.getElementById('btn-toggle');
-        const sidebar = document.querySelector('.sidebar');
-        if (btnToggle && sidebar) {
-            btnToggle.style.cursor = 'pointer';
-            btnToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('collapsed');
-            });
-        }
-    } else {
-        window.location.href = "index.html";
+    // Toggle para colapsar/expandir el sidebar
+    const btnToggle = document.getElementById('btn-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    if (btnToggle && sidebar) {
+        btnToggle.style.cursor = 'pointer';
+        btnToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
     }
 }
+
+
 
 function conectarNavegacion() {
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -1304,9 +1310,6 @@ onSnapshot(collection(db, "evidencias"), (s) => {
     store.evidencias_jornadas = s.docs.map(d => ({ id: d.id, ...d.data() })); 
     if (typeof window.reprocesarJornadas === 'function') window.reprocesarJornadas(); 
 });
-
-
-
 
 // =============================================================================
 // --- RENDERIZADO DEL PANEL GLOBAL DE DIRECCIÓN Y FINANZAS (4 MÓDULOS) ---
