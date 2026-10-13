@@ -740,9 +740,36 @@ window.prepararEdicion = (id) => {
     document.getElementById('grado').value = r.grado || 'LEVE';
     document.getElementById('duracion').value = r.duracion || 'TEMPORAL';
 
+    // Cargar Terapeuta
+    const selectTerapeuta = document.getElementById('nombre_terapeuta');
+    if (selectTerapeuta) {
+        let encontrada = false;
+        const terapeutaValor = (r.nombre_terapeuta || '').trim().toUpperCase();
+        for (let i = 0; i < selectTerapeuta.options.length; i++) {
+            if (selectTerapeuta.options[i].value.toUpperCase() === terapeutaValor) {
+                selectTerapeuta.value = selectTerapeuta.options[i].value;
+                encontrada = true;
+                break;
+            }
+        }
+        if (!encontrada) selectTerapeuta.value = "";
+    }
+
     // Marcar días habituales guardados
     document.querySelectorAll('.chk-dia').forEach(cb => {
         cb.checked = r.dias_atencion && r.dias_atencion.includes(cb.value);
+    });
+
+    // Marcar servicios guardados
+    const serviciosGuardados = r.servicio ? r.servicio.split(',').map(s => s.trim().toUpperCase()) : [];
+    document.querySelectorAll('.check-serv').forEach(cb => {
+        cb.checked = serviciosGuardados.includes(cb.value.toUpperCase());
+    });
+
+    // Marcar tipo de discapacidad
+    const tiposDiscapacidadGuardados = r.tipo_discapacidad ? r.tipo_discapacidad.split(',').map(t => t.trim().toUpperCase()) : [];
+    document.querySelectorAll('input[name="tipo_discapacidad"]').forEach(cb => {
+        cb.checked = tiposDiscapacidadGuardados.includes(cb.value.toUpperCase());
     });
 
     window.toggleCamposEspeciales();
