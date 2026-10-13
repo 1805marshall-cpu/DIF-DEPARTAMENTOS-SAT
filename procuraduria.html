@@ -194,7 +194,12 @@
         justify-content: center;
         gap: 8px; 
         text-transform: uppercase; 
-        transition: background 0.2s, border-color 0.2s; 
+        transition: background 0.2s, border-color 0.2s, opacity 0.2s; 
+    }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 
     .btn-primary {
@@ -203,12 +208,12 @@
         border-color: var(--primary);
     }
     
-    .btn:hover { 
+    .btn:hover:not(:disabled) { 
         background: #f8fafc; 
         border-color: #cbd5e1;
     }
 
-    .btn-primary:hover {
+    .btn-primary:hover:not(:disabled) {
         background: #1e293b;
     }
 
@@ -479,6 +484,14 @@
         <button class="btn btn-primary" id="btn-save" onclick="guardar()"><i class="fas fa-save"></i> Guardar</button>
         <button class="btn" id="btn-update" style="background: var(--warning); border-color: var(--warning); color: white; display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> Actualizar</button>
         <button class="btn" onclick="exportarExcel()"><i class="fas fa-download"></i> Excel</button>
+        
+        <label class="btn" style="cursor:pointer;">
+            <i class="fas fa-file-import"></i> Importar
+            <input type="file" id="import-excel" accept=".xlsx, .xls" style="display:none" onchange="importarDesdeExcel(event)">
+        </label>
+
+        <button class="btn" onclick="limpiarForm()"><i class="fas fa-broom"></i> Limpiar</button>
+        <button class="btn" style="color: var(--danger); border-color: #fecaca;" onclick="borrarTodaLaBase()"><i class="fas fa-trash-alt"></i> Vaciar</button>
         <button class="btn" onclick="limpiarForm()"><i class="fas fa-plus"></i> Nuevo</button>
     </div>
 </div>
@@ -706,7 +719,6 @@
         window.toggleCampoMenores();
     };
 
-    // ACTUALIZA DINÁMICAMENTE EL DESPLEGABLE DE ASUNTOS DISPONIBLES
     function actualizarOpcionesAsuntos() {
         const selectAsuntos = document.getElementById('filtro-asunto');
         const valorActual = selectAsuntos.value;
@@ -872,24 +884,59 @@
         reader.readAsArrayBuffer(file);
     };
 
+    // GUARDAR PROTEGIDO CONTRA DOBLE CLIC Y ERRORES DE RED
     window.guardar = async () => {
+        const btnSave = document.getElementById('btn-save');
         const data = obtenerValoresForm();
+
         if(!data.nombre) {
             mostrarNotificacion("El nombre del solicitante es obligatorio.", 'warning');
             return;
         }
-        data.t = new Date().getTime();
-        await addDoc(dataRef, data);
-        window.limpiarForm();
-        mostrarNotificacion("Expediente guardado correctamente.", 'success');
+
+        // Bloquear botón para evitar duplicados
+        btnSave.disabled = true;
+        const textoOriginal = btnSave.innerHTML;
+        btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+        try {
+            data.t = new Date().getTime();
+            await addDoc(dataRef, data);
+            window.limpiarForm();
+            mostrarNotificacion("Expediente guardado correctamente.", 'success');
+        } catch (error) {
+            console.error("Error al guardar:", error);
+            mostrarNotificacion("Error de conexión. Intente nuevamente.", 'error');
+        } finally {
+            // Desbloquear botón
+            btnSave.disabled = false;
+            btnSave.innerHTML = textoOriginal;
+        }
     };
 
+    // ACTUALIZAR PROTEGIDO CONTRA DOBLE CLIC Y ERRORES DE RED
     window.actualizar = async () => {
+        const btnUpdate = document.getElementById('btn-update');
         const id = document.getElementById('edit-id').value;
         if(!id) return;
-        await updateDoc(doc(db, "procuraduria", id), obtenerValoresForm());
-        window.limpiarForm();
-        mostrarNotificacion("Registro actualizado correctamente.", 'success');
+
+        // Bloquear botón para evitar duplicados
+        btnUpdate.disabled = true;
+        const textoOriginal = btnUpdate.innerHTML;
+        btnUpdate.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
+
+        try {
+            await updateDoc(doc(db, "procuraduria", id), obtenerValoresForm());
+            window.limpiarForm();
+            mostrarNotificacion("Registro actualizado correctamente.", 'success');
+        } catch (error) {
+            console.error("Error al actualizar:", error);
+            mostrarNotificacion("Error de conexión. Intente nuevamente.", 'error');
+        } finally {
+            // Desbloquear botón
+            btnUpdate.disabled = false;
+            btnUpdate.innerHTML = textoOriginal;
+        }
     };
 
     window.borrarTodaLaBase = async () => {
@@ -914,17 +961,14 @@
         });
     };
 
-    // LÓGICA DE FILTRADO TRIPLE (BÚSQUEDA GENERAL + MES + ASUNTO)
     window.filtrar = () => {
         const term = document.getElementById('buscador').value.toLowerCase().trim();
         const mesSeleccionado = document.getElementById('filtro-mes').value;
         const asuntoSeleccionado = document.getElementById('filtro-asunto').value;
 
         datosMostrados = todosLosDatos.filter(r => {
-            // 1. Filtro Texto General
             const coincideTexto = Object.values(r).some(val => String(val).toLowerCase().includes(term));
             
-            // 2. Filtro por Mes (YYYY-MM-DD)
             let coincideMes = true;
             if (mesSeleccionado !== "TODOS") {
                 if (r.fecha) {
@@ -936,7 +980,6 @@
                 }
             }
 
-            // 3. Filtro por Asunto
             let coincideAsunto = true;
             if (asuntoSeleccionado !== "TODOS") {
                 coincideAsunto = (r.asuntos && r.asuntos.trim().toUpperCase() === asuntoSeleccionado);
