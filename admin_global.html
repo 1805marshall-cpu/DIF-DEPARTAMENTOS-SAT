@@ -3393,6 +3393,9 @@ window.reprocesarProcuraduria = function() {
 };
 
 // =========================================================================
+// Reprocesar Todo Jornadas Itinerantes
+// =========================================================================
+// =========================================================================
 // Reprocesar Todo Jornadas Itinerantes (Con Tipo de Jornada en Últimas Registradas)
 // =========================================================================
    
@@ -3596,6 +3599,84 @@ window.reprocesarJornItin = function() {
 // Alias de compatibilidad
 window.reprocesarJornadas = window.reprocesarJornItin;
 
+
+// --- FUNCIÓN PARA RENDERIZAR LAS GRÁFICAS DE JORNADAS ---
+function renderizarGraficasJornadas(serviciosConteo, evidencias, jornadas) {
+    if (typeof Chart === 'undefined') return;
+
+    // Gráfica 1: Atenciones por Servicio (Barras)
+    const canvas1 = document.getElementById('chartJiServicios');
+    if (canvas1) {
+        const labels = Object.keys(serviciosConteo).map(s => s.toUpperCase());
+        const data = Object.values(serviciosConteo);
+
+        if (window.chartJiServiciosInstance) {
+            window.chartJiServiciosInstance.destroy();
+        }
+
+        window.chartJiServiciosInstance = new Chart(canvas1, {
+            type: 'bar',
+            data: {
+                labels: labels.length ? labels : ['SIN DATOS'],
+                datasets: [{
+                    label: 'Atenciones',
+                    data: data.length ? data : [0],
+                    backgroundColor: '#a21caf',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+        window.chartJiServiciosInstance.resize();
+    }
+
+    // Gráfica 2: Evolución / Distribución por Localidad (Dona)
+    const canvas2 = document.getElementById('chartJiEvolucion');
+    if (canvas2) {
+        const locMap = {};
+        evidencias.forEach(ev => {
+            const j = jornadas.find(item => item.id === ev.jornadaId);
+            const loc = j?.colonia || 'Otras';
+            let suma = 0;
+            if (ev.cantidades) Object.values(ev.cantidades).forEach(v => suma += Number(v) || 0);
+            locMap[loc] = (locMap[loc] || 0) + suma;
+        });
+
+        const labelsLoc = Object.keys(locMap);
+        const dataLoc = Object.values(locMap);
+
+        if (window.chartJiEvolucionInstance) {
+            window.chartJiEvolucionInstance.destroy();
+        }
+
+        window.chartJiEvolucionInstance = new Chart(canvas2, {
+            type: 'doughnut',
+            data: {
+                labels: labelsLoc.length ? labelsLoc : ['SIN DATOS'],
+                datasets: [{
+                    data: dataLoc.length ? dataLoc : [1],
+                    backgroundColor: ['#a21caf', '#10b981', '#0284c7', '#f59e0b', '#ec4899', '#6366f1', '#14b8a6']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { boxWidth: 12, font: { size: 10 } }
+                    }
+                }
+            }
+        });
+        window.chartJiEvolucionInstance.resize();
+    }
+}
 
 
 // =============================================================
