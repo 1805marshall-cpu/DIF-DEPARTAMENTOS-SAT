@@ -1692,47 +1692,23 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
     };
 
     // ==========================================
-    // REPORTE DIF MUNICIPAL
+    // REPORTE DIF MUNICIPAL (DÍA, MES, RANGO Y AÑO)
     // ==========================================
     window.toggleTipoFiltroMunicipal = () => {
-        const tipo = document.getElementById('tipoFiltroMunicipal')?.value;
-        document.getElementById('filtroContenedorMes').style.display = tipo === 'mes' ? 'block' : 'none';
-        document.getElementById('filtroContenedorRango').style.display = tipo === 'rango' ? 'flex' : 'none';
-        document.getElementById('filtroContenedorAnio').style.display = tipo === 'anio' ? 'block' : 'none';
+        const selector = document.getElementById('tipoFiltroMunicipal');
+        const tipo = selector ? selector.value : 'mes';
+
+        const contDia = document.getElementById('filtroContenedorDia');
+        const contMes = document.getElementById('filtroContenedorMes');
+        const contRango = document.getElementById('filtroContenedorRango');
+        const contAnio = document.getElementById('filtroContenedorAnio');
+
+        if (contDia) contDia.style.display = tipo === 'dia' ? 'block' : 'none';
+        if (contMes) contMes.style.display = tipo === 'mes' ? 'block' : 'none';
+        if (contRango) contRango.style.display = tipo === 'rango' ? 'flex' : 'none';
+        if (contAnio) contAnio.style.display = tipo === 'anio' ? 'block' : 'none';
+
         window.generarReporteMunicipal();
-    };
-
-    window.imprimirReporteMunicipal = () => {
-        const contenido = document.getElementById('contenidoReporteMunicipal')?.innerHTML;
-        if (!contenido) return;
-
-        const ventanaImpresion = window.open('', '_blank', 'width=900,height=800');
-        ventanaImpresion.document.write(`
-            <!DOCTYPE html>
-            <html lang="es">
-            <head>
-                <meta charset="UTF-8">
-                <title>Reporte Oficial DIF Municipal - CRISAT</title>
-                <style>
-                    body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; margin: 0; padding: 20px; color: #1e293b; }
-                    @media print {
-                        body { padding: 0; }
-                        @page { margin: 1.5cm; size: portrait; }
-                    }
-                </style>
-            </head>
-            <body>
-                ${contenido}
-                <script>
-                    window.onload = function() {
-                        window.print();
-                        window.onafterprint = function() { window.close(); };
-                    };
-                <\/script>
-            </body>
-            </html>
-        `);
-        ventanaImpresion.document.close();
     };
 
     window.generarReporteMunicipal = function() {
@@ -1745,6 +1721,7 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         }
 
         const tipoFiltro = document.getElementById('tipoFiltroMunicipal')?.value || 'mes';
+        const diaFiltro = document.getElementById('diaMunicipal')?.value || '';
         const mesFiltro = document.getElementById('mesMunicipal')?.value || '';
         const fInicio = document.getElementById('fechaInicioMunicipal')?.value || '';
         const fFin = document.getElementById('fechaFinMunicipal')?.value || '';
@@ -1760,23 +1737,40 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         };
 
         let nombreMesTexto = "DEL PERIODO";
-        if (mesObjetivo && mesObjetivo.includes('-')) {
-            const [a, m] = mesObjetivo.split('-');
-            nombreMesTexto = `${nombresMeses[m] || m} DE ${a}`;
-        }
 
+        // --- FILTRADO SEGÚN LA OPCIÓN SELECCIONADA ---
         let registrosPeriodo = cacheRegistros.filter(r => {
             const fechaReg = r.fecha_ISO || r.fecha_captura || '';
-            if (tipoFiltro === 'rango' && fInicio && fFin) return fechaReg >= fInicio && fechaReg <= fFin;
-            if (tipoFiltro === 'anio' && anioFiltro) return fechaReg.startsWith(anioFiltro);
-            return fechaReg.startsWith(mesObjetivo);
+            if (!fechaReg) return false;
+
+            if (tipoFiltro === 'dia') {
+                const diaTarget = diaFiltro || hoyLocal;
+                nombreMesTexto = `DEL DÍA ${diaTarget}`;
+                return fechaReg === diaTarget;
+            } else if (tipoFiltro === 'rango') {
+                if (fInicio && fFin) {
+                    nombreMesTexto = `DEL PERIODO DEL ${fInicio} AL ${fFin}`;
+                    return fechaReg >= fInicio && fechaReg <= fFin;
+                }
+                return true;
+            } else if (tipoFiltro === 'anio') {
+                const anioTarget = anioFiltro || hoyLocal.substring(0, 4);
+                nombreMesTexto = `DEL AÑO ${anioTarget}`;
+                return fechaReg.startsWith(anioTarget);
+            } else {
+                // Filtro Mensual (default)
+                if (mesObjetivo && mesObjetivo.includes('-')) {
+                    const [a, m] = mesObjetivo.split('-');
+                    nombreMesTexto = `DEL MES DE ${nombresMeses[m] || m} DE ${a}`;
+                }
+                return fechaReg.startsWith(mesObjetivo);
+            }
         });
 
         let totalIngresosPrimeraVez = 0;
         let deComunidades = 0;
         let deUrbanos = 0;
 
-        let totalTerapias = registrosPeriodo.length;
         let compresas = 0;
         let electroterapia = 0;
         let mecanoterapia = 0;
@@ -1793,17 +1787,30 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         let terapeutasMap = {};
 
         let totalCuotaRecuperacion = 0;
+        let totalTerapiasBrindadas = 0;
         let pacientesContadosPrimeraVez = new Set();
+        let pacientesAltasContados = new Set();
 
         registrosPeriodo.forEach(r => {
             const idPaciente = (r.expediente || r.curp || r.nombre_paciente || '').trim().toUpperCase();
-            totalCuotaRecuperacion += parseFloat(r.monto || 0);
-
+            const estatusCita = (r.estatus || '').toUpperCase();
             const estExp = (r.estatus_expediente || '').toUpperCase();
             const tipoUbicacion = (r.tipo_ubicacion || '').toUpperCase();
             const esComunidad = tipoUbicacion.includes('LOCALIDAD') || tipoUbicacion.includes('COMUNIDAD');
             const municipioP = (r.localidad || r.municipio || 'SAN ANDRÉS TUXTLA').trim().toUpperCase();
 
+            // 1. SOLO SI ASISTIÓ: suma cobro y cuenta terapias brindadas
+            if (estatusCita === "ASISTIÓ") {
+                totalCuotaRecuperacion += parseFloat(r.monto || 0);
+                totalTerapiasBrindadas++;
+
+                const serv = (r.servicio || '').toUpperCase();
+                if (serv.includes('COMPRESA') || serv.includes('CALIENTE')) compresas++;
+                if (serv.includes('ELECTRO') || serv.includes('TENS') || serv.includes('ULTRASONIDO') || serv.includes('LASER')) electroterapia++;
+                if (serv.includes('MECANO') || serv.includes('MASAJE')) mecanoterapia++;
+            }
+
+            // 2. INGRESOS PRIMERA VEZ
             if (estExp.includes('NUEVO') || estExp.includes('PRIMERA')) {
                 if (idPaciente && !pacientesContadosPrimeraVez.has(idPaciente)) {
                     pacientesContadosPrimeraVez.add(idPaciente);
@@ -1813,13 +1820,9 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
                 }
             }
 
-            const serv = (r.servicio || '').toUpperCase();
-            if (serv.includes('COMPRESA') || serv.includes('CALIENTE')) compresas++;
-            if (serv.includes('ELECTRO') || serv.includes('TENS') || serv.includes('ULTRASONIDO') || serv.includes('LASER')) electroterapia++;
-            if (serv.includes('MECANO') || serv.includes('MASAJE')) mecanoterapia++;
-
+            // 3. MENORES Y MUNICIPIOS (Solo si asistió)
             const edadNum = parseInt(r.edad || '-1', 10);
-            if (idPaciente && edadNum >= 0 && edadNum <= 14) {
+            if (idPaciente && edadNum >= 0 && edadNum <= 14 && estatusCita === "ASISTIÓ") {
                 menoresSet.add(idPaciente);
                 const sexo = (r.sexo || '').toUpperCase();
                 if (sexo === 'M' || sexo.includes('FEM') || sexo.includes('MUJER')) {
@@ -1836,17 +1839,22 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
                 }
             }
 
+            // 4. ALTAS Y DESERCIONES (Basadas en el estatus del expediente)
             const terapeuta = (r.nombre_terapeuta || 'SIN ASIGNAR').trim().toUpperCase();
             if (!terapeutasMap[terapeuta]) {
                 terapeutasMap[terapeuta] = { mejorias: 0, deserciones: 0 };
             }
 
-            if (estExp.includes('MEJORI') || estExp.includes('ALTA')) {
-                altasMejorias++;
-                terapeutasMap[terapeuta].mejorias++;
-            } else if (estExp.includes('DESERCI') || estExp.includes('BAJA') || r.estatus === 'FALTÓ') {
-                altasDeserciones++;
-                terapeutasMap[terapeuta].deserciones++;
+            if (idPaciente && !pacientesAltasContados.has(idPaciente + '-' + estExp)) {
+                if (estExp.includes('MEJORI') || estExp.includes('ALTA')) {
+                    pacientesAltasContados.add(idPaciente + '-' + estExp);
+                    altasMejorias++;
+                    terapeutasMap[terapeuta].mejorias++;
+                } else if (estExp.includes('DESERCI') || estExp.includes('BAJA')) {
+                    pacientesAltasContados.add(idPaciente + '-' + estExp);
+                    altasDeserciones++;
+                    terapeutasMap[terapeuta].deserciones++;
+                }
             }
         });
 
@@ -1889,16 +1897,16 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
                 </div>
 
                 <p style="margin-bottom: 20px;">
-                    Por medio de la presente entrego informe del mes de <b>${nombreMesTexto}</b> del CRISAT:
+                    Por medio de la presente entrego informe <b>${nombreMesTexto}</b> del CRISAT:
                 </p>
 
                 <ul style="list-style-type: disc; padding-left: 25px; margin-bottom: 30px;">
                     <li style="margin-bottom: 12px;">Ingresaron <b>${totalIngresosPrimeraVez} pacientes</b> de primera vez.</li>
                     <li style="margin-bottom: 12px;">De los ingresos <b>${deComunidades} son de comunidades</b> y <b>${deUrbanos} urbanos</b>.</li>
-                    <li style="margin-bottom: 12px;">Se otorgaron un total de <b>${totalTerapias.toLocaleString()} terapias</b>, alcanzando un total de <b>${totalSesiones.toLocaleString()} sesiones</b>: <u>${compresas.toLocaleString()} compresas</u>, <u>${electroterapia.toLocaleString()} electroterapia</u> y <u>${mecanoterapia.toLocaleString()} mecanoterapia</u>.</li>
+                    <li style="margin-bottom: 12px;">Se otorgaron un total de <b>${totalTerapiasBrindadas.toLocaleString()} terapias efectivas</b>, alcanzando un total de <b>${totalSesiones.toLocaleString()} sesiones</b>: <u>${compresas.toLocaleString()} compresas</u>, <u>${electroterapia.toLocaleString()} electroterapia</u> y <u>${mecanoterapia.toLocaleString()} mecanoterapia</u>.</li>
                     <li style="margin-bottom: 12px;">Tenemos un total de <b>${menoresSet.size} menores de edad</b>, <b>${ninasSet.size} niñas</b> y <b>${ninosSet.size} niños</b>, <b>${menoresComunidades.size} vienen de distintas comunidades</b>, <b>${Object.keys(municipiosExternosMap).length} de distintos municipios</b> (${listaMunicipiosTexto}) y <b>${menoresUrbanos.size} son urbanos</b>.</li>
                     <li style="margin-bottom: 12px;">Se dieron de alta <b>${totalAltas} pacientes</b>, de los cuales <b>${altasMejorias} fueron mejorías</b> y <b>${altasDeserciones} deserciones</b>. El terapeuta con mayor número de mejorías fue <b>${mejorTerapeuta}</b> y con mayor número de deserciones fue <b>${deserciónTerapeuta}</b>.</li>
-                    <li style="margin-bottom: 12px;">Durante el mes de ${nombreMesTexto.toLowerCase()} se entregó la cantidad total de <b>$${totalCuotaRecuperacion.toFixed(2)}</b> por concepto de cuotas de recuperación.</li>
+                    <li style="margin-bottom: 12px;">Durante el periodo de ${nombreMesTexto.toLowerCase()} se entregó la cantidad total de <b>$${totalCuotaRecuperacion.toFixed(2)}</b> por concepto de cuotas de recuperación de terapias brindadas.</li>
                     <li style="margin-bottom: 12px;">Se está registrando toda la información en el sistema web del CRISAT para corroborar su funcionalidad operativa y estadística.</li>
                 </ul>
 
@@ -1916,17 +1924,20 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         `;
     };
 
+    
     // ==========================================
     // REPORTE DIF ESTATAL (VISUALIZACIÓN PREVIA E IMPRESIÓN)
     // ==========================================
 
-    // 1. REPORTE DIARIO SISP-15 (Muestra vista previa)
+    // 1. REPORTE DIARIO SISP-15 (Muestra vista previa con filtro estricto de asistencia)
     window.generarReporteDiarioCrisver = () => {
         const contenedor = document.getElementById('contenidoReporteEstatal');
         if (!contenedor) return;
 
         const fechaFiltro = document.getElementById('fechaDiariaCrisver')?.value || window.obtenerFechaLocal();
-        const registrosDia = cacheRegistros.filter(r => r.fecha_ISO === fechaFiltro);
+        
+        // ⚠️ CRITERIO ESTRICTO: Solo se consideran las citas del día donde el paciente realmente ASISTIÓ
+        const registrosDia = cacheRegistros.filter(r => r.fecha_ISO === fechaFiltro && (r.estatus || '').toUpperCase() === 'ASISTIÓ');
 
         let filasHTML = '';
         let tM = 0, tF = 0, t1a = 0, tSub = 0, tHidro = 0, tComp = 0, tPara = 0, tCrio = 0, tElectro = 0, tMecano = 0;
@@ -1980,7 +1991,7 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
 
         contenedor.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;" class="no-print">
-                <h3 style="margin: 0; color: #0284c7;"><i class="fas fa-file-alt"></i> Vista Previa: SISP-15 (Diario)</h3>
+                <h3 style="margin: 0; color: #0284c7;"><i class="fas fa-file-alt"></i> Vista Previa: SISP-15 (Diario - Asistencias Efectivas)</h3>
                 <button type="button" onclick="window.imprimirSeccionReporte('contenidoReporteEstatal')" style="background: #0284c7; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">
                     <i class="fas fa-print"></i> Imprimir Este Reporte
                 </button>
@@ -1993,7 +2004,7 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
                 <div style="margin-bottom: 8px; display: grid; grid-template-columns: 2fr 2fr 1fr; gap: 10px; border: 1px solid #000; padding: 5px;">
                     <div><b>Fecha:</b> ${fechaFiltro}</div>
                     <div><b>Centro:</b> CRISAT - DIF MUNICIPAL</div>
-                    <div><b>Total:</b> ${registrosDia.length}</div>
+                    <div><b>Total Asistencias:</b> ${registrosDia.length}</div>
                 </div>
                 <table style="width: 100%; border-collapse: collapse;">
                     <thead>
@@ -2014,7 +2025,7 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
                         </tr>
                     </thead>
                     <tbody>
-                        ${filasHTML || '<tr><td colspan="13" style="text-align: center; border: 1px solid #000; padding: 10px;">Sin registros para esta fecha.</td></tr>'}
+                        ${filasHTML || '<tr><td colspan="13" style="text-align: center; border: 1px solid #000; padding: 10px;">Sin asistencias registradas para esta fecha.</td></tr>'}
                     </tbody>
                     <tfoot>
                         <tr style="background: #f1f5f9; font-weight: bold;">
@@ -2036,7 +2047,7 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         `;
     };
 
-    // 2. REPORTE MENSUAL SISP-1 (Muestra vista previa)
+    // 2. REPORTE MENSUAL SISP-1 (Filtro estricto: Solo sesiones de pacientes que asistieron)
     window.generarReporteEstatal = () => {
         const contenedor = document.getElementById('contenidoReporteEstatal');
         if (!contenedor) return;
@@ -2061,7 +2072,13 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         const fInicio = `${anioAnt}-${String(mesAnt).padStart(2, '0')}-14`;
         const fFin = `${anioEval}-${String(mesEval).padStart(2, '0')}-13`;
 
-        const registrosCorte = cacheRegistros.filter(r => r.fecha_ISO && r.fecha_ISO >= fInicio && r.fecha_ISO <= fFin);
+        // ⚠️ CRITERIO ESTRICTO: Solo registros del periodo con estatus ASISTIÓ
+        const registrosCorte = cacheRegistros.filter(r => {
+            if (!r.fecha_ISO) return false;
+            const esRango = r.fecha_ISO >= fInicio && r.fecha_ISO <= fFin;
+            const asistio = (r.estatus || '').toUpperCase() === 'ASISTIÓ';
+            return esRango && asistio;
+        });
 
         let hidro = 0, compInfr = 0, crio = 0, para = 0, electroTot = 0, mecanoTot = 0;
         let fisio1a = 0, fisioSubs = 0;
@@ -2121,7 +2138,7 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
 
         contenedor.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;" class="no-print">
-                <h3 style="margin: 0; color: #0d9488;"><i class="fas fa-file-medical-alt"></i> Vista Previa: SISP-1 (Mensual)</h3>
+                <h3 style="margin: 0; color: #0d9488;"><i class="fas fa-file-medical-alt"></i> Vista Previa: SISP-1 (Mensual - Sesiones Efectivas)</h3>
                 <button type="button" onclick="window.imprimirSeccionReporte('contenidoReporteEstatal')" style="background: #0d9488; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">
                     <i class="fas fa-print"></i> Imprimir Este Reporte
                 </button>
@@ -2133,7 +2150,7 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
                 </div>
 
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px;">
-                    <tr style="background: #e2e8f0;"><th colspan="4" style="border: 1px solid #000; padding: 5px;">TERAPIA FÍSICA</th></tr>
+                    <tr style="background: #e2e8f0;"><th colspan="4" style="border: 1px solid #000; padding: 5px;">TERAPIA FÍSICA (ASISTENCIAS REALES)</th></tr>
                     <tr style="text-align: center;">
                         <td style="border: 1px solid #000; padding: 5px;">1a. Vez: <b>${fisio1a}</b></td>
                         <td style="border: 1px solid #000; padding: 5px;">Subs.: <b>${fisioSubs}</b></td>
@@ -2143,7 +2160,7 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
                 </table>
 
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px;">
-                    <tr style="background: #e2e8f0;"><th colspan="6" style="border: 1px solid #000; padding: 5px;">TIPO DE ATENCIÓN (MODALIDADES DE TERAPIA FÍSICA)</th></tr>
+                    <tr style="background: #e2e8f0;"><th colspan="6" style="border: 1px solid #000; padding: 5px;">TIPO DE ATENCIÓN (MODALIDADES APLICADAS)</th></tr>
                     <tr style="text-align: center;">
                         <td style="border: 1px solid #000; padding: 5px;">Hidroterapia: <b>${hidro}</b></td>
                         <td style="border: 1px solid #000; padding: 5px;">C.H.C / Infrarrojo: <b>${compInfr}</b></td>
@@ -2168,7 +2185,7 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         `;
     };
 
-    // 3. REPORTE MENSUAL DE ALTAS SISP-19 (Muestra vista previa)
+    // 3. REPORTE MENSUAL DE ALTAS SISP-19 (Basado en estatus oficiales de expediente)
     window.generarReporteAltasCrisver = () => {
         const contenedor = document.getElementById('contenidoReporteEstatal');
         if (!contenedor) return;
@@ -2195,8 +2212,8 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
             if (!r.fecha_ISO) return false;
             const esRangoCorrecto = r.fecha_ISO >= fInicio && r.fecha_ISO <= fFin;
             const estatus = (r.estatus_expediente || r.motivo_alta || '').toUpperCase();
-            const esAlta = estatus.includes('ALTA') || estatus.includes('BAJA') || estatus.includes('MEJORIA') || estatus.includes('DEFUNCIÓN') || estatus.includes('REFERENCIA');
-            return esRangoCorrecto && esAlta;
+            const esAltaOficial = estatus.includes('ALTA') || estatus.includes('BAJA') || estatus.includes('MEJORIA') || estatus.includes('DEFUNCIÓN') || estatus.includes('REFERENCIA');
+            return esRangoCorrecto && esAltaOficial;
         });
 
         let filasHTML = '';
@@ -2239,7 +2256,7 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
 
         contenedor.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;" class="no-print">
-                <h3 style="margin: 0; color: #7c3aed;"><i class="fas fa-file-invoice"></i> Vista Previa: SISP-19 (Altas)</h3>
+                <h3 style="margin: 0; color: #7c3aed;"><i class="fas fa-file-invoice"></i> Vista Previa: SISP-19 (Altas y Bajas Oficiales)</h3>
                 <button type="button" onclick="window.imprimirSeccionReporte('contenidoReporteEstatal')" style="background: #7c3aed; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;">
                     <i class="fas fa-print"></i> Imprimir Este Reporte
                 </button>
@@ -2283,12 +2300,11 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         `;
     };
 
-    // Función de impresión optimizada para imprimir únicamente el contenedor seleccionado
+    // Función de impresión optimizada
     window.imprimirSeccionReporte = (idContenedor) => {
         const contenedor = document.getElementById(idContenedor);
         if (!contenedor) return;
         
-        // Abre una ventana limpia para impresión directa basada en el HTML actual de la vista previa
         const ventana = window.open('', '_blank', 'width=950,height=800');
         ventana.document.write(`
             <!DOCTYPE html>
@@ -2317,6 +2333,7 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         `);
         ventana.document.close();
     };
+
 </script>
 </body>
 </html>
