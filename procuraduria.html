@@ -212,6 +212,7 @@
         background: #1e293b;
     }
 
+    /* REJILLA DE BÚSQUEDA Y FILTROS */
     .search-box { 
         background: #fafafa; 
         padding: 16px; 
@@ -219,7 +220,7 @@
         border: 1px solid var(--border); 
         margin-bottom: 20px; 
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: 2fr 1fr 1.5fr 1fr;
         gap: 16px; 
         align-items: flex-end; 
     }
@@ -292,6 +293,10 @@
         cursor: not-allowed; 
     }
 
+    @media (max-width: 992px) {
+        .search-box { grid-template-columns: 1fr 1fr; }
+    }
+
     @media (max-width: 768px) {
         header {
             flex-direction: column;
@@ -301,6 +306,7 @@
         }
         .container { padding: 0 10px; }
         .card { padding: 16px; }
+        .search-box { grid-template-columns: 1fr; }
         .table-wrap { border: none; background: transparent; }
         table, thead, tbody, th, td, tr { display: block; }
         thead tr { position: absolute; top: -9999px; left: -9999px; }
@@ -417,7 +423,6 @@
                     <input type="text" id="asuntos" placeholder="Ej: Pensión Alimenticia, Guardia y Custodia...">
                 </div>
 
-                <!-- SWITCHS / TOGGLES -->
                 <div class="form-group">
                     <label>Menor de Edad</label>
                     <div class="toggle-container">
@@ -451,7 +456,6 @@
                     </div>
                 </div>
 
-                <!-- CAMPO CONDICIONAL PARA CANTIDAD DE MENORES -->
                 <div class="form-group" id="grupo-cant-menores">
                     <label><i class="fas fa-child"></i> Cantidad de Menores</label>
                     <input type="number" id="cant_menores" min="1" placeholder="Ej. 2">
@@ -475,15 +479,41 @@
         <button class="btn btn-primary" id="btn-save" onclick="guardar()"><i class="fas fa-save"></i> Guardar</button>
         <button class="btn" id="btn-update" style="background: var(--warning); border-color: var(--warning); color: white; display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> Actualizar</button>
         <button class="btn" onclick="exportarExcel()"><i class="fas fa-download"></i> Excel</button>
+        <button class="btn" onclick="limpiarForm()"><i class="fas fa-plus"></i> Nuevo</button>
     </div>
 </div>
 
+    <!-- BUSCADOR CON FILTROS DE MES Y ASUNTO -->
     <div class="search-box no-print">
-        <div class="form-group" style="flex:2;">
+        <div class="form-group">
             <label><i class="fas fa-search"></i> Buscador Inteligente</label>
-            <input type="text" id="buscador" placeholder="Escribe para buscar por cualquier campo..." onkeyup="filtrar()">
+            <input type="text" id="buscador" placeholder="Escribe para buscar..." onkeyup="filtrar()">
         </div>
-        <div class="form-group" style="flex:1;">
+        <div class="form-group">
+            <label><i class="fas fa-calendar-alt"></i> Filtrar por Mes</label>
+            <select id="filtro-mes" onchange="filtrar()">
+                <option value="TODOS" selected>Todos los meses</option>
+                <option value="01">Enero</option>
+                <option value="02">Febrero</option>
+                <option value="03">Marzo</option>
+                <option value="04">Abril</option>
+                <option value="05">Mayo</option>
+                <option value="06">Junio</option>
+                <option value="07">Julio</option>
+                <option value="08">Agosto</option>
+                <option value="09">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-gavel"></i> Filtrar por Asunto</label>
+            <select id="filtro-asunto" onchange="filtrar()">
+                <option value="TODOS" selected>Todos los asuntos</option>
+            </select>
+        </div>
+        <div class="form-group">
             <label>Filas por página</label>
             <select id="rows-per-page" onchange="actualizarFilasPorPagina()">
                 <option value="10" selected>10 registros</option>
@@ -634,7 +664,6 @@
         }
     });
 
-    // FUNCIONES GLOBALES DE UTILIDAD
     window.actualizarTextoToggle = (idCheckbox, idLabel) => {
         const checked = document.getElementById(idCheckbox).checked;
         document.getElementById(idLabel).innerText = checked ? "Sí" : "No";
@@ -671,12 +700,36 @@
 
         document.getElementById('edad').value = edad >= 0 ? edad : 0;
         
-        // Auto-seleccionar si es menor de edad (< 18 años)
         const esMenor = edad < 18;
         document.getElementById('menor_edad').checked = esMenor;
         window.actualizarTextoToggle('menor_edad', 'label-menor');
         window.toggleCampoMenores();
     };
+
+    // ACTUALIZA DINÁMICAMENTE EL DESPLEGABLE DE ASUNTOS DISPONIBLES
+    function actualizarOpcionesAsuntos() {
+        const selectAsuntos = document.getElementById('filtro-asunto');
+        const valorActual = selectAsuntos.value;
+        
+        const conjuntoAsuntos = new Set();
+        todosLosDatos.forEach(r => {
+            if (r.asuntos && r.asuntos.trim() !== '') {
+                conjuntoAsuntos.add(r.asuntos.trim().toUpperCase());
+            }
+        });
+
+        const listaOrdenada = Array.from(conjuntoAsuntos).sort();
+
+        selectAsuntos.innerHTML = '<option value="TODOS">Todos los asuntos</option>';
+        listaOrdenada.forEach(asunto => {
+            const opt = document.createElement('option');
+            opt.value = asunto;
+            opt.textContent = asunto;
+            selectAsuntos.appendChild(opt);
+        });
+
+        selectAsuntos.value = conjuntoAsuntos.has(valorActual) ? valorActual : "TODOS";
+    }
 
     function obtenerValoresForm() {
         const esMenor = document.getElementById('menor_edad').checked;
@@ -717,9 +770,8 @@
         document.getElementById('btn-next').disabled = paginaActual === totalPag;
 
         tbody.innerHTML = segmento.map(reg => {
-            // Muestra en la tabla de forma clara si hay menores y cuántos son
             const txtMenores = reg.menor_edad === 'Sí' 
-                ? `<span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:4px; font-weight:600;"><i class="fas fa-child"></i> Sí (${reg.cant_menores || '1'})</span>` 
+                ? `<span style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-weight:600;">Sí ${reg.cant_menores ? '(' + reg.cant_menores + ')' : ''}</span>` 
                 : 'No';
 
             return `
@@ -862,11 +914,36 @@
         });
     };
 
+    // LÓGICA DE FILTRADO TRIPLE (BÚSQUEDA GENERAL + MES + ASUNTO)
     window.filtrar = () => {
         const term = document.getElementById('buscador').value.toLowerCase().trim();
-        datosMostrados = todosLosDatos.filter(r => 
-            Object.values(r).some(val => String(val).toLowerCase().includes(term))
-        );
+        const mesSeleccionado = document.getElementById('filtro-mes').value;
+        const asuntoSeleccionado = document.getElementById('filtro-asunto').value;
+
+        datosMostrados = todosLosDatos.filter(r => {
+            // 1. Filtro Texto General
+            const coincideTexto = Object.values(r).some(val => String(val).toLowerCase().includes(term));
+            
+            // 2. Filtro por Mes (YYYY-MM-DD)
+            let coincideMes = true;
+            if (mesSeleccionado !== "TODOS") {
+                if (r.fecha) {
+                    const partesFecha = r.fecha.split('-');
+                    const mesRegistro = partesFecha[1];
+                    coincideMes = (mesRegistro === mesSeleccionado);
+                } else {
+                    coincideMes = false;
+                }
+            }
+
+            // 3. Filtro por Asunto
+            let coincideAsunto = true;
+            if (asuntoSeleccionado !== "TODOS") {
+                coincideAsunto = (r.asuntos && r.asuntos.trim().toUpperCase() === asuntoSeleccionado);
+            }
+
+            return coincideTexto && coincideMes && coincideAsunto;
+        });
 
         datosMostrados.sort((a, b) => (parseInt(b.no) || 0) - (parseInt(a.no) || 0));
         paginaActual = 1; 
@@ -887,10 +964,13 @@
         window.actualizarTextoToggle('embarazada', 'label-embarazada');
         window.toggleCampoMenores();
 
+        document.getElementById('filtro-mes').value = 'TODOS';
+        document.getElementById('filtro-asunto').value = 'TODOS';
         document.getElementById('no').value = proximoNo;
         document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
         document.getElementById('btn-save').style.display = 'inline-flex';
         document.getElementById('btn-update').style.display = 'none';
+        window.filtrar();
     };
 
     window.editarLocal = (id) => {
@@ -983,6 +1063,8 @@
         if(!document.getElementById('edit-id').value) {
             document.getElementById('no').value = proximoNo;
         }
+
+        actualizarOpcionesAsuntos();
         window.filtrar();
     });
 
