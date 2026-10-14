@@ -1460,10 +1460,13 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         modalContainer.style.display = 'flex';
     };
 
-    window.guardarJustificacionYReagendar = async function(idRegistro) {
+        window.guardarJustificacionYReagendar = async function(idRegistro) {
         const motivo = document.getElementById('modal_motivo_justificacion')?.value.trim().toUpperCase() || 'FALTA JUSTIFICADA';
         const nuevoEstatusExp = document.getElementById('modal_nuevo_estatus_exp')?.value;
         const nuevaFechaCita = document.getElementById('modal_justifica_fecha')?.value;
+
+        // Validar si el nuevo estatus es un cierre de ciclo (Alta o Baja)
+        const esCierreTratamiento = nuevoEstatusExp.includes('ALTA') || nuevoEstatusExp.includes('BAJA') || nuevoEstatusExp.includes('MEJORI') || nuevoEstatusExp.includes('DESERCI');
 
         try {
             const docRef = doc(db, "registros_generales", idRegistro);
@@ -1473,24 +1476,36 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
             const dataActual = docSnap.data();
             const expedientePaciente = dataActual.expediente;
 
+            // 1. Actualizamos el registro actual
             await updateDoc(docRef, {
                 justificacion: motivo,
                 estatus_expediente: nuevoEstatusExp,
                 estatus: "FALTÓ"
             });
 
+            // 2. Actualizamos el estatus del expediente en *todos* los registros históricos de este paciente
             if (expedientePaciente && nuevoEstatusExp) {
                 const q = query(collection(db, "registros_generales"), where("expediente", "==", expedientePaciente));
                 const querySnapshot = await getDocs(q);
                 
                 const batch = writeBatch(db);
                 querySnapshot.forEach((documento) => {
-                    batch.update(doc(db, "registros_generales", documento.id), { estatus_expediente: nuevoEstatusExp });
+                    const datosDoc = documento.data();
+                    let updateData = { estatus_expediente: nuevoEstatusExp };
+
+                    // Opcional recomendado: Si es un cierre de tratamiento, cancelamos/actualizamos también cualquier cita futura que estuviera "PENDIENTE"
+                    if (esCierreTratamiento && datosDoc.estatus === "PENDIENTE") {
+                        updateData.estatus = "CANCELADO"; // O el estatus que prefieras para limpiar pendientes futuros
+                        updateData.justificacion = `CANCELADO POR: ${nuevoEstatusExp}`;
+                    }
+
+                    batch.update(doc(db, "registros_generales", documento.id), updateData);
                 });
                 await batch.commit();
             }
 
-            if (nuevaFechaCita) {
+            // 3. Solo permitimos agendar nueva cita si NO es un cierre de tratamiento
+            if (nuevaFechaCita && !esCierreTratamiento) {
                 await addDoc(collection(db, "registros_generales"), {
                     ...dataActual,
                     fecha_ISO: nuevaFechaCita,
@@ -1500,6 +1515,8 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
                     timestamp: serverTimestamp()
                 });
                 window.mostrarToast(`✅ Falta justificada y nueva cita agendada para el ${nuevaFechaCita}.`, "success");
+            } else if (esCierreTratamiento) {
+                window.mostrarToast(`✨ Expediente actualizado a "${nuevoEstatusExp}". Se cerraron las citas pendientes.`, "success");
             } else {
                 window.mostrarToast("✅ Falta justificada correctamente.", "success");
             }
@@ -2047,7 +2064,7 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         `;
     };
 
-    // 2. REPORTE MENSUAL SISP-1 (Filtro estricto: Solo sesiones de pacientes que asistieron)
+        // 2. REPORTE MENSUAL SISP-1 (Filtro estricto: Solo sesiones efectivas y causas de 1a vez)
     window.generarReporteEstatal = () => {
         const contenedor = document.getElementById('contenidoReporteEstatal');
         if (!contenedor) return;
@@ -2083,6 +2100,9 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
         let hidro = 0, compInfr = 0, crio = 0, para = 0, electroTot = 0, mecanoTot = 0;
         let fisio1a = 0, fisioSubs = 0;
 
+        let causasMap = {};
+        let pacientesPrimeraVezSet = new Set();
+
         registrosCorte.forEach(r => {
             const tipoT = (r.servicio || r.tipo_terapia || '').toLowerCase();
             if (tipoT.includes('hidro')) hidro++;
@@ -2093,16 +2113,23 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
             if (tipoT.includes('mecano') || tipoT.includes('masaje')) mecanoTot++;
 
             const estExp = (r.estatus_expediente || '').toUpperCase();
-            if (estExp.includes('NUEVO') || estExp.includes('PRIMERA')) fisio1a++; else fisioSubs++;
+            const esPrimerIngreso = estExp.includes('NUEVO') || estExp.includes('PRIMERA');
+
+            if (esPrimerIngreso) {
+                fisio1a++;
+                const idPaciente = (r.expediente || r.curp || r.nombre_paciente || '').trim().toUpperCase();
+                // Acumulamos las causas exclusivamente de pacientes de 1a vez
+                if (idPaciente && !pacientesPrimeraVezSet.has(idPaciente)) {
+                    pacientesPrimeraVezSet.add(idPaciente);
+                    const diag = (r.diagnostico || 'NO ESPECIFICADO').trim().toUpperCase();
+                    causasMap[diag] = (causasMap[diag] || 0) + 1;
+                }
+            } else {
+                fisioSubs++;
+            }
         });
 
         const sumaSesionesFisio = hidro + compInfr + crio + para + electroTot + mecanoTot;
-
-        let causasMap = {};
-        registrosCorte.forEach(r => {
-            const c = (r.diagnostico || 'NO ESPECIFICADO').trim().toUpperCase();
-            causasMap[c] = (causasMap[c] || 0) + 1;
-        });
         const top5Causas = Object.entries(causasMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
         const rangos = [
@@ -2172,8 +2199,8 @@ import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot
                 </table>
 
                 <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px;">
-                    <tr style="background: #e2e8f0;"><th colspan="2" style="border: 1px solid #000; padding: 5px;">PRINCIPALES CAUSAS DE ATENCIÓN (TOP 5)</th></tr>
-                    ${top5Causas.map(([c, cant]) => `<tr><td style="border: 1px solid #000; padding: 4px;">${c}</td><td style="border: 1px solid #000; padding: 4px; text-align: right;"><b>${cant}</b></td></tr>`).join('') || '<tr><td colspan="2" style="border: 1px solid #000; text-align: center;">Sin registros en este rango de fechas</td></tr>'}
+                    <tr style="background: #e2e8f0;"><th colspan="2" style="border: 1px solid #000; padding: 5px;">PRINCIPALES CAUSAS DE ATENCIÓN (TOP 5 - 1a VEZ)</th></tr>
+                    ${top5Causas.map(([c, cant]) => `<tr><td style="border: 1px solid #000; padding: 4px;">${c}</td><td style="border: 1px solid #000; padding: 4px; text-align: right;"><b>${cant}</b></td></tr>`).join('') || '<tr><td colspan="2" style="border: 1px solid #000; text-align: center;">Sin registros de primera vez en este rango de fechas</td></tr>'}
                 </table>
 
                 <table style="width: 100%; border-collapse: collapse;">
