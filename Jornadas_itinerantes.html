@@ -700,13 +700,12 @@
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Campaña de Esterilización"> Campaña de Esterilización</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Cortes de Cabello"> Cortes de Cabello</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="IVEA"> Instituto Veracruzano de Educación para los Adultos (IVEA)</div>
-                            <div class="service-item"><input type="checkbox" class="check-srv" value="Optometrista (DIF)"> Optometrista (DIF)</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Salud Bucal (DIF)"> Salud Bucal (DIF)</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Salud Médica (DIF)"> Salud Médica (DIF)</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Análisis Clínicos (DIF)"> Análisis Clínicos (DIF)</div>
+                            <div class="service-item"><input type="checkbox" class="check-srv" value="Ultrasonidos (DIF)"> Ultrasonidos (DIF)</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Fisioterapia-CRISAT (DIF)"> Fisioterapia-CRISAT (DIF)</div>
                             <div class="service-item"><input type="checkbox" class="check-srv" value="Pláticas de Psicología"> Pláticas de Psicología</div>
-                            <div class="service-item"><input type="checkbox" class="check-srv" value="Campañas Especiales"> Campañas Especiales</div>
                         </div>
                     </div>
 
@@ -797,7 +796,7 @@
         const db = getFirestore(app);
         const jornadasRef = collection(db, "jornadas_itinerantes");
 
-        // Cuentas autorizadas (Nota: Recomendado mover autenticación a Firebase Auth)
+        // Cuentas autorizadas
         const cuentasJornadas = {
             "jornadas.itinerantes": { p: "jornadas2026", dep: "JORNADAS" },
             "admin": { p: "master2026", dep: "GLOBAL" },
@@ -1008,8 +1007,8 @@
             const tbody = document.getElementById('tabla-jornadas');
             tbody.innerHTML = '';
 
-            // ORDENAR POR FECHA DE MENOR A MAYOR (ASCENDENTE)
-            jornadas.sort((a, b) => (a.fecha || '').localeCompare(b.fecha || ''));
+            // ORDENAR POR FECHA DE MÁS RECIENTE A MÁS LEJANA (DESCENDENTE: DE MAYOR A MENOR)
+            jornadas.sort((a, b) => (b.fecha || '').localeCompare(a.fecha || ''));
 
             const jornadasLimitadas = jornadas.slice(0, MAX_ITEMS);
 
@@ -1109,12 +1108,12 @@
             document.getElementById('metric-servicios').innerText = totalServicios;
 
             const hoy = new Date().toISOString().split('T')[0];
-            const futuras = jornadas.filter(j => j.fecha >= hoy);
+            const futuras = jornadas.filter(j => j.fecha >= hoy).sort((a, b) => a.fecha.localeCompare(b.fecha));
             
             if (futuras.length > 0) {
                 document.getElementById('metric-proxima').innerText = futuras[0].fecha;
             } else if (jornadas.length > 0) {
-                document.getElementById('metric-proxima').innerText = jornadas[jornadas.length - 1].fecha;
+                document.getElementById('metric-proxima').innerText = jornadas[0].fecha;
             } else {
                 document.getElementById('metric-proxima').innerText = '--';
             }
@@ -1129,9 +1128,8 @@
                 return;
             }
 
-            // Comparación por cadenas YYYY-MM-DD para evitar desfases de zona horaria
-            const hoyStr = new Date().toLocaleDateString('sv-SE'); // Formato ISO local YYYY-MM-DD
-            const hoyObj = new Date(hoyStr + 'T00:00:00');
+            const hoyObj = new Date();
+            hoyObj.setHours(0, 0, 0, 0);
 
             let jornadaHoy = null;
             let jornadaProxima = null;
@@ -1140,7 +1138,7 @@
             jornadas.forEach(j => {
                 const fechaJornada = new Date(j.fecha + 'T00:00:00');
                 const diffTime = fechaJornada - hoyObj;
-                const diffDias = Math.round(diffTime / (1000 * 60 * 60 * 24));
+                const diffDias = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
                 if (diffDias === 0) {
                     jornadaHoy = j;
