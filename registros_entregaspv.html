@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIF 2026 - 2029 | Control de Entregas y Apoyos</title>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & Outfit -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SheetJS Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>  
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary: #0d9488;
+            --primary-hover: #0f766e;
+            --primary-light: #f0fdfa;
+            --primary-border: #ccfbf1;
+            --accent: #14b8a6;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+            --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.06);
+            --shadow-lg: 0 16px 32px rgba(15, 23, 42, 0.08);
+            --danger: #ef4444;
+            --danger-bg: #fef2f2;
+            --excel: #10b981;
+            --excel-bg: #ecfdf5;
+            --edit: #3b82f6;
+            --edit-bg: #eff6ff;
+            --user-bg: #0f172a;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        h1, h2, h3, h4, .user-badge, legend { font-family: 'Outfit', sans-serif; }
+
+        .session-bar {
+            background: var(--user-bg);
+            color: white;
+            padding: 12px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            backdrop-filter: blur(8px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .session-info { display: flex; align-items: center; gap: 14px; }
+        
+        .user-badge {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 10px rgba(13, 148, 136, 0.3);
+        }
+
+        .welcome-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .welcome-text strong {
+            color: #5eead4;
+            font-weight: 700;
+        }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.18);
+            color: white;
+            padding: 7px 16px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.25s ease;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-logout:hover {
+            background: var(--danger);
+            border-color: var(--danger);
+            transform: translateY(-1px);
+        }
+
+        .container { max-width: 1350px; margin: 25px auto; padding: 0 20px; }
+
+        .card {
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        .card-title {
+            color: var(--primary);
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            background: var(--primary-light);
+            padding: 10px;
+            border-radius: var(--radius-md);
+            color: var(--primary);
+            font-size: 18px;
+        }
+
+        fieldset {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            margin-bottom: 22px;
+            background: #fafcfd;
+            transition: border-color 0.2s ease;
+        }
+
+        fieldset:focus-within { border-color: var(--primary); background: #ffffff; }
+
+        legend {
+            padding: 4px 12px;
+            color: var(--primary);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.7px;
+            background: var(--primary-light);
+            border: 1px solid var(--primary-border);
+            border-radius: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 18px;
+        }
+
+        .form-group { display: flex; flex-direction: column; }
+
+        label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        input, select {
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            outline: none;
+            transition: all 0.2s ease;
+            font-size: 13px;
+            background: #fff;
+            color: var(--text-main);
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.12);
+        }
+
+        .location-type-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .location-pill {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .location-pill input[type="radio"] { display: none; }
+
+        .location-pill:has(input:checked) {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .photo-dropzone {
+            border: 2px dashed #cbd5e1;
+            padding: 18px 12px;
+            border-radius: var(--radius-md);
+            text-align: center;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .photo-dropzone:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .photo-dropzone i { font-size: 22px; color: var(--primary); }
+
+        .preview-mini-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            min-height: 48px;
+        }
+
+        .thumb-box {
+            position: relative;
+            width: 52px;
+            height: 52px;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
+        }
+
+        .thumb-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        .thumb-box button {
+            position: absolute;
+            top: 3px; right: 3px;
+            background: rgba(239, 68, 68, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 18px; height: 18px;
+            font-size: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .thumb-box button:hover { transform: scale(1.15); }
+
+        .btn-save {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            width: 100%;
+            font-weight: 700;
+            margin-top: 10px;
+            font-size: 14px;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 14px rgba(13, 148, 136, 0.25);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(13, 148, 136, 0.35);
+        }
+
+        .btn-cancel-edit {
+            background: #e2e8f0;
+            color: var(--text-main);
+            padding: 15px;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 700;
+            margin-top: 10px;
+            font-size: 14px;
+            transition: all 0.25s ease;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-cancel-edit:hover { background: #cbd5e1; }
+
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            border: 1px dashed var(--border-hover);
+            align-items: center;
+        }
+
+        .btn-admin {
+            padding: 9px 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-export {
+            background: var(--excel-bg);
+            color: var(--excel);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-export:hover { background: var(--excel); color: white; transform: translateY(-1px); }
+
+        .btn-print {
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-print:hover { background: #2563eb; color: white; transform: translateY(-1px); }
+
+        .btn-clear-db {
+            background: var(--danger-bg);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            margin-left: auto;
+        }
+
+        .btn-clear-db:hover { background: var(--danger); color: white; transform: translateY(-1px); }
+
+        .table-controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .rows-per-page-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .rows-per-page-container select {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1150px;
+            font-size: 12px;
+            background: white;
+        }
+
+        th {
+            background: #f8fafc;
+            color: var(--text-muted);
+            padding: 13px 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+            text-align: left;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background-color: #f8fafc; }
+
+        .badge-type {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid var(--primary-border);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 10px;
+            display: inline-block;
+        }
+
+        .badge-loc {
+            background: #f1f5f9;
+            color: var(--text-muted);
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 4px;
+            text-transform: uppercase;
+        }
+
+        .table-photo-stack {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            justify-content: center;
+        }
+
+        .table-thumb {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            object-fit: cover;
+            border: 1.5px solid #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .table-thumb:hover { transform: scale(1.2); z-index: 2; }
+
+        .photo-count-badge {
+            background: var(--text-muted);
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 10px;
+            margin-left: 2px;
+        }
+
+        .btn-tbl {
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            margin: 0 2px;
+        }
+
+        .btn-tbl-edit { background: var(--edit-bg); color: var(--edit); }
+        .btn-tbl-edit:hover { background: var(--edit); color: white; transform: translateY(-1px); }
+
+        .btn-tbl-delete { background: var(--danger-bg); color: var(--danger); }
+        .btn-tbl-delete:hover { background: var(--danger); color: white; transform: translateY(-1px); }
+
+        .pagination-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pagination-info {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .pagination-buttons { display: flex; gap: 5px; }
+
+        .btn-page {
+            background: #fff;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-page:hover:not(:disabled) {
+            background: var(--primary-light);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-page.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        .btn-page:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .swal2-popup {
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+            border-radius: var(--radius-lg) !important;
+            padding: 25px !important;
+        }
+
+        .swal2-title {
+            font-family: 'Outfit', sans-serif !important;
+            color: var(--text-main) !important;
+            font-weight: 700 !important;
+        }
+
+        .swal2-styled.swal2-confirm {
+            background-color: var(--primary) !important;
+            border-radius: var(--radius-sm) !important;
+            box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25) !important;
+            font-weight: 600 !important;
+            padding: 10px 24px !important;
+        }
+
+        .carousel-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .carousel-container {
+            position: relative;
+            max-width: 85vw;
+            max-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            object-fit: contain;
+        }
+
+        .carousel-btn {
+            position: absolute;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            width: 46px; height: 46px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .carousel-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.1); }
+        .carousel-prev { left: -60px; }
+        .carousel-next { right: -60px; }
+
+        .carousel-close {
+            position: absolute;
+            top: 20px; right: 25px;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .carousel-close:hover { transform: scale(1.2); color: var(--danger); }
+
+        .carousel-counter {
+            color: rgba(255,255,255,0.8);
+            margin-top: 15px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        @media print {
+            body { background: #fff !important; }
+            .session-bar, form, .admin-actions, button, .no-print, .table-controls-bar, .pagination-footer { display: none !important; }
+            .container, .card { width: 100% !important; margin: 0 !important; padding: 0 !important; border: none !important; box-shadow: none !important; }
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { border: 1px solid #000 !important; font-size: 10px !important; color: #000 !important; }
+        }
+
+        @media (max-width: 768px) {
+            .carousel-prev { left: 10px; }
+            .carousel-next { right: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- BARRA DE SESIÓN Y BIENVENIDA -->
+<div class="session-bar">
+    <div class="session-info">
+        <span class="user-badge" id="display_role">DIF MUNICIPAL</span>
+        <span class="welcome-text">
+            <i class="fas fa-user-circle"></i> Bienvenido(a), <strong id="usuario_nombre_display">Miguel Angel Vidal Pucheta</strong>
+        </span>
+    </div>
+    <div>
+        <button class="btn-logout" onclick="cerrarSesion()">
+            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        </button>
+    </div>
+</div>
+
+<div class="container">
+    <!-- TARJETA DE FORMULARIO -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title"><i class="fas fa-hand-holding-heart"></i> Registro de Programa / Apoyo Beneficiario</h2>
+            <span id="form_mode_indicator" class="badge-type" style="display:none; background:#eff6ff; color:#3b82f6; border-color:#bfdbfe;">MODO EDICIÓN</span>
+        </div>
+        
+        <form id="form_entregas" onsubmit="event.preventDefault(); guardarEntrega();">
+            <input type="hidden" id="edit_doc_id" value="">
+            
+            <fieldset>
+                <legend><i class="fas fa-info-circle"></i> Datos Generales de Entrega</legend>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>No. Consecutivo</label>
+                        <input type="text" id="reg_consecutivo" readonly style="background: #f1f5f9; font-weight: 700; color: var(--primary);">
+                    </div>
+                    <div class="form-group">
+                        <label>Fecha de Entrega</label>
+                        <input type="date" id="reg_fecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Programa / Taller / Apoyo</label>
+                        <select id="reg_tipo_entrega" required>
+                            <option value="">-- SELECCIONE PROGRAMA --</option>
+                            <option value="PAE_CALIENTE">Prog. Alimentación Escolar (Caliente)</option>
+                            <option value="PAE_FRIA">Prog. Alimentación Escolar (Fría)</option>
+                            <option value="VULNERABILIDAD">Prog. Atención Alimentaria a Personas en Situación de Vulnerabilidad</option>
+                            <option value="1000_DIAS">Prog. Atención Alimentaria en los Primeros 1000 Días</option>
+                            <option value="EMERGENCIA">Prog. Atención Alimentaria en Situación de Emergencia o Desastre</option>
+                            <option value="CARPINTERIA">Taller de Carpintería</option>
+                            <option value="PANADERIA">Taller de Panadería</option>
+                            <option value="COCINA">Taller de Cocina</option>
+                            <option value="LAMINA">Apoyo para Láminas</option>
+                            <option value="TINACO">Apoyo para Tinacos</option>
+                            <option value="REFRIGERADOR">Apoyo para Refrigeradores</option>
+                            <option value="DESPENSA">Apoyo para Despensa</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Cantidad Entregada</label>
+                        <input type="number" id="reg_cantidad" min="1" placeholder="Ej. 150" required>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend><i class="fas fa-map-marker-alt"></i> Ubicación y Destino</legend>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Tipo de Asentamiento</label>
+                        <div class="location-type-toggle">
+                            <label class="location-pill">
+                                <input type="radio" name="reg_tipo_asentamiento" value="LOCALIDAD" checked onchange="actualizarPlaceholderUbicacion()">
+                                <i class="fas fa-tree"></i> Localidad
+                            </label>
+                            <label class="location-pill">
+                                <input type="radio" name="reg_tipo_asentamiento" value="COLONIA" onchange="actualizarPlaceholderUbicacion()">
+                                <i class="fas fa-city"></i> Colonia
+                            </label>
+                        </div>
+                        <input type="text" id="reg_localidad" placeholder="Ej. Caleria" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Tipo de Destinatario</label>
+                        <select id="reg_tipo_destino" required onchange="toggleCamposEscuela(this.value)">
+                            <option value="">-- SELECCIONE --</option>
+                            <option value="ESCUELA">Escuela / Plantel Educativo</option>
+                            <option value="AGENTE_MUNICIPAL">Agente Municipal</option>
+                            <option value="COMITE">Comité Comunitario</option>
+                            <option value="BENEFICIARIO_DIRECTO">Beneficiario Directo</option>
+                            <option value="OTRO">Otro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Escuela / Agente Municipal / Nombre</label>
+                        <input type="text" id="reg_destino" placeholder="Ej. Primaria Benito Juárez o Agente Juan Pérez" required>
+                    </div>
+
+                    <div id="wrapper_escuela_director" class="form-group" style="display: none;">
+                        <label>Nombre del Director(a)</label>
+                        <input type="text" id="reg_nombre_director" placeholder="Ej. Prof. Roberto Gómez">
+                    </div>
+                    <div id="wrapper_escuela_clave" class="form-group" style="display: none;">
+                        <label>Clave de la Escuela (CCT)</label>
+                        <input type="text" id="reg_clave_escuela" placeholder="Ej. 30EPR1234X">
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend><i class="fas fa-camera"></i> Evidencia Fotográfica y Documental</legend>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label><i class="fas fa-file-invoice"></i> Documentos de Entrega (Oficios/Listas)</label>
+                        <div class="photo-dropzone" onclick="document.getElementById('input_evidencia').click()">
+                            <i class="fas fa-folder-open"></i>
+                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Adjuntar Documentos</span>
+                            <input type="file" id="input_evidencia" accept="image/*" multiple style="display:none;" onchange="manejarArchivosFotos(this, 'evidencia')">
+                        </div>
+                        <div id="preview_evidencia" class="preview-mini-container"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label><i class="fas fa-images"></i> Evidencia Fotográfica de Entrega</label>
+                        <div class="photo-dropzone" onclick="document.getElementById('input_entrega').click()">
+                            <i class="fas fa-camera-retro"></i>
+                            <span style="font-size: 11px; color: var(--text-muted); font-weight: 500;">Adjuntar Fotos de Entrega</span>
+                            <input type="file" id="input_entrega" accept="image/*" multiple style="display:none;" onchange="manejarArchivosFotos(this, 'entrega')">
+                        </div>
+                        <div id="preview_entrega" class="preview-mini-container"></div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" id="btn_submit_form" class="btn-save">
+                    <i class="fas fa-save"></i> GUARDAR REGISTRO DE ENTREGA
+                </button>
+                <button type="button" id="btn_cancel_edit" class="btn-cancel-edit" onclick="cancelarEdicion()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- TARJETA DE TABLA HISTÓRICA CON PAGINACIÓN -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fas fa-list-check"></i> Historial de Entregas y Apoyos Registrados</h3>
+        </div>
+        
+        <div class="admin-actions">
+            <button class="btn-admin btn-export" onclick="exportarExcelEntregas()">
+                <i class="fas fa-file-excel"></i> Exportar a Excel
+            </button>
+            <button class="btn-admin btn-print" onclick="window.print()">
+                <i class="fas fa-print"></i> Imprimir Reporte
+            </button>
+            <button id="btnVaciar" class="btn-admin btn-clear-db" onclick="vaciarBaseEntregas()">
+                <i class="fas fa-trash-alt"></i> Vaciar Historial
+            </button>
+        </div>
+
+        <div class="table-controls-bar">
+            <div style="flex: 1; min-width: 250px;">
+                <input type="text" id="input_busqueda" placeholder="🔍 Buscar por localidad, colonia, escuela, director, CCT o programa..." oninput="filtrarTabla()" style="width: 100%; box-sizing: border-box;">
+            </div>
+            <div class="rows-per-page-container">
+                <label for="select_filas" style="margin: 0; font-size: 11px;">Mostrar:</label>
+                <select id="select_filas" onchange="cambiarFilasPorPagina()">
+                    <option value="10" selected>10 filas</option>
+                    <option value="25">25 filas</option>
+                    <option value="50">50 filas</option>
+                    <option value="100">100 filas</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="text-align: center; width: 50px;">No.</th>
+                        <th style="text-align: center; width: 85px;">Fecha</th>
+                        <th style="width: 150px;">Localidad / Colonia</th>
+                        <th style="width: 170px;">Escuela / Agente / Nombre</th>
+                        <th style="width: 140px;">Director(a) / Resp.</th>
+                        <th style="text-align: center; width: 85px;">Clave CCT</th>
+                        <th style="width: 140px;">Programa</th>
+                        <th style="text-align: center; width: 60px;">Cant.</th>
+                        <th style="text-align: center; width: 95px;">📄 Doc.</th>
+                        <th style="text-align: center; width: 95px;">📸 Fotos</th>
+                        <th style="text-align: center; width: 80px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo_tabla_entregas">
+                    <tr><td colspan="11" style="text-align:center; padding: 25px; color: var(--text-muted);">Cargando registros...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination-footer">
+            <div id="pagination_info" class="pagination-info">Mostrando 0 de 0 registros</div>
+            <div id="pagination_buttons" class="pagination-buttons"></div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CARRUSEL DE FOTOS -->
+<div id="carouselModal" class="carousel-modal">
+    <span class="carousel-close" onclick="cerrarCarrusel()">&times;</span>
+    <div class="carousel-container">
+        <button class="carousel-btn carousel-prev" onclick="cambiarFotoCarrusel(-1)"><i class="fas fa-chevron-left"></i></button>
+        <img id="carouselImg" class="carousel-img" src="" alt="Evidencia">
+        <button class="carousel-btn carousel-next" onclick="cambiarFotoCarrusel(1)"><i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div id="carouselCounter" class="carousel-counter">1 / 1</div>
+</div>
+
+<!-- LÓGICA Y CONEXIÓN A FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+const firebaseConfig = { 
+    apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E", 
+    projectId: "poblacion-vulnerable---dif" 
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const coleccionEntregas = collection(db, "entregas_alimentarias_2026");
+
+let listadoEntregas = [];
+let datosFiltrados = [];
+let paginaActual = 1;
+let filasPorPagina = 10;
+
+let fotosEvidenciaTemp = [];
+let fotosEntregaTemp = [];
+
+let fotosCarruselActuales = [];
+let indiceCarrusel = 0;
+
+const PROGRAMAS_MAP = {
+    "PAE_CALIENTE": "Prog. Alimentación Escolar (Caliente)",
+    "PAE_FRIA": "Prog. Alimentación Escolar (Fría)",
+    "VULNERABILIDAD": "Prog. Atención Alimentaria a Personas en Vulnerabilidad",
+    "1000_DIAS": "Prog. Atención Alimentaria Primeros 1000 Días",
+    "EMERGENCIA": "Prog. Atención Alimentaria Emergencia o Desastre",
+    "CARPINTERIA": "Taller de Carpintería",
+    "PANADERIA": "Taller de Panadería",
+    "COCINA": "Taller de Cocina",
+    "LAMINA": "Apoyo para Láminas",
+    "TINACO": "Apoyo para Tinacos",
+    "REFRIGERADOR": "Apoyo para Refrigeradores",
+    "DESPENSA": "Apoyo para Despensa"
+};
+
+// Cargar Nombre de Usuario Almacenado o Usar Predeterminado
+window.addEventListener('DOMContentLoaded', () => {
+    const usuarioGuardado = localStorage.getItem('dif_user_name') || sessionStorage.getItem('dif_user_name') || 'Miguel Angel Vidal Pucheta';
+    const rolGuardado = localStorage.getItem('dif_user_role') || sessionStorage.getItem('dif_user_role') || 'DIF MUNICIPAL';
+    
+    document.getElementById('usuario_nombre_display').innerText = usuarioGuardado;
+    document.getElementById('display_role').innerText = rolGuardado;
+});
+
+document.getElementById('reg_fecha').valueAsDate = new Date();
+
+window.actualizarPlaceholderUbicacion = function() {
+    const tipo = document.querySelector('input[name="reg_tipo_asentamiento"]:checked').value;
+    const input = document.getElementById('reg_localidad');
+    if (tipo === 'LOCALIDAD') {
+        input.placeholder = "Ej. Caleria";
+    } else {
+        input.placeholder = "Ej. Centro";
+    }
+};
+
+window.toggleCamposEscuela = function(tipo) {
+    const wrapDirector = document.getElementById('wrapper_escuela_director');
+    const wrapClave = document.getElementById('wrapper_escuela_clave');
+    const inputDirector = document.getElementById('reg_nombre_director');
+    const inputClave = document.getElementById('reg_clave_escuela');
+
+    if (tipo === 'ESCUELA') {
+        wrapDirector.style.display = 'flex';
+        wrapClave.style.display = 'flex';
+        inputDirector.required = true;
+        inputClave.required = true;
+    } else {
+        wrapDirector.style.display = 'none';
+        wrapClave.style.display = 'none';
+        inputDirector.required = false;
+        inputClave.required = false;
+        inputDirector.value = '';
+        inputClave.value = '';
+    }
+};
+
+// Listener en tiempo real Firestore
+onSnapshot(query(coleccionEntregas, orderBy("fecha_registro", "desc")), (snapshot) => {
+    listadoEntregas = [];
+    snapshot.forEach(docSnap => {
+        listadoEntregas.push({ id: docSnap.id, ...docSnap.data() });
+    });
+
+    const maxProg = listadoEntregas.reduce((max, item) => Math.max(max, item.num_progresivo || 0), 0);
+    if (!document.getElementById('edit_doc_id').value) {
+        document.getElementById('reg_consecutivo').value = maxProg + 1;
+    }
+
+    filtrarTabla();
+});
+
+window.manejarArchivosFotos = function(input, tipo) {
+    const files = Array.from(input.files);
+    if (files.length === 0) return;
+
+    files.forEach(file => {
+        if (!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const maxDim = 600;
+                let w = img.width, h = img.height;
+                if (w > h) { if (w > maxDim) { h *= maxDim / w; w = maxDim; } }
+                else { if (h > maxDim) { w *= maxDim / h; h = maxDim; } }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = w; canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                const base64Str = canvas.toDataURL('image/jpeg', 0.65);
+
+                if (tipo === 'evidencia') {
+                    fotosEvidenciaTemp.push(base64Str);
+                    actualizarPrevisualizacion('evidencia');
+                } else {
+                    fotosEntregaTemp.push(base64Str);
+                    actualizarPrevisualizacion('entrega');
+                }
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+    input.value = '';
+};
+
+function actualizarPrevisualizacion(tipo) {
+    const contenedor = document.getElementById(`preview_${tipo}`);
+    const arrayFotos = tipo === 'evidencia' ? fotosEvidenciaTemp : fotosEntregaTemp;
+    contenedor.innerHTML = '';
+
+    arrayFotos.forEach((base64, idx) => {
+        contenedor.innerHTML += `
+            <div class="thumb-box">
+                <img src="${base64}">
+                <button type="button" onclick="removerFotoTemp('${tipo}', ${idx})"><i class="fas fa-times"></i></button>
+            </div>
+        `;
+    });
+}
+
+window.removerFotoTemp = function(tipo, index) {
+    if (tipo === 'evidencia') fotosEvidenciaTemp.splice(index, 1);
+    else fotosEntregaTemp.splice(index, 1);
+    actualizarPrevisualizacion(tipo);
+};
+
+window.guardarEntrega = async function() {
+    const editId = document.getElementById('edit_doc_id').value;
+    const tipoDestino = document.getElementById('reg_tipo_destino').value;
+    const tipoAsentamiento = document.querySelector('input[name="reg_tipo_asentamiento"]:checked').value;
+
+    const datosRegistro = {
+        fecha_entrega: document.getElementById('reg_fecha').value,
+        tipo_entrega: document.getElementById('reg_tipo_entrega').value,
+        cantidad: parseInt(document.getElementById('reg_cantidad').value) || 0,
+        tipo_asentamiento: tipoAsentamiento,
+        localidad: document.getElementById('reg_localidad').value.trim().toUpperCase(),
+        tipo_destino: tipoDestino,
+        destino: document.getElementById('reg_destino').value.trim().toUpperCase(),
+        nombre_director: tipoDestino === 'ESCUELA' ? document.getElementById('reg_nombre_director').value.trim().toUpperCase() : 'N/A',
+        clave_escuela: tipoDestino === 'ESCUELA' ? document.getElementById('reg_clave_escuela').value.trim().toUpperCase() : 'N/A',
+        fotos_evidencia: [...fotosEvidenciaTemp],
+        fotos_entrega: [...fotosEntregaTemp],
+        capturado_por: document.getElementById('usuario_nombre_display').innerText
+    };
+
+    try {
+        if (editId) {
+            await updateDoc(doc(db, "entregas_alimentarias_2026", editId), datosRegistro);
+            Swal.fire({
+                title: '¡Registro Actualizado!',
+                text: 'Se han guardado los cambios correctamente.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } else {
+            const maxProg = listadoEntregas.reduce((max, item) => Math.max(max, item.num_progresivo || 0), 0);
+            datosRegistro.num_progresivo = maxProg + 1;
+            datosRegistro.fecha_registro = new Date().toISOString();
+
+            await addDoc(coleccionEntregas, datosRegistro);
+            Swal.fire({
+                title: '¡Guardado con Éxito!',
+                text: 'El nuevo registro de entrega ha sido almacenado.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
+        resetearFormulario();
+    } catch (e) {
+        Swal.fire({ title: 'Error al Guardar', text: e.message, icon: 'error' });
+    }
+};
+
+function resetearFormulario() {
+    document.getElementById('form_entregas').reset();
+    document.getElementById('edit_doc_id').value = '';
+    document.getElementById('reg_fecha').valueAsDate = new Date();
+    fotosEvidenciaTemp = [];
+    fotosEntregaTemp = [];
+    document.getElementById('preview_evidencia').innerHTML = '';
+    document.getElementById('preview_entrega').innerHTML = '';
+    
+    document.querySelector('input[name="reg_tipo_asentamiento"][value="LOCALIDAD"]').checked = true;
+    actualizarPlaceholderUbicacion();
+    toggleCamposEscuela('');
+
+    document.getElementById('btn_submit_form').innerHTML = '<i class="fas fa-save"></i> GUARDAR REGISTRO DE ENTREGA';
+    document.getElementById('btn_cancel_edit').style.display = 'none';
+    document.getElementById('form_mode_indicator').style.display = 'none';
+
+    const maxProg = listadoEntregas.reduce((max, item) => Math.max(max, item.num_progresivo || 0), 0);
+    document.getElementById('reg_consecutivo').value = maxProg + 1;
+}
+
+window.cancelarEdicion = function() {
+    resetearFormulario();
+};
+
+window.editarRegistro = function(id) {
+    const item = listadoEntregas.find(d => d.id === id);
+    if (!item) return;
+
+    document.getElementById('edit_doc_id').value = item.id;
+    document.getElementById('reg_consecutivo').value = item.num_progresivo;
+    document.getElementById('reg_fecha').value = item.fecha_entrega;
+    document.getElementById('reg_tipo_entrega').value = item.tipo_entrega;
+    document.getElementById('reg_cantidad').value = item.cantidad;
+    
+    const tipoAsent = item.tipo_asentamiento || 'LOCALIDAD';
+    const radioAsent = document.querySelector(`input[name="reg_tipo_asentamiento"][value="${tipoAsent}"]`);
+    if (radioAsent) radioAsent.checked = true;
+    actualizarPlaceholderUbicacion();
+
+    document.getElementById('reg_localidad').value = item.localidad;
+    
+    const tipoDest = item.tipo_destino || (item.clave_escuela && item.clave_escuela !== 'N/A' ? 'ESCUELA' : 'AGENTE_MUNICIPAL');
+    document.getElementById('reg_tipo_destino').value = tipoDest;
+    toggleCamposEscuela(tipoDest);
+
+    document.getElementById('reg_destino').value = item.destino;
+    document.getElementById('reg_nombre_director').value = item.nombre_director === 'N/A' ? '' : (item.nombre_director || '');
+    document.getElementById('reg_clave_escuela').value = item.clave_escuela === 'N/A' ? '' : (item.clave_escuela || '');
+
+    fotosEvidenciaTemp = [...(item.fotos_evidencia || [])];
+    fotosEntregaTemp = [...(item.fotos_entrega || [])];
+
+    actualizarPrevisualizacion('evidencia');
+    actualizarPrevisualizacion('entrega');
+
+    document.getElementById('btn_submit_form').innerHTML = '<i class="fas fa-sync-alt"></i> ACTUALIZAR REGISTRO';
+    document.getElementById('btn_cancel_edit').style.display = 'inline-flex';
+    document.getElementById('form_mode_indicator').style.display = 'inline-block';
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+window.eliminarRegistro = async function(id) {
+    const res = await Swal.fire({
+        title: '¿Eliminar registro?',
+        text: 'Esta acción borrará la entrega del historial.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (res.isConfirmed) {
+        try {
+            await deleteDoc(doc(db, "entregas_alimentarias_2026", id));
+            Swal.fire({ title: 'Registro Eliminado', icon: 'success', timer: 1500, showConfirmButton: false });
+        } catch (e) {
+            Swal.fire('Error', e.message, 'error');
+        }
+    }
+};
+
+window.vaciarBaseEntregas = async function() {
+    if (listadoEntregas.length === 0) {
+        Swal.fire('Sin Registros', 'No hay datos almacenados.', 'info');
+        return;
+    }
+
+    const res = await Swal.fire({
+        title: '¿Vaciar TODO el historial?',
+        text: 'Se eliminarán de forma permanente todos los registros.',
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Sí, vaciar todo',
+        cancelButtonText: 'Cancelar'
+    });
+
+    if (res.isConfirmed) {
+        try {
+            for (const item of listadoEntregas) {
+                await deleteDoc(doc(db, "entregas_alimentarias_2026", item.id));
+            }
+            Swal.fire('Historial Vacío', 'Se han eliminado todos los registros.', 'success');
+        } catch (e) {
+            Swal.fire('Error', e.message, 'error');
+        }
+    }
+};
+
+// --- FILTRO Y PAGINACIÓN ---
+window.filtrarTabla = function() {
+    const texto = document.getElementById('input_busqueda').value.toLowerCase();
+    datosFiltrados = listadoEntregas.filter(d => {
+        const progNombre = (PROGRAMAS_MAP[d.tipo_entrega] || d.tipo_entrega).toLowerCase();
+        const tipoAsent = (d.tipo_asentamiento || '').toLowerCase();
+        return (d.localidad || '').toLowerCase().includes(texto) ||
+               (d.destino || '').toLowerCase().includes(texto) ||
+               (d.nombre_director || '').toLowerCase().includes(texto) ||
+               (d.clave_escuela || '').toLowerCase().includes(texto) ||
+               tipoAsent.includes(texto) ||
+               progNombre.includes(texto);
+    });
+    paginaActual = 1;
+    renderizarTablaConPaginacion();
+};
+
+window.cambiarFilasPorPagina = function() {
+    filasPorPagina = parseInt(document.getElementById('select_filas').value);
+    paginaActual = 1;
+    renderizarTablaConPaginacion();
+};
+
+window.cambiarPagina = function(nuevaPagina) {
+    const totalPaginas = Math.ceil(datosFiltrados.length / filasPorPagina) || 1;
+    if (nuevaPagina < 1 || nuevaPagina > totalPaginas) return;
+    paginaActual = nuevaPagina;
+    renderizarTablaConPaginacion();
+};
+
+function renderizarTablaConPaginacion() {
+    const tbody = document.getElementById('cuerpo_tabla_entregas');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    if (datosFiltrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center; padding:25px; color: var(--text-muted);">No se encontraron registros.</td></tr>`;
+        document.getElementById('pagination_info').innerText = `Mostrando 0 de 0 registros`;
+        document.getElementById('pagination_buttons').innerHTML = '';
+        return;
+    }
+
+    const totalRegistros = datosFiltrados.length;
+    const totalPaginas = Math.ceil(totalRegistros / filasPorPagina);
+    if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+
+    const inicio = (paginaActual - 1) * filasPorPagina;
+    const fin = Math.min(inicio + filasPorPagina, totalRegistros);
+    const datosPagina = datosFiltrados.slice(inicio, fin);
+
+    datosPagina.forEach(d => {
+        const docs = d.fotos_evidencia || [];
+        let htmlDocs = docs.length === 0 ? '<span style="color:#cbd5e1;">-</span>' : `
+            <div class="table-photo-stack">
+                <img src="${docs[0]}" class="table-thumb" onclick="abrirCarrusel('${d.id}', 'evidencia', 0)">
+                ${docs.length > 1 ? `<span class="photo-count-badge">+${docs.length - 1}</span>` : ''}
+            </div>
+        `;
+
+        const entregas = d.fotos_entrega || [];
+        let htmlEntregas = entregas.length === 0 ? '<span style="color:#cbd5e1;">-</span>' : `
+            <div class="table-photo-stack">
+                <img src="${entregas[0]}" class="table-thumb" onclick="abrirCarrusel('${d.id}', 'entrega', 0)">
+                ${entregas.length > 1 ? `<span class="photo-count-badge">+${entregas.length - 1}</span>` : ''}
+            </div>
+        `;
+
+        const nombreProg = PROGRAMAS_MAP[d.tipo_entrega] || d.tipo_entrega;
+        const directorStr = d.nombre_director && d.nombre_director !== 'N/A' ? d.nombre_director : '<span style="color:#cbd5e1;">-</span>';
+        const claveStr = d.clave_escuela && d.clave_escuela !== 'N/A' ? d.clave_escuela : '<span style="color:#cbd5e1;">-</span>';
+        
+        const badgeTag = d.tipo_asentamiento === 'COLONIA' 
+            ? '<span class="badge-loc" style="background:#fef3c7; color:#b45309;">COL</span>' 
+            : '<span class="badge-loc" style="background:#e0f2fe; color:#0369a1;">LOC</span>';
+
+        tbody.innerHTML += `
+            <tr>
+                <td style="text-align:center; font-weight:700; color:var(--primary);">${d.num_progresivo}</td>
+                <td style="text-align:center;">${d.fecha_entrega}</td>
+                <td style="font-weight:600;">${badgeTag} ${d.localidad}</td>
+                <td style="font-weight:500;">${d.destino}</td>
+                <td style="font-size:11px;">${directorStr}</td>
+                <td style="text-align:center; font-family:monospace; font-size:11px;">${claveStr}</td>
+                <td><span class="badge-type">${nombreProg}</span></td>
+                <td style="text-align:center; font-weight:700; color:var(--primary);">${d.cantidad}</td>
+                <td style="text-align:center;">${htmlDocs}</td>
+                <td style="text-align:center;">${htmlEntregas}</td>
+                <td style="text-align:center;">
+                    <button class="btn-tbl btn-tbl-edit" onclick="editarRegistro('${d.id}')" title="Editar"><i class="fas fa-pen"></i></button>
+                    <button class="btn-tbl btn-tbl-delete" onclick="eliminarRegistro('${d.id}')" title="Eliminar"><i class="fas fa-trash-alt"></i></button>
+                </td>
+            </tr>
+        `;
+    });
+
+    document.getElementById('pagination_info').innerText = `Mostrando del ${inicio + 1} al ${fin} de ${totalRegistros} registros`;
+
+    const btnContainer = document.getElementById('pagination_buttons');
+    btnContainer.innerHTML = '';
+
+    btnContainer.innerHTML += `<button class="btn-page" onclick="cambiarPagina(${paginaActual - 1})" ${paginaActual === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+
+    for (let i = 1; i <= totalPaginas; i++) {
+        if (i === 1 || i === totalPaginas || (i >= paginaActual - 1 && i <= paginaActual + 1)) {
+            btnContainer.innerHTML += `<button class="btn-page ${i === paginaActual ? 'active' : ''}" onclick="cambiarPagina(${i})">${i}</button>`;
+        } else if (i === paginaActual - 2 || i === paginaActual + 2) {
+            btnContainer.innerHTML += `<span style="padding: 6px 4px; color: var(--text-muted);">...</span>`;
+        }
+    }
+
+    btnContainer.innerHTML += `<button class="btn-page" onclick="cambiarPagina(${paginaActual + 1})" ${paginaActual === totalPaginas ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+}
+
+// Lógica de Carrusel
+window.abrirCarrusel = function(docId, tipo, indiceInicial) {
+    const item = listadoEntregas.find(d => d.id === docId);
+    if (!item) return;
+
+    fotosCarruselActuales = tipo === 'evidencia' ? (item.fotos_evidencia || []) : (item.fotos_entrega || []);
+    if (fotosCarruselActuales.length === 0) return;
+
+    indiceCarrusel = indiceInicial;
+    actualizarVistaCarrusel();
+
+    document.getElementById('carouselModal').style.display = 'flex';
+};
+
+function actualizarVistaCarrusel() {
+    document.getElementById('carouselImg').src = fotosCarruselActuales[indiceCarrusel];
+    document.getElementById('carouselCounter').innerText = `${indiceCarrusel + 1} / ${fotosCarruselActuales.length}`;
+}
+
+window.cambiarFotoCarrusel = function(direccion) {
+    indiceCarrusel += direccion;
+    if (indiceCarrusel < 0) indiceCarrusel = fotosCarruselActuales.length - 1;
+    if (indiceCarrusel >= fotosCarruselActuales.length) indiceCarrusel = 0;
+    actualizarVistaCarrusel();
+};
+
+window.cerrarCarrusel = function() {
+    document.getElementById('carouselModal').style.display = 'none';
+};
+
+window.exportarExcelEntregas = function() {
+    if (listadoEntregas.length === 0) {
+        Swal.fire('Sin datos', 'No hay registros para exportar.', 'warning');
+        return;
+    }
+    const datosExcel = listadoEntregas.map(d => ({
+        "No. Consecutivo": d.num_progresivo,
+        "Fecha de Entrega": d.fecha_entrega,
+        "Programa / Taller": PROGRAMAS_MAP[d.tipo_entrega] || d.tipo_entrega,
+        "Cantidad": d.cantidad,
+        "Tipo Ubicación": d.tipo_asentamiento || 'LOCALIDAD',
+        "Localidad / Colonia": d.localidad,
+        "Tipo Destino": d.tipo_destino || 'N/A',
+        "Escuela / Agente / Nombre": d.destino,
+        "Nombre Director(a)": d.nombre_director || 'N/A',
+        "Clave CCT": d.clave_escuela || 'N/A',
+        "Capturado Por": d.capturado_por || 'N/A',
+        "Total Documentos": (d.fotos_evidencia || []).length,
+        "Total Fotos Evidencia": (d.fotos_entrega || []).length
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(datosExcel);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Control de Entregas");
+    XLSX.writeFile(wb, `REPORTE_PROGRAMAS_DIF_${new Date().toISOString().slice(0,10)}.xlsx`);
+};
+
+// Cierre de Sesión Seguro
+window.cerrarSesion = function() {
+    Swal.fire({
+        title: '¿Cerrar Sesión?',
+        text: 'Saldrás del sistema de captura.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#0d9488',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Sí, salir',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "index.html";
+        }
+    });
+};
+</script>
+</body>
+</html>
