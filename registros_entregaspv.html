@@ -683,7 +683,7 @@
     <div class="session-info">
         <span class="user-badge" id="display_role">DIF MUNICIPAL</span>
         <span class="welcome-text">
-            <i class="fas fa-user-circle"></i> Bienvenido(a), <strong id="usuario_nombre_display">Miguel Angel Vidal Pucheta</strong>
+            <i class="fas fa-user-circle"></i> <strong id="usuario_nombre_display">Miguel Angel Vidal Pucheta</strong>
         </span>
     </div>
     <div>
@@ -835,9 +835,6 @@
             <button class="btn-admin btn-print" onclick="window.print()">
                 <i class="fas fa-print"></i> Imprimir Reporte
             </button>
-            <button id="btnVaciar" class="btn-admin btn-clear-db" onclick="vaciarBaseEntregas()">
-                <i class="fas fa-trash-alt"></i> Vaciar Historial
-            </button>
         </div>
 
         <div class="table-controls-bar">
@@ -936,12 +933,16 @@ const PROGRAMAS_MAP = {
     "DESPENSA": "Apoyo para Despensa"
 };
 
-// Cargar Nombre de Usuario Almacenado o Usar Predeterminado
+// Cargar Solo Nombre de Usuario Almacenado (Limpia Títulos como LIC., ING., LTS., etc.)
 window.addEventListener('DOMContentLoaded', () => {
-    const usuarioGuardado = localStorage.getItem('dif_user_name') || sessionStorage.getItem('dif_user_name') || 'Miguel Angel Vidal Pucheta';
+    let usuarioBruto = localStorage.getItem('dif_user_name') || sessionStorage.getItem('dif_user_name') || localStorage.getItem('activeUser') || sessionStorage.getItem('nombre_usuario') || 'Miguel Angel Vidal Pucheta';
+    
+    // Remover prefijos de título profesionales si existen
+    const usuarioLimpio = usuarioBruto.replace(/^(LIC\.|ING\.|LTS\.|ADMIN|PROF\.)\s+/i, '').trim();
+    
     const rolGuardado = localStorage.getItem('dif_user_role') || sessionStorage.getItem('dif_user_role') || 'DIF MUNICIPAL';
     
-    document.getElementById('usuario_nombre_display').innerText = usuarioGuardado;
+    document.getElementById('usuario_nombre_display').innerText = usuarioLimpio;
     document.getElementById('display_role').innerText = rolGuardado;
 });
 
