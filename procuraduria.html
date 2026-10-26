@@ -158,8 +158,8 @@
         transform: translateX(16px);
     }
     
-    /* CAMPO CONDICIONAL ANIMADO */
-    #grupo-cant-menores {
+    /* CAMPOS CONDICIONALES ANIMADOS */
+    #grupo-cant-menores, #grupo-asunto-personalizado {
         max-height: 0;
         opacity: 0;
         overflow: hidden;
@@ -167,7 +167,7 @@
         margin-top: 0;
     }
 
-    #grupo-cant-menores.visible {
+    #grupo-cant-menores.visible, #grupo-asunto-personalizado.visible {
         max-height: 100px;
         opacity: 1;
         margin-top: 4px;
@@ -425,7 +425,23 @@
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
                 <div class="form-group" style="grid-column: span 2;">
                     <label>Asunto(s)</label>
-                    <input type="text" id="asuntos" placeholder="Ej: Pensión Alimenticia, Guardia y Custodia...">
+                    <select id="asuntos" onchange="verificarAsuntoPersonalizado()">
+                        <option value="">Seleccione un asunto...</option>
+                        <option value="ASESORIA">Asesoria</option>
+                        <option value="AUDIENCIA EN JUZGADO CIVIL">Audiencia en Juzgado Civil</option>
+                        <option value="AUDIENCIA EN JUZGADO PENAL">Audiencia en Juzgado Penal</option>
+                        <option value="ASISTENCIA A FISCALIA">Asistencia a Fiscalía</option>
+                        <option value="VISITAS DOMICILIARIAS">Visitas Domiciliarias</option>
+                        <option value="ENTREGA DE CONSTANCIA DE TUTORIA">Entrega de Constancia de Tutoria</option>
+                        <option value="ASISTENCIA A REGISTRO CIVIL">Asistencia a Registro Civil</option>
+                        <option value="ACTIVIDAD DIVERSA">Actividad Diversa</option>
+                        <option value="OTRO">Otro (Especificar)</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="grupo-asunto-personalizado" style="grid-column: span 2;">
+                    <label>Especifique Otro Asunto</label>
+                    <input type="text" id="asunto_otro" placeholder="Escriba el asunto personalizado...">
                 </div>
 
                 <div class="form-group">
@@ -483,8 +499,16 @@
     <div class="btn-box" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
         <button class="btn btn-primary" id="btn-save" onclick="guardar()"><i class="fas fa-save"></i> Guardar</button>
         <button class="btn" id="btn-update" style="background: var(--warning); border-color: var(--warning); color: white; display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> Actualizar</button>
-                <button class="btn" onclick="limpiarForm()"><i class="fas fa-plus"></i> Nuevo</button>
         <button class="btn" onclick="exportarExcel()"><i class="fas fa-download"></i> Excel</button>
+        
+        <label class="btn" style="cursor:pointer;">
+            <i class="fas fa-file-import"></i> Importar
+            <input type="file" id="import-excel" accept=".xlsx, .xls" style="display:none" onchange="importarDesdeExcel(event)">
+        </label>
+
+        <button class="btn" onclick="limpiarForm()"><i class="fas fa-broom"></i> Limpiar</button>
+        <button class="btn" style="color: var(--danger); border-color: #fecaca;" onclick="borrarTodaLaBase()"><i class="fas fa-trash-alt"></i> Vaciar</button>
+        <button class="btn" onclick="limpiarForm()"><i class="fas fa-plus"></i> Nuevo</button>
     </div>
 </div>
 
@@ -685,6 +709,17 @@
         }
     };
 
+    window.verificarAsuntoPersonalizado = () => {
+        const select = document.getElementById('asuntos');
+        const grupoOtro = document.getElementById('grupo-asunto-personalizado');
+        if (select.value === 'OTRO') {
+            grupoOtro.classList.add('visible');
+        } else {
+            grupoOtro.classList.remove('visible');
+            document.getElementById('asunto_otro').value = '';
+        }
+    };
+
     window.calcularEdad = () => {
         const fechaNac = document.getElementById('fecha_nacimiento').value;
         if (!fechaNac) {
@@ -711,7 +746,7 @@
         window.toggleCampoMenores();
     };
 
-    function actualizarOpcionesAsuntos() {
+    function actualizarOpcionesAsuntosFiltro() {
         const selectAsuntos = document.getElementById('filtro-asunto');
         const valorActual = selectAsuntos.value;
         
@@ -737,6 +772,12 @@
 
     function obtenerValoresForm() {
         const esMenor = document.getElementById('menor_edad').checked;
+        const selectAsunto = document.getElementById('asuntos').value;
+        let asuntoFinal = selectAsunto;
+        if (asuntoFinal === 'OTRO') {
+            asuntoFinal = document.getElementById('asunto_otro').value.trim().toUpperCase();
+        }
+
         return {
             no: document.getElementById('no').value,
             fecha: document.getElementById('fecha').value,
@@ -746,7 +787,7 @@
             genero: document.getElementById('genero').value,
             domicilio: document.getElementById('domicilio').value.toUpperCase(),
             lugar: document.getElementById('lugar').value.toUpperCase(),
-            asuntos: document.getElementById('asuntos').value.toUpperCase(),
+            asuntos: asuntoFinal,
             menor_edad: esMenor ? 'Sí' : 'No',
             cant_menores: esMenor ? (document.getElementById('cant_menores').value || '1') : '',
             horarios_mixtos: document.getElementById('horarios_mixtos').checked ? 'Sí' : 'No',
@@ -855,7 +896,7 @@
                         genero: String(getV(["GENERO", "SEXO"]) || "NO ESPECIFICADO").toUpperCase(),
                         domicilio: String(getV(["DOMICILIO"]) || "").toUpperCase(),
                         lugar: String(getV(["LUGAR", "LOCALIDAD", "COMUNIDAD"]) || "").toUpperCase(),
-                        asuntos: String(getV(["ASUNTOS", "ASUNTO"]) || "").toUpperCase(),
+                        asuntos: String(getV(["ASUNTOS", "ASUNTO"]) || "ASESORIA").toUpperCase(),
                         menor_edad: String(getV(["MENOR DE EDAD", "MENOR"]) || "No"),
                         cant_menores: String(getV(["CANTIDAD MENORES", "CANT. MENORES", "MENORES"]) || ""),
                         horarios_mixtos: String(getV(["HORARIOS MIXTOS", "MIXTO"]) || "No"),
@@ -876,7 +917,6 @@
         reader.readAsArrayBuffer(file);
     };
 
-    // GUARDAR PROTEGIDO CONTRA DOBLE CLIC Y ERRORES DE RED
     window.guardar = async () => {
         const btnSave = document.getElementById('btn-save');
         const data = obtenerValoresForm();
@@ -885,8 +925,11 @@
             mostrarNotificacion("El nombre del solicitante es obligatorio.", 'warning');
             return;
         }
+        if(!data.asuntos) {
+            mostrarNotificacion("Debe seleccionar un asunto.", 'warning');
+            return;
+        }
 
-        // Bloquear botón para evitar duplicados
         btnSave.disabled = true;
         const textoOriginal = btnSave.innerHTML;
         btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
@@ -900,19 +943,16 @@
             console.error("Error al guardar:", error);
             mostrarNotificacion("Error de conexión. Intente nuevamente.", 'error');
         } finally {
-            // Desbloquear botón
             btnSave.disabled = false;
             btnSave.innerHTML = textoOriginal;
         }
     };
 
-    // ACTUALIZAR PROTEGIDO CONTRA DOBLE CLIC Y ERRORES DE RED
     window.actualizar = async () => {
         const btnUpdate = document.getElementById('btn-update');
         const id = document.getElementById('edit-id').value;
         if(!id) return;
 
-        // Bloquear botón para evitar duplicados
         btnUpdate.disabled = true;
         const textoOriginal = btnUpdate.innerHTML;
         btnUpdate.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
@@ -925,7 +965,6 @@
             console.error("Error al actualizar:", error);
             mostrarNotificacion("Error de conexión. Intente nuevamente.", 'error');
         } finally {
-            // Desbloquear botón
             btnUpdate.disabled = false;
             btnUpdate.innerHTML = textoOriginal;
         }
@@ -986,10 +1025,11 @@
     };
 
     window.limpiarForm = () => {
-        ['edit-id','fecha','nombre','fecha_nacimiento','edad','domicilio','lugar','asuntos','cant_menores','detalles','elaboro'].forEach(id => {
+        ['edit-id','fecha','nombre','fecha_nacimiento','edad','domicilio','lugar','cant_menores','asunto_otro','detalles','elaboro'].forEach(id => {
             document.getElementById(id).value = '';
         });
         document.getElementById('genero').value = 'NO ESPECIFICADO';
+        document.getElementById('asuntos').value = '';
         
         ['menor_edad', 'horarios_mixtos', 'embarazada'].forEach(id => {
             document.getElementById(id).checked = false;
@@ -998,6 +1038,7 @@
         window.actualizarTextoToggle('horarios_mixtos', 'label-mixtos');
         window.actualizarTextoToggle('embarazada', 'label-embarazada');
         window.toggleCampoMenores();
+        window.verificarAsuntoPersonalizado();
 
         document.getElementById('filtro-mes').value = 'TODOS';
         document.getElementById('filtro-asunto').value = 'TODOS';
@@ -1020,7 +1061,20 @@
         document.getElementById('genero').value = reg.genero || 'NO ESPECIFICADO';
         document.getElementById('domicilio').value = reg.domicilio || '';
         document.getElementById('lugar').value = reg.lugar || '';
-        document.getElementById('asuntos').value = reg.asuntos || '';
+        
+        // Manejo del selector de asuntos al editar
+        const selectAsunto = document.getElementById('asuntos');
+        const opcionesValidas = Array.from(selectAsunto.options).map(o => o.value);
+        const asuntoReg = (reg.asuntos || '').trim().toUpperCase();
+
+        if (opcionesValidas.includes(asuntoReg)) {
+            selectAsunto.value = asuntoReg;
+            document.getElementById('asunto_otro').value = '';
+        } else {
+            selectAsunto.value = 'OTRO';
+            document.getElementById('asunto_otro').value = reg.asuntos || '';
+        }
+        window.verificarAsuntoPersonalizado();
         
         document.getElementById('menor_edad').checked = reg.menor_edad === 'Sí';
         window.actualizarTextoToggle('menor_edad', 'label-menor');
@@ -1099,7 +1153,7 @@
             document.getElementById('no').value = proximoNo;
         }
 
-        actualizarOpcionesAsuntos();
+        actualizarOpcionesAsuntosFiltro();
         window.filtrar();
     });
 
