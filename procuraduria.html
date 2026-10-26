@@ -500,14 +500,6 @@
         <button class="btn btn-primary" id="btn-save" onclick="guardar()"><i class="fas fa-save"></i> Guardar</button>
         <button class="btn" id="btn-update" style="background: var(--warning); border-color: var(--warning); color: white; display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> Actualizar</button>
         <button class="btn" onclick="exportarExcel()"><i class="fas fa-download"></i> Excel</button>
-        
-        <label class="btn" style="cursor:pointer;">
-            <i class="fas fa-file-import"></i> Importar
-            <input type="file" id="import-excel" accept=".xlsx, .xls" style="display:none" onchange="importarDesdeExcel(event)">
-        </label>
-
-        <button class="btn" onclick="limpiarForm()"><i class="fas fa-broom"></i> Limpiar</button>
-        <button class="btn" style="color: var(--danger); border-color: #fecaca;" onclick="borrarTodaLaBase()"><i class="fas fa-trash-alt"></i> Vaciar</button>
         <button class="btn" onclick="limpiarForm()"><i class="fas fa-plus"></i> Nuevo</button>
     </div>
 </div>
