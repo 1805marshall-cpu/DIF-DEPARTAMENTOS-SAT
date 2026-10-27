@@ -1117,7 +1117,7 @@
         </div>
     </div>
 
-    <!-- Script principal actualizado con autolimpieza y botón de reinicio -->
+    <!-- Script principal optimizado para Alta Calidad y Resguardo Dual -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -1147,8 +1147,7 @@
         let sliderFotosActuales = [];
         let sliderIndexActual = 0;
 
-        // Debe quedar así:
-const listaIdsServicios = ['esterilizacion', 'corte', 'ivea', 'bucal', 'medica', 'analisis', 'fisioterapia', 'psicologia', 'optometria', 'ultrasonidos'];
+        const listaIdsServicios = ['esterilizacion', 'corte', 'ivea', 'bucal', 'medica', 'analisis', 'fisioterapia', 'psicologia', 'optometria', 'especiales', 'ultrasonidos'];
 
         document.addEventListener('DOMContentLoaded', () => {
             const usuarioActivo = sessionStorage.getItem('usuario_campo');
@@ -1234,13 +1233,12 @@ const listaIdsServicios = ['esterilizacion', 'corte', 'ivea', 'bucal', 'medica',
 
                         showToast('¡Datos e imágenes guardados con éxito!', 'success', 'fa-cloud-arrow-up');
 
-                        // LIMPIAR FORMULARIO AUTOMÁTICAMENTE TRAS GUARDAR CON ÉXITO
                         limpiarFormularioCompleto();
                         renderizarTablaEvidencias();
 
                     } catch (error) {
                         console.error("Error al procesar evidencias:", error);
-                        showToast('Error al guardar la información', 'error', 'fa-triangle-exclamation');
+                        showToast('Error al guardar la información (verifique que las imágenes no excedan el límite de tamaño permitido)', 'error', 'fa-triangle-exclamation');
                     } finally {
                         if (btnSubmit) {
                             btnSubmit.disabled = false;
@@ -1388,14 +1386,14 @@ const listaIdsServicios = ['esterilizacion', 'corte', 'ivea', 'bucal', 'medica',
                 'salud-medica': ['salud medica'],
                 'salud-bucal': ['salud bucal'],
                 'analisis': ['analisis clinicos'],
-                'fisioterapia': ['fisioterapia'],
+                'fisioterapia': ['fisioterapia', 'fisioterapia-crisat'],
                 'psicologia': ['psicologia', 'platicas de psicologia'],
                 'ivea': ['ivea'],
                 'esterilizacion': ['campana de esterilizacion'],
                 'jurisdiccion': ['jurisdiccion sanitaria'],
-                'ultrasonidos': ['ultrasonidos'] // <-- Agrega esta línea
+                'especiales': ['campañas especiales'],
+                'ultrasonidos': ['ultrasonidos']
             };
-
 
             listaIdsServicios.forEach(key => {
                 const chk = document.getElementById(`chk-${key}`);
@@ -1487,7 +1485,8 @@ const listaIdsServicios = ['esterilizacion', 'corte', 'ivea', 'bucal', 'medica',
             showToast('Formulario limpiado correctamente', 'info', 'fa-rotate-right');
         };
 
-        function comprimirYConvertirImagen(file, maxWidth = 900, quality = 0.65) {
+        // Procesamiento configurado a Alta Calidad (maxWidth 1200px, quality 0.8)
+        function comprimirYConvertirImagen(file, maxWidth = 1200, quality = 0.8) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
@@ -1523,11 +1522,11 @@ const listaIdsServicios = ['esterilizacion', 'corte', 'ivea', 'bucal', 'medica',
             const inputFiles = document.getElementById(inputId);
             if (!inputFiles || !inputFiles.files) return;
 
-            showToast('Procesando y comprimiendo imágenes...', 'info', 'fa-compress');
+            showToast('Procesando imágenes en alta calidad...', 'info', 'fa-compress');
 
             for (let file of Array.from(inputFiles.files)) {
                 try {
-                    const base64String = await comprimirYConvertirImagen(file, 900, 0.65);
+                    const base64String = await comprimirYConvertirImagen(file, 1200, 0.8);
                     cacheFiles[tipo].push(base64String);
                 } catch (err) {
                     console.error("Error al procesar archivo:", err);
@@ -1536,7 +1535,7 @@ const listaIdsServicios = ['esterilizacion', 'corte', 'ivea', 'bucal', 'medica',
 
             inputFiles.value = '';
             renderPreview();
-            showToast('Imágenes listas para guardar', 'success', 'fa-check');
+            showToast('Imágenes listas y nítidas', 'success', 'fa-check');
         };
 
         window.eliminarFotoExistente = function(tipo, index) {
