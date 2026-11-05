@@ -3,22 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Sistema DIF 2026 - Edición Especial Halloween</title>
+    <title>Acceso Sistema DIF 2026 - Edición Día de Muertos</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --primary-dif: #7c2d12;       
             --primary-hover: #9a3412;     
-            --accent-gold: #d97706;       /* Naranja cempasúchil / calabaza */
-            --accent-purple: #581c87;     /* Morado místico */
+            --cempasuchil: #f97316;       /* Naranja Cempasúchil */
+            --cempasuchil-gold: #facc15;  /* Amarillo Cempasúchil */
+            --veladora-purple: #7e22ce;   /* Morado festivo */
             --text-dark: #1c1917;
             --danger: #dc2626;
         }
 
-        /* --- FONDO CLARO Y EFECTO LINTERNA SUAVE --- */
+        /* --- FONDO MÍSTICO NOCTURNO Y LINTERNA --- */
         body { 
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            background: radial-gradient(circle at center, #2e1065 0%, #15092a 100%); 
+            background: radial-gradient(circle at center, #3b0764 0%, #150524 100%); 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -32,7 +33,7 @@
             cursor: default;
         }
 
-        /* Capa de luz móvil más suave y transparente */
+        /* Capa de luz móvil tipo veladora */
         body::after {
             content: '';
             position: fixed;
@@ -40,7 +41,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: radial-gradient(circle 260px at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(255, 215, 130, 0.15) 0%, rgba(20, 10, 35, 0.2) 70%, rgba(10, 5, 20, 0.35) 100%);
+            background: radial-gradient(circle 260px at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(255, 180, 80, 0.18) 0%, rgba(30, 8, 50, 0.25) 70%, rgba(12, 3, 20, 0.4) 100%);
             pointer-events: none;
             z-index: 10;
         }
@@ -50,13 +51,54 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- MURCIÉLAGOS COLGADOS (NATIVOS SVG) --- */
-        .roost {
+        /* --- CAMINO DE FLOR DE CEMPASÚCHIL AMPLIADO (DESDE ABAJO HACIA EL LOGIN) --- */
+        .cempasuchil-path {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 380px;
+            height: 240px;
+            pointer-events: none;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0.9;
+        }
+
+        .petal {
+            position: absolute;
+            background: radial-gradient(circle, var(--cempasuchil-gold) 0%, var(--cempasuchil) 80%);
+            border-radius: 50% 50% 20% 20%;
+            box-shadow: 0 0 10px rgba(249, 115, 22, 0.7);
+        }
+
+        /* --- PAPEL PICADO TRADICIONAL SUPERIOR --- */
+        .papel-picado {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 80px;
+            height: 32px;
+            background-image: repeating-linear-gradient(90deg, 
+                #f97316 0px, #f97316 40px, 
+                #7e22ce 40px, #7e22ce 80px, 
+                #ec4899 80px, #ec4899 120px, 
+                #eab308 120px, #eab308 160px);
+            opacity: 0.85;
+            z-index: 15;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            border-bottom: 2px dashed rgba(255,255,255,0.4);
+        }
+
+        /* --- MURCIÉLAGOS COLGADOS (DURMIENDO) --- */
+        .roost {
+            position: fixed;
+            top: 32px;
+            left: 0;
+            width: 100%;
+            height: 60px;
             display: flex;
             justify-content: space-around;
             align-items: flex-start;
@@ -74,20 +116,18 @@
 
         .bat-thread {
             width: 1px;
-            height: 25px;
+            height: 20px;
             background: rgba(255, 255, 255, 0.25);
         }
 
         .bat-svg {
-            width: 38px;
-            height: 38px;
-            fill: #e2e8f0;
+            width: 35px;
+            height: 35px;
+            fill: #cbd5e1;
             filter: drop-shadow(0 2px 5px rgba(0,0,0,0.8));
-            transform: rotate(180deg); /* Colgados de cabeza */
-            transition: all 0.4s ease;
+            transform: rotate(180deg);
         }
 
-        /* Balanceo suave de murciélagos al estar colgados */
         .bat-wrapper:nth-child(1) { animation: sway 3s ease-in-out infinite alternate; }
         .bat-wrapper:nth-child(2) { animation: sway 3.8s ease-in-out infinite alternate-reverse; }
         .bat-wrapper:nth-child(3) { animation: sway 3.2s ease-in-out infinite alternate; }
@@ -98,7 +138,6 @@
             100% { transform: rotate(5deg); }
         }
 
-        /* Clase cuando despiertan y vuelan al iniciar sesión */
         .bat-wrapper.flying {
             animation: flyAway 1.4s ease-in-out forwards !important;
         }
@@ -109,46 +148,40 @@
             100% { transform: translate(var(--rand-x, 150px), -120vh) scale(0.5); opacity: 0; }
         }
 
-        /* Telarañas en esquinas */
-        .cobweb {
+        /* --- VELADORAS LATERALES CON PARPADEO --- */
+        .veladora-container {
             position: fixed;
-            width: 130px;
-            height: 130px;
-            pointer-events: none;
-            opacity: 0.35;
-            z-index: 2;
-            background-repeat: no-repeat;
-        }
-        .cobweb-tl { top: 0; left: 0; background-image: radial-gradient(circle at 0 0, #fff 70%, transparent 71%); border-bottom-right-radius: 100%; }
-        .cobweb-tr { top: 0; right: 0; background-image: radial-gradient(circle at 100% 0, #fff 70%, transparent 71%); border-bottom-left-radius: 100%; }
-
-        /* Araña colgante */
-        .spider-container {
-            position: absolute;
-            top: 0;
-            right: 40px;
+            bottom: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            z-index: 6;
-            animation: hangSpider 4s ease-in-out infinite;
+            z-index: 12;
+        }
+        .veladora-left { left: 40px; }
+        .veladora-right { right: 40px; }
+
+        .flame {
+            width: 14px;
+            height: 24px;
+            background: linear-gradient(to top, #ff9100, #ffea00);
+            border-radius: 50% 50% 20% 20%;
+            animation: flicker 0.6s infinite alternate ease-in-out;
+            box-shadow: 0 0 12px #ff9100, 0 0 25px #ffea00;
+            margin-bottom: 2px;
         }
 
-        .spider-thread {
-            width: 1px;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.4);
+        @keyframes flicker {
+            0% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
+            100% { transform: scale(1.1) rotate(2deg); opacity: 1; filter: brightness(1.2); }
         }
 
-        .spider-icon {
-            color: #1c1917;
-            font-size: 1.4rem;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-        }
-
-        @keyframes hangSpider {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(20px); }
+        .vaso-veladora {
+            width: 32px;
+            height: 45px;
+            background: linear-gradient(135deg, rgba(126,34,206,0.8), rgba(249,115,22,0.8));
+            border-radius: 4px 4px 10px 10px;
+            border: 2px solid rgba(255,255,255,0.4);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
         }
 
         /* Banner superior */
@@ -160,7 +193,7 @@
             align-items: center;
             margin-bottom: 20px;
             animation: fadeIn 0.6s ease-out forwards;
-            z-index: 4;
+            z-index: 12;
         }
         .brand-logo { 
             height: 50px; 
@@ -168,25 +201,25 @@
             filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8));
         }
 
-        /* Tarjeta de Login estilo Calabaza / Halloween */
+        /* Tarjeta de Login */
         .login-card {
             background: rgba(255, 255, 255, 0.98);
             padding: 34px 30px;
             border-radius: 20px;
-            box-shadow: 0 15px 40px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(217, 119, 6, 0.4);
+            box-shadow: 0 15px 40px -5px rgba(0, 0, 0, 0.7), 0 0 25px rgba(249, 115, 22, 0.4);
             width: 100%;
             max-width: 380px;
             text-align: center;
-            border: 2px solid rgba(217, 119, 6, 0.6);
+            border: 2px solid #f97316;
             box-sizing: border-box;
             animation: fadeIn 0.6s ease-out 0.1s forwards;
             opacity: 0; 
             position: relative;
             overflow: hidden;
-            z-index: 4;
+            z-index: 12;
         }
 
-        /* Franja superior temática */
+        /* Franja superior tricolor */
         .login-card::before {
             content: '';
             position: absolute;
@@ -194,7 +227,7 @@
             left: 0;
             right: 0;
             height: 6px;
-            background: linear-gradient(90deg, #d97706, #7c2d12, #581c87);
+            background: linear-gradient(90deg, #f97316, #7e22ce, #ec4899, #eab308);
         }
 
         .slogan-img {
@@ -202,7 +235,7 @@
             margin: 0 auto 16px auto;
             display: block;
             object-fit: contain;
-            opacity: 0.9;
+            opacity: 0.95;
         }
 
         .seasonal-badge {
@@ -213,10 +246,10 @@
             color: #c2410c;
             font-size: 11px;
             font-weight: 700;
-            padding: 4px 12px;
+            padding: 5px 14px;
             border-radius: 20px;
             margin-bottom: 12px;
-            border: 1px solid #ffedd5;
+            border: 1px solid #fed7aa;
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
@@ -273,14 +306,14 @@
         }
 
         input:focus { 
-            border-color: var(--accent-gold); 
+            border-color: var(--cempasuchil); 
             background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.2); 
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2); 
         }
 
         input:focus + .input-icon,
         .input-icon-container:focus-within .input-icon {
-            color: var(--accent-gold);
+            color: var(--cempasuchil);
         }
         
         .password-container input { 
@@ -297,7 +330,7 @@
             font-size: 0.95rem;
             transition: color 0.2s;
         }
-        .toggle-password:hover { color: var(--accent-gold); }
+        .toggle-password:hover { color: var(--cempasuchil); }
 
         .btn-login {
             background: var(--text-dark);
@@ -319,7 +352,7 @@
         }
         
         .btn-login:hover { 
-            background: var(--accent-gold); 
+            background: var(--cempasuchil); 
         }
         
         .btn-login:disabled { 
@@ -339,40 +372,78 @@
             font-weight: 500;
         }
 
-        @media (max-width: 480px) {
-            .login-card { padding: 24px 18px; }
+        /* --- CALAVERITAS DE AZÚCAR DECORATIVAS ABAJO DE LA TARJETA --- */
+        .sugar-skulls-footer {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 16px;
+            z-index: 12;
+            animation: fadeIn 0.6s ease-out 0.2s forwards;
+            opacity: 0;
+        }
+
+        .sugar-skull {
+            font-size: 1.3rem;
+            color: #facc15;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+            animation: floatSkull 3s ease-in-out infinite alternate;
+        }
+        .sugar-skull:nth-child(2) { animation-delay: 0.5s; color: #ec4899; }
+        .sugar-skull:nth-child(3) { animation-delay: 1s; color: #f97316; }
+
+        @keyframes floatSkull {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-4px); }
+        }
+
+        @media (max-width: 768px) {
+            .veladora-container, .cempasuchil-path { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Murciélagos SVG Colgados Arriba (Durmiendo) -->
-    <div class="roost">
-        <div class="bat-wrapper" style="--rand-x: -250px;">
-            <div class="bat-thread"></div>
-            <svg class="bat-svg" viewBox="0 0 24 24"><path d="M12,2C11.5,2.5 10.8,3.2 10,3.5C8.5,4 6,3 4,4C2,5 1,7 1,9C1,11 2.5,12.5 4,12C5.5,11.5 6.5,10 7,9C7.5,10.5 8.5,12 10,12.5C11,12.8 11.5,12.2 12,12C12.5,12.2 13,12.8 14,12.5C15.5,12 16.5,10.5 17,9C17.5,10 18.5,11.5 20,12C21.5,12.5 23,11 23,9C23,7 22,5 20,4C18,3 15.5,4 14,3.5C13.2,3.2 12.5,2.5 12,2Z"/></svg>
-        </div>
-        <div class="bat-wrapper" style="--rand-x: -100px;">
-            <div class="bat-thread"></div>
-            <svg class="bat-svg" viewBox="0 0 24 24"><path d="M12,2C11.5,2.5 10.8,3.2 10,3.5C8.5,4 6,3 4,4C2,5 1,7 1,9C1,11 2.5,12.5 4,12C5.5,11.5 6.5,10 7,9C7.5,10.5 8.5,12 10,12.5C11,12.8 11.5,12.2 12,12C12.5,12.2 13,12.8 14,12.5C15.5,12 16.5,10.5 17,9C17.5,10 18.5,11.5 20,12C21.5,12.5 23,11 23,9C23,7 22,5 20,4C18,3 15.5,4 14,3.5C13.2,3.2 12.5,2.5 12,2Z"/></svg>
-        </div>
-        <div class="bat-wrapper" style="--rand-x: 100px;">
-            <div class="bat-thread"></div>
-            <svg class="bat-svg" viewBox="0 0 24 24"><path d="M12,2C11.5,2.5 10.8,3.2 10,3.5C8.5,4 6,3 4,4C2,5 1,7 1,9C1,11 2.5,12.5 4,12C5.5,11.5 6.5,10 7,9C7.5,10.5 8.5,12 10,12.5C11,12.8 11.5,12.2 12,12C12.5,12.2 13,12.8 14,12.5C15.5,12 16.5,10.5 17,9C17.5,10 18.5,11.5 20,12C21.5,12.5 23,11 23,9C23,7 22,5 20,4C18,3 15.5,4 14,3.5C13.2,3.2 12.5,2.5 12,2Z"/></svg>
-        </div>
-        <div class="bat-wrapper" style="--rand-x: 250px;">
-            <div class="bat-thread"></div>
-            <svg class="bat-svg" viewBox="0 0 24 24"><path d="M12,2C11.5,2.5 10.8,3.2 10,3.5C8.5,4 6,3 4,4C2,5 1,7 1,9C1,11 2.5,12.5 4,12C5.5,11.5 6.5,10 7,9C7.5,10.5 8.5,12 10,12.5C11,12.8 11.5,12.2 12,12C12.5,12.2 13,12.8 14,12.5C15.5,12 16.5,10.5 17,9C17.5,10 18.5,11.5 20,12C21.5,12.5 23,11 23,9C23,7 22,5 20,4C18,3 15.5,4 14,3.5C13.2,3.2 12.5,2.5 12,2Z"/></svg>
-        </div>
+    <!-- Papel Picado Superior -->
+    <div class="papel-picado"></div>
+
+    <!-- Camino Extendido de Pétalos de Cempasúchil -->
+    <div class="cempasuchil-path">
+        <!-- Base ancha abajo -->
+        <div class="petal" style="bottom: 0px; left: 30px; width: 36px; height: 24px; transform: rotate(15deg);"></div>
+        <div class="petal" style="bottom: 5px; left: 110px; width: 34px; height: 22px; transform: rotate(-10deg);"></div>
+        <div class="petal" style="bottom: 0px; left: 190px; width: 38px; height: 25px; transform: rotate(5deg);"></div>
+        <div class="petal" style="bottom: 8px; left: 270px; width: 35px; height: 23px; transform: rotate(-20deg);"></div>
+        <div class="petal" style="bottom: 2px; left: 340px; width: 32px; height: 20px; transform: rotate(25deg);"></div>
+        
+        <!-- Centro -->
+        <div class="petal" style="bottom: 30px; left: 70px; width: 35px; height: 22px; transform: rotate(-25deg);"></div>
+        <div class="petal" style="bottom: 35px; left: 150px; width: 32px; height: 20px; transform: rotate(18deg);"></div>
+        <div class="petal" style="bottom: 32px; left: 230px; width: 36px; height: 23px; transform: rotate(-12deg);"></div>
+        <div class="petal" style="bottom: 28px; left: 300px; width: 33px; height: 21px; transform: rotate(14deg);"></div>
+
+        <!-- Subiendo hacia el login -->
+        <div class="petal" style="bottom: 65px; left: 95px; width: 32px; height: 20px; transform: rotate(10deg);"></div>
+        <div class="petal" style="bottom: 70px; left: 180px; width: 34px; height: 22px; transform: rotate(-15deg);"></div>
+        <div class="petal" style="bottom: 68px; left: 255px; width: 30px; height: 19px; transform: rotate(22deg);"></div>
+        
+        <div class="petal" style="bottom: 105px; left: 130px; width: 33px; height: 21px; transform: rotate(-5deg);"></div>
+        <div class="petal" style="bottom: 110px; left: 215px; width: 31px; height: 20px; transform: rotate(16deg);"></div>
+
+        <div class="petal" style="bottom: 150px; left: 170px; width: 28px; height: 18px; transform: rotate(-8deg);"></div>
+        <div class="petal" style="bottom: 155px; left: 210px; width: 29px; height: 18px; transform: rotate(12deg);"></div>
+
+        <div class="petal" style="bottom: 190px; left: 185px; width: 26px; height: 16px; transform: rotate(5deg);"></div>
     </div>
 
-    <!-- Elementos Ambientales -->
-    <div class="cobweb cobweb-tl"></div>
-    <div class="cobweb cobweb-tr"></div>
-    
-    <div class="spider-container">
-        <div class="spider-thread"></div>
-        <i class="fas fa-spider spider-icon"></i>
+    <!-- Veladoras a los costados -->
+    <div class="veladora-container veladora-left">
+        <div class="flame"></div>
+        <div class="vaso-veladora"></div>
+    </div>
+    <div class="veladora-container veladora-right">
+        <div class="flame"></div>
+        <div class="vaso-veladora"></div>
     </div>
 
     <!-- Contenido Principal Login -->
@@ -382,7 +453,7 @@
 
     <div class="login-card">
         <div class="seasonal-badge">
-            <i class="fas fa-ghost"></i> Noche de Brujas & Calabazas
+            <i class="fas fa-skull"></i> Camino de Cempasúchil · Día de Muertos
         </div>
 
         <img src="Captura_de_pantalla_2026-02-05_a_la_s__10.28.31_a.m.-removebg-preview.png" alt="Amor que protege" class="slogan-img">
@@ -412,6 +483,13 @@
         <div id="error-msg" class="error">
             <i class="fas fa-circle-exclamation"></i> Credenciales incorrectas
         </div>
+    </div>
+
+    <!-- Calaveritas de Azúcar Decorativas abajo de la tarjeta -->
+    <div class="sugar-skulls-footer">
+        <i class="fas fa-skull sugar-skull"></i>
+        <i class="fas fa-ghost sugar-skull"></i>
+        <i class="fas fa-skull sugar-skull"></i>
     </div>
 
 <script>
@@ -499,7 +577,7 @@
         if (cuentas[user] && cuentas[user].p === pass) {
             error.style.display = 'none';
 
-            // --- ANIMAR MURCIÉLAGOS VOLANDO ---
+            // --- DESPERTAR MURCIÉLAGOS ---
             const bats = document.querySelectorAll('.bat-wrapper');
             bats.forEach(bat => bat.classList.add('flying'));
 
@@ -518,7 +596,7 @@
             localStorage.setItem('userDep', cuentas[user].dep);
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Validando...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Siguiendo el camino...';
 
             setTimeout(() => {
                 window.location.href = cuentas[user].url;
