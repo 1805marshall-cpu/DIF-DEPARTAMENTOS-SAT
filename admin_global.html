@@ -62,54 +62,83 @@
     </div>
 
     <div class="main-content">
-        <div class="top-bar">
-            <div style="display:flex; align-items:center; gap:20px;">
-                <i class="fas fa-bars" id="btn-toggle"></i>
-                <h2 id="view-title" style="margin:0;">Panel</h2>
-            </div>
-            
-            <div style="flex-grow: 1; max-width: 400px; margin: 0 20px; position: relative;">
-                <i class="fas fa-search" style="position: absolute; left: 12px; top: 10px; color: #64748b;"></i>
-                <input type="text" id="global-search-input" placeholder="BUSCAR POR NOMBRE, FOLIO O CAMPO CLAVE..." 
-                    onkeyup="window.reprocesarTodo()" 
-                    style="width: 90%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
-            </div>
-            <div style="flex-grow: 1; max-width: 400px; margin: 0 20px; position: relative;">
-                <i class="fas fa-map-marker-alt" style="position: absolute; left: 12px; top: 10px; color: #64748b;"></i>
-                <input type="text" id="global-zone-search" placeholder="BUSCAR POR ZONA / LOCALIDAD..." 
-                    onkeyup="window.reprocesarTodo()" 
-                    style="width: 90%; padding: 8px 10px 8px 35px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 12px; font-weight: bold;">
-            </div>
-            <div class="top-bar-filter-item">
-                <select id="global-month-filter" onchange="window.reprocesarTodo()">
-                    <option value="all">📅 TODOS LOS MESES</option>
-                    <option value="01">Enero</option>
-                    <option value="02">Febrero</option>
-                    <option value="03">Marzo</option>
-                    <option value="04">Abril</option>
-                    <option value="05">Mayo</option>
-                    <option value="06">Junio</option>
-                    <option value="07">Julio</option>
-                    <option value="08">Agosto</option>
-                    <option value="09">Septiembre</option>
-                    <option value="10">Octubre</option>
-                    <option value="11">Noviembre</option>
-                    <option value="12">Diciembre</option>
-                </select>
-            </div>
+    <div class="top-bar" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 18px; background: #ffffff; box-shadow: 0 1px 4px rgba(0,0,0,0.05); flex-wrap: nowrap; width: 100%;">
+    
+    <!-- 1. Título y Botón Menú -->
+    <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+        <i class="fas fa-bars" id="btn-toggle" style="cursor: pointer; font-size: 15px; color: #334155;"></i>
+        <h2 id="view-title" style="margin: 0; font-size: 13px; font-weight: 800; color: #1e293b;">Panel</h2>
+    </div>
+    
+    <!-- 2. Buscadores Horizontales (Estilo Pastilla con buen ancho) -->
+    <div style="display: flex; align-items: center; gap: 6px; flex-grow: 1; max-width: 520px;">
+        <!-- Buscador Nombre / Folio -->
+        <div style="position: relative; flex: 1; min-width: 190px;">
+            <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 9.5px;"></i>
+            <input type="text" id="global-search-input" placeholder="BUSCAR POR NOMBRE, FOLIO..." 
+                onkeyup="window.reprocesarTodo()" 
+                style="width: 100%; padding: 4px 10px 4px 30px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 9.5px; font-weight: bold; background: #f8fafc; color: #1e293b;">
+        </div>
+        <!-- Buscador Zona / Localidad -->
+        <div style="position: relative; flex: 1; min-width: 180px;">
+            <i class="fas fa-map-marker-alt" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 9.5px;"></i>
+            <input type="text" id="global-zone-search" placeholder="BUSCAR POR ZONA..." 
+                onkeyup="window.reprocesarTodo()" 
+                style="width: 100%; padding: 4px 10px 4px 30px; border-radius: 20px; border: 1px solid #cbd5e1; outline: none; font-size: 9.5px; font-weight: bold; background: #f8fafc; color: #1e293b;">
+        </div>
+    </div>
 
-            <div class="top-bar-filter-item">
-                <select id="global-year-filter" onchange="window.reprocesarTodo()">
-                    <option value="all">📆 TODOS LOS AÑOS</option>
-                    <option value="2025">2025</option>
-                    <option value="2026" selected>2026</option>
-                    <option value="2027">2027</option>
-                </select>
-            </div>
-            <div id="reloj" class="badge bg-light text-dark border px-3 py-2 shadow-sm" style="font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;"></div>
+    <!-- 3. Filtros de Fecha Horizontales (Estilo Pastillas Uniformes) -->
+    <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0; background: #ffffff;">
+        
+        <!-- Mes -->
+        <div style="display: flex; align-items: center; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 20px; padding: 2px 8px;">
+            <span style="font-size: 8px; font-weight: 800; color: #64748b; margin-right: 4px;">MES</span>
+            <select id="global-month-filter" onchange="window.reprocesarTodo()" style="background: transparent; border: none; outline: none; font-size: 9.5px; font-weight: bold; color: #1e293b; cursor: pointer;">
+                <option value="all">TODOS</option>
+                <option value="01">ENERO</option>
+                <option value="02">FEBRERO</option>
+                <option value="03">MARZO</option>
+                <option value="04">ABRIL</option>
+                <option value="05">MAYO</option>
+                <option value="06">JUNIO</option>
+                <option value="07">JULIO</option>
+                <option value="08">AGOSTO</option>
+                <option value="09">SEPTIEMBRE</option>
+                <option value="10">OCTUBRE</option>
+                <option value="11">NOVIEMBRE</option>
+                <option value="12">DICIEMBRE</option>
+            </select>
         </div>
 
-        <!-- ========================================== -->
+        <!-- Año -->
+        <div style="display: flex; align-items: center; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 20px; padding: 2px 8px;">
+            <span style="font-size: 8px; font-weight: 800; color: #64748b; margin-right: 4px;">AÑO</span>
+            <select id="global-year-filter" onchange="window.reprocesarTodo()" style="background: transparent; border: none; outline: none; font-size: 9.5px; font-weight: bold; color: #1e293b; cursor: pointer;">
+                <option value="all">TODOS</option>
+                <option value="2026" selected>2026</option>
+                <option value="2027">2027</option>
+                <option value="2028">2028</option>
+                <option value="2029">2029</option>
+            </select>
+        </div>
+
+        <!-- Del -->
+        <div style="display: flex; align-items: center; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 20px; padding: 2px 8px;">
+            <span style="font-size: 8px; font-weight: 800; color: #64748b; margin-right: 4px;">DEL</span>
+            <input type="date" id="global-date-start" onchange="window.reprocesarTodo()" style="background: transparent; border: none; outline: none; font-size: 9.5px; font-weight: bold; color: #1e293b; width: 105px;">
+        </div>
+
+        <!-- Al -->
+        <div style="display: flex; align-items: center; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 20px; padding: 2px 8px;">
+            <span style="font-size: 8px; font-weight: 800; color: #64748b; margin-right: 4px;">AL</span>
+            <input type="date" id="global-date-end" onchange="window.reprocesarTodo()" style="background: transparent; border: none; outline: none; font-size: 9.5px; font-weight: bold; color: #1e293b; width: 105px;">
+        </div>
+    </div>
+</div>
+
+    
+<!-- ========================================== -->
 <!-- VISTA: JORNADAS ITINERANTES -->
 <!-- ========================================== -->
 <div id="view-jornadas-itinerantes" class="view-container" style="display: none;">
@@ -1124,8 +1153,8 @@ const store = {
     medica_d: [],
     inventario_farmacia: [],
     salidas_farmacia: [],
-    jornadas: [],         // NUEVO: Almacena las jornadas registradas
-    evidencias_jornadas: [] // NUEVO: Almacena las evidencias e informes de campo
+    jornadas: [],         
+    evidencias_jornadas: [] 
 };
 window.store = store;
 
@@ -1137,6 +1166,133 @@ console.log("CAIC Dir:", window.store.caic_d);
 console.log("Médica Dir:", window.store.medica_d);
 console.log("Store completo actual:", window.store);
 
+// --- 🌟 FUNCIÓN CORREGIDA DE VALIDACIÓN DE FECHAS (DEL / AL) Y FILTROS ---
+window.cumpleFiltrosGlobales = function(fechaItemRaw, textoBusquedaItem = "", zonaItemStr = "") {
+    const mesFiltro = document.getElementById('global-month-filter')?.value || 'all';
+    const anioFiltro = document.getElementById('global-year-filter')?.value || 'all';
+    const fechaInicioStr = document.getElementById('global-date-start')?.value || '';
+    const fechaFinStr = document.getElementById('global-date-end')?.value || '';
+    const textoInput = document.getElementById('global-search-input')?.value.toLowerCase().trim() || '';
+    const zonaInput = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || '';
+
+    // 1. Filtro de Texto
+    if (textoInput && !String(textoBusquedaItem).toLowerCase().includes(textoInput)) {
+        return false;
+    }
+
+    // 2. Filtro de Zona
+    if (zonaInput && !String(zonaItemStr).toLowerCase().includes(zonaInput)) {
+        return false;
+    }
+
+    // 3. Normalización robusta de la fecha del registro
+    let anioItem = "";
+    let mesItem = "";
+    let fechaEstandar = "";
+
+    if (fechaItemRaw) {
+        let fechaObj = null;
+
+        if (typeof fechaItemRaw.toDate === 'function') {
+            fechaObj = fechaItemRaw.toDate();
+        } else if (fechaItemRaw.seconds) {
+            fechaObj = new Date(fechaItemRaw.seconds * 1000);
+        } else if (fechaItemRaw instanceof Date) {
+            fechaObj = fechaItemRaw;
+        } else {
+            let str = String(fechaItemRaw).trim().split(' ')[0]; // Remover hora si existe
+            
+            // Si viene en formato DD/MM/YYYY o DD-MM-YYYY
+            if (str.includes('/') || (str.includes('-') && str.split('-')[0].length === 2)) {
+                const sep = str.includes('/') ? '/' : '-';
+                const partes = str.split(sep);
+                if (partes.length === 3) {
+                    const dia = partes[0].padStart(2, '0');
+                    const mes = partes[1].padStart(2, '0');
+                    let anio = partes[2];
+                    if (anio.length === 2) anio = `20${anio}`;
+                    str = `${anio}-${mes}-${dia}`;
+                }
+            }
+            
+            if (str.includes('-') && str.length >= 10) {
+                const p = str.split('-');
+                if (p[0].length === 4) {
+                    anioItem = p[0];
+                    mesItem = p[1];
+                    fechaEstandar = str;
+                }
+            } else {
+                fechaObj = new Date(str);
+            }
+        }
+
+        if (fechaObj && !isNaN(fechaObj.getTime())) {
+            const y = fechaObj.getFullYear();
+            const m = String(fechaObj.getMonth() + 1).padStart(2, '0');
+            const d = String(fechaObj.getDate()).padStart(2, '0');
+            anioItem = String(y);
+            mesItem = m;
+            fechaEstandar = `${y}-${m}-${d}`;
+        }
+    }
+
+    // Si el registro no tiene fecha válida
+    if (!fechaEstandar) {
+        return (fechaInicioStr === '' && fechaFinStr === '' && mesFiltro === 'all' && anioFiltro === 'all');
+    }
+
+    // 4. Evaluar Rango de Fechas Exactas (DEL / AL) con prioridad absoluta si están llenos
+    if (fechaInicioStr || fechaFinStr) {
+        if (fechaInicioStr && fechaEstandar < fechaInicioStr) return false;
+        if (fechaFinStr && fechaEstandar > fechaFinStr) return false;
+        return true; // Si cumple el rango DEL/AL, ignoramos los selectores individuales de mes/año
+    }
+
+    // 5. Evaluar Selectores Secundarios (Mes y Año) si DEL / AL están vacíos
+    if (anioFiltro !== 'all' && anioItem !== anioFiltro) return false;
+    if (mesFiltro !== 'all' && mesItem !== mesFiltro) return false;
+
+    return true;
+};
+
+
+
+// --- 🌟 RENDERIZADO POR LOTES (PAGINACIÓN VIRTUAL PARA EVITAR LENTITUD) ---
+window.paginarYRenderizar = function(containerId, dataArray, renderCallback, elementosPorLote = 50) {
+    const contenedor = document.getElementById(containerId);
+    if (!contenedor) return;
+
+    if (!dataArray || dataArray.length === 0) {
+        contenedor.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:20px; font-size:12px;">Sin registros para mostrar en este filtro.</div>';
+        const paginadorPrevio = document.getElementById(`${containerId}-paginator`);
+        if (paginadorPrevio) paginadorPrevio.remove();
+        return;
+    }
+
+    const loteActual = dataArray.slice(0, elementosPorLote);
+    contenedor.innerHTML = renderCallback(loteActual);
+
+    if (dataArray.length > elementosPorLote) {
+        let paginadorDiv = document.getElementById(`${containerId}-paginator`);
+        if (!paginadorDiv) {
+            paginadorDiv = document.createElement('div');
+            paginadorDiv.id = `${containerId}-paginator`;
+            paginadorDiv.style.cssText = "text-align: center; padding: 10px;";
+            contenedor.parentNode.appendChild(paginadorDiv);
+        }
+
+        paginadorDiv.innerHTML = `
+            <button onclick="window.cargarMasRegistros('${containerId}', ${elementosPorLote})" 
+                style="background: #e2e8f0; border: none; padding: 6px 14px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; color: #334155;">
+                Cargar más registros (${dataArray.length - elementosPorLote} restantes)...
+            </button>
+        `;
+    } else {
+        const paginadorDiv = document.getElementById(`${containerId}-paginator`);
+        if (paginadorDiv) paginadorDiv.remove();
+    }
+};
 // --- FUNCIÓN GLOBAL PARA CAMBIAR DE VISTA ---
 window.mostrarVista = function(idVista) {
     document.querySelectorAll('.view-container').forEach(view => {
@@ -1152,17 +1308,56 @@ window.mostrarVista = function(idVista) {
     if (vistaDestino) {
         vistaDestino.style.display = 'block';
         
+        // Sincronización y reprocesamiento automático según el módulo activo
         if (vistaDestino.id === 'view-crisat') {
             if (typeof window.reprocesarCrisat === 'function') window.reprocesarCrisat();
         }
-        if (vistaDestino.id === 'view-direccion') {
+        else if (vistaDestino.id === 'view-direccion') {
             if (typeof window.reprocesarDireccion === 'function') window.reprocesarDireccion();
         }
-        if (vistaDestino.id === 'view-farmacia') {
+        else if (vistaDestino.id === 'view-farmacia') {
             if (typeof window.reprocesarFarmacia === 'function') window.reprocesarFarmacia();
+        }
+        else if (vistaDestino.id === 'view-social' || vistaDestino.id === 'view-trabajo-social') {
+            if (typeof window.reprocesarTrabSoc === 'function') window.reprocesarTrabSoc();
+        }
+        else if (vistaDestino.id === 'view-jefatura' || vistaDestino.id === 'view-jefatura-psicologia') {
+            if (typeof window.reprocesarJefatura === 'function') window.reprocesarJefatura();
+        }
+        else if (vistaDestino.id === 'view-procuraduria') {
+            if (typeof window.reprocesarProcuraduria === 'function') window.reprocesarProcuraduria();
+        }
+        else if (vistaDestino.id === 'view-psicologia') {
+            if (typeof window.reprocesarPsicologia === 'function') window.reprocesarPsicologia();
+        }
+        else if (vistaDestino.id === 'view-medica' || vistaDestino.id === 'view-area-medica') {
+            if (typeof window.reprocesarMedica === 'function') window.reprocesarMedica();
         }
     }
 };
+
+/// =============================================================================
+// AUTO-ACTUALIZACIÓN INSTÁNTANEA PARA FILTROS GLOBALES (DEL, AL, MES, AÑO, ZONA)
+// =============================================================================
+document.addEventListener("DOMContentLoaded", () => {
+    const idsFiltrosGlobales = [
+        'global-search-input', 
+        'global-zone-search', 
+        'global-month-filter', 
+        'global-year-filter', 
+        'global-date-start', 
+        'global-date-end'
+    ];
+
+    idsFiltrosGlobales.forEach(id => {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+            elemento.addEventListener('input', dispararReprocesoActivo);
+            elemento.addEventListener('change', dispararReprocesoActivo);
+        }
+    });
+});
+
 
 // --- FUNCIÓN DE TOGGLE ADAPTADA ---
 window.toggleSidebar = function() {
@@ -1180,7 +1375,6 @@ window.showView = function(viewId, element) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     if (element) element.classList.add('active');
 
-    // Ocultar menú automáticamente en móvil al seleccionar una opción
     if (window.innerWidth <= 767) {
         const sidebar = document.querySelector('.sidebar');
         if (sidebar) sidebar.classList.remove('active');
@@ -1191,16 +1385,14 @@ window.cerrarSesion = function() {
     localStorage.removeItem('activeUser');
     window.location.href = "index.html";
 };
+
 function iniciarSistema() {
-    // 1. Obtener usuario y departamento desde almacenamiento
     const usuario = localStorage.getItem('activeUser') || sessionStorage.getItem('social_nombre') || sessionStorage.getItem('nombre_usuario') || 'ADMINISTRADOR';
     const departamento = localStorage.getItem('userDep') || sessionStorage.getItem('dep_usuario') || 'SISTEMA DIF';
     
-    // 2. Buscar los elementos exactos de tu HTML
     const elemUser = document.getElementById("nombre-usuario-activo") || document.getElementById("user-name-display");
     const elemRole = document.getElementById("dep-usuario-activo") || document.getElementById("user-role-display") || document.querySelector(".user-profile-box small");
     
-    // 3. Inyectar los datos en el menú lateral
     if (elemUser) {
         elemUser.innerText = usuario.toUpperCase();
     }
@@ -1208,12 +1400,10 @@ function iniciarSistema() {
         elemRole.innerText = departamento.toUpperCase();
     }
     
-    // 4. Continuar con la inicialización del dashboard
     if (typeof aplicarRestriccionesDeDepartamento === 'function') aplicarRestriccionesDeDepartamento();
     if (typeof conectarNavegacion === 'function') conectarNavegacion();
     if (typeof window.mostrarVista === 'function') window.mostrarVista('view-bienvenida');
 
-    // Toggle para colapsar/expandir el sidebar
     const btnToggle = document.getElementById('btn-toggle');
     const sidebar = document.querySelector('.sidebar');
     if (btnToggle && sidebar) {
@@ -1223,8 +1413,6 @@ function iniciarSistema() {
         });
     }
 }
-
-
 
 function conectarNavegacion() {
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -1250,9 +1438,8 @@ function aplicarRestriccionesDeDepartamento() {
         "VULNERABLE": ["nav-vulnerable", "view-vulnerable"],
         "DIRECCION": ["nav-direccion", "view-direccion"],
         "FARMACIA": ["nav-farmacia", "view-farmacia"],
-        "JORNADAS": ["nav-jornadas-itinerantes", "view-jornadas-itinerantes"] // NUEVO
+        "JORNADAS": ["nav-jornadas-itinerantes", "view-jornadas-itinerantes"]
     };
-
 
     const permitidos = permisos[depUsuario] || ["nav-territorial", "nav-crisat", "nav-direccion"];
 
@@ -1275,23 +1462,56 @@ if (document.readyState === 'loading') {
     iniciarSistema();
 }
 
+// =============================================================================
+// REPROCESO ACTIVO INTELIGENTE (ACTUALIZA SOLO LA VISTA VISIBLE EN PANTALLA)
+// =============================================================================
 window.reprocesarTodo = function() {
-    if (typeof window.reprocesarPsico === 'function') window.reprocesarPsico();
-    if (typeof window.reprocesarProcuraduria === 'function') window.reprocesarProcuraduria();
-    if (typeof window.reprocesarJefatura === 'function') window.reprocesarJefatura();
-    if (typeof window.reprocesarTrabSoc === 'function') window.reprocesarTrabSoc();
-    if (typeof window.reprocesarMedica === 'function') window.reprocesarMedica();
-    if (typeof window.renderReporteJerarquico === 'function') window.renderReporteJerarquico();
-    if (typeof window.reprocesarVulnerable === 'function') window.reprocesarVulnerable();
-    if (typeof window.reprocesarCrisat === 'function') window.reprocesarCrisat();
-    if (typeof window.reprocesarDespensas === 'function') window.reprocesarDespensas();
-    if (typeof window.reprocesarDireccion === 'function') window.reprocesarDireccion();
-    if (typeof window.reprocesarFarmacia === 'function') window.reprocesarFarmacia();
-    
-    // ASEGÚRATE DE TENER ESTA LÍNEA AQUÍ:
-    if (typeof window.reprocesarJornItin === 'function') window.reprocesarJornItin();
-};
+    // Mapeo completo de todas las vistas del sistema con sus respectivas funciones
+    const vistasMap = {
+        'view-crisat': window.reprocesarCrisat,
+        'view-direccion': window.reprocesarDireccion,
+        'view-farmacia': window.reprocesarFarmacia,
+        'view-social': window.reprocesarTrabSoc,
+        'view-trabajo-social': window.reprocesarTrabSoc,
+        'view-jefatura': window.reprocesarJefatura,
+        'view-jefatura-psicologia': window.reprocesarJefatura,
+        'view-procuraduria': window.reprocesarProcuraduria,
+        'view-psicologia': window.reprocesarPsico,
+        'view-medica': window.reprocesarMedica,
+        'view-area-medica': window.reprocesarMedica,
+        'view-vulnerable': window.reprocesarVulnerable,
+        'view-apoyo_direccion': window.reprocesarDespensas,
+        'view-jornadas-itinerantes': window.reprocesarJornItin,
+        'view-territorial': window.renderReporteJerarquico,
+        'view-estadisticas': window.reprocesarEstadisticasDIF
+    };
 
+    let vistaEncontrada = false;
+
+    // Recorremos las vistas para encontrar la que está visible actualmente en pantalla
+    for (const [idVista, fnReprocesar] of Object.entries(vistasMap)) {
+        const elVista = document.getElementById(idVista);
+        
+        if (elVista) {
+            const displayStyle = window.getComputedStyle(elVista).display;
+            // Si la vista está visible (no está en 'none')
+            if (displayStyle !== 'none') {
+                if (typeof fnReprocesar === 'function') {
+                    fnReprocesar(); // Ejecuta únicamente el reproceso de este departamento al instante
+                    vistaEncontrada = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Plan de respaldo por si ninguna vista matchea directamente
+    if (!vistaEncontrada) {
+        if (typeof window.reprocesarEstadisticasDIF === 'function') {
+            window.reprocesarEstadisticasDIF();
+        }
+    }
+};
 
 
 
@@ -1324,6 +1544,7 @@ onSnapshot(collection(db, "medica"), (s) => { store.medica_d = s.docs.map(d => (
 // --- LISTENERS DE FIRESTORE PARA FARMACIA ---
 onSnapshot(collection(db, "inventario_farmacia"), (s) => {  window.store.inventario_farmacia = s.docs.map(d => ({id: d.id, ...d.data()}));  if (typeof window.reprocesarFarmacia === 'function') { window.reprocesarFarmacia(); } });
 onSnapshot(collection(db, "salidas_farmacia"), (s) => { window.store.salidas_farmacia = s.docs.map(d => ({ id: d.id, ...d.data() })); if (typeof window.reprocesarFarmacia === 'function') {  window.reprocesarFarmacia(); } });
+
 // --- LISTENERS EN TIEMPO REAL PARA JORNADAS ITINERANTES ---
 onSnapshot(collection(db, "jornadas_itinerantes"), (s) => { 
     store.jornadas = s.docs.map(d => ({ id: d.id, ...d.data() })); 
@@ -1340,27 +1561,39 @@ onSnapshot(collection(db, "evidencias"), (s) => {
 // =============================================================================
 
 window.reprocesarDireccion = function() {
-    // Lectura de filtros globales de búsqueda y fechas (mes y año)
-    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
-    const zona = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
+    // Lectura de filtros globales de búsqueda, zona, mes, año y rango de días (DEL / AL)
+    const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
+    const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     const mes = document.getElementById('global-month-filter')?.value || "all";
     const anio = document.getElementById('global-year-filter')?.value || "all";
+    const fechaInicio = document.getElementById('global-date-start')?.value || "";
+    const fechaFin = document.getElementById('global-date-end')?.value || "";
 
     // Función auxiliar de filtrado interno para Dirección
     const pasaFiltros = (item) => {
         const textoItem = (item.concepto || item.proveedor || item.nombre || item.beneficiario || "").toLowerCase();
         const zonaItem = (item.colonia || item.lugar || item.col_loc || "").toLowerCase();
-        const fecha = item.fecha || item.fecha_registro || "";
+        
+        // Extracción de la fecha del registro (normalizada a formato YYYY-MM-DD para rangos)
+        const fechaCruda = item.fecha || item.fecha_registro || "";
+        const fechaStr = String(fechaCruda).trim().split(' ')[0]; // Limpia horas si las tuviera
 
-        const anioReg = fecha.length >= 4 ? fecha.substring(0, 4) : "";
-        const mesReg = fecha.includes('-') ? fecha.split('-')[1] : "";
+        const anioReg = fechaStr.length >= 4 ? fechaStr.substring(0, 4) : "";
+        const mesReg = fechaStr.includes('-') ? fechaStr.split('-')[1] : (fechaStr.includes('/') ? fechaStr.split('/')[1] : "");
 
         const cumpleBusqueda = textoItem.includes(busqueda);
         const cumpleZona = zonaItem.includes(zona);
         const cumpleAnio = (anio === 'all' || anioReg === anio);
         const cumpleMes = (mes === 'all' || mesReg === mes);
 
-        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+        // Validación de Rango de Fechas exactas (DEL / AL)
+        let cumpleRangoFecha = true;
+        if (fechaStr.length >= 8) {
+            if (fechaInicio && fechaStr < fechaInicio) cumpleRangoFecha = false;
+            if (fechaFin && fechaStr > fechaFin) cumpleRangoFecha = false;
+        }
+
+        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes && cumpleRangoFecha;
     };
 
     // Consolidamos y filtramos estrictamente los 4 módulos leyendo directo de las variables de dirección del store
@@ -1472,21 +1705,24 @@ window.reprocesarDireccion = function() {
         }
     }
 };
+
 // =============================================================================
 // FUNCIÓN PRINCIPAL DE CRISAT (CON FILTRO DE MES Y AÑO INTEGRADO)
 // =============================================================================
 window.reprocesarCrisat = function() {
     const datosCrudos = window.store.crisat || [];
     
-    // 🌟 Lectura de filtros globales (búsqueda, zona, mes y año)
+    // 🌟 Lectura de filtros globales (búsqueda, zona, mes, año y rango de días DEL / AL)
     const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
     const zonaFiltro = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     const mes = document.getElementById('global-month-filter')?.value || "all";
     const anio = document.getElementById('global-year-filter')?.value || "all";
+    const fechaInicio = document.getElementById('global-date-start')?.value || "";
+    const fechaFin = document.getElementById('global-date-end')?.value || "";
 
-    // Función auxiliar para extraer año y mes de cualquier formato de fecha
-    const obtenerAnioMes = (fechaCruda) => {
-        if (!fechaCruda) return { anio: "", mes: "" };
+    // Función auxiliar para extraer año, mes y fecha estandarizada (YYYY-MM-DD) de cualquier formato
+    const obtenerAnioMesYFecha = (fechaCruda) => {
+        if (!fechaCruda) return { anio: "", mes: "", fechaStr: "" };
         let f = fechaCruda;
         if (typeof f === 'object' && f !== null) {
             if (f.seconds) f = new Date(f.seconds * 1000);
@@ -1508,7 +1744,22 @@ window.reprocesarCrisat = function() {
             if (p[0].length === 4) { anioReg = p[0]; mesReg = p[1] || ""; } 
             else if (p[2] && p[2].length === 4) { anioReg = p[2]; mesReg = p[1] || ""; }
         }
-        return { anio: anioReg, mes: mesReg ? String(mesReg).padStart(2, '0') : "" };
+
+        // Construir fecha normalizada YYYY-MM-DD si es posible
+        let fechaEstandar = fStr;
+        if (anioReg && mesReg && fStr.length >= 8) {
+            const partes = fStr.includes('-') ? fStr.split('-') : fStr.split('/');
+            let diaReg = partes[0].length === 4 ? partes[2] : partes[0];
+            if (diaReg && diaReg.length === 2) {
+                fechaEstandar = `${anioReg}-${mesReg}-${diaReg}`;
+            }
+        }
+
+        return { 
+            anio: anioReg, 
+            mes: mesReg ? String(mesReg).padStart(2, '0' ) : "", 
+            fechaStr: fechaEstandar 
+        };
     };
 
     // Filtrar los registros de CRISAT según los selectores globales
@@ -1517,14 +1768,21 @@ window.reprocesarCrisat = function() {
         const z = (item.col_loc || item.colonia || item.localidad || item.zona || item.comunidad || item.domicilio || "").toLowerCase();
         
         const fechaRaw = item.fecha || item.fecha_registro || item.timestamp || item.date || "";
-        const { anio: anioRegistro, mes: mesRegistro } = obtenerAnioMes(fechaRaw);
+        const { anio: anioRegistro, mes: mesRegistro, fechaStr } = obtenerAnioMesYFecha(fechaRaw);
         
         const cumpleBusqueda = busqueda === "" || paciente.includes(busqueda);
         const cumpleZona = zonaFiltro === "" || z.includes(zonaFiltro);
         const cumpleAnio = (anio === 'all' || anioRegistro === "" || anioRegistro === anio);
         const cumpleMes = (mes === 'all' || mesRegistro === "" || mesRegistro === mes);
 
-        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+        // Validación de Rango de Fechas exactas (DEL / AL)
+        let cumpleRangoFecha = true;
+        if (fechaStr.length >= 8) {
+            if (fechaInicio && fechaStr < fechaInicio) cumpleRangoFecha = false;
+            if (fechaFin && fechaStr > fechaFin) cumpleRangoFecha = false;
+        }
+
+        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes && cumpleRangoFecha;
     });
     
     let totalActividades = datos.length;
@@ -1673,7 +1931,6 @@ window.reprocesarCrisat = function() {
     renderizarListaZona('crisat-list-localidades', porLocalidad, 'fa-map-marker-alt');
 };
 
-
 // =============================================================================
 // MÓDULO: TRABAJO SOCIAL (ESTILOS CLÁSICOS + GRÁFICAS INFERIORES)
 // =============================================================================
@@ -1681,15 +1938,19 @@ window.reprocesarTrabSoc = function() {
     const col1 = document.getElementById('col-1');
     if (!col1) return;
 
+    // 1. Captura de todos los filtros globales (incluyendo DEL y AL)
     const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
     const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     const mes = document.getElementById('global-month-filter')?.value || "all";
     const anio = document.getElementById('global-year-filter')?.value || "all";
+    const fechaInicio = document.getElementById('global-date-start')?.value || "";
+    const fechaFin = document.getElementById('global-date-end')?.value || "";
 
-    const dataSocial = store.social || [];
+    const dataSocial = window.store?.social || [];
 
-    const obtenerAnioMes = (fechaCruda) => {
-        if (!fechaCruda) return { anio: "", mes: "" };
+    // Helper para extraer y normalizar fechas (Año, Mes y Fecha en formato YYYY-MM-DD)
+    const obtenerAnioMesYFecha = (fechaCruda) => {
+        if (!fechaCruda) return { anio: "", mes: "", fechaStr: "" };
         let f = fechaCruda;
         if (typeof f === 'object' && f !== null) {
             if (f.seconds) f = new Date(f.seconds * 1000);
@@ -1711,31 +1972,58 @@ window.reprocesarTrabSoc = function() {
             if (p[0].length === 4) { anioReg = p[0]; mesReg = p[1] || ""; } 
             else if (p[2] && p[2].length === 4) { anioReg = p[2]; mesReg = p[1] || ""; }
         }
-        return { anio: anioReg, mes: mesReg ? String(mesReg).padStart(2, '0') : "" };
+        
+        let fechaEstandar = fStr;
+        if (anioReg && mesReg && fStr.length >= 8) {
+            const partes = fStr.includes('-') ? fStr.split('-') : fStr.split('/');
+            let diaReg = partes[0].length === 4 ? partes[2] : partes[0];
+            if (diaReg && diaReg.length === 2) {
+                fechaEstandar = `${anioReg}-${mesReg}-${diaReg}`;
+            }
+        }
+
+        return { 
+            anio: anioReg, 
+            mes: mesReg ? String(mesReg).padStart(2, '0') : "", 
+            fechaStr: fechaEstandar 
+        };
     };
 
+    // 2. Filtrado unificado de los registros aplicando Búsqueda, Zona, Mes, Año y Rango de Días (DEL / AL)
     const filtrados = dataSocial.filter(item => {
         const nombre = (item.nombre || item.fullName || "").toLowerCase();
         const programa = (item.programa || item.supportType || "").toLowerCase();
         const asunto = (item.asunto || "").toLowerCase();
         const detalleAsunto = (item.detalle_asunto || "").toLowerCase();
-        const z = (item.col_loc || item.locality || "").toLowerCase();
+        const folio = (item.folio || "").toLowerCase();
+        const curp = (item.curp || "").toLowerCase();
+        
+        const z = (item.col_loc || item.locality || item.zona || item.localidad || item.colonia || "").toLowerCase();
         const direccion = (item.direccion || "").toLowerCase();
         
-        const fechaRaw = item.fecha_registro || item.fecha || item.date || "";
-        const { anio: anioRegistro, mes: mesRegistro } = obtenerAnioMes(fechaRaw);
+        const fechaRaw = item.fecha_registro || item.fecha || item.createdAt || item.date || "";
+        const infoFecha = obtenerAnioMesYFecha(fechaRaw);
         
         const coincideBusqueda = busqueda === "" || 
                                  nombre.includes(busqueda) || 
                                  programa.includes(busqueda) || 
                                  asunto.includes(busqueda) || 
-                                 detalleAsunto.includes(busqueda);
+                                 detalleAsunto.includes(busqueda) ||
+                                 folio.includes(busqueda) ||
+                                 curp.includes(busqueda);
                                  
         const cumpleZona = zona === "" || z.includes(zona) || direccion.includes(zona);
-        const cumpleAnio = (anio === 'all' || anioRegistro === "" || anioRegistro === anio);
-        const cumpleMes = (mes === 'all' || mesRegistro === "" || mesRegistro === mes);
+        const cumpleAnio = (anio === 'all' || infoFecha.anio === "" || infoFecha.anio === anio);
+        const cumpleMes = (mes === 'all' || infoFecha.mes === "" || infoFecha.mes === mes);
 
-        return coincideBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+        // Validación de Rango de Fechas exactas (DEL / AL)
+        let cumpleRangoFecha = true;
+        if (infoFecha.fechaStr.length >= 8) {
+            if (fechaInicio && infoFecha.fechaStr < fechaInicio) cumpleRangoFecha = false;
+            if (fechaFin && infoFecha.fechaStr > fechaFin) cumpleRangoFecha = false;
+        }
+
+        return coincideBusqueda && cumpleZona && cumpleAnio && cumpleMes && cumpleRangoFecha;
     });
 
     const limpiarModulosSinDatos = () => {
@@ -1998,16 +2286,17 @@ window.reprocesarTrabSoc = function() {
     }
 };
 
-
 // =============================================================================
 // FUNCIÓN PRINCIPAL DE PROCESAMIENTO POBLACION VULNERABLE
 // =============================================================================
 window.reprocesarVulnerable = () => {
-    // 🌟 Lectura de filtros globales (búsqueda, zona, mes y año)
+    // 🌟 Lectura de filtros globales (búsqueda, zona, mes, año y rango de días DEL / AL)
     const busqueda = document.getElementById('global-search-input')?.value.toLowerCase() || "";
     const zonaFiltro = document.getElementById('global-zone-search')?.value.toLowerCase() || "";
     const mes = document.getElementById('global-month-filter')?.value || "all";
     const anio = document.getElementById('global-year-filter')?.value || "all";
+    const fechaInicio = document.getElementById('global-date-start')?.value || "";
+    const fechaFin = document.getElementById('global-date-end')?.value || "";
 
     const dataCruda = store.proyectos || []; 
     
@@ -2025,16 +2314,26 @@ window.reprocesarVulnerable = () => {
             nombreBeneficiario = `${item.beneficiario.nombre || ''} ${item.beneficiario.paterno || ''} ${item.beneficiario.materno || ''}`.toLowerCase();
         }
 
-        const fecha = item.fecha || item.fecha_registro || "";
-        const anioReg = fecha.length >= 4 ? fecha.substring(0, 4) : "";
-        const mesReg = fecha.includes('-') ? fecha.split('-')[1] : "";
+        // Extracción y normalización de la fecha del registro
+        const fechaRaw = item.fecha || item.fecha_registro || "";
+        const fechaStr = String(fechaRaw).trim().split(' ')[0]; // Limpia horas si las tuviera
+
+        const anioReg = fechaStr.length >= 4 ? fechaStr.substring(0, 4) : "";
+        const mesReg = fechaStr.includes('-') ? fechaStr.split('-')[1] : (fechaStr.includes('/') ? fechaStr.split('/')[1] : "");
 
         const cumpleBusqueda = programa.includes(busqueda) || subgrupo.includes(busqueda) || nombreBeneficiario.includes(busqueda);
         const cumpleZona = localidad.includes(zonaFiltro) || colonia.includes(zonaFiltro);
         const cumpleAnio = (anio === 'all' || anioReg === anio);
         const cumpleMes = (mes === 'all' || mesReg === mes);
 
-        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+        // Validación de Rango de Fechas exactas (DEL / AL)
+        let cumpleRangoFecha = true;
+        if (fechaStr.length >= 8) {
+            if (fechaInicio && fechaStr < fechaInicio) cumpleRangoFecha = false;
+            if (fechaFin && fechaStr > fechaFin) cumpleRangoFecha = false;
+        }
+
+        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes && cumpleRangoFecha;
     });
 
     if (!data || data.length === 0) {
@@ -2492,7 +2791,9 @@ if (!window.psicoCharts) {
     window.psicoCharts = {};
 }
 
-// Helper para destruir e inicializar gráficas de Chart.js de forma segura
+// --- HELPER UNIVERSAL SEGURO PARA GRÁFICAS DE CHART.JS ---
+window.psicoCharts = window.psicoCharts || {};
+
 function renderOrUpdateChart(canvasId, type, config) {
     const ctx = document.getElementById(canvasId)?.getContext('2d');
     if (!ctx) return;
@@ -2516,6 +2817,15 @@ function renderOrUpdateChart(canvasId, type, config) {
     });
 }
 
+// Alias de compatibilidad y helper seguro para despensas
+window.renderOrUpdateDespensasChart = function(canvasId, type, config) {
+    if (typeof renderOrUpdateChart === 'function') {
+        renderOrUpdateChart(canvasId, type, config);
+    } else {
+        console.warn("renderOrUpdateChart no está disponible todavía.");
+    }
+};
+
     // =============================================================
     // AREA MÉDICA
     // =============================================================
@@ -2523,15 +2833,14 @@ window.reprocesarMedica = function() {
     const tablaDatos = document.getElementById('m-tabla-datos');
     if (!tablaDatos) return;
 
-    // 1. Sincronización Universal con Selectores Maestros y Globales
+    // 1. Sincronización Universal con Selectores Maestros y Globales (incluyendo DEL y AL)
     const busqueda = (document.getElementById('f-search')?.value || document.getElementById('global-search-input')?.value || "").toLowerCase().trim();
     const zonaFiltro = (document.getElementById('f-procedencia')?.value || document.getElementById('global-zone-search')?.value || "").toLowerCase().trim();
     
-    // Captura de Año
+    // Captura de Año y Mes globales
     const selectAnio = document.getElementById('f-year') || document.getElementById('global-year-filter');
-    const anioFiltro = parseInt(selectAnio?.value) || new Date().getFullYear();
+    const anioFiltro = selectAnio?.value !== "all" ? parseInt(selectAnio?.value) : "all";
 
-    // Captura y Normalización de Mes (Texto, '0'-'11', o '1'-'12')
     const selectMes = document.getElementById('f-month') || document.getElementById('global-month-filter') || document.querySelector('.view-container select');
     let mesFiltroRaw = selectMes ? selectMes.value.toString().trim() : "all";
 
@@ -2552,6 +2861,10 @@ window.reprocesarMedica = function() {
             }
         }
     }
+
+    // Captura de los nuevos inputs de rango de días (DEL / AL)
+    const fechaInicio = document.getElementById('global-date-start')?.value || "";
+    const fechaFin = document.getElementById('global-date-end')?.value || "";
 
     const tipoPeriodo = document.getElementById('f-periodo-tipo')?.value || "all";
     const subPeriodo = document.getElementById('f-subperiodo')?.value || "";
@@ -2595,24 +2908,34 @@ window.reprocesarMedica = function() {
 
     // 2. Filtrado Multidimensional
     const data = dataCruda.filter(d => {
-        const fecha = d.fecha_cap || d.fecha || "";
-        if (!fecha || !fecha.includes('-')) return false;
+        const fechaRaw = d.fecha_cap || d.fecha || "";
+        if (!fechaRaw) return false;
 
-        const pAnio = fecha.split('-');
+        const fechaStr = String(fechaRaw).trim().split(' ')[0]; // Formato YYYY-MM-DD
+        if (!fechaStr.includes('-')) return false;
+
+        const pAnio = fechaStr.split('-');
         const regYear = parseInt(pAnio[0], 10);
         const regMonthIdx = parseInt(pAnio[1], 10) - 1;
         const regDia = parseInt(pAnio[2], 10);
-        const wNum = getW(fecha);
+        const wNum = getW(fechaStr);
 
-        if (regYear !== anioFiltro) return false;
-        if (mesTargetIdx !== "all" && regMonthIdx !== mesTargetIdx) return false;
+        // Si hay un rango DEL / AL activo, tiene prioridad sobre mes y año individuales
+        if (fechaInicio || fechaFin) {
+            if (fechaInicio && fechaStr < fechaInicio) return false;
+            if (fechaFin && fechaStr > fechaFin) return false;
+        } else {
+            // Validación normal por Año y Mes si DEL / AL están vacíos
+            if (anioFiltro !== "all" && regYear !== anioFiltro) return false;
+            if (mesTargetIdx !== "all" && regMonthIdx !== mesTargetIdx) return false;
+        }
 
         if (tipoPeriodo === "semana" && subPeriodo && wNum.toString() !== subPeriodo) return false;
         if (tipoPeriodo === "quincena" && subPeriodo) {
             const qActual = regDia <= 15 ? 1 : 2;
             if (qActual.toString() !== subPeriodo) return false;
         }
-        if (tipoPeriodo === "dia" && subPeriodo && fecha !== subPeriodo) return false;
+        if (tipoPeriodo === "dia" && subPeriodo && fechaStr !== subPeriodo) return false;
 
         const folioStr = (d.folio_str || d.folio || "").trim().toUpperCase();
         const esSinFolio = (folioStr === "" || folioStr === "S/F" || folioStr === "SF");
@@ -2844,30 +3167,47 @@ window.reprocesarPsico = function() {
     const contenedorPrincipal = document.getElementById('p-list-pacientes');
     if (!contenedorPrincipal) return;
 
-    // Elementos de filtrado global (búsqueda, zona, mes y año)
+    // Elementos de filtrado global (búsqueda, zona, mes, año y rango DEL / AL)
     const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
     const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     const mes = document.getElementById('global-month-filter')?.value || "all";
     const anio = document.getElementById('global-year-filter')?.value || "all";
+    const fechaInicio = document.getElementById('global-date-start')?.value || "";
+    const fechaFin = document.getElementById('global-date-end')?.value || "";
 
     const dataCruda = store.psicologia || [];
 
-    // Filtrado de registros
+    // Filtrado de registros con soporte para fechas y rangos exactos
     const filtrados = dataCruda.filter(item => {
         const paciente = (item.paciente || "").toLowerCase();
         const z = (item.col_loc || "").toLowerCase();
         const tema = (item.tema || "").toLowerCase();
-        const fecha = item.fecha || ""; // Formato esperado "YYYY-MM-DD"
         
-        const anioRegistro = fecha.length >= 4 ? fecha.substring(0, 4) : "";
-        const mesRegistro = fecha.includes('-') ? fecha.split('-')[1] : "";
+        const fechaRaw = item.fecha || ""; 
+        const fechaStr = String(fechaRaw).trim().split(' ')[0]; // Formato YYYY-MM-DD
+        
+        const anioRegistro = fechaStr.length >= 4 ? fechaStr.substring(0, 4) : "";
+        const mesRegistro = fechaStr.includes('-') ? fechaStr.split('-')[1] : (fechaStr.includes('/') ? fechaStr.split('/')[1] : "");
         
         const cumpleBusqueda = paciente.includes(busqueda) || tema.includes(busqueda);
         const cumpleZona = z.includes(zona);
-        const cumpleAnio = (anio === 'all' || anioRegistro === anio);
-        const cumpleMes = (mes === 'all' || mesRegistro === mes);
         
-        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+        // Validación de Rango de Fechas exactas (DEL / AL) con prioridad o respaldo
+        let cumpleRangoFecha = true;
+        if (fechaStr.length >= 8) {
+            if (fechaInicio && fechaStr < fechaInicio) cumpleRangoFecha = false;
+            if (fechaFin && fechaStr > fechaFin) cumpleRangoFecha = false;
+        }
+
+        // Si hay fechas DEL/AL activas, mandan sobre mes y año; de lo contrario usan los selectores normales
+        let cumpleAnioMes = true;
+        if (!fechaInicio && !fechaFin) {
+            const cumpleAnio = (anio === 'all' || anioRegistro === anio);
+            const cumpleMes = (mes === 'all' || mesRegistro === mes);
+            cumpleAnioMes = cumpleAnio && cumpleMes;
+        }
+        
+        return cumpleBusqueda && cumpleZona && cumpleRangoFecha && cumpleAnioMes;
     });
 
     // Helpers para normalización de género
@@ -3034,34 +3374,6 @@ window.reprocesarPsico = function() {
         }
     });
 };
-// Objeto global seguro para gestionar las instancias de las gráficas
-if (!window.jefaturaCharts) {
-    window.jefaturaCharts = {};
-}
-
-// Función auxiliar para renderizar o actualizar canvas
-function renderOrUpdateJefaturaChart(canvasId, type, config) {
-    const ctx = document.getElementById(canvasId)?.getContext('2d');
-    if (!ctx) return;
-
-    if (window.jefaturaCharts[canvasId]) {
-        window.jefaturaCharts[canvasId].destroy();
-    }
-
-    window.jefaturaCharts[canvasId] = new Chart(ctx, {
-        type: type,
-        data: config.data,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
-                ...config.options?.plugins
-            },
-            ...config.options
-        }
-    });
-}
 
 // =============================================================================
 // MÓDULO: JEFATURA DE PSICOLOGÍA (CON GRÁFICAS)
@@ -3070,30 +3382,47 @@ window.reprocesarJefatura = function() {
     const contenedorActividades = document.getElementById('jp-list-actividades');
     if (!contenedorActividades) return;
 
-    // Elementos de filtrado global sincronizados
+    // Elementos de filtrado global sincronizados (incluyendo DEL y AL)
     const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
     const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     const mes = document.getElementById('global-month-filter')?.value || "all";
     const anio = document.getElementById('global-year-filter')?.value || "all";
+    const fechaInicio = document.getElementById('global-date-start')?.value || "";
+    const fechaFin = document.getElementById('global-date-end')?.value || "";
 
-    const dataCruda = store.jefatura || [];
+    const dataCruda = window.store?.jefatura || [];
 
     const filtrados = dataCruda.filter(item => {
         const paciente = (item.paciente || "").toLowerCase();
         const dependencia = (item.dependencia || "").toLowerCase();
         const actividad = (item.actividad || "").toLowerCase();
         const z = (item.colonia || "").toLowerCase();
-        const fecha = item.fecha || ""; 
-
-        const anioRegistro = fecha.length >= 4 ? fecha.substring(0, 4) : "";
-        const mesRegistro = fecha.includes('-') ? fecha.split('-')[1] : "";
         
-        const cumpleBusqueda = paciente.includes(busqueda) || dependencia.includes(busqueda) || actividad.includes(busqueda);
-        const cumpleZona = z.includes(zona);
-        const cumpleAnio = (anio === 'all' || anioRegistro === anio);
-        const cumpleMes = (mes === 'all' || mesRegistro === mes);
+        const fechaRaw = item.fecha || ""; 
+        const fechaStr = String(fechaRaw).trim().split(' ')[0]; // Formato YYYY-MM-DD
 
-        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+        const anioRegistro = fechaStr.length >= 4 ? fechaStr.substring(0, 4) : "";
+        const mesRegistro = fechaStr.includes('-') ? fechaStr.split('-')[1] : (fechaStr.includes('/') ? fechaStr.split('/')[1] : "");
+        
+        const cumpleBusqueda = busqueda === "" || paciente.includes(busqueda) || dependencia.includes(busqueda) || actividad.includes(busqueda);
+        const cumpleZona = zona === "" || z.includes(zona);
+
+        // Validación de Rango de Fechas exactas (DEL / AL)
+        let cumpleRangoFecha = true;
+        if (fechaStr.length >= 8) {
+            if (fechaInicio && fechaStr < fechaInicio) cumpleRangoFecha = false;
+            if (fechaFin && fechaStr > fechaFin) cumpleRangoFecha = false;
+        }
+
+        // Si hay fechas DEL/AL activas, tienen prioridad; de lo contrario usan los selectores normales
+        let cumpleAnioMes = true;
+        if (!fechaInicio && !fechaFin) {
+            const cumpleAnio = (anio === 'all' || anioRegistro === anio);
+            const cumpleMes = (mes === 'all' || mesRegistro === mes);
+            cumpleAnioMes = cumpleAnio && cumpleMes;
+        }
+
+        return cumpleBusqueda && cumpleZona && cumpleRangoFecha && cumpleAnioMes;
     });
 
     // Actualización de KPIs superiores
@@ -3107,32 +3436,36 @@ window.reprocesarJefatura = function() {
     }
 
     // --- RENDERIZADO DE LISTA PRINCIPAL (Últimas 15 actividades) ---
-    contenedorActividades.innerHTML = filtrados.slice(-15).reverse().map(d => `
-        <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
-            <div style="flex:1;">
-                <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.dependencia || 'N/A'}</div>
-                <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${d.actividad || 'SIN ACTIVIDAD'}</div>
+    contenedorActividades.innerHTML = filtrados.length === 0 
+        ? '<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin registros</div>'
+        : filtrados.slice(-15).reverse().map(d => `
+            <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+                <div style="flex:1;">
+                    <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.dependencia || 'N/A'}</div>
+                    <div style="font-size:9px; color:var(--primary, #0284c7); font-weight:700;">${d.actividad || 'SIN ACTIVIDAD'}</div>
+                </div>
+                <div style="text-align:right; font-size:9px; color:#64748b;">
+                    ${d.fecha || ''}<br>${d.horario || '--:--'}
+                </div>
             </div>
-            <div style="text-align:right; font-size:9px; color:#64748b;">
-                ${d.fecha || ''}<br>${d.horario || '--:--'}
-            </div>
-        </div>
-    `).join('');
+        `).join('');
 
     // --- RENDERIZADO DE LISTA GEOGRÁFICA / OFICIOS ---
     const contenedorGeo = document.getElementById('jp-list-geo');
     if (contenedorGeo) {
-        contenedorGeo.innerHTML = filtrados.slice(-15).reverse().map(d => `
-            <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
-                <div style="flex:1;">
-                    <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.colonia || 'SIN ZONA'}</div>
-                    <div style="font-size:9px; color:#64748b; font-weight:700;">${d.actividad || ''}</div>
+        contenedorGeo.innerHTML = filtrados.length === 0 
+            ? '<div style="text-align:center; padding:15px; color:#64748b; font-size:11px;">Sin registros</div>'
+            : filtrados.slice(-15).reverse().map(d => `
+                <div class="member-line" style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #f1f5f9; padding: 5px 0;">
+                    <div style="flex:1;">
+                        <div style="font-weight:800; font-size:11px; color:#1e293b;">${d.colonia || 'SIN ZONA'}</div>
+                        <div style="font-size:9px; color:#64748b; font-weight:700;">${d.actividad || ''}</div>
+                    </div>
+                    <div style="font-size:9px; font-weight:bold; color:var(--accent, #0ea5e9); text-align:right;">
+                        ${d.oficio || 'S/N'}
+                    </div>
                 </div>
-                <div style="font-size:9px; font-weight:bold; color:var(--accent, #0ea5e9); text-align:right;">
-                    ${d.oficio || 'S/N'}
-                </div>
-            </div>
-        `).join('');
+            `).join('');
     }
 
     // =========================================================================
@@ -3200,6 +3533,38 @@ window.reprocesarJefatura = function() {
     });
 };
 
+// Gestor global seguro para controlar las instancias de gráficas de Jefatura
+if (!window.jefaturaCharts) {
+    window.jefaturaCharts = {};
+}
+
+// Función auxiliar para renderizar o actualizar canvas de Jefatura de Psicología
+function renderOrUpdateJefaturaChart(canvasId, type, config) {
+    const ctx = document.getElementById(canvasId)?.getContext('2d');
+    if (!ctx) return;
+
+    if (window.jefaturaCharts[canvasId]) {
+        window.jefaturaCharts[canvasId].destroy();
+    }
+
+    window.jefaturaCharts[canvasId] = new Chart(ctx, {
+        type: type,
+        data: config.data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                ...config.options?.plugins
+            },
+            ...config.options
+        }
+    });
+}
+
+// =============================================================================
+// MÓDULO: PROCURADURÍA (ESTADÍSTICAS AMPLIADAS Y GRÁFICAS)
+// =============================================================================
 // Gestor global seguro para controlar las instancias de gráficas de Procuraduría
 if (!window.procuraduriaCharts) {
     window.procuraduriaCharts = {};
@@ -3229,18 +3594,18 @@ function renderOrUpdateProcuraduriaChart(canvasId, type, config) {
     });
 }
 
-// =============================================================================
-// MÓDULO: PROCURADURÍA (ESTADÍSTICAS AMPLIADAS Y GRÁFICAS)
-// =============================================================================
+
 window.reprocesarProcuraduria = function() {
     const contenedorCasos = document.getElementById('pr-list-casos');
     if (!contenedorCasos) return;
 
-    // Elementos de filtrado global sincronizados
+    // Elementos de filtrado global sincronizados (incluyendo DEL y AL)
     const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
     const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     const mes = document.getElementById('global-month-filter')?.value || "all";
     const anio = document.getElementById('global-year-filter')?.value || "all";
+    const fechaInicio = document.getElementById('global-date-start')?.value || "";
+    const fechaFin = document.getElementById('global-date-end')?.value || "";
 
     const dataCruda = store.procuraduria || [];
 
@@ -3249,17 +3614,32 @@ window.reprocesarProcuraduria = function() {
         const asuntos = (item.asuntos || "").toLowerCase();
         const z = (item.lugar || "").toLowerCase();
         const domicilio = (item.domicilio || "").toLowerCase();
-        const fecha = item.fecha || ""; 
+        
+        const fechaRaw = item.fecha || ""; 
+        const fechaStr = String(fechaRaw).trim().split(' ')[0]; // Formato YYYY-MM-DD
 
-        const anioRegistro = fecha.length >= 4 ? fecha.substring(0, 4) : "";
-        const mesRegistro = fecha.includes('-') ? fecha.split('-')[1] : "";
+        const anioRegistro = fechaStr.length >= 4 ? fechaStr.substring(0, 4) : "";
+        const mesRegistro = fechaStr.includes('-') ? fechaStr.split('-')[1] : (fechaStr.includes('/') ? fechaStr.split('/')[1] : "");
         
         const cumpleBusqueda = nombre.includes(busqueda) || asuntos.includes(busqueda) || domicilio.includes(busqueda);
         const cumpleZona = z.includes(zona);
-        const cumpleAnio = (anio === 'all' || anioRegistro === anio);
-        const cumpleMes = (mes === 'all' || mesRegistro === mes);
+
+        // Validación de Rango de Fechas exactas (DEL / AL)
+        let cumpleRangoFecha = true;
+        if (fechaStr.length >= 8) {
+            if (fechaInicio && fechaStr < fechaInicio) cumpleRangoFecha = false;
+            if (fechaFin && fechaStr > fechaFin) cumpleRangoFecha = false;
+        }
+
+        // Si hay fechas DEL/AL activas, mandan sobre mes y año; de lo contrario usan los selectores normales
+        let cumpleAnioMes = true;
+        if (!fechaInicio && !fechaFin) {
+            const cumpleAnio = (anio === 'all' || anioRegistro === anio);
+            const cumpleMes = (mes === 'all' || mesRegistro === mes);
+            cumpleAnioMes = cumpleAnio && cumpleMes;
+        }
         
-        return cumpleBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+        return cumpleBusqueda && cumpleZona && cumpleRangoFecha && cumpleAnioMes;
     });
 
     // Helper para valores booleanos suaves
@@ -3410,9 +3790,7 @@ window.reprocesarProcuraduria = function() {
     });
 };
 
-// =========================================================================
-// Reprocesar Todo Jornadas Itinerantes
-// =========================================================================
+
 // =========================================================================
 // Reprocesar Todo Jornadas Itinerantes (Con Tipo de Jornada en Últimas Registradas)
 // =========================================================================
@@ -3421,11 +3799,13 @@ window.reprocesarJornItin = function() {
     const jornadas = window.store.jornadas || [];
     const evidencias = window.store.evidencias_jornadas || [];
 
-    // 1. Obtener valores de los filtros globales de la barra superior
+    // 1. Obtener valores de los filtros globales de la barra superior (incluyendo DEL y AL)
     const searchVal = (document.getElementById('global-search-input')?.value || '').toLowerCase().trim();
     const zoneVal = (document.getElementById('global-zone-search')?.value || '').toLowerCase().trim();
     const monthVal = document.getElementById('global-month-filter')?.value || 'all';
     const yearVal = document.getElementById('global-year-filter')?.value || 'all';
+    const fechaInicio = document.getElementById('global-date-start')?.value || '';
+    const fechaFin = document.getElementById('global-date-end')?.value || '';
 
     // 2. Filtrar evidencias cruzando con los datos de su jornada correspondiente
     const evidenciasFiltradas = evidencias.filter(ev => {
@@ -3439,30 +3819,38 @@ window.reprocesarJornItin = function() {
         const textoZona = `${jornada.colonia || ''} ${jornada.lugar || ''}`.toLowerCase();
         const coincideZona = !zoneVal || textoZona.includes(zoneVal);
 
-        // Filtro de Fecha (Mes y Año)
+        // Filtro de Fecha (Mes, Año y Rango DEL / AL)
         let coincideFecha = true;
         const fechaRef = jornada.fecha || ev.fechaRegistro || '';
-        
-        if (fechaRef && (monthVal !== 'all' || yearVal !== 'all')) {
-            let anio = '';
-            let mes = '';
+        const fechaStr = typeof fechaRef === 'string' ? fechaRef.split('T')[0] : (fechaRef instanceof Date ? fechaRef.toISOString().split('T')[0] : '');
 
-            if (typeof fechaRef === 'string') {
-                const partes = fechaRef.split('T')[0].split('-');
-                if (partes.length >= 2) {
-                    anio = partes[0];
-                    mes = partes[1];
+        if (fechaStr.length >= 8) {
+            // Prioridad a Rango exacto DEL / AL si están activos
+            if (fechaInicio || fechaFin) {
+                if (fechaInicio && fechaStr < fechaInicio) coincideFecha = false;
+                if (fechaFin && fechaStr > fechaFin) coincideFecha = false;
+            } else if (monthVal !== 'all' || yearVal !== 'all') {
+                // Filtro por Mes y Año
+                let anio = '';
+                let mes = '';
+
+                if (typeof fechaRef === 'string') {
+                    const partes = fechaRef.split('T')[0].split('-');
+                    if (partes.length >= 2) {
+                        anio = partes[0];
+                        mes = partes[1];
+                    }
+                } else {
+                    const dateObj = new Date(fechaRef);
+                    if (!isNaN(dateObj)) {
+                        anio = String(dateObj.getFullYear());
+                        mes = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    }
                 }
-            } else {
-                const dateObj = new Date(fechaRef);
-                if (!isNaN(dateObj)) {
-                    anio = String(dateObj.getFullYear());
-                    mes = String(dateObj.getMonth() + 1).padStart(2, '0');
-                }
+
+                if (yearVal !== 'all' && anio !== yearVal) coincideFecha = false;
+                if (monthVal !== 'all' && mes !== monthVal) coincideFecha = false;
             }
-
-            if (yearVal !== 'all' && anio !== yearVal) coincideFecha = false;
-            if (monthVal !== 'all' && mes !== monthVal) coincideFecha = false;
         }
 
         return coincideSearch && coincideZona && coincideFecha;
@@ -3524,7 +3912,7 @@ window.reprocesarJornItin = function() {
     if (kpiServicios) kpiServicios.textContent = Object.keys(serviciosConteo).length;
     if (kpiEvidencias) kpiEvidencias.textContent = totalEvidenciasFotos;
 
-    // 5. Renderizar Lista 1: Últimas Jornadas Registradas (AHORA INCLUYE TIPO DE JORNADA)
+    // 5. Renderizar Lista 1: Últimas Jornadas Registradas
     const listUltimas = document.getElementById('ji-list-ultimas');
     if (listUltimas) {
         if (evidenciasFiltradas.length === 0) {
@@ -3540,8 +3928,6 @@ window.reprocesarJornItin = function() {
                 if (ev.cantidades) Object.values(ev.cantidades).forEach(v => sumaLocal += Number(v) || 0);
 
                 const fechaStr = j.fecha || (ev.fechaRegistro ? ev.fechaRegistro.split('T')[0] : 'Sin fecha');
-                
-                // Obtener el tipo de jornada guardado en la base de datos
                 const tipoJornadaStr = j.tipo || j.tipoJornada || j.modalidad || 'Jornada Itinerante';
 
                 return `
@@ -3708,10 +4094,12 @@ window.reprocesarDespensas = function() {
     const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     const mes = document.getElementById('global-month-filter')?.value || "all";
     const anio = document.getElementById('global-year-filter')?.value || "all";
+    const fechaInicio = document.getElementById('global-date-start')?.value || "";
+    const fechaFin = document.getElementById('global-date-end')?.value || "";
 
-    // Función universal para extraer año y mes sin importar el formato de la fecha
-    const obtenerAnioMes = (fechaCruda) => {
-        if (!fechaCruda) return { anio: "", mes: "" };
+    // Función universal para extraer año, mes y fecha estandarizada (YYYY-MM-DD)
+    const obtenerAnioMesYFecha = (fechaCruda) => {
+        if (!fechaCruda) return { anio: "", mes: "", fechaStr: "" };
 
         let f = fechaCruda;
         if (typeof f === 'object' && f !== null) {
@@ -3729,7 +4117,6 @@ window.reprocesarDespensas = function() {
         let anioReg = "";
         let mesReg = "";
 
-        // Soporte para formato YYYY-MM-DD o DD-MM-YYYY
         if (fStr.includes('-')) {
             const p = fStr.split('-');
             if (p[0].length === 4) {
@@ -3739,9 +4126,7 @@ window.reprocesarDespensas = function() {
                 anioReg = p[2];
                 mesReg = p[1] || "";
             }
-        } 
-        // Soporte para formato DD/MM/YYYY o YYYY/MM/DD
-        else if (fStr.includes('/')) {
+        } else if (fStr.includes('/')) {
             const p = fStr.split('/');
             if (p[0].length === 4) {
                 anioReg = p[0];
@@ -3752,21 +4137,34 @@ window.reprocesarDespensas = function() {
             }
         }
 
+        let fechaEstandar = fStr;
+        if (anioReg && mesReg && fStr.length >= 8) {
+            const partes = fStr.includes('-') ? fStr.split('-') : fStr.split('/');
+            let diaReg = partes[0].length === 4 ? partes[2] : partes[0];
+            if (diaReg && diaReg.length === 2) {
+                fechaEstandar = `${anioReg}-${mesReg}-${diaReg}`;
+            }
+        }
+
         return { 
             anio: anioReg, 
-            mes: mesReg ? String(mesReg).padStart(2, '0') : "" 
+            mes: mesReg ? String(mesReg).padStart(2, '0') : "",
+            fechaStr: fechaEstandar 
         };
     };
 
     const records = recordsCrudos.filter(item => {
-        const fullName = (item.fullName || item.nombre || "").toLowerCase();
-        const folio = (item.folio || "").toLowerCase();
-        const supportType = (item.supportType || item.programa || "").toLowerCase();
-        const locality = (item.locality || item.col_loc || "").toLowerCase();
-        const direccion = (item.direccion || "").toLowerCase();
+        // 🌟 Normalización multicampo para asegurar lectura de nombres y folios
+        const fullName = (item.fullName || item.nombre || item.beneficiario || item.paciente || "").toLowerCase();
+        const folio = (item.folio || item.num_progresivo || item.expediente || "").toLowerCase();
+        const supportType = (item.supportType || item.programa || item.asunto || item.apoyo || "").toLowerCase();
+
+        // 🌟 Normalización multicampo para zona y domicilio
+        const locality = (item.locality || item.col_loc || item.lugar || item.colonia || item.localidad || item.comunidad || "").toLowerCase();
+        const direccion = (item.direccion || item.domicilio || "").toLowerCase();
         
-        const fechaRaw = item.fecha_registro || item.fecha || item.date || "";
-        const { anio: anioRegistro, mes: mesRegistro } = obtenerAnioMes(fechaRaw);
+        const fechaRaw = item.fecha_registro || item.fecha || item.date || item.createdAt || "";
+        const { anio: anioRegistro, mes: mesRegistro, fechaStr } = obtenerAnioMesYFecha(fechaRaw);
         
         const coincideBusqueda = busqueda === "" || 
                                  fullName.includes(busqueda) || 
@@ -3775,11 +4173,21 @@ window.reprocesarDespensas = function() {
                                  
         const cumpleZona = zona === "" || locality.includes(zona) || direccion.includes(zona);
         
-        // Si el registro no tiene fecha pero el filtro está en 'all', se permite pasar
-        const cumpleAnio = (anio === 'all' || anioRegistro === "" || anioRegistro === anio);
-        const cumpleMes = (mes === 'all' || mesRegistro === "" || mesRegistro === mes);
+        // Validación de Rango de Fechas exactas (DEL / AL) con prioridad
+        let cumpleRangoFecha = true;
+        if (fechaStr.length >= 8) {
+            if (fechaInicio && fechaStr < fechaInicio) cumpleRangoFecha = false;
+            if (fechaFin && fechaStr > fechaFin) cumpleRangoFecha = false;
+        }
 
-        return coincideBusqueda && cumpleZona && cumpleAnio && cumpleMes;
+        let cumpleAnioMes = true;
+        if (!fechaInicio && !fechaFin) {
+            const cumpleAnio = (anio === 'all' || anioRegistro === "" || anioRegistro === anio);
+            const cumpleMes = (mes === 'all' || mesRegistro === "" || mesRegistro === mes);
+            cumpleAnioMes = cumpleAnio && cumpleMes;
+        }
+
+        return coincideBusqueda && cumpleZona && cumpleRangoFecha && cumpleAnioMes;
     });
 
     // Caso cuando no hay registros tras el filtrado
@@ -3792,7 +4200,6 @@ window.reprocesarDespensas = function() {
         if (document.getElementById('desp-list-tipos')) document.getElementById('desp-list-tipos').innerHTML = '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>';
         if (document.getElementById('desp-list-localidades')) document.getElementById('desp-list-localidades').innerHTML = '<div style="color: #94a3b8; font-size: 11px; text-align: center; padding: 20px;">Sin datos</div>';
         
-        // Limpiar/destruir gráficas en caso de 0 registros
         renderOrUpdateDespensasChart('chartDespGenero', 'doughnut', { data: { labels: [], datasets: [{ data: [] }] } });
         renderOrUpdateDespensasChart('chartDespTipos', 'bar', { data: { labels: [], datasets: [{ data: [] }] } });
         renderOrUpdateDespensasChart('chartDespLocalidades', 'bar', { data: { labels: [], datasets: [{ data: [] }] } });
@@ -3800,16 +4207,16 @@ window.reprocesarDespensas = function() {
     }
 
     let totalEntregas = records.length;
-    let unicosSet = new Set(records.map(r => (r.fullName || r.nombre || '').trim().toUpperCase()));
+    let unicosSet = new Set(records.map(r => (r.fullName || r.nombre || r.beneficiario || '').trim().toUpperCase()));
     let totalBeneficiarios = unicosSet.size;
 
     let mujeres = records.filter(r => {
-        const g = (r.gender || r.genero || "").toLowerCase().trim();
+        const g = (r.gender || r.genero || r.sexo || "").toLowerCase().trim();
         return g === 'femenino' || g === 'f' || g === 'mujer';
     }).length;
 
     let hombres = records.filter(r => {
-        const g = (r.gender || r.genero || "").toLowerCase().trim();
+        const g = (r.gender || r.genero || r.sexo || "").toLowerCase().trim();
         return g === 'masculino' || g === 'm' || g === 'hombre';
     }).length;
 
@@ -3820,10 +4227,10 @@ window.reprocesarDespensas = function() {
     let pacientesHTML = '';
 
     records.forEach(r => {
-        let tipo = (r.supportType || r.programa || 'No especificado').trim();
+        let tipo = (r.supportType || r.programa || r.asunto || r.apoyo || 'No especificado').trim();
         tiposCount[tipo] = (tiposCount[tipo] || 0) + 1;
 
-        let loc = (r.locality || r.col_loc || 'No especificada').trim();
+        let loc = (r.locality || r.col_loc || r.lugar || r.colonia || r.localidad || 'No especificada').trim();
         localidadesCount[loc] = (localidadesCount[loc] || 0) + 1;
     });
 
@@ -3834,9 +4241,9 @@ window.reprocesarDespensas = function() {
 
     let ultimosRecientes = [...records].slice(-10).reverse();
     ultimosRecientes.forEach(r => {
-        const name = r.fullName || r.nombre || 'Sin nombre';
-        const locName = r.locality || r.col_loc || 'N/A';
-        const supType = r.supportType || r.programa || 'Apoyo';
+        const name = r.fullName || r.nombre || r.beneficiario || 'Sin nombre';
+        const locName = r.locality || r.col_loc || r.lugar || r.colonia || 'N/A';
+        const supType = r.supportType || r.programa || r.asunto || 'Apoyo';
         pacientesHTML += `
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 11px;">
                 <div>
@@ -3886,10 +4293,8 @@ window.reprocesarDespensas = function() {
     }
 
     // =========================================================================
-    // GENERACIÓN / ACTUALIZACIÓN DE GRÁFICAS
+    // GRÁFICAS DEL MÓDULO DE APOMYOS DIRECCIÓN
     // =========================================================================
-
-    // 1. Gráfica de Rosca: Distribución por Género
     const labelsGenero = ['Mujeres', 'Hombres'];
     const dataGenero = [mujeres, hombres];
     if (otrosGenero > 0) {
@@ -3907,7 +4312,6 @@ window.reprocesarDespensas = function() {
         }
     });
 
-    // 2. Gráfica de Barras Horizontales: Top Programas / Tipos de Apoyo
     const topTipos = tiposOrdenados.slice(0, 7);
     renderOrUpdateDespensasChart('chartDespTipos', 'bar', {
         data: {
@@ -3925,7 +4329,6 @@ window.reprocesarDespensas = function() {
         }
     });
 
-    // 3. Gráfica de Barras Verticales: Top Localidades / Colonias Beneficiadas
     const topLocalidades = locOrdenadas.slice(0, 7);
     renderOrUpdateDespensasChart('chartDespLocalidades', 'bar', {
         data: {
@@ -3954,18 +4357,22 @@ window.reprocesarFarmacia = function() {
     const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
     const mesFiltro = document.getElementById('global-month-filter')?.value || "all";
     const anioFiltro = document.getElementById('global-year-filter')?.value || "all";
+    const fechaInicio = document.getElementById('global-date-start')?.value || "";
+    const fechaFin = document.getElementById('global-date-end')?.value || "";
 
-    const obtenerAnioMesRegistro = (item) => {
+    const obtenerAnioMesYFecha = (item) => {
         let fechaCruda = item.timestamp || item.t || item.fecha || "";
-        if (!fechaCruda) return { anio: "", mes: "" };
+        if (!fechaCruda) return { anio: "", mes: "", fechaStr: "" };
 
         let fechaObj = new Date(Number(fechaCruda) || fechaCruda);
-        if (isNaN(fechaObj.getTime())) return { anio: "", mes: "" };
+        if (isNaN(fechaObj.getTime())) return { anio: "", mes: "", fechaStr: "" };
 
-        return { 
-            anio: String(fechaObj.getFullYear()), 
-            mes: String(fechaObj.getMonth() + 1).padStart(2, '0') 
-        };
+        const anioReg = String(fechaObj.getFullYear());
+        const mesReg = String(fechaObj.getMonth() + 1).padStart(2, '0');
+        const diaReg = String(fechaObj.getDate()).padStart(2, '0');
+        const fechaStr = `${anioReg}-${mesReg}-${diaReg}`;
+
+        return { anio: anioReg, mes: mesReg, fechaStr: fechaStr };
     };
 
     const inventarioFiltrado = inventarioCrudo.filter(item => {
@@ -3973,21 +4380,45 @@ window.reprocesarFarmacia = function() {
         const nombreMed = (item.nombre || "").toLowerCase();
         const origenMed = (item.origen || "").toLowerCase();
         
-        const { anio: anioReg, mes: mesReg } = obtenerAnioMesRegistro(item);
+        const { anio: anioReg, mes: mesReg, fechaStr } = obtenerAnioMesYFecha(item);
         
         const coincideBusqueda = busqueda === "" || nombreMed.includes(busqueda) || origenMed.includes(busqueda);
-        const cumpleAnio = (anioFiltro === 'all' || anioReg === "" || anioReg === anioFiltro);
-        const cumpleMes = (mesFiltro === 'all' || mesReg === "" || mesReg === mesFiltro);
+        
+        // Validación de Rango de Fechas exactas (DEL / AL) con prioridad
+        let cumpleRangoFecha = true;
+        if (fechaStr.length >= 8) {
+            if (fechaInicio && fechaStr < fechaInicio) cumpleRangoFecha = false;
+            if (fechaFin && fechaStr > fechaFin) cumpleRangoFecha = false;
+        }
 
-        return coincideBusqueda && cumpleAnio && cumpleMes;
+        let cumpleAnioMes = true;
+        if (!fechaInicio && !fechaFin) {
+            const cumpleAnio = (anioFiltro === 'all' || anioReg === "" || anioReg === anioFiltro);
+            const cumpleMes = (mesFiltro === 'all' || mesReg === "" || mesReg === mesFiltro);
+            cumpleAnioMes = cumpleAnio && cumpleMes;
+        }
+
+        return coincideBusqueda && cumpleRangoFecha && cumpleAnioMes;
     });
 
-    // 🌟 Filtrar también las salidas según el mes y año seleccionados
+    // 🌟 Filtrar también las salidas según el rango de días, mes o año seleccionados
     const salidasFiltradas = salidasCrudas.filter(salida => {
-        const { anio: anioReg, mes: mesReg } = obtenerAnioMesRegistro(salida);
-        const cumpleAnio = (anioFiltro === 'all' || anioReg === "" || anioReg === anioFiltro);
-        const cumpleMes = (mesFiltro === 'all' || mesReg === "" || mesReg === mesFiltro);
-        return cumpleAnio && cumpleMes;
+        const { anio: anioReg, mes: mesReg, fechaStr } = obtenerAnioMesYFecha(salida);
+        
+        let cumpleRangoFecha = true;
+        if (fechaStr.length >= 8) {
+            if (fechaInicio && fechaStr < fechaInicio) cumpleRangoFecha = false;
+            if (fechaFin && fechaStr > fechaFin) cumpleRangoFecha = false;
+        }
+
+        let cumpleAnioMes = true;
+        if (!fechaInicio && !fechaFin) {
+            const cumpleAnio = (anioFiltro === 'all' || anioReg === "" || anioReg === anioFiltro);
+            const cumpleMes = (mesFiltro === 'all' || mesReg === "" || mesReg === mesFiltro);
+            cumpleAnioMes = cumpleAnio && cumpleMes;
+        }
+
+        return cumpleRangoFecha && cumpleAnioMes;
     });
 
     let totalTipos = inventarioFiltrado.length;
@@ -4216,6 +4647,8 @@ window.reprocesarEstadisticasDIF = function() {
     const safeStore = (typeof store !== 'undefined' && store !== null) ? store : {};
     const busqueda = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
     const zona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
+    const fechaInicio = document.getElementById('global-date-start')?.value || "";
+    const fechaFin = document.getElementById('global-date-end')?.value || "";
     
     // 💡 Forzar valor a "all" si el select de meses está vacío o al iniciar la página
     const selectMesEl = document.getElementById('global-month-filter');
@@ -4309,19 +4742,32 @@ window.reprocesarEstadisticasDIF = function() {
         });
     });
 
-    // Filtrado Multicriterio (Mes y Año)
+    // Filtrado Multicriterio (Mes, Año y Rango DEL / AL)
     const filtrados = dataConsolidada.filter(item => {
-        const partesFecha = item.fecha ? item.fecha.split(/[-/]/) : [];
-        const anioItem = partesFecha.length >= 1 ? String(partesFecha[0]) : "";
-        const mesItem = partesFecha.length >= 2 ? String(partesFecha[1]).padStart(2, '0') : null;
+        const fechaStr = item.fecha || "";
         
-        const coincideAnio = (anioFiltro === 'all' || anioItem === anioFiltro);
-        const coincideMes = (mesFiltro === 'all' || mesItem === mesFiltro);
+        // Validación de Rango de Fechas exactas (DEL / AL) con prioridad
+        let cumpleRangoFecha = true;
+        if (fechaStr.length >= 8) {
+            if (fechaInicio && fechaStr < fechaInicio) cumpleRangoFecha = false;
+            if (fechaFin && fechaStr > fechaFin) cumpleRangoFecha = false;
+        }
+
+        let cumpleAnioMes = true;
+        if (!fechaInicio && !fechaFin) {
+            const partesFecha = fechaStr ? fechaStr.split(/[-/]/) : [];
+            const anioItem = partesFecha.length >= 1 ? String(partesFecha[0]) : "";
+            const mesItem = partesFecha.length >= 2 ? String(partesFecha[1]).padStart(2, '0') : null;
+            
+            const coincideAnio = (anioFiltro === 'all' || anioItem === anioFiltro);
+            const coincideMes = (mesFiltro === 'all' || mesItem === mesFiltro);
+            cumpleAnioMes = coincideAnio && coincideMes;
+        }
         
         const coincideZona = String(item.zona || "").toLowerCase().includes(zona);
         const coincideBusqueda = busqueda === "" || String(item.busquedaTexto || "").toLowerCase().includes(busqueda);
         
-        return coincideAnio && coincideMes && coincideZona && coincideBusqueda;
+        return cumpleAnioMes && cumpleRangoFecha && coincideZona && coincideBusqueda;
     });
 
     // Métrica y Agrupación
@@ -4557,6 +5003,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const inputZona = document.getElementById('global-zone-search');
     const selectMes = document.getElementById('global-month-filter');
     const selectAnio = document.getElementById('global-year-filter');
+    const inputDel = document.getElementById('global-date-start');
+    const inputAl = document.getElementById('global-date-end');
 
     const actualizarTodo = () => {
         if (typeof window.reprocesarEstadisticasDIF === 'function') window.reprocesarEstadisticasDIF();
@@ -4567,6 +5015,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (inputZona) inputZona.addEventListener('input', actualizarTodo);
     if (selectMes) selectMes.addEventListener('change', actualizarTodo);
     if (selectAnio) selectAnio.addEventListener('change', actualizarTodo);
+    if (inputDel) inputDel.addEventListener('change', actualizarTodo);
+    if (inputAl) inputAl.addEventListener('change', actualizarTodo);
 });
 
 // Gestor global seguro para controlar las instancias de gráficas del Reporte Territorial
@@ -4684,11 +5134,13 @@ window.renderReporteJerarquico = function() {
     const safeArray = (arr) => Array.isArray(arr) ? arr : [];
     const safeStore = (typeof store !== 'undefined' && store !== null) ? store : {};
 
-    // 1. Captura segura de filtros globales (incluyendo año)
+    // 1. Captura segura de filtros globales (incluyendo DEL y AL)
     const busquedaTexto = document.getElementById('global-search-input')?.value.toLowerCase().trim() || "";
     const busquedaZona = document.getElementById('global-zone-search')?.value.toLowerCase().trim() || "";
     const mesFiltro = document.getElementById('global-month-filter')?.value || "all";
     const anioFiltro = document.getElementById('global-year-filter')?.value || "all";
+    const fechaInicio = document.getElementById('global-date-start')?.value || "";
+    const fechaFin = document.getElementById('global-date-end')?.value || "";
 
     // 2. Mapeo Especial para Padrón Vulnerable / Proyectos
     const registrosVulnerablesProcesados = [];
@@ -4796,13 +5248,26 @@ window.renderReporteJerarquico = function() {
         }))
     ];
 
-    // 4. Filtrado Multicriterio (Año, Mes, Zona, Texto)
+    // 4. Filtrado Multicriterio (Año, Mes, Rango DEL/AL, Zona, Texto)
     const filtrados = data.filter(i => {
-        const anioItem = obtenerAnioNormalizado(i.fecha);
-        const mesItem = obtenerMesNormalizado(i.fecha);
-        
-        const coincideAnio = (anioFiltro === 'all' || anioItem === anioFiltro);
-        const coincideMes = (mesFiltro === 'all' || mesItem === mesFiltro);
+        let fechaStr = String(i.fecha || "").trim().split(' ')[0];
+
+        // Validación de Rango de Fechas exactas (DEL / AL) con prioridad
+        let cumpleRangoFecha = true;
+        if (fechaStr.length >= 8) {
+            if (fechaInicio && fechaStr < fechaInicio) cumpleRangoFecha = false;
+            if (fechaFin && fechaStr > fechaFin) cumpleRangoFecha = false;
+        }
+
+        let cumpleAnioMes = true;
+        if (!fechaInicio && !fechaFin) {
+            const anioItem = obtenerAnioNormalizado(i.fecha);
+            const mesItem = obtenerMesNormalizado(i.fecha);
+            
+            const coincideAnio = (anioFiltro === 'all' || anioItem === anioFiltro);
+            const coincideMes = (mesFiltro === 'all' || mesItem === mesFiltro);
+            cumpleAnioMes = coincideAnio && coincideMes;
+        }
         
         const coincideZona = i.zona.toLowerCase().includes(busquedaZona);
         const coincideBusqueda = (
@@ -4813,7 +5278,7 @@ window.renderReporteJerarquico = function() {
             i.info.toLowerCase().includes(busquedaTexto)
         );
         
-        return coincideAnio && coincideMes && coincideZona && coincideBusqueda;
+        return cumpleAnioMes && cumpleRangoFecha && coincideZona && coincideBusqueda;
     });
 
     window._ultimoFiltradoTerritorial = filtrados;
@@ -4841,7 +5306,6 @@ window.renderReporteJerarquico = function() {
     if (keysOrdenadas.length === 0) {
         container.innerHTML = `<div style="text-align:center; color:#94a3b8; font-size:12px; padding:30px;">No se encontraron registros territoriales para los filtros seleccionados.</div>`;
         
-        // Limpiar gráficas
         renderOrUpdateTerritorialChart('chartTerritorialDeps', 'bar', { data: { labels: [], datasets: [{ data: [] }] } });
         renderOrUpdateTerritorialChart('chartTerritorialEstatus', 'doughnut', { data: { labels: [], datasets: [{ data: [] }] } });
         renderOrUpdateTerritorialChart('chartTerritorialZonas', 'bar', { data: { labels: [], datasets: [{ data: [] }] } });
@@ -4906,7 +5370,6 @@ window.renderReporteJerarquico = function() {
         conteoZonas[z] = (conteoZonas[z] || 0) + 1;
     });
 
-    // 1. Gráfica de Barras Horizontales: Volumen por Departamento
     const topDeps = Object.entries(conteoDeps).sort((a, b) => b[1] - a[1]);
     renderOrUpdateTerritorialChart('chartTerritorialDeps', 'bar', {
         data: {
@@ -4924,7 +5387,6 @@ window.renderReporteJerarquico = function() {
         }
     });
 
-    // 2. Gráfica de Rosca: Distribución de Estatus
     const topEstatus = Object.entries(conteoEstatus).sort((a, b) => b[1] - a[1]).slice(0, 5);
     renderOrUpdateTerritorialChart('chartTerritorialEstatus', 'doughnut', {
         data: {
@@ -4936,7 +5398,6 @@ window.renderReporteJerarquico = function() {
         }
     });
 
-    // 3. Gráfica de Barras Verticales: Top Zonas
     const topZonas = Object.entries(conteoZonas).sort((a, b) => b[1] - a[1]).slice(0, 6);
     renderOrUpdateTerritorialChart('chartTerritorialZonas', 'bar', {
         data: {
@@ -4953,12 +5414,12 @@ window.renderReporteJerarquico = function() {
         }
     });
 };
+
 // =============================================================================
-// IMPRESIÓN DIRECTA SOBRE LA MISMA PÁGINA (SIN VENTANAS NI PESTAÑAS NUEVAS)
+// IMPRESIÓN DIRECTA SOBRE LA MISMA PÁGINA
 // =============================================================================
 
 window.imprimirReporteTerritorial = function() {
-    // 1. Asegurar que exista contenido visible en el reporte
     const contenedor = document.getElementById('territorial-master-list');
     
     if (!contenedor || !contenedor.innerHTML.trim()) {
@@ -4972,7 +5433,6 @@ window.imprimirReporteTerritorial = function() {
         return;
     }
 
-    // 2. Inyectar o actualizar CSS de impresión directamente en el <head>
     let estiloImpresion = document.getElementById('estilo-impresion-pagina');
     if (!estiloImpresion) {
         estiloImpresion = document.createElement('style');
@@ -4980,21 +5440,15 @@ window.imprimirReporteTerritorial = function() {
         document.head.appendChild(estiloImpresion);
     }
 
-    // 3. Definir reglas CSS para cuando se active la impresión (Ctrl+P / window.print)
     estiloImpresion.innerHTML = `
         @media print {
-            /* Ocultar absolutamente todo en la página */
             body * {
                 visibility: hidden !important;
             }
-
-            /* Hacer visible únicamente el contenedor del reporte y sus elementos hijos */
             #territorial-master-list, 
             #territorial-master-list * {
                 visibility: visible !important;
             }
-
-            /* Posicionar el reporte en el origen de la hoja de papel */
             #territorial-master-list {
                 position: absolute !important;
                 left: 0 !important;
@@ -5004,13 +5458,10 @@ window.imprimirReporteTerritorial = function() {
                 padding: 0 !important;
                 box-shadow: none !important;
             }
-
-            /* Configuración del papel e impresión de colores exactos */
             @page {
                 size: letter;
                 margin: 10mm;
             }
-
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
@@ -5019,7 +5470,6 @@ window.imprimirReporteTerritorial = function() {
         }
     `;
 
-    // 4. Disparar el diálogo de impresión nativo sobre la misma página
     window.print();
 };
 
@@ -5070,47 +5520,115 @@ window.showView = function(viewId, element) {
 // RELOJ INSTITUCIONAL
 // =============================================================================
 
-    function actualizarRelojEstiloCuadros() {
-        const ahora = new Date();
-        const horas = String(ahora.getHours()).padStart(2, '0');
-        const minutos = String(ahora.getMinutes()).padStart(2, '0');
-        const segundos = String(ahora.getSeconds()).padStart(2, '0');
+function actualizarRelojEstiloCuadros() {
+    const ahora = new Date();
+    const horas = String(ahora.getHours()).padStart(2, '0');
+    const minutos = String(ahora.getMinutes()).padStart(2, '0');
+    const segundos = String(ahora.getSeconds()).padStart(2, '0');
+    
+    const relojEl = document.getElementById('reloj');
+    if (relojEl) {
+        relojEl.innerHTML = `
+            <i class="far fa-clock text-muted"></i>
+            <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px;">${horas}</span>:
+            <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px;">${minutos}</span>:
+            <span style="background: #cbd5e1; color: #0f172a; padding: 2px 4px; border-radius: 4px;">${segundos}</span>
+        `;
+    }
+}
+setInterval(actualizarRelojEstiloCuadros, 1000);
+actualizarRelojEstiloCuadros();
+
+// =============================================================================
+// ENLACE DE EVENTOS Y EXPOSICIÓN GLOBAL DE FUNCIONES
+// =============================================================================
+
+// Exponemos de forma explícita todas las funciones de reproceso al objeto window
+window.showView = showView;
+window.toggleSidebar = toggleSidebar;
+window.cerrarSesion = cerrarSesion;
+window.reprocesarJornItin = window.reprocesarJornItin;
+window.reprocesarJornadas = window.reprocesarJornItin;
+window.reprocesarDespensas = window.reprocesarDespensas;
+window.reprocesarDireccion = window.reprocesarDireccion;
+window.reprocesarFarmacia = window.reprocesarFarmacia;
+window.reprocesarCrisat = window.reprocesarCrisat;
+window.reprocesarTrabSoc = window.reprocesarTrabSoc;
+window.reprocesarJefatura = window.reprocesarJefatura;
+window.reprocesarProcuraduria = window.reprocesarProcuraduria;
+window.reprocesarPsico = window.reprocesarPsico;
+window.reprocesarMedica = window.reprocesarMedica;
+window.reprocesarVulnerable = window.reprocesarVulnerable;
+window.renderReporteJerarquico = window.renderReporteJerarquico;
+window.reprocesarEstadisticasDIF = window.reprocesarEstadisticasDIF;
+
+document.addEventListener("DOMContentLoaded", () => {
+    const idsFiltrosGlobales = [
+        'global-search-input', 
+        'global-zone-search', 
+        'global-month-filter', 
+        'global-year-filter', 
+        'global-date-start', 
+        'global-date-end'
+    ];
+
+    idsFiltrosGlobales.forEach(id => {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+            elemento.addEventListener('input', dispararReprocesoActivo);
+            elemento.addEventListener('change', dispararReprocesoActivo);
+        }
+    });
+});
+
+function dispararReprocesoActivo() {
+    // Mapeo exhaustivo que cubre todas las posibles variantes de IDs de las vistas
+    const vistasMap = {
+        'view-crisat': window.reprocesarCrisat,
+        'view-direccion': window.reprocesarDireccion,
+        'view-farmacia': window.reprocesarFarmacia,
+        'view-social': window.reprocesarTrabSoc,
+        'view-trabajo-social': window.reprocesarTrabSoc,
+        'view-jefatura': window.reprocesarJefatura,
+        'view-jefatura-psicologia': window.reprocesarJefatura,
+        'view-procuraduria': window.reprocesarProcuraduria,
+        'view-psicologia': window.reprocesarPsico,
+        'view-medica': window.reprocesarMedica,
+        'view-area-medica': window.reprocesarMedica,
+        'view-vulnerable': window.reprocesarVulnerable,
+        'view-apoyo_direccion': window.reprocesarDespensas,
+        'view-despensas': window.reprocesarDespensas,
+        'view-jornadas-itinerantes': window.reprocesarJornItin,
+        'view-jornadas': window.reprocesarJornItin,
+        'view-territorial': window.renderReporteJerarquico,
+        'view-estadisticas': window.reprocesarEstadisticasDIF
+    };
+
+    let vistaEncontrada = false;
+
+    for (const [idVista, fnReprocesar] of Object.entries(vistasMap)) {
+        const elVista = document.getElementById(idVista);
         
-        const relojEl = document.getElementById('reloj');
-        if (relojEl) {
-            relojEl.innerHTML = `
-                <i class="far fa-clock text-muted"></i>
-                <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px;">${horas}</span>:
-                <span style="background: #e2e8f0; padding: 2px 4px; border-radius: 4px;">${minutos}</span>:
-                <span style="background: #cbd5e1; color: #0f172a; padding: 2px 4px; border-radius: 4px;">${segundos}</span>
-            `;
+        if (elVista) {
+            const displayStyle = window.getComputedStyle(elVista).display;
+            // Si la vista está visible en pantalla en este momento
+            if (displayStyle !== 'none' && displayStyle !== '') {
+                if (typeof fnReprocesar === 'function') {
+                    fnReprocesar();
+                    vistaEncontrada = true;
+                    break;
+                }
+            }
         }
     }
-    setInterval(actualizarRelojEstiloCuadros, 1000);
-    actualizarRelojEstiloCuadros();
 
-// =============================================================================
-// ENLACE DE EVENTOS PARA ACTUALIZACIÓN EN TIEMPO REAL
-// =============================================================================
-document.addEventListener("DOMContentLoaded", () => {
-    const inputBusqueda = document.getElementById('global-search-input');
-    const inputZona = document.getElementById('global-zone-search');
-    const selectMes = document.getElementById('global-month-filter');
-    const selectAnio = document.getElementById('global-year-filter');
-
-    if (inputBusqueda) {
-        inputBusqueda.addEventListener('input', () => window.reprocesarEstadisticasDIF());
+    // Plan de respaldo global si ninguna vista coincide
+    if (!vistaEncontrada) {
+        if (typeof window.reprocesarEstadisticasDIF === 'function') {
+            window.reprocesarEstadisticasDIF();
+        }
     }
-    if (inputZona) {
-        inputZona.addEventListener('input', () => window.reprocesarEstadisticasDIF());
-    }
-    if (selectMes) {
-        selectMes.addEventListener('change', () => window.reprocesarEstadisticasDIF());
-    }
-    if (selectAnio) {
-        selectAnio.addEventListener('change', () => window.reprocesarEstadisticasDIF());
-    }
-});
+}
 
 </script>
 </body>
