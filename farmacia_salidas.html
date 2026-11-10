@@ -60,11 +60,14 @@
         .btn-success { background: var(--success); }
         .btn-warning { background: var(--warning); color: white; }
         .btn-danger { background: var(--danger); color: white; }
+        .btn-info { background: #0ea5e9; color: white; }
+        .btn-word { background: #2b579a; color: white; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; vertical-align: middle; }
         th { background: #f1f5f9; color: #475569; font-weight: 600; }
         .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
         .origen-propio { background: #fef3c7; color: #b45309; }
+        .badge-resurtir { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
         
         /* GALERÍA Y ROTADOR DE IMÁGENES EN TABLA */
         .carrusel-evidencia {
@@ -115,7 +118,7 @@
         .med-header { display: flex; justify-content: space-between; gap: 10px; }
         .med-stock-info { font-size: 0.72rem; color: #0284c7; font-weight: 500; background: #ffffff; padding: 2px 6px; border-radius: 4px; border: 1px solid #bae6fd; display: inline-block; width: fit-content; }
 
-        /* ZONA ESTILIZADA IDÉNTICA A TU CAPTURA */
+        /* ZONA ESTILIZADA DE ARRASTRE */
         #drop-zone {
             border: 2px dashed #38bdf8;
             border-radius: 12px;
@@ -123,6 +126,7 @@
             text-align: center;
             background: #ffffff;
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         #drop-zone.dragover {
             border-color: #0284c7;
@@ -165,7 +169,7 @@
         }
         .btn-delete-thumb:hover { background: #dc2626; }
 
-        /* MODAL GALERÍA */
+        /* MODALES */
         #modal-galeria { 
             display: none; 
             position: fixed; 
@@ -237,15 +241,24 @@
         </div>
     </div>
 
-    <!-- TARJETAS RESUMEN EN CABECERA -->
-    <div class="kpi-container">
-        <div class="kpi-card">
-            <span class="kpi-title">Tipos de Meds</span>
-            <strong id="kpi-total-meds" class="kpi-value" style="color: #0284c7;">0</strong>
-        </div>
-        <div class="kpi-card">
-            <span class="kpi-title">Total Entregados</span>
-            <strong id="kpi-total-salidas" class="kpi-value" style="color: #10b981;">0 uds</strong>
+    <!-- BOTONES DE EXPORTACIÓN, RESUMEN Y KPIs -->
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <button class="btn btn-word" onclick="mostrarModalVistaPreviaWord()" style="font-size: 0.85rem; padding: 8px 12px;">
+            <i class="fas fa-file-word"></i> Exportar Word (.doc)
+        </button>
+        <button class="btn btn-info" onclick="abrirModalResumenLocalidad()" style="font-size: 0.85rem; padding: 8px 12px;">
+            <i class="fas fa-chart-pie"></i> Resumen por Localidad
+        </button>
+
+        <div class="kpi-container">
+            <div class="kpi-card">
+                <span class="kpi-title">Tipos de Meds</span>
+                <strong id="kpi-total-meds" class="kpi-value" style="color: #0284c7;">0</strong>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-title">Total Entregados</span>
+                <strong id="kpi-total-salidas" class="kpi-value" style="color: #10b981;">0 uds</strong>
+            </div>
         </div>
     </div>
 
@@ -361,15 +374,15 @@
             </div>
         </div>
 
-        <!-- SECCIÓN DE CARGA Y GESTIÓN DE FOTOS (ESTILO IDÉNTICO A TU IMAGEN) -->
+        <!-- SECCIÓN DE CARGA Y GESTIÓN DE FOTOS -->
         <div class="form-grid">
             <div class="form-group full">
                 <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">
                     Evidencia Fotográfica
                 </label>
 
-                <!-- Zona de arrastre idéntica a tu captura -->
-                <div id="drop-zone">
+                <!-- Zona de arrastre interactiva -->
+                <div id="drop-zone" onclick="document.getElementById('s-fotos').click()">
                     <i class="fas fa-cloud-arrow-up" style="font-size: 2.2rem; color: #0284c7; margin-bottom: 8px;"></i>
                     <p style="margin: 0 0 8px 0; color: #0f172a; font-weight: 600; font-size: 0.95rem;">
                         Haz clic aquí o arrastra fotos de evidencia
@@ -378,20 +391,16 @@
                         Puedes agregar varias imágenes (JPG o PNG)
                     </p>
                     
-                    <!-- Input file oculto pero funcional -->
-                    <input type="file" id="s-fotos" accept="image/*" capture="environment" multiple style="display: none;" onchange="mostrarIndicadorFotos(this)">
+                    <input type="file" id="s-fotos" accept="image/*" capture="environment" multiple style="display: none;" onchange="procesarArchivosSeleccionados(this.files)">
                     
-                    <!-- Botón clásico "Elegir archivos" estilo input file nativo -->
-                    <label for="s-fotos" style="display: inline-block; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 0.85rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                    <button type="button" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 6px 14px; border-radius: 6px; font-weight: 500; font-size: 0.85rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); pointer-events: none;">
                         Elegir archivos
-                    </label>
+                    </button>
                     <span id="texto-estado-archivo" style="font-size: 0.85rem; color: #64748b; margin-left: 8px;">Sin archivos seleccionados</span>
                 </div>
 
-                <!-- Contenedor donde aparecerán las miniaturas de las fotos nuevas seleccionadas -->
                 <div id="indicador-archivos-seleccionados" style="margin-top: 10px;"></div>
 
-                <!-- Contenedor para fotos existentes (en caso de edición) -->
                 <div id="contenedor-fotos-existentes" style="margin-top: 12px; display: none;">
                     <span style="font-size: 0.85rem; color: #475569; font-weight: 600; display: block; margin-bottom: 5px;">Fotos guardadas previamente:</span>
                     <div id="grid-fotos-existentes" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
@@ -432,6 +441,9 @@
                 <div style="text-align:right;">
                     <span style="font-size:0.75rem; color:#64748b; display:block;">STOCK ACTUAL EN INVENTARIO</span>
                     <strong id="kardex-stock-actual" style="font-size:1.3rem; color:#0369a1;">0 uds</strong>
+                    <div id="kardex-alerta-resurtir" style="margin-top:4px; display:none;">
+                        <span class="badge badge-resurtir"><i class="fas fa-exclamation-triangle"></i> OBSERVACIÓN: RESURTIR (<= 5 uds)</span>
+                    </div>
                 </div>
             </div>
 
@@ -520,7 +532,6 @@
     let fotosExistentesEdicion = []; 
     let carruselIntervals = [];
 
-    // Arreglo global para acumular las nuevas fotos seleccionadas o capturadas
     let archivosNuevosSeleccionados = [];
 
     let fotosModalActuales = [];
@@ -537,20 +548,16 @@
     badgeRol.style.background = "#a21caf";
     badgeRol.style.color = "#ffffff";
 
-    // LISTENER INVENTARIO + KPI MEDS
     onSnapshot(farmaciaRef, (snap) => {
         inventarioGlobal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         document.getElementById('kpi-total-meds').innerText = inventarioGlobal.length;
-        
         poblarSelectorKardex();
         filtrarMedicamentosPorDestino();
         cambiarDestino();
     });
 
-    // LISTENER SALIDAS + KPI TOTAL ENTREGADOS
     onSnapshot(salidasRef, (snap) => {
         salidasGlobal = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        
         let totalPiezasEntregadas = 0;
         salidasGlobal.forEach(s => {
             if (s.medicamentos && Array.isArray(s.medicamentos)) {
@@ -560,23 +567,389 @@
             }
         });
         document.getElementById('kpi-total-salidas').innerText = `${totalPiezasEntregadas} uds`;
-
         renderizarSalidas();
-        
         if (document.getElementById('kardex-select-med').value) {
             consultarKardexMedicamento();
         }
     });
 
+    // ==========================================
+    // VISTA PREVIA Y EXPORTAR REPORTE EN WORD
+    // ==========================================
+    window.mostrarModalVistaPreviaWord = () => {
+        if (!inventarioGlobal || inventarioGlobal.length === 0) {
+            return Swal.fire({ icon: 'warning', title: 'Sin datos', text: 'No hay datos de inventario para generar el reporte.' });
+        }
+
+        let salidasPorMedicamento = {};
+        salidasGlobal.forEach(s => {
+            let listaMeds = [];
+            if (s.medicamentos && Array.isArray(s.medicamentos)) {
+                listaMeds = s.medicamentos;
+            } else if (s.medicamentoId || s.medicamentoNombre) {
+                listaMeds = [{
+                    medicamentoId: s.medicamentoId,
+                    medicamentoNombre: s.medicamentoNombre || s.nombreMedicamento || s.medicamento,
+                    cantidad: Number(s.cantidad || 1)
+                }];
+            }
+
+            listaMeds.forEach(m => {
+                let idMed = m.medicamentoId;
+                let nombreMed = (m.medicamentoNombre || '').toUpperCase().trim();
+                let cant = Number(m.cantidad || 0);
+                let key = idMed ? idMed : nombreMed;
+                if (!salidasPorMedicamento[key]) salidasPorMedicamento[key] = 0;
+                salidasPorMedicamento[key] += cant;
+            });
+        });
+
+        // Construir HTML del modal con la tabla de medicamentos, totales y advertencias <= 5
+        let htmlTablaConsolidado = `
+            <div style="text-align: left; max-height: 55vh; overflow-y: auto; padding-right: 5px; font-size: 0.9rem;">
+                <h4 style="color: #0284c7; margin-top: 0;"><i class="fas fa-boxes"></i> 1. Consolidado de Medicamentos (Salidas vs Stock)</h4>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <thead>
+                        <tr style="background: #0284c7; color: white;">
+                            <th style="padding: 8px; border: 1px solid #cbd5e1;">Medicamento</th>
+                            <th style="padding: 8px; border: 1px solid #cbd5e1;">Origen</th>
+                            <th style="padding: 8px; border: 1px solid #cbd5e1;">Total Salidas</th>
+                            <th style="padding: 8px; border: 1px solid #cbd5e1;">Stock Bodega</th>
+                            <th style="padding: 8px; border: 1px solid #cbd5e1;">Observación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        inventarioGlobal.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+
+        let acumuladoTotalSalidas = 0;
+        let acumuladoTotalStock = 0;
+
+        inventarioGlobal.forEach(item => {
+            let salidasTotales = salidasPorMedicamento[item.id] || salidasPorMedicamento[(item.nombre || '').toUpperCase().trim()] || 0;
+            let stockRestante = Number(item.existencia || 0);
+            let origenTxt = item.origen === 'DONACIÓN' ? 'DONACIÓN' : 'RECURSO PROPIO';
+
+            acumuladoTotalSalidas += salidasTotales;
+            acumuladoTotalStock += stockRestante;
+
+            let obsResurtir = stockRestante <= 5 
+                ? `<span class="badge badge-resurtir"><i class="fas fa-exclamation-triangle"></i> RESURTIR</span>` 
+                : `<span style="color:#10b981; font-weight:600;"><i class="fas fa-check-circle"></i> Suficiente</span>`;
+
+            htmlTablaConsolidado += `
+                <tr>
+                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1;"><b>${item.nombre}</b></td>
+                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${origenTxt}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1; color: #047857; font-weight: bold;">${salidasTotales} uds</td>
+                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1; color: #1d4ed8; font-weight: bold;">${stockRestante} uds</td>
+                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${obsResurtir}</td>
+                </tr>
+            `;
+        });
+
+        // Fila de totales generales al pie de la tabla
+        htmlTablaConsolidado += `
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #f1f5f9; font-weight: bold;">
+                            <td colspan="2" style="padding: 8px; border: 1px solid #cbd5e1; text-align: right;">TOTALES GENERALES:</td>
+                            <td style="padding: 8px; border: 1px solid #cbd5e1; color: #047857;">${acumuladoTotalSalidas} uds</td>
+                            <td style="padding: 8px; border: 1px solid #cbd5e1; color: #1d4ed8;">${acumuladoTotalStock} uds</td>
+                            <td style="padding: 8px; border: 1px solid #cbd5e1;">-</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <h4 style="color: #0284c7;"><i class="fas fa-history"></i> 2. Historial Reciente de Salidas (${salidasGlobal.length} registros totales)</h4>
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #0f172a; color: white;">
+                            <th style="padding: 8px; border: 1px solid #cbd5e1;">Fecha</th>
+                            <th style="padding: 8px; border: 1px solid #cbd5e1;">Destino / Jornada</th>
+                            <th style="padding: 8px; border: 1px solid #cbd5e1;">Beneficiario</th>
+                            <th style="padding: 8px; border: 1px solid #cbd5e1;">Detalle Fármacos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        let salidasCopia = [...salidasGlobal].sort((a, b) => b.timestamp - a.timestamp);
+        salidasCopia.slice(0, 15).forEach(s => {
+            let destinoTxt = s.destino || 'JORNADA';
+            if (s.destino === 'JORNADA ITINERANTE' && s.jornadaLugar) {
+                destinoTxt += ` (${s.jornadaLugar})`;
+            }
+            let beneficiarioTxt = `${s.beneficiarioNombre || 'N/A'} (${s.beneficiarioLocalidad || 'S/N'})`;
+            let medsTxt = '';
+            if (s.medicamentos && Array.isArray(s.medicamentos)) {
+                medsTxt = s.medicamentos.map(m => `${m.medicamentoNombre}: ${m.cantidad}u`).join(', ');
+            } else {
+                medsTxt = `${s.medicamentoNombre || 'Med'}: ${s.cantidad || 1}u`;
+            }
+
+            htmlTablaConsolidado += `
+                <tr>
+                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${s.fecha || 'S/F'}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1;"><b>${destinoTxt}</b></td>
+                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${beneficiarioTxt}</td>
+                    <td style="padding: 6px 8px; border: 1px solid #cbd5e1; font-size: 0.85rem;">${medsTxt}</td>
+                </tr>
+            `;
+        });
+
+        htmlTablaConsolidado += `
+                    </tbody>
+                </table>
+                ${salidasGlobal.length > 15 ? '<p style="text-align: center; color: #64748b; font-size: 0.8rem; margin-top: 8px;">* Mostrando los últimos 15 registros en la vista previa. El documento de Word incluirá todo el historial completo.</p>' : ''}
+            </div>
+        `;
+
+        Swal.fire({
+            title: '<i class="fas fa-file-word" style="color: #2b579a;"></i> Vista Previa del Reporte Oficial',
+            html: htmlTablaConsolidado,
+            width: '850px',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-download"></i> Descargar Archivo Word (.doc)',
+            confirmButtonColor: '#2b579a',
+            cancelButtonText: 'Cerrar',
+            cancelButtonColor: '#64748b',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                exportarReporteWordReal();
+            }
+        });
+    };
+
+    window.exportarReporteWordReal = () => {
+        let salidasPorMedicamento = {};
+        salidasGlobal.forEach(s => {
+            let listaMeds = [];
+            if (s.medicamentos && Array.isArray(s.medicamentos)) {
+                listaMeds = s.medicamentos;
+            } else if (s.medicamentoId || s.medicamentoNombre) {
+                listaMeds = [{
+                    medicamentoId: s.medicamentoId,
+                    medicamentoNombre: s.medicamentoNombre || s.nombreMedicamento || s.medicamento,
+                    cantidad: Number(s.cantidad || 1)
+                }];
+            }
+
+            listaMeds.forEach(m => {
+                let idMed = m.medicamentoId;
+                let nombreMed = (m.medicamentoNombre || '').toUpperCase().trim();
+                let cant = Number(m.cantidad || 0);
+                let key = idMed ? idMed : nombreMed;
+                if (!salidasPorMedicamento[key]) salidasPorMedicamento[key] = 0;
+                salidasPorMedicamento[key] += cant;
+            });
+        });
+
+        let contenidoWord = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head>
+                <meta charset='utf-8'>
+                <title>Reporte Farmacia DIF</title>
+                <style>
+                    body { font-family: 'Arial', sans-serif; color: #1e293b; line-height: 1.4; }
+                    h1 { color: #0284c7; text-align: center; font-size: 20pt; margin-bottom: 5px; }
+                    h2 { color: #0f172a; font-size: 14pt; border-bottom: 2px solid #0284c7; padding-bottom: 5px; margin-top: 25px; }
+                    p { font-size: 11pt; color: #475569; text-align: center; margin-top: 0; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                    th { background-color: #0284c7; color: white; padding: 10px; font-size: 11pt; border: 1px solid #cbd5e1; text-align: left; }
+                    td { padding: 8px 10px; font-size: 10.5pt; border: 1px solid #cbd5e1; color: #334155; }
+                    tr:nth-child(even) { background-color: #f8fafc; }
+                    .resurtir { color: #dc2626; font-weight: bold; background-color: #fee2e2; padding: 2px 6px; border-radius: 4px; }
+                </style>
+            </head>
+            <body>
+                <h1>SISTEMA DIF - FARMACIA MUNICIPAL</h1>
+                <p>Reporte Consolidado de Salidas y Existencias en Bodega</p>
+                <p><b>Fecha de Emisión:</b> ${new Date().toLocaleDateString()}</p>
+
+                <h2>1. Consolidado de Medicamentos (Salidas vs Stock)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Medicamento</th>
+                            <th>Origen</th>
+                            <th>Total Salidas (Entregadas)</th>
+                            <th>Stock Restante (Bodega)</th>
+                            <th>Observación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        inventarioGlobal.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
+
+        let totalWordSalidas = 0;
+        let totalWordStock = 0;
+
+        inventarioGlobal.forEach(item => {
+            let salidasTotales = salidasPorMedicamento[item.id] || salidasPorMedicamento[(item.nombre || '').toUpperCase().trim()] || 0;
+            let stockRestante = Number(item.existencia || 0);
+            let origenTxt = item.origen === 'DONACIÓN' ? 'DONACIÓN' : 'RECURSO PROPIO';
+
+            totalWordSalidas += salidasTotales;
+            totalWordStock += stockRestante;
+
+            let obsWord = stockRestante <= 5 ? '<span class="resurtir">RESURTIR</span>' : 'Suficiente';
+
+            contenidoWord += `
+                <tr>
+                    <td><b>${item.nombre}</b></td>
+                    <td>${origenTxt}</td>
+                    <td><b>${salidasTotales} uds</b></td>
+                    <td><b>${stockRestante} uds</b></td>
+                    <td>${obsWord}</td>
+                </tr>
+            `;
+        });
+
+        contenidoWord += `
+                    </tbody>
+                    <tfoot>
+                        <tr style="background-color: #f1f5f9; font-weight: bold;">
+                            <td colspan="2" style="text-align: right;">TOTALES GENERALES:</td>
+                            <td><b>${totalWordSalidas} uds</b></td>
+                            <td><b>${totalWordStock} uds</b></td>
+                            <td>-</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <h2>2. Historial Detallado de Salidas</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Destino / Jornada</th>
+                            <th>Beneficiario y Localidad</th>
+                            <th>Medicamento(s) y Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        salidasGlobal.sort((a, b) => b.timestamp - a.timestamp);
+
+        salidasGlobal.forEach(s => {
+            let destinoTxt = s.destino || 'JORNADA';
+            if (s.destino === 'JORNADA ITINERANTE' && s.jornadaLugar) {
+                destinoTxt += ` (${s.jornadaLugar})`;
+            }
+
+            let beneficiarioTxt = `${s.beneficiarioNombre || 'N/A'} - Loc: ${s.beneficiarioLocalidad || 'S/N'}`;
+
+            let medsTxt = '';
+            if (s.medicamentos && Array.isArray(s.medicamentos)) {
+                medsTxt = s.medicamentos.map(m => `${m.medicamentoNombre}: ${m.cantidad} uds`).join('<br>');
+            } else {
+                medsTxt = `${s.medicamentoNombre || 'Medicamento'}: ${s.cantidad || 1} uds`;
+            }
+
+            contenidoWord += `
+                <tr>
+                    <td>${s.fecha || 'S/F'}</td>
+                    <td><b>${destinoTxt}</b></td>
+                    <td>${beneficiarioTxt}</td>
+                    <td>${medsTxt}</td>
+                </tr>
+            `;
+        });
+
+        contenidoWord += `
+                    </tbody>
+                </table>
+            </body>
+            </html>
+        `;
+
+        const blob = new Blob(['\ufeff' + contenidoWord], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Reporte_Farmacia_DIF_${new Date().toISOString().split('T')[0]}.doc`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        Swal.fire({
+            icon: 'success',
+            title: '¡Reporte Exportado!',
+            text: 'El documento de Word (.doc) se ha descargado correctamente.',
+            timer: 2500,
+            showConfirmButton: false
+        });
+    };
+
+    window.abrirModalResumenLocalidad = () => {
+        if (!salidasGlobal || salidasGlobal.length === 0) {
+            return Swal.fire({ icon: 'info', title: 'Sin registros', text: 'No hay salidas registradas para generar el resumen.' });
+        }
+
+        let resumen = {};
+        salidasGlobal.forEach(s => {
+            let localidad = (s.beneficiarioLocalidad || s.localidad || s.jornadaLugar || 'GENERAL / SIN LOCALIDAD').toUpperCase().trim();
+            if (!resumen[localidad]) {
+                resumen[localidad] = { totalPiezas: 0, medicamentos: {} };
+            }
+
+            let listaMeds = [];
+            if (s.medicamentos && Array.isArray(s.medicamentos)) {
+                listaMeds = s.medicamentos;
+            } else if (s.medicamentoNombre || s.nombreMedicamento || s.medicamento) {
+                listaMeds = [{ medicamentoNombre: s.medicamentoNombre || s.nombreMedicamento || s.medicamento, cantidad: Number(s.cantidad || 1) }];
+            }
+
+            listaMeds.forEach(m => {
+                let nombreMed = (m.medicamentoNombre || m.nombre || 'MEDICAMENTO').toUpperCase().trim();
+                let cant = Number(m.cantidad || 0);
+                resumen[localidad].totalPiezas += cant;
+                if (!resumen[localidad].medicamentos[nombreMed]) resumen[localidad].medicamentos[nombreMed] = 0;
+                resumen[localidad].medicamentos[nombreMed] += cant;
+            });
+        });
+
+        let htmlContenido = `<div style="text-align: left; max-height: 60vh; overflow-y: auto; padding-right: 5px;">`;
+        for (let loc in resumen) {
+            htmlContenido += `
+                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0284c7; padding-bottom: 6px; margin-bottom: 8px;">
+                        <span style="font-weight: 700; color: #0369a1; font-size: 1rem;"><i class="fas fa-map-marker-alt"></i> ${loc}</span>
+                        <span class="badge" style="background: #0284c7; color: white; font-size: 0.8rem;">Total: ${resumen[loc].totalPiezas} uds</span>
+                    </div>
+                    <ul style="margin: 0; padding-left: 20px; font-size: 0.88rem; color: #334155;">
+            `;
+            for (let med in resumen[loc].medicamentos) {
+                htmlContenido += `<li style="margin-bottom: 4px;"><b>${med}:</b> <span style="color: #059669; font-weight: 600;">${resumen[loc].medicamentos[med]} piezas</span></li>`;
+            }
+            htmlContenido += `</ul></div>`;
+        }
+        htmlContenido += `</div>`;
+
+        Swal.fire({
+            title: '<i class="fas fa-chart-pie" style="color: #0284c7;"></i> Resumen de Salidas por Localidad',
+            html: htmlContenido,
+            width: '650px',
+            confirmButtonText: 'Cerrar',
+            confirmButtonColor: '#0284c7'
+        });
+    };
+
     function poblarSelectorKardex() {
         const selectKardex = document.getElementById('kardex-select-med');
         const valorPrevio = selectKardex.value;
-        
         inventarioGlobal.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
-        
         selectKardex.innerHTML = '<option value="">-- Elige un medicamento para ver su historial --</option>' +
-            inventarioGlobal.map(i => `<option value="${i.id}">${i.nombre} (${i.origen || 'S/N'}) - Stock: ${i.existencia}</option>`).join('');
-            
+            inventarioGlobal.map(i => {
+                let etiquetaResurtir = i.existencia <= 5 ? ' ⚠️ RESURTIR' : '';
+                return `<option value="${i.id}">${i.nombre} (${i.origen || 'S/N'}) - Stock: ${i.existencia}${etiquetaResurtir}</option>`;
+            }).join('');
         if (valorPrevio) selectKardex.value = valorPrevio;
     }
 
@@ -584,11 +957,9 @@
         const medId = document.getElementById('kardex-select-med').value;
         const contenedorResultado = document.getElementById('kardex-resultado');
         const tbody = document.getElementById('kardex-tbody');
+        const alertaResurtir = document.getElementById('kardex-alerta-resurtir');
 
-        if (!medId) {
-            contenedorResultado.style.display = 'none';
-            return;
-        }
+        if (!medId) { contenedorResultado.style.display = 'none'; return; }
 
         const med = inventarioGlobal.find(i => i.id === medId);
         if (!med) return;
@@ -597,8 +968,13 @@
         document.getElementById('kardex-origen-med').innerText = `Origen: ${med.origen || 'N/A'}`;
         document.getElementById('kardex-stock-actual').innerText = `${med.existencia} uds`;
 
-        let historialMed = [];
+        if (Number(med.existencia || 0) <= 5) {
+            alertaResurtir.style.display = 'block';
+        } else {
+            alertaResurtir.style.display = 'none';
+        }
 
+        let historialMed = [];
         salidasGlobal.forEach(s => {
             let infoDestinoTxt = s.destino || 'JORNADA';
             if (s.destino === 'JORNADA ITINERANTE' && s.jornadaLugar) {
@@ -619,14 +995,12 @@
                         });
                     }
                 });
-            } else if (s.medicamentoId === medId || s.medicamentoNombre === med.nombre || s.nombreMedicamento === med.nombre) {
+            } else if (s.medicamentoId === medId || s.medicamentoNombre === med.nombre) {
                 historialMed.push({
                     fecha: s.fecha || 'Sin fecha',
                     destinoTxt: infoDestinoTxt,
                     beneficiario: s.beneficiarioNombre || 'N/A',
                     cantidad: s.cantidad || 1,
-                    stockAnterior: undefined,
-                    stockPosterior: undefined,
                     timestamp: s.timestamp || 0
                 });
             }
@@ -642,7 +1016,6 @@
                 const textoTraza = tieneTraza 
                     ? `<span style="color:#0284c7; font-weight:600;">Stock: ${h.stockAnterior} ➔ ${h.stockPosterior}</span>`
                     : `<span style="color:#94a3b8; font-style:italic;">Registro histórico previo</span>`;
-
                 return `
                     <tr>
                         <td><b>${h.fecha}</b></td>
@@ -654,38 +1027,29 @@
                 `;
             }).join('');
         }
-
         contenedorResultado.style.display = 'block';
     };
 
     window.cambiarDestino = () => {
         const destino = document.getElementById('s-destino').value;
         const contenedorJornada = document.getElementById('contenedor-datos-jornada');
-
-        if (destino === 'JORNADA ITINERANTE') {
-            contenedorJornada.style.display = 'block';
-        } else {
-            contenedorJornada.style.display = 'none';
-        }
-
+        contenedorJornada.style.display = (destino === 'JORNADA ITINERANTE') ? 'block' : 'none';
         filtrarMedicamentosPorDestino();
     };
 
     window.filtrarMedicamentosPorDestino = () => {
         const destino = document.getElementById('s-destino').value;
         const selectMed = document.getElementById('s-medicamento');
-        
-        let filtrados = [];
-        if (destino === 'AREA MEDICA') {
-            filtrados = inventarioGlobal.filter(i => i.origen === 'DONACIÓN' && i.existencia > 0);
-        } else {
-            filtrados = inventarioGlobal.filter(i => i.origen === 'RECURSO PROPIO' && i.existencia > 0);
-        }
+        let filtrados = (destino === 'AREA MEDICA') 
+            ? inventarioGlobal.filter(i => i.origen === 'DONACIÓN' && i.existencia > 0)
+            : inventarioGlobal.filter(i => i.origen === 'RECURSO PROPIO' && i.existencia > 0);
 
         selectMed.innerHTML = filtrados.length > 0 
-            ? '<option value="">Seleccione un medicamento...</option>' + filtrados.map(i => `<option value="${i.id}">${i.nombre} (Disponibles: ${i.existencia})</option>`).join('')
+            ? '<option value="">Seleccione un medicamento...</option>' + filtrados.map(i => {
+                let etiquetaResurtir = i.existencia <= 5 ? ' (⚠️ RESURTIR)' : '';
+                return `<option value="${i.id}">${i.nombre} (Disponibles: ${i.existencia})${etiquetaResurtir}</option>`;
+            }).join('')
             : '<option value="">No hay medicamentos disponibles</option>';
-            
         mostrarPreviewStock();
     };
 
@@ -694,16 +1058,13 @@
         const cant = parseInt(document.getElementById('s-cantidad').value) || 0;
         const textElem = document.getElementById('preview-stock-text');
 
-        if (!medId) {
-            textElem.style.display = 'none';
-            return;
-        }
-
+        if (!medId) { textElem.style.display = 'none'; return; }
         const med = inventarioGlobal.find(i => i.id === medId);
         if (med) {
             const restante = med.existencia - cant;
+            let avisoResurtir = restante <= 5 ? ' <span style="color:#dc2626; font-weight:700;">- ⚠️ ¡Quedarán <= 5 uds (Resurtir)!</span>' : '';
             textElem.style.display = 'block';
-            textElem.innerHTML = `<i class="fas fa-info-circle"></i> Stock actual: <b>${med.existencia}</b> ➔ Restarán: <b>${restante >= 0 ? restante : 0}</b>`;
+            textElem.innerHTML = `<i class="fas fa-info-circle"></i> Stock actual: <b>${med.existencia}</b> ➔ Restarán: <b>${restante >= 0 ? restante : 0}</b>${avisoResurtir}`;
         }
     };
 
@@ -777,32 +1138,30 @@
         inputEdad.value = edad >= 0 ? edad : 0;
     };
 
-    // ==========================================
-    // GESTIÓN DE FOTOS MÚLTIPLES (ACUMULATIVAS)
-    // ==========================================
-    window.mostrarIndicadorFotos = (input) => {
-        const textoEstado = document.getElementById('texto-estado-archivo');
-        if (input.files && input.files.length > 0) {
-            const nuevosArchivos = Array.from(input.files);
+    window.procesarArchivosSeleccionados = (filesList) => {
+        if (filesList && filesList.length > 0) {
+            const nuevosArchivos = Array.from(filesList);
             archivosNuevosSeleccionados = archivosNuevosSeleccionados.concat(nuevosArchivos);
-            
-            if (archivosNuevosSeleccionados.length === 1) {
-                textoEstado.innerText = archivosNuevosSeleccionados[0].name;
-            } else {
-                textoEstado.innerText = `${archivosNuevosSeleccionados.length} archivos seleccionados`;
-            }
-            
-            input.value = '';
+            actualizarTextoEstadoArchivos();
             renderizarPrevisualizacionNuevasFotos();
         }
     };
 
-    function renderizarPrevisualizacionNuevasFotos() {
-        const contenedorIndicador = document.getElementById('indicador-archivos-seleccionados');
+    function actualizarTextoEstadoArchivos() {
         const textoEstado = document.getElementById('texto-estado-archivo');
-        
         if (archivosNuevosSeleccionados.length === 0) {
             textoEstado.innerText = "Sin archivos seleccionados";
+        } else if (archivosNuevosSeleccionados.length === 1) {
+            textoEstado.innerText = archivosNuevosSeleccionados[0].name;
+        } else {
+            textoEstado.innerText = `${archivosNuevosSeleccionados.length} archivos seleccionados`;
+        }
+    }
+
+    function renderizarPrevisualizacionNuevasFotos() {
+        const contenedorIndicador = document.getElementById('indicador-archivos-seleccionados');
+        
+        if (archivosNuevosSeleccionados.length === 0) {
             contenedorIndicador.innerHTML = '';
             return;
         }
@@ -813,7 +1172,7 @@
             htmlPreviews += `
                 <div class="preview-thumb-card">
                     <img src="${urlTemp}" alt="Preview ${idx + 1}">
-                    <button type="button" class="btn-delete-thumb" onclick="eliminarFotoNueva(${idx})" title="Eliminar foto">&times;</button>
+                    <button type="button" class="btn-delete-thumb" onclick="event.stopPropagation(); eliminarFotoNueva(${idx})" title="Eliminar foto">&times;</button>
                 </div>
             `;
         });
@@ -829,6 +1188,7 @@
 
     window.eliminarFotoNueva = (index) => {
         archivosNuevosSeleccionados.splice(index, 1);
+        actualizarTextoEstadoArchivos();
         renderizarPrevisualizacionNuevasFotos();
     };
 
@@ -846,7 +1206,7 @@
         grid.innerHTML = fotosExistentesEdicion.map((foto, idx) => `
             <div class="preview-thumb-card">
                 <img src="${foto}" alt="Foto ${idx + 1}">
-                <button class="btn-delete-thumb" onclick="eliminarFotoEdicion(${idx})" title="Eliminar foto">&times;</button>
+                <button type="button" class="btn-delete-thumb" onclick="eliminarFotoEdicion(${idx})" title="Eliminar foto">&times;</button>
             </div>
         `).join('');
     }
@@ -856,7 +1216,6 @@
         renderizarFotosExistentesEdicion();
     };
 
-    // Drag and Drop support
     document.addEventListener('DOMContentLoaded', () => {
         const dropZone = document.getElementById('drop-zone');
         if (!dropZone) return;
@@ -880,29 +1239,19 @@
         dropZone.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
             if (dt.files && dt.files.length > 0) {
-                const nuevosArchivos = Array.from(dt.files);
-                archivosNuevosSeleccionados = archivosNuevosSeleccionados.concat(nuevosArchivos);
-                const textoEstado = document.getElementById('texto-estado-archivo');
-                if (archivosNuevosSeleccionados.length === 1) {
-                    textoEstado.innerText = archivosNuevosSeleccionados[0].name;
-                } else {
-                    textoEstado.innerText = `${archivosNuevosSeleccionados.length} archivos seleccionados`;
-                }
-                renderizarPrevisualizacionNuevasFotos();
+                procesarArchivosSeleccionados(dt.files);
             }
         }, false);
     });
 
     window.procesarSalida = async () => {
         const destino = document.getElementById('s-destino').value;
-        
         let jornadaLugar = "";
         let jornadaFecha = "";
 
         if (destino === 'JORNADA ITINERANTE') {
             jornadaLugar = document.getElementById('jornada-lugar').value.toUpperCase().trim();
             jornadaFecha = document.getElementById('jornada-fecha').value;
-
             if (!jornadaLugar || !jornadaFecha) {
                 return Swal.fire({ icon: 'warning', title: 'Campos incompletos', text: 'Por favor indique el lugar y la fecha de la jornada itinerante.' });
             }
@@ -935,7 +1284,6 @@
             if (editSalidaID) {
                 const salidaAntigua = salidasGlobal.find(s => s.id === editSalidaID);
 
-                // Restaurar inventario previo
                 if (salidaAntigua.medicamentos && Array.isArray(salidaAntigua.medicamentos)) {
                     for (let item of salidaAntigua.medicamentos) {
                         const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
@@ -944,15 +1292,8 @@
                             await updateDoc(medRef, { existencia: medSnap.data().existencia + item.cantidad });
                         }
                     }
-                } else if (salidaAntigua.medicamentoId) {
-                    const medRef = doc(db, "inventario_farmacia", salidaAntigua.medicamentoId);
-                    const medSnap = await getDoc(medRef);
-                    if (medSnap.exists()) {
-                        await updateDoc(medRef, { existencia: medSnap.data().existencia + (salidaAntigua.cantidad || 0) });
-                    }
                 }
 
-                // Descontar nuevo inventario
                 let loteMedicamentosConTrazabilidad = [];
                 for (let item of loteMedicamentosTemp) {
                     const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
@@ -965,25 +1306,17 @@
                         stockPosterior = stockAnterior - item.cantidad;
                         await updateDoc(medRef, { existencia: stockPosterior });
                     }
-
                     loteMedicamentosConTrazabilidad.push({ ...item, stockAnterior, stockPosterior });
                 }
 
                 let fotosFinales = [...fotosExistentesEdicion, ...nuevasFotosBase64];
 
                 await updateDoc(doc(db, "salidas_farmacia", editSalidaID), {
-                    destino,
-                    jornadaLugar,
-                    jornadaFecha,
+                    destino, jornadaLugar, jornadaFecha,
                     medicamentos: loteMedicamentosConTrazabilidad,
-                    beneficiarioNombre,
-                    fechaNacimiento,
-                    beneficiarioEdad,
-                    beneficiarioGenero,
-                    beneficiarioLocalidad,
-                    beneficiarioMunicipio,
-                    beneficiarioReceta,
-                    fecha: fechaEntregaFinal,
+                    beneficiarioNombre, fechaNacimiento, beneficiarioEdad,
+                    beneficiarioGenero, beneficiarioLocalidad, beneficiarioMunicipio,
+                    beneficiarioReceta, fecha: fechaEntregaFinal,
                     fotosEvidencia: fotosFinales
                 });
 
@@ -992,7 +1325,6 @@
 
             } else {
                 let loteMedicamentosConTrazabilidad = [];
-
                 for (let item of loteMedicamentosTemp) {
                     const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
                     const medSnap = await getDoc(medRef);
@@ -1004,21 +1336,14 @@
                         stockPosterior = stockAnterior - item.cantidad;
                         await updateDoc(medRef, { existencia: stockPosterior });
                     }
-
                     loteMedicamentosConTrazabilidad.push({ ...item, stockAnterior, stockPosterior });
                 }
 
                 await addDoc(salidasRef, {
-                    destino,
-                    jornadaLugar,
-                    jornadaFecha,
+                    destino, jornadaLugar, jornadaFecha,
                     medicamentos: loteMedicamentosConTrazabilidad,
-                    beneficiarioNombre,
-                    fechaNacimiento,
-                    beneficiarioEdad,
-                    beneficiarioGenero,
-                    beneficiarioLocalidad,
-                    beneficiarioMunicipio,
+                    beneficiarioNombre, fechaNacimiento, beneficiarioEdad,
+                    beneficiarioGenero, beneficiarioLocalidad, beneficiarioMunicipio,
                     beneficiarioReceta,
                     usuario: usuarioLoggeado,
                     fecha: fechaEntregaFinal,
@@ -1048,7 +1373,7 @@
         document.getElementById('b-fecha-entrega').value = "";
         
         archivosNuevosSeleccionados = [];
-        document.getElementById('texto-estado-archivo').innerText = "Sin archivos seleccionados";
+        actualizarTextoEstadoArchivos();
         document.getElementById('indicador-archivos-seleccionados').innerHTML = "";
         
         fotosExistentesEdicion = [];
@@ -1092,7 +1417,6 @@
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-
                     resolve(canvas.toDataURL('image/jpeg', calidad));
                 };
                 img.onerror = (error) => reject(error);
@@ -1120,7 +1444,6 @@
         }
 
         salidasGlobal.sort((a, b) => b.timestamp - a.timestamp);
-
         const totalRegistros = salidasGlobal.length;
         const totalPaginas = Math.ceil(totalRegistros / limitePorPagina) || 1;
         if (paginaActual > totalPaginas) paginaActual = totalPaginas;
@@ -1135,17 +1458,14 @@
 
         tbody.innerHTML = datosPaginados.map((s, index) => {
             let htmlGaleria = `<span style="color:#94a3b8; font-size:0.8rem;">Sin fotos</span>`;
-            
             if (s.fotosEvidencia && s.fotosEvidencia.length > 0) {
                 const contenedorId = `carrusel-${index}`;
                 const imagenesHTML = s.fotosEvidencia.map((foto, idx) => 
                     `<img src="${foto}" class="${idx === 0 ? 'activa' : ''}" data-idx="${idx}" alt="Evidencia">`
                 ).join('');
-                
                 const badgeContador = s.fotosEvidencia.length > 1 
                     ? `<div class="badge-contador-fotos"><i class="fas fa-images"></i> ${s.fotosEvidencia.length}</div>` 
                     : '';
-
                 htmlGaleria = `
                     <div id="${contenedorId}" class="carrusel-evidencia" onclick="abrirModalGaleriaCarrusel('${s.id}')" title="Clic para expandir evidencias">
                         ${imagenesHTML}
@@ -1162,21 +1482,20 @@
 
             let detalleTexto = `
                 <b>${s.beneficiarioNombre || 'N/A'}</b><br>
-                <small style="color:#64748b">Localidad: ${s.beneficiarioLocalidad || s.localidad || 'S/N'}</small><br>
-                <small style="color:#64748b">Municipio: ${s.beneficiarioMunicipio || s.municipio || 'San Andrés Tuxtla'}</small>
+                <small style="color:#64748b">Localidad: ${s.beneficiarioLocalidad || 'S/N'}</small><br>
+                <small style="color:#64748b">Municipio: ${s.beneficiarioMunicipio || 'San Andrés Tuxtla'}</small>
             `;
 
             let listaMedHTML = '';
             let totalPiezas = 0;
-
             if (s.medicamentos && Array.isArray(s.medicamentos) && s.medicamentos.length > 0) {
                 listaMedHTML = `<ul class="lista-meds-tabla">` + 
                     s.medicamentos.map(m => {
                         totalPiezas += Number(m.cantidad || 0);
                         const tieneTraza = (m.stockAnterior !== undefined && m.stockPosterior !== undefined);
-                        const textoTraza = tieneTraza 
-                            ? `Antes: <b>${m.stockAnterior}</b> ➔ Quedaron: <b>${m.stockPosterior}</b>`
-                            : `Histórico sin traza inicial`;
+                        const textoTraza = tieneTraza ? `Antes: <b>${m.stockAnterior}</b> ➔ Quedaron: <b>${m.stockPosterior}</b>` : `Histórico sin traza inicial`;
+                        
+                        const alertaPost = (m.stockPosterior !== undefined && m.stockPosterior <= 5) ? ` <span style="color:#ef4444; font-weight:bold;">(⚠️ RESURTIR)</span>` : '';
 
                         return `
                             <li>
@@ -1184,18 +1503,10 @@
                                     <span>${m.medicamentoNombre || 'Sin nombre'}</span>
                                     <span>${m.cantidad || 0} uds</span>
                                 </div>
-                                <div class="med-stock-info">
-                                    <i class="fas fa-history"></i> ${textoTraza}
-                                </div>
+                                <div class="med-stock-info"><i class="fas fa-history"></i> ${textoTraza}${alertaPost}</div>
                             </li>
                         `;
-                    }).join('') +
-                `</ul>`;
-            } else if (s.medicamentoNombre || s.nombreMedicamento || s.medicamento) {
-                const nombreMed = s.medicamentoNombre || s.nombreMedicamento || s.medicamento || 'Medicamento No Especificado';
-                const cantMed = s.cantidad || 1;
-                totalPiezas = Number(cantMed);
-                listaMedHTML = `<ul class="lista-meds-tabla"><li><div class="med-header"><span>${nombreMed}</span><span>${cantMed} uds</span></div></li></ul>`;
+                    }).join('') + `</ul>`;
             } else {
                 listaMedHTML = `<span style="color:#94a3b8; font-size:0.85rem;">Sin medicamentos</span>`;
             }
@@ -1227,7 +1538,6 @@
     function iniciarRotacionCarrusel(contenedorId) {
         const contenedor = document.getElementById(contenedorId);
         if (!contenedor) return;
-
         const imgs = contenedor.querySelectorAll('img');
         if (imgs.length <= 1) return;
 
@@ -1239,7 +1549,6 @@
         }, 2500);
 
         carruselIntervals.push(timer);
-
         contenedor.addEventListener('mouseenter', () => clearInterval(timer));
         contenedor.addEventListener('mouseleave', () => {
             timer = setInterval(() => {
@@ -1254,10 +1563,8 @@
     window.abrirModalGaleriaCarrusel = (salidaId) => {
         const item = salidasGlobal.find(s => s.id === salidaId);
         if (!item || !item.fotosEvidencia || item.fotosEvidencia.length === 0) return;
-
         fotosModalActuales = item.fotosEvidencia;
         indiceFotoModal = 0;
-
         actualizarModalGaleriaView();
         document.getElementById('modal-galeria').style.display = 'flex';
     };
@@ -1270,45 +1577,25 @@
 
         imgModal.src = fotosModalActuales[indiceFotoModal];
         indicador.innerText = `Foto ${indiceFotoModal + 1} de ${fotosModalActuales.length}`;
-
-        if (fotosModalActuales.length <= 1) {
-            btnPrev.style.display = 'none';
-            btnNext.style.display = 'none';
-        } else {
-            btnPrev.style.display = 'block';
-            btnNext.style.display = 'block';
-        }
+        btnPrev.style.display = fotosModalActuales.length <= 1 ? 'none' : 'block';
+        btnNext.style.display = fotosModalActuales.length <= 1 ? 'none' : 'block';
     }
 
     window.navegarModalGaleria = (direccion, e) => {
         if (e) e.stopPropagation();
         indiceFotoModal += direccion;
-        if (indiceFotoModal < 0) {
-            indiceFotoModal = fotosModalActuales.length - 1;
-        } else if (indiceFotoModal >= fotosModalActuales.length) {
-            indiceFotoModal = 0;
-        }
+        if (indiceFotoModal < 0) indiceFotoModal = fotosModalActuales.length - 1;
+        else if (indiceFotoModal >= fotosModalActuales.length) indiceFotoModal = 0;
         actualizarModalGaleriaView();
     };
 
     window.cerrarGaleriaModal = (e) => {
-        if (e.target.id === 'modal-galeria') {
-            document.getElementById('modal-galeria').style.display = 'none';
-        }
+        if (e.target.id === 'modal-galeria') document.getElementById('modal-galeria').style.display = 'none';
     };
 
     window.cerrarGaleriaModalDirecto = () => {
         document.getElementById('modal-galeria').style.display = 'none';
     };
-
-    document.addEventListener('keydown', (e) => {
-        const modal = document.getElementById('modal-galeria');
-        if (modal && modal.style.display === 'flex') {
-            if (e.key === 'ArrowLeft') navegarModalGaleria(-1);
-            else if (e.key === 'ArrowRight') navegarModalGaleria(1);
-            else if (e.key === 'Escape') cerrarGaleriaModalDirecto();
-        }
-    });
 
     window.prepararEdicionSalida = (id) => {
         const item = salidasGlobal.find(s => s.id === id);
@@ -1326,24 +1613,12 @@
         document.getElementById('b-fecha-nacimiento').value = item.fechaNacimiento || '';
         document.getElementById('b-edad').value = item.beneficiarioEdad || '';
         document.getElementById('b-genero').value = item.beneficiarioGenero || 'FEMENINO';
-        document.getElementById('b-localidad').value = item.beneficiarioLocalidad || item.localidad || '';
-        document.getElementById('b-municipio').value = item.beneficiarioMunicipio || item.municipio || 'San Andrés Tuxtla';
+        document.getElementById('b-localidad').value = item.beneficiarioLocalidad || '';
+        document.getElementById('b-municipio').value = item.beneficiarioMunicipio || 'San Andrés Tuxtla';
         document.getElementById('b-receta').value = item.beneficiarioReceta || '';
         document.getElementById('b-fecha-entrega').value = item.fecha || '';
 
-        if (item.medicamentos && Array.isArray(item.medicamentos)) {
-            loteMedicamentosTemp = JSON.parse(JSON.stringify(item.medicamentos));
-        } else if (item.medicamentoId || item.medicamentoNombre || item.nombreMedicamento) {
-            loteMedicamentosTemp = [{
-                medicamentoId: item.medicamentoId || '',
-                medicamentoNombre: item.medicamentoNombre || item.nombreMedicamento || item.medicamento || 'Sin Especificar',
-                cantidad: Number(item.cantidad || 1),
-                origenStock: item.origenStock || 'RECURSO PROPIO'
-            }];
-        } else {
-            loteMedicamentosTemp = [];
-        }
-
+        loteMedicamentosTemp = item.medicamentos ? JSON.parse(JSON.stringify(item.medicamentos)) : [];
         actualizarTablaLoteTemporal();
         
         fotosExistentesEdicion = item.fotosEvidencia ? [...item.fotosEvidencia] : [];
@@ -1379,7 +1654,6 @@
 
         try {
             const item = salidasGlobal.find(s => s.id === id);
-
             if (item.medicamentos && Array.isArray(item.medicamentos)) {
                 for (let med of item.medicamentos) {
                     if (med.medicamentoId) {
@@ -1390,14 +1664,7 @@
                         }
                     }
                 }
-            } else if (item.medicamentoId) {
-                const medRef = doc(db, "inventario_farmacia", item.medicamentoId);
-                const medSnap = await getDoc(medRef);
-                if (medSnap.exists()) {
-                    await updateDoc(medRef, { existencia: medSnap.data().existencia + Number(item.cantidad || 0) });
-                }
             }
-
             await deleteDoc(doc(db, "salidas_farmacia", id));
             Swal.fire({ icon: 'success', title: '¡Eliminado y stock restaurado!', timer: 1500, showConfirmButton: false });
         } catch (e) {
