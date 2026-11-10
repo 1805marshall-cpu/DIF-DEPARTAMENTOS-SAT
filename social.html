@@ -674,7 +674,7 @@
         establecerUsuarioPorDefecto();
     };
 
-    window.actualizarAsuntos = () => {
+   window.actualizarAsuntos = () => {
         const prog = document.getElementById('programa').value;
         const asuSelect = document.getElementById('asunto');
         const contDet = document.getElementById('container-detalle-especifico');
@@ -688,7 +688,7 @@
             "V.D./E. SOCIOECONOMICO": ["ASILO", "ADOPCIÓN"],
             "VISITA DOMICILIARIA": ["INVESTIGACION", "CERCIORAMIENTO DE TUTOR", "ASILO"],
             "ATENCION CIUDADANA": ["CAPACITACION", "ENTREGA DE EXPEDIENTES DIF ESTATAL", "ENTREGA DE APOYOS FUNCIONALES ESTATALES", "ENTREGA DE APOYOS FUNCIONALES MUNICIPALES", "TRASLADO Y ACOMPAÑAMIENTO A CRISVER", "PLATICAS PREVENTIVAS", "PACIENTES RECURRENTES", "DESPENSA MENSUAL"],
-            "ESTUDIO SOCIOECONOMICO": ["ASILO", "DESCUENTO TRANSPORTE", "DESCUENTO CMAPS", "APOYO ATAUD", "APOYO FUNCIONAL MUNICIPAL", "APOYO FUNCIONAL ESTATAL", "ESTUDIOS CLINICOS", "TRASLADO DE CUERPO", "REGISTRO CIVIL", "TERAPIAS CRISAT", "APOYO AL INMIGRANTE", "CONDONACIÓN DE LENTES", "DESPENSA MENSUAL", "DESCUENTO SERVICIO DE AMBULANCIA", "APOYO A LA CIUDADANIA"]
+            "ESTUDIO SOCIOECONOMICO": ["ASILO", "DESCUENTO TRANSPORTE", "DESCUENTO CMAPS", "APOYO ATAUD", "APOYO FUNCIONAL MUNICIPAL", "APOYO FUNCIONAL ESTATAL", "ESTUDIOS CLINICOS", "TRASLADO DE CUERPO", "REGISTRO CIVIL", "TERAPIAS CRISAT", "APOYO AL INMIGRANTE", "CONDONACIÓN DE LENTES", "DESPENSA MENSUAL", "DESCUENTO SERVICIO DE AMBULANCIA", "APOYO A LA CIUDADANIA", "APOYO PARA TESTAMENTO"]
         };
 
         if(dataAsuntos[prog]) {
@@ -740,7 +740,7 @@
             document.getElementById('label-detalle').innerText = "Diagnóstico / Especificación";
         } else if (asu === "GESTION DE CITAS") {
             detSelect.innerHTML = '<option value="">-- SELECCIONAR ESPECIFICACIÓN --</option>';
-            ["TDH", "AUTISMO", "AUX. AUDITIVO", "PROTESIS", "CRISVER (DIVERSOS)", "SINDROME DE DOWN"].forEach(s => {
+            ["TDAH", "TDH", "AUTISMO", "AUX. AUDITIVO", "PROTESIS", "CRISVER (DIVERSOS)", "SINDROME DE DOWN"].forEach(s => {
                 const o = document.createElement('option');
                 o.value = s; o.textContent = s;
                 detSelect.appendChild(o);
