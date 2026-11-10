@@ -251,7 +251,6 @@
 
     let evidenciasBase64 = [];
     
-    // Variables para el carrusel modal
     let carruselLista = [];
     let carruselIndexActual = 0;
 
@@ -720,7 +719,11 @@
             "ANDADERA"
         ];
 
-        if (asu && (asu.includes("APOYO") || asu.includes("APOYOS"))) {
+        // Si es Apoyo Ataúd o Apoyo para Testamento, NO se muestra ningún desplegable de especificaciones
+        if (asu === "APOYO ATAUD" || asu === "APOYO PARA TESTAMENTO") {
+            contDet.style.display = 'none';
+            detSelect.innerHTML = '';
+        } else if (asu && (asu.includes("APOYO") || asu.includes("APOYOS"))) {
             detSelect.innerHTML = '<option value="">-- SELECCIONAR TIPO DE APOYO --</option>';
             tiposApoyoFuncional.forEach(s => {
                 const o = document.createElement('option');
@@ -864,8 +867,6 @@
             else if (esExp) campoDetalle2 = reg.exp_tipo ? `Tipo: ${reg.exp_tipo}` : 'N/A';
             else campoDetalle2 = reg.nombre_solicitante || '<i style="color:#cbd5e1">MISMO</i>';
 
-            const telefonoTxt = reg.telefono ? `<a href="tel:${reg.telefono}" style="color:var(--primary); text-decoration:none; font-weight:500;"><i class="fa-solid fa-phone" style="font-size:10px;"></i> ${reg.telefono}</a>` : '<span style="color:#cbd5e1;">N/A</span>';
-
             return `
             <tr>
                 <td data-label="No."><b>${reg.numero_consecutivo}</b></td>
@@ -938,7 +939,6 @@
     };
     
     window.exportarExcel = () => {
-        // Limpiamos los datos para excluir campos pesados de imágenes en la exportación
         const datosLimpios = datosFiltrados.map(({ evidencias, url_evidencia, id, ...rest }) => rest);
         const ws = XLSX.utils.json_to_sheet(datosLimpios);
         const wb = XLSX.utils.book_new();
@@ -957,37 +957,34 @@
         renderTabla(); 
     };
 
-function establecerUsuarioPorDefecto() {
-    let nombreSocial = sessionStorage.getItem('social_nombre') || sessionStorage.getItem('usuario_nombre') || sessionStorage.getItem('nombre_usuario') || localStorage.getItem('social_nombre');
-    let tituloSocial = sessionStorage.getItem('social_titulo') || sessionStorage.getItem('usuario_titulo') || '';
-    
-    // Si la clave guardada es un ID corto (ej: "juanita.campechano"), mapeamos al nombre real
-    if (nombreSocial === 'juanita.campechano' || nombreSocial === 'social') {
-        nombreSocial = 'LIC. JUANITA C. CAMPECHANO QUEZADA';
-    } else if (nombreSocial === 'monse.plata') {
-        nombreSocial = 'LTS. MONSERRAT PLATA FLORES';
-    }
+    function establecerUsuarioPorDefecto() {
+        let nombreSocial = sessionStorage.getItem('social_nombre') || sessionStorage.getItem('usuario_nombre') || sessionStorage.getItem('nombre_usuario') || localStorage.getItem('social_nombre');
+        let tituloSocial = sessionStorage.getItem('social_titulo') || sessionStorage.getItem('usuario_titulo') || '';
+        
+        if (nombreSocial === 'juanita.campechano' || nombreSocial === 'social') {
+            nombreSocial = 'LIC. JUANITA C. CAMPECHANO QUEZADA';
+        } else if (nombreSocial === 'monse.plata') {
+            nombreSocial = 'LTS. MONSERRAT PLATA FLORES';
+        }
 
-    const spanTextoNombre = document.getElementById('texto-nombre-usuario');
-    const saludoContenedor = document.getElementById('bienvenida-usuario');
-    const selectUsuario = document.getElementById('usuario');
+        const spanTextoNombre = document.getElementById('texto-nombre-usuario');
+        const saludoContenedor = document.getElementById('bienvenida-usuario');
+        const selectUsuario = document.getElementById('usuario');
 
-    if (nombreSocial && saludoContenedor && spanTextoNombre) {
-        spanTextoNombre.innerText = `${tituloSocial} ${nombreSocial}`.trim();
-        saludoContenedor.style.display = 'inline-flex';
-    }
+        if (nombreSocial && saludoContenedor && spanTextoNombre) {
+            spanTextoNombre.innerText = `${tituloSocial} ${nombreSocial}`.trim();
+            saludoContenedor.style.display = 'inline-flex';
+        }
 
-    if (nombreSocial && selectUsuario) {
-        for (let i = 0; i < selectUsuario.options.length; i++) {
-            if (selectUsuario.options[i].value === nombreSocial) {
-                selectUsuario.selectedIndex = i;
-                break;
+        if (nombreSocial && selectUsuario) {
+            for (let i = 0; i < selectUsuario.options.length; i++) {
+                if (selectUsuario.options[i].value === nombreSocial) {
+                    selectUsuario.selectedIndex = i;
+                    break;
+                }
             }
         }
     }
-}
-
-
 
     document.addEventListener("DOMContentLoaded", () => {
         const asuntoSelect = document.getElementById('asunto');
@@ -1007,7 +1004,6 @@ function establecerUsuarioPorDefecto() {
 
         establecerUsuarioPorDefecto();
 
-        // Control por teclado para navegabilidad del carrusel (Izquierda / Derecha / Escape)
         document.addEventListener('keydown', (e) => {
             const modal = document.getElementById('modal-foto');
             if (modal.style.display === 'flex') {
@@ -1018,7 +1014,6 @@ function establecerUsuarioPorDefecto() {
         });
     });
 
-    // Ejecutar de inmediato también por seguridad
     establecerUsuarioPorDefecto();
 
     window.cerrarSesion = async () => {
