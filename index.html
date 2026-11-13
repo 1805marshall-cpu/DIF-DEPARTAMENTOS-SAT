@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Sistema DIF 2026 - Edición Día de Muertos</title>
+    <title>Acceso Sistema DIF 2026 - Edición Navideña Mágica</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
-            --primary-dif: #7c2d12;       
-            --primary-hover: #9a3412;     
-            --cempasuchil: #f97316;       /* Naranja Cempasúchil */
-            --cempasuchil-gold: #facc15;  /* Amarillo Cempasúchil */
-            --veladora-purple: #7e22ce;   /* Morado festivo */
-            --text-dark: #1c1917;
+            --primary-dif: #991b1b;       
+            --primary-hover: #7f1d1d;     
+            --accent-gold: #fbbf24;       
+            --accent-green: #15803d;      
+            --snow-white: #f8fafc;
             --danger: #dc2626;
         }
 
-        /* --- FONDO MÍSTICO NOCTURNO Y LINTERNA --- */
+        /* --- FONDO NOCTURNO MÁGICO Y LINTERNA --- */
         body { 
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            background: radial-gradient(circle at center, #3b0764 0%, #150524 100%); 
+            background: radial-gradient(circle at center, #0f172a 0%, #020617 100%); 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -33,7 +32,7 @@
             cursor: default;
         }
 
-        /* Capa de luz móvil tipo veladora */
+        /* Capa de luz móvil tipo linterna cálida */
         body::after {
             content: '';
             position: fixed;
@@ -41,7 +40,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: radial-gradient(circle 260px at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(255, 180, 80, 0.18) 0%, rgba(30, 8, 50, 0.25) 70%, rgba(12, 3, 20, 0.4) 100%);
+            background: radial-gradient(circle 280px at var(--cursor-x, 50%) var(--cursor-y, 50%), rgba(251, 191, 36, 0.18) 0%, rgba(15, 23, 42, 0.25) 70%, rgba(2, 6, 23, 0.45) 100%);
             pointer-events: none;
             z-index: 10;
         }
@@ -51,140 +50,155 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- CAMINO DE FLOR DE CEMPASÚCHIL AMPLIADO (DESDE ABAJO HACIA EL LOGIN) --- */
-        .cempasuchil-path {
+        /* --- SANTA CLAUS Y SUS RENOS VOLANDO EN EL CIELO --- */
+        .sleigh-flying {
             position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 380px;
-            height: 240px;
+            top: 15%;
+            left: -150px;
+            font-size: 2.2rem;
+            color: #fbbf24;
+            z-index: 3;
             pointer-events: none;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            opacity: 0.9;
+            animation: flySleigh 18s linear infinite;
+            filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.6));
         }
 
-        .petal {
-            position: absolute;
-            background: radial-gradient(circle, var(--cempasuchil-gold) 0%, var(--cempasuchil) 80%);
-            border-radius: 50% 50% 20% 20%;
-            box-shadow: 0 0 10px rgba(249, 115, 22, 0.7);
+        @keyframes flySleigh {
+            0% { transform: translateX(-150px) translateY(0) scale(0.8); opacity: 0; }
+            10% { opacity: 0.9; }
+            90% { opacity: 0.9; }
+            100% { transform: translateX(calc(100vw + 200px)) translateY(-40px) scale(1.1); opacity: 0; }
         }
 
-        /* --- PAPEL PICADO TRADICIONAL SUPERIOR --- */
-        .papel-picado {
+        /* --- SERIE DE LUCES NAVIDEÑAS SUPERIORES --- */
+        .christmas-lights {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 32px;
-            background-image: repeating-linear-gradient(90deg, 
-                #f97316 0px, #f97316 40px, 
-                #7e22ce 40px, #7e22ce 80px, 
-                #ec4899 80px, #ec4899 120px, 
-                #eab308 120px, #eab308 160px);
-            opacity: 0.85;
-            z-index: 15;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            border-bottom: 2px dashed rgba(255,255,255,0.4);
-        }
-
-        /* --- MURCIÉLAGOS COLGADOS (DURMIENDO) --- */
-        .roost {
-            position: fixed;
-            top: 32px;
-            left: 0;
-            width: 100%;
-            height: 60px;
+            height: 35px;
             display: flex;
             justify-content: space-around;
-            align-items: flex-start;
-            z-index: 20;
+            align-items: center;
+            z-index: 15;
+            pointer-events: none;
+            padding: 0 10px;
+        }
+
+        .light-bulb {
+            width: 11px;
+            height: 15px;
+            border-radius: 50%;
+            animation: flashLight 1.2s infinite alternate ease-in-out;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .light-bulb:nth-child(odd) { color: #ef4444; background: #ef4444; animation-delay: 0.2s; }
+        .light-bulb:nth-child(even) { color: #22c55e; background: #22c55e; animation-delay: 0.6s; }
+        .light-bulb:nth-child(3n) { color: #fbbf24; background: #fbbf24; animation-delay: 0.4s; }
+        .light-bulb:nth-child(4n) { color: #38bdf8; background: #38bdf8; animation-delay: 0.8s; }
+
+        @keyframes flashLight {
+            0% { opacity: 0.3; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.15); box-shadow: 0 0 16px currentColor; }
+        }
+
+        /* --- COPOS DE NIEVE CAYENDO --- */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+            animation: fallSnow linear infinite;
+            z-index: 2;
             pointer-events: none;
         }
 
-        .bat-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transform-origin: top center;
-            transition: transform 0.8s ease, opacity 0.8s ease;
+        @keyframes fallSnow {
+            0% { transform: translateY(-10px) translateX(0); opacity: 0.9; }
+            50% { transform: translateY(50vh) translateX(20px); opacity: 0.5; }
+            100% { transform: translateY(105vh) translateX(-20px); opacity: 0; }
         }
 
-        .bat-thread {
-            width: 1px;
-            height: 20px;
-            background: rgba(255, 255, 255, 0.25);
-        }
-
-        .bat-svg {
-            width: 35px;
-            height: 35px;
-            fill: #cbd5e1;
-            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.8));
-            transform: rotate(180deg);
-        }
-
-        .bat-wrapper:nth-child(1) { animation: sway 3s ease-in-out infinite alternate; }
-        .bat-wrapper:nth-child(2) { animation: sway 3.8s ease-in-out infinite alternate-reverse; }
-        .bat-wrapper:nth-child(3) { animation: sway 3.2s ease-in-out infinite alternate; }
-        .bat-wrapper:nth-child(4) { animation: sway 4s ease-in-out infinite alternate-reverse; }
-
-        @keyframes sway {
-            0% { transform: rotate(-5deg); }
-            100% { transform: rotate(5deg); }
-        }
-
-        .bat-wrapper.flying {
-            animation: flyAway 1.4s ease-in-out forwards !important;
-        }
-
-        @keyframes flyAway {
-            0% { transform: rotate(0deg) translateY(0) scale(1); }
-            20% { transform: rotate(180deg) translateY(10px) scale(1.2); }
-            100% { transform: translate(var(--rand-x, 150px), -120vh) scale(0.5); opacity: 0; }
-        }
-
-        /* --- VELADORAS LATERALES CON PARPADEO --- */
-        .veladora-container {
+        /* --- PAISAJE INFERIOR: PASTO VERDE Y NIEVE 3D --- */
+        .winter-landscape {
             position: fixed;
-            bottom: 20px;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 90px;
+            background: linear-gradient(to top, #14532d 0%, #16a34a 60%, #f8fafc 100%);
+            border-top-left-radius: 50% 25px;
+            border-top-right-radius: 50% 25px;
+            z-index: 5;
+            pointer-events: none;
+            box-shadow: 0 -5px 20px rgba(22, 163, 74, 0.4);
+        }
+
+        /* --- DECORACIONES EN EL PASTO (PINOS, REGALOS Y RENO MÓVIL) --- */
+        .landscape-props {
+            position: fixed;
+            bottom: 15px;
+            width: 100%;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            z-index: 12;
-        }
-        .veladora-left { left: 40px; }
-        .veladora-right { right: 40px; }
-
-        .flame {
-            width: 14px;
-            height: 24px;
-            background: linear-gradient(to top, #ff9100, #ffea00);
-            border-radius: 50% 50% 20% 20%;
-            animation: flicker 0.6s infinite alternate ease-in-out;
-            box-shadow: 0 0 12px #ff9100, 0 0 25px #ffea00;
-            margin-bottom: 2px;
+            justify-content: space-between;
+            padding: 0 60px;
+            box-sizing: border-box;
+            z-index: 6;
+            pointer-events: none;
         }
 
-        @keyframes flicker {
-            0% { transform: scale(1) rotate(-2deg); opacity: 0.9; }
-            100% { transform: scale(1.1) rotate(2deg); opacity: 1; filter: brightness(1.2); }
+        .prop-group {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
         }
 
-        .vaso-veladora {
-            width: 32px;
-            height: 45px;
-            background: linear-gradient(135deg, rgba(126,34,206,0.8), rgba(249,115,22,0.8));
-            border-radius: 4px 4px 10px 10px;
-            border: 2px solid rgba(255,255,255,0.4);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+        .festive-tree {
+            font-size: 2.8rem;
+            color: #15803d;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+            position: relative;
+        }
+        
+        .festive-tree::before {
+            content: '★';
+            position: absolute;
+            font-size: 1rem;
+            color: #fbbf24;
+            top: -12px;
+            left: 14px;
+            animation: glowStar 1.5s infinite alternate;
         }
 
-        /* Banner superior */
+        @keyframes glowStar {
+            from { opacity: 0.4; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1.2); text-shadow: 0 0 8px #fbbf24; }
+        }
+
+        /* Reno asomándose en el pasto con movimiento suave de cabeza */
+        .moving-deer {
+            font-size: 2.2rem;
+            color: #78350f;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5));
+            animation: moveDeer 4s ease-in-out infinite alternate;
+            transform-origin: bottom center;
+        }
+
+        @keyframes moveDeer {
+            0% { transform: translateY(5px) rotate(-5deg); }
+            100% { transform: translateY(0px) rotate(5deg); }
+        }
+
+        .gift-box {
+            font-size: 1.8rem;
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5));
+        }
+        .gift-red { color: #ef4444; }
+        .gift-gold { color: #fbbf24; }
+        .gift-blue { color: #38bdf8; }
+
+        /* Banner superior logos */
         .brand-header {
             width: 100%;
             max-width: 380px;
@@ -201,16 +215,16 @@
             filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8));
         }
 
-        /* Tarjeta de Login */
+        /* Tarjeta de Login Creativa Navideña */
         .login-card {
             background: rgba(255, 255, 255, 0.98);
             padding: 34px 30px;
             border-radius: 20px;
-            box-shadow: 0 15px 40px -5px rgba(0, 0, 0, 0.7), 0 0 25px rgba(249, 115, 22, 0.4);
+            box-shadow: 0 20px 45px -5px rgba(0, 0, 0, 0.7), 0 0 25px rgba(22, 163, 74, 0.3);
             width: 100%;
             max-width: 380px;
             text-align: center;
-            border: 2px solid #f97316;
+            border: 2px solid #16a34a;
             box-sizing: border-box;
             animation: fadeIn 0.6s ease-out 0.1s forwards;
             opacity: 0; 
@@ -219,7 +233,7 @@
             z-index: 12;
         }
 
-        /* Franja superior tricolor */
+        /* Franja superior festiva tricolor */
         .login-card::before {
             content: '';
             position: absolute;
@@ -227,7 +241,7 @@
             left: 0;
             right: 0;
             height: 6px;
-            background: linear-gradient(90deg, #f97316, #7e22ce, #ec4899, #eab308);
+            background: linear-gradient(90deg, #ef4444, #16a34a, #fbbf24, #38bdf8);
         }
 
         .slogan-img {
@@ -242,14 +256,14 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: #fff7ed;
-            color: #c2410c;
+            background: #f0fdf4;
+            color: #15803d;
             font-size: 11px;
             font-weight: 700;
             padding: 5px 14px;
             border-radius: 20px;
             margin-bottom: 12px;
-            border: 1px solid #fed7aa;
+            border: 1px solid #dcfce7;
             letter-spacing: 0.5px;
             text-transform: uppercase;
         }
@@ -306,14 +320,14 @@
         }
 
         input:focus { 
-            border-color: var(--cempasuchil); 
+            border-color: #16a34a; 
             background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2); 
+            box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2); 
         }
 
         input:focus + .input-icon,
         .input-icon-container:focus-within .input-icon {
-            color: var(--cempasuchil);
+            color: #16a34a;
         }
         
         .password-container input { 
@@ -330,7 +344,7 @@
             font-size: 0.95rem;
             transition: color 0.2s;
         }
-        .toggle-password:hover { color: var(--cempasuchil); }
+        .toggle-password:hover { color: #16a34a; }
 
         .btn-login {
             background: var(--text-dark);
@@ -352,7 +366,7 @@
         }
         
         .btn-login:hover { 
-            background: var(--cempasuchil); 
+            background: #16a34a; 
         }
         
         .btn-login:disabled { 
@@ -372,78 +386,49 @@
             font-weight: 500;
         }
 
-        /* --- CALAVERITAS DE AZÚCAR DECORATIVAS ABAJO DE LA TARJETA --- */
-        .sugar-skulls-footer {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-top: 16px;
-            z-index: 12;
-            animation: fadeIn 0.6s ease-out 0.2s forwards;
-            opacity: 0;
-        }
-
-        .sugar-skull {
-            font-size: 1.3rem;
-            color: #facc15;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
-            animation: floatSkull 3s ease-in-out infinite alternate;
-        }
-        .sugar-skull:nth-child(2) { animation-delay: 0.5s; color: #ec4899; }
-        .sugar-skull:nth-child(3) { animation-delay: 1s; color: #f97316; }
-
-        @keyframes floatSkull {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-4px); }
-        }
-
         @media (max-width: 768px) {
-            .veladora-container, .cempasuchil-path { display: none; }
+            .landscape-props { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Papel Picado Superior -->
-    <div class="papel-picado"></div>
-
-    <!-- Camino Extendido de Pétalos de Cempasúchil -->
-    <div class="cempasuchil-path">
-        <!-- Base ancha abajo -->
-        <div class="petal" style="bottom: 0px; left: 30px; width: 36px; height: 24px; transform: rotate(15deg);"></div>
-        <div class="petal" style="bottom: 5px; left: 110px; width: 34px; height: 22px; transform: rotate(-10deg);"></div>
-        <div class="petal" style="bottom: 0px; left: 190px; width: 38px; height: 25px; transform: rotate(5deg);"></div>
-        <div class="petal" style="bottom: 8px; left: 270px; width: 35px; height: 23px; transform: rotate(-20deg);"></div>
-        <div class="petal" style="bottom: 2px; left: 340px; width: 32px; height: 20px; transform: rotate(25deg);"></div>
-        
-        <!-- Centro -->
-        <div class="petal" style="bottom: 30px; left: 70px; width: 35px; height: 22px; transform: rotate(-25deg);"></div>
-        <div class="petal" style="bottom: 35px; left: 150px; width: 32px; height: 20px; transform: rotate(18deg);"></div>
-        <div class="petal" style="bottom: 32px; left: 230px; width: 36px; height: 23px; transform: rotate(-12deg);"></div>
-        <div class="petal" style="bottom: 28px; left: 300px; width: 33px; height: 21px; transform: rotate(14deg);"></div>
-
-        <!-- Subiendo hacia el login -->
-        <div class="petal" style="bottom: 65px; left: 95px; width: 32px; height: 20px; transform: rotate(10deg);"></div>
-        <div class="petal" style="bottom: 70px; left: 180px; width: 34px; height: 22px; transform: rotate(-15deg);"></div>
-        <div class="petal" style="bottom: 68px; left: 255px; width: 30px; height: 19px; transform: rotate(22deg);"></div>
-        
-        <div class="petal" style="bottom: 105px; left: 130px; width: 33px; height: 21px; transform: rotate(-5deg);"></div>
-        <div class="petal" style="bottom: 110px; left: 215px; width: 31px; height: 20px; transform: rotate(16deg);"></div>
-
-        <div class="petal" style="bottom: 150px; left: 170px; width: 28px; height: 18px; transform: rotate(-8deg);"></div>
-        <div class="petal" style="bottom: 155px; left: 210px; width: 29px; height: 18px; transform: rotate(12deg);"></div>
-
-        <div class="petal" style="bottom: 190px; left: 185px; width: 26px; height: 16px; transform: rotate(5deg);"></div>
+    <!-- Trineo de Santa Claus volando en el cielo -->
+    <div class="sleigh-flying">
+        <i class="fas fa-sleigh" title="¡Santa Claus vuela!"></i> 🦌🎅
     </div>
 
-    <!-- Veladoras a los costados -->
-    <div class="veladora-container veladora-left">
-        <div class="flame"></div>
-        <div class="vaso-veladora"></div>
+    <!-- Serie de Luces Navideñas Superiores -->
+    <div class="christmas-lights">
+        <div class="light-bulb"></div><div class="light-bulb"></div><div class="light-bulb"></div><div class="light-bulb"></div>
+        <div class="light-bulb"></div><div class="light-bulb"></div><div class="light-bulb"></div><div class="light-bulb"></div>
+        <div class="light-bulb"></div><div class="light-bulb"></div><div class="light-bulb"></div><div class="light-bulb"></div>
+        <div class="light-bulb"></div><div class="light-bulb"></div><div class="light-bulb"></div><div class="light-bulb"></div>
     </div>
-    <div class="veladora-container veladora-right">
-        <div class="flame"></div>
-        <div class="vaso-veladora"></div>
+
+    <!-- Copos de Nieve Cayendo -->
+    <div class="snowflake" style="left: 10%; animation-duration: 7s; animation-delay: 0s;">❄</div>
+    <div class="snowflake" style="left: 25%; animation-duration: 9s; animation-delay: 2s;">❅</div>
+    <div class="snowflake" style="left: 40%; animation-duration: 6s; animation-delay: 1s;">❆</div>
+    <div class="snowflake" style="left: 60%; animation-duration: 8s; animation-delay: 3s;">❄</div>
+    <div class="snowflake" style="left: 75%; animation-duration: 10s; animation-delay: 1.5s;">❅</div>
+    <div class="snowflake" style="left: 90%; animation-duration: 7s; animation-delay: 2.5s;">❆</div>
+
+    <!-- Paisaje Inferior: Pasto Verde y Nieve -->
+    <div class="winter-landscape"></div>
+
+    <!-- Elementos Decorativos sobre el Pasto (Pinos, Regalos y Reno Mándote Saludos) -->
+    <div class="landscape-props">
+        <div class="prop-group">
+            <div class="festive-tree"><i class="fas fa-tree"></i></div>
+            <i class="fas fa-gift gift-box gift-red"></i>
+            <div class="moving-deer" title="¡Un reno asomándose!"><i class="fas fa-deer"></i> 🦌</div>
+        </div>
+        <div class="prop-group">
+            <i class="fas fa-gift gift-box gift-blue"></i>
+            <div class="festive-tree"><i class="fas fa-tree"></i></div>
+            <i class="fas fa-gift gift-box gift-gold"></i>
+        </div>
     </div>
 
     <!-- Contenido Principal Login -->
@@ -453,13 +438,13 @@
 
     <div class="login-card">
         <div class="seasonal-badge">
-            <i class="fas fa-skull"></i> Camino de Cempasúchil · Día de Muertos
+            <i class="fas fa-holly-berry"></i> Navidad & Próspero 2027
         </div>
 
         <img src="Captura_de_pantalla_2026-02-05_a_la_s__10.28.31_a.m.-removebg-preview.png" alt="Amor que protege" class="slogan-img">
         
         <h2>SISTEMA INTEGRAL</h2>
-        <p>Panel de Control · Edición Especial</p>
+        <p>Panel de Control · Edición Mágica</p>
 
         <div class="input-group">
             <div class="input-icon-container">
@@ -483,13 +468,6 @@
         <div id="error-msg" class="error">
             <i class="fas fa-circle-exclamation"></i> Credenciales incorrectas
         </div>
-    </div>
-
-    <!-- Calaveritas de Azúcar Decorativas abajo de la tarjeta -->
-    <div class="sugar-skulls-footer">
-        <i class="fas fa-skull sugar-skull"></i>
-        <i class="fas fa-ghost sugar-skull"></i>
-        <i class="fas fa-skull sugar-skull"></i>
     </div>
 
 <script>
@@ -577,10 +555,6 @@
         if (cuentas[user] && cuentas[user].p === pass) {
             error.style.display = 'none';
 
-            // --- DESPERTAR MURCIÉLAGOS ---
-            const bats = document.querySelectorAll('.bat-wrapper');
-            bats.forEach(bat => bat.classList.add('flying'));
-
             const perfil = perfilesUsuarios[user] || { nombre: user.toUpperCase(), titulo: "LIC." };
 
             sessionStorage.setItem('sesion_activa', 'true'); 
@@ -596,11 +570,11 @@
             localStorage.setItem('userDep', cuentas[user].dep);
 
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Siguiendo el camino...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ¡Entrando a la magia navideña...';
 
             setTimeout(() => {
                 window.location.href = cuentas[user].url;
-            }, 1200);
+            }, 1000);
         } else {
             error.style.display = 'block';
             passField.value = '';
