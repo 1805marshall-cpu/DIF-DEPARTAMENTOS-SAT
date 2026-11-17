@@ -220,10 +220,21 @@
         </div>
     </div>
 
-    <!-- Buscador -->
-    <div class="search-box no-print">
-        <div class="form-group" style="flex:2;"><label><i class="fa-solid fa-magnifying-glass"></i> Buscador Global</label><input type="text" id="buscador" placeholder="Buscar por nombre, TDAH, estado del correo..." onkeyup="filtrar(true)"></div>
-        <div class="form-group" style="flex:1;">
+    <!-- Buscador y Filtro por Usuario -->
+    <div class="search-box no-print" style="grid-template-columns: 2fr 1fr 1fr;">
+        <div class="form-group">
+            <label><i class="fa-solid fa-magnifying-glass"></i> Buscador Global</label>
+            <input type="text" id="buscador" placeholder="Buscar por nombre, TDAH, estado del correo..." onkeyup="filtrar(true)">
+        </div>
+        <div class="form-group">
+            <label><i class="fa-solid fa-filter"></i> Filtrar por Usuario</label>
+            <select id="filtro-usuario" onchange="filtrar(true)">
+                <option value="">-- TODOS LOS USUARIOS --</option>
+                <option value="MONSERRAT PLATA FLORES">MONSERRAT PLATA FLORES (MONSE)</option>
+                <option value="JUANITA C. CAMPECHANO QUEZADA">JUANITA C. CAMPECHANO QUEZADA (JUANITA)</option>
+            </select>
+        </div>
+        <div class="form-group">
             <label>Filas por página</label>
             <select id="rows-per-page" onchange="actualizarFilasPorPagina()">
                 <option value="10" selected>10 filas</option>
@@ -333,8 +344,6 @@
         const programaNorm = programa ? programa.toUpperCase().trim() : "";
         const asuntoNorm = asunto ? asunto.toUpperCase().trim() : "";
 
-        // Solo mostrar flujo estatal cuando es programa SOLICITUD (para gestión estatal).
-        // En ESTUDIO SOCIOECONOMICO (incluyendo APOYO FUNCIONAL MUNICIPAL) es 100% municipal y NO espera correo estatal.
         if (programaNorm === "SOLICITUD" && !asuntoNorm.includes("MUNICIPAL") && (asuntoNorm.includes("CITAS") || asuntoNorm.includes("APOYO") || asuntoNorm.includes("GESTION"))) {
             secSeguimientoEstatal.style.display = 'block';
         } else {
@@ -499,7 +508,6 @@
         }
     };
 
-    // ORDENADO DE FECHA MÁS RECIENTE (HOY) A ANTERIOR Y LÍMITE DE RENDIMIENTO
     const qCarga = query(apoyosRef, orderBy("fecha_registro", "desc"), limit(150));
     onSnapshot(qCarga, (snapshot) => {
         todosLosDatos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -777,7 +785,6 @@
         listaCampos.forEach(id => {
             const el = document.getElementById(id);
             if(el) {
-                // Si el trámite es municipal (sección estatal oculta), no guardar pasos de seguimiento estatal
                 if (!esSeguimientoEstatalVisible && camposEstatal.includes(id)) {
                     res[id] = "";
                 } else if(['numero_consecutivo', 'fecha_registro', 'fecha_nacimiento', 'edad', 'usuario', 'detalle_asunto', 'genero', 'cap_fecha', 'cap_hora', 'exp_cantidad', 'exp_fecha_entrega', 'telefono', 'fecha_respuesta_correo', 'fecha_estudio_validado', 'fecha_cita_crisver'].includes(id)) {
@@ -953,13 +960,18 @@
     window.filtrar = (resetearPagina = false) => {
         if(resetearPagina) paginaActual = 1;
         const term = document.getElementById('buscador').value.toLowerCase();
-        datosFiltrados = todosLosDatos.filter(r => 
-            Object.values(r).some(v => String(v).toLowerCase().includes(term))
-        ).sort((a,b) => {
+        const usuarioFiltro = document.getElementById('filtro-usuario').value;
+
+        datosFiltrados = todosLosDatos.filter(r => {
+            const cumpleTexto = Object.values(r).some(v => String(v).toLowerCase().includes(term));
+            const cumpleUsuario = !usuarioFiltro || (r.usuario && r.usuario === usuarioFiltro);
+            return cumpleTexto && cumpleUsuario;
+        }).sort((a,b) => {
             const fechaA = a.fecha_registro || "";
             const fechaB = b.fecha_registro || "";
             return fechaB.localeCompare(fechaA);
         });
+
         renderTabla();
     };
 
