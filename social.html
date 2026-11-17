@@ -8,20 +8,16 @@
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>:root{--primary:#4f46e5;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--bg:#f8fafc;--text:#334155;--border:#e2e8f0}body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);margin:0;color:var(--text);font-size:13px;letter-spacing:-.01em}header{background:#fff;padding:12px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}.container{max-width:1400px;margin:20px auto;padding:0 20px}.card,.search-box,.paginacion-bar,.table-wrap{background:#fff;border-radius:8px;border:1px solid var(--border)}.card{padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.02),0 1px 2px rgba(0,0,0,.04);margin-bottom:20px}h3{margin:0 0 16px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}.form-group{display:flex;flex-direction:column}label{font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;margin-bottom:6px;letter-spacing:.03em}input,select,textarea{padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:12px;outline:0;background:#fff;color:var(--text);transition:all .2s;width:100%;box-sizing:border-box}input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.08)}.file-upload-wrapper{position:relative;display:inline-block;width:100%}.file-upload-label{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;background:#f1f5f9;border:2px dashed var(--border);border-radius:6px;color:#475569;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}.file-upload-label:hover{background:#e2e8f0;border-color:var(--primary);color:var(--primary)}.file-upload-input{display:none}.btn-box{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}.btn{padding:8px 16px;border:1px solid transparent;border-radius:6px;font-weight:500;cursor:pointer;font-size:11px;color:#fff;background:var(--primary);display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,transform .1s}.btn:hover{opacity:.92}.btn-secondary{background:#fff;color:#475569;border-color:var(--border)}.btn-secondary:hover{background:#f8fafc;color:#0f172a}.search-box{padding:16px;margin-bottom:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;align-items:flex-end}.table-wrap{overflow-x:auto;width:100%}table{width:100%;border-collapse:collapse}th{background:#f8fafc;padding:10px 16px;text-align:left;font-size:10px;font-weight:600;color:#64748b;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.03em}td{padding:12px 16px;border-bottom:1px solid #f1f5f9;vertical-align:middle;color:#334155}tr:hover{background-color:#fafafa}.status-badge{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:500;text-transform:uppercase;display:inline-flex;align-items:center;gap:4px}.preview-container{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.thumb-box{position:relative;width:55px;height:55px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}.thumb-box img{width:100%;height:100%;object-fit:cover;cursor:pointer}.thumb-box .btn-remove-img{position:absolute;top:2px;right:2px;background:rgba(239,68,68,.9);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}.thumb-box .btn-remove-img:hover{background:#dc2626}.bg-atendido,.bg-realizado,.bg-validado{background:#ecfdf5;color:#047857}.bg-entregado,.bg-en-proceso{background:#f0f9ff;color:#0369a1}.bg-pendiente{background:#fffbeb;color:#b45309}.bg-cancelado{background:#fef2f2;color:#b91c1c}.paginacion-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;margin-top:15px;flex-wrap:wrap;gap:10px}.btn-pag{padding:6px 12px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;font-size:11px;color:#475569}.btn-pag:hover:not(:disabled){background:#f8fafc}.btn-pag:disabled{background:#f1f5f9;cursor:not-allowed;color:#cbd5e1}.modal-carrusel-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);color:#fff;border:none;font-size:24px;padding:12px 16px;cursor:pointer;border-radius:50%;transition:background .2s;user-select:none}.modal-carrusel-nav:hover{background:rgba(255,255,255,.4)}.modal-carrusel-prev{left:20px}.modal-carrusel-next{right:20px}@media (max-width:768px){header{flex-direction:column;gap:8px;text-align:center;padding:12px}.container{padding:0 10px}.table-wrap{border:none;background:0 0}table,thead,tbody,th,td,tr{display:block}thead tr{position:absolute;top:-9999px;left:-9999px}tr{background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,.02)}td{border:none;border-bottom:1px solid #f8fafc;position:relative;padding-left:45%!important;text-align:right;font-size:12px;min-height:32px;display:flex;align-items:center;justify-content:flex-end}td:last-child{border-bottom:0}td:before{position:absolute;top:50%;left:12px;transform:translateY(-50%);width:40%;padding-right:10px;white-space:nowrap;text-align:left;font-weight:600;color:#64748b;font-size:10px;text-transform:uppercase;content:attr(data-label)}.paginacion-bar{flex-direction:column;text-align:center}}@media print{.no-print{display:none!important}}</style>
+
+    <style>:root{--primary:#4f46e5;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#0284c7;--bg:#f8fafc;--text:#334155;--border:#e2e8f0}body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);margin:0;color:var(--text);font-size:13px;letter-spacing:-.01em}header{background:#fff;padding:12px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}.container{max-width:1400px;margin:20px auto;padding:0 20px}.card,.search-box,.paginacion-bar,.table-wrap{background:#fff;border-radius:8px;border:1px solid var(--border)}.card{padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.02),0 1px 2px rgba(0,0,0,.04);margin-bottom:20px}h3{margin:0 0 16px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}.form-group{display:flex;flex-direction:column}label{font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;margin-bottom:6px;letter-spacing:.03em}input,select,textarea{padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:12px;outline:0;background:#fff;color:var(--text);transition:all .2s;width:100%;box-sizing:border-box}input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.08)}input:disabled,select:disabled{background:#f1f5f9!important;cursor:not-allowed!important;color:#94a3b8!important;border-color:#e2e8f0!important}.file-upload-wrapper{position:relative;display:inline-block;width:100%}.file-upload-label{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;background:#f1f5f9;border:2px dashed var(--border);border-radius:6px;color:#475569;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}.file-upload-label:hover{background:#e2e8f0;border-color:var(--primary);color:var(--primary)}.file-upload-input{display:none}.btn-box{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}.btn{padding:8px 16px;border:1px solid transparent;border-radius:6px;font-weight:500;cursor:pointer;font-size:11px;color:#fff;background:var(--primary);display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,transform .1s}.btn:hover{opacity:.92}.btn-secondary{background:#fff;color:#475569;border-color:var(--border)}.btn-secondary:hover{background:#f8fafc;color:#0f172a}.search-box{padding:16px;margin-bottom:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;align-items:flex-end}.table-wrap{overflow-x:auto;width:100%}table{width:100%;border-collapse:collapse}th{background:#f8fafc;padding:10px 16px;text-align:left;font-size:10px;font-weight:600;color:#64748b;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.03em}td{padding:12px 16px;border-bottom:1px solid #f1f5f9;vertical-align:middle;color:#334155}tr:hover{background-color:#fafafa}.status-badge{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:500;text-transform:uppercase;display:inline-flex;align-items:center;gap:4px}.step-badge{padding:3px 8px;border-radius:12px;font-size:9px;font-weight:700;text-transform:uppercase;display:inline-block;margin-top:4px}.step-1{background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd}.step-2{background:#fef3c7;color:#b45309;border:1px solid #fde68a}.step-3{background:#f3e8ff;color:#6b21a8;border:1px solid #e9d5ff}.step-4{background:#dcfce7;color:#15803d;border:1px solid #bbf7d0}.preview-container{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.thumb-box{position:relative;width:55px;height:55px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}.thumb-box img{width:100%;height:100%;object-fit:cover;cursor:pointer}.thumb-box .btn-remove-img{position:absolute;top:2px;right:2px;background:rgba(239,68,68,.9);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}.thumb-box .btn-remove-img:hover{background:#dc2626}.bg-atendido,.bg-realizado,.bg-validado{background:#ecfdf5;color:#047857}.bg-entregado,.bg-en-proceso{background:#f0f9ff;color:#0369a1}.bg-pendiente{background:#fffbeb;color:#b45309}.bg-cancelado{background:#fef2f2;color:#b91c1c}.paginacion-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;margin-top:15px;flex-wrap:wrap;gap:10px}.btn-pag{padding:6px 12px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;font-size:11px;color:#475569}.btn-pag:hover:not(:disabled){background:#f8fafc}.btn-pag:disabled{background:#f1f5f9;cursor:not-allowed;color:#cbd5e1}.modal-carrusel-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);color:#fff;border:none;font-size:24px;padding:12px 16px;cursor:pointer;border-radius:50%;transition:background .2s;user-select:none}.modal-carrusel-nav:hover{background:rgba(255,255,255,.4)}.modal-carrusel-prev{left:20px}.modal-carrusel-next{right:20px}@media (max-width:768px){header{flex-direction:column;gap:8px;text-align:center;padding:12px}.container{padding:0 10px}.table-wrap{border:none;background:0 0}table,thead,tbody,th,td,tr{display:block}thead tr{position:absolute;top:-9999px;left:-9999px}tr{background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,.02)}td{border:none;border-bottom:1px solid #f8fafc;position:relative;padding-left:45%!important;text-align:right;font-size:12px;min-height:32px;display:flex;align-items:center;justify-content:flex-end}td:last-child{border-bottom:0}td:before{position:absolute;top:50%;left:12px;transform:translateY(-50%);width:40%;padding-right:10px;white-space:nowrap;text-align:left;font-weight:600;color:#64748b;font-size:10px;text-transform:uppercase;content:attr(data-label)}.paginacion-bar{flex-direction:column;text-align:center}}@media print{.no-print{display:none!important}}</style>
 </head>
 <body>
 
 <header class="no-print">
     <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-        <div style="display: flex; align-items: center; gap: 20px;">
-            <h2 style="margin:0; color: var(--text); font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid fa-users-gear" style="color: var(--primary);"></i> TRABAJO SOCIAL DIF
-            </h2>
-            <!-- Insignia del usuario conectado con diseño mejorado -->
-            <span id="bienvenida-usuario" style="font-size: 11px; font-weight: 600; color: var(--primary); background: #e0e7ff; padding: 5px 12px; border-radius: 6px; display: none; align-items: center; gap: 6px; border: 1px solid #c7d2fe;">
-                <i class="fa-solid fa-user-shield"></i> <span id="texto-nombre-usuario"></span>
-            </span>
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <h2 style="margin:0; color: var(--text); font-size: 15px; font-weight: 600;"><i class="fa-solid fa-users-gear" style="color: var(--primary);"></i> TRABAJO SOCIAL DIF</h2>
+            <span id="bienvenida-usuario" style="font-size: 11px; font-weight: 500; color: #475569; background: #f1f5f9; padding: 4px 10px; border-radius: 4px; display: none;"></span>
         </div>
         <div style="display: flex; align-items: center; gap: 8px;">
             <button class="btn btn-secondary" onclick="location.href='admin_global.html'"><i class="fa-solid fa-chart-pie"></i> Dashboard</button>
@@ -41,7 +37,7 @@
             <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #fafafa;">
                 <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-hand-holding-heart"></i> Detalles del Trámite o Apoyo</legend>
                 <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px;">
-                    <div class="form-group"><label>No. Consecutivo</label><input type="text" id="numero_consecutivo" readonly style="background:#f8fafc; font-weight:500;"></div>
+                    <div class="form-group"><label>No. Consecutivo</label><input type="number" id="numero_consecutivo" style="background:#fff; font-weight:500;" placeholder="Ej. 1"></div>
                     <div class="form-group"><label>Fecha de Registro</label><input type="date" id="fecha_registro"></div>
                     <div class="form-group">
                         <label>Programa</label>
@@ -56,9 +52,64 @@
                     </div>
                     <div class="form-group"><label>Asunto</label><select id="asunto" onchange="evaluarVistaAsunto()"><option value="">-- SELECCIONE PROGRAMA --</option></select></div>
                     
-                    <div class="form-group" id="container-detalle-especifico" style="display:none;"><label id="label-detalle">ESPECIFICACIÓN</label><select id="detalle_asunto"></select></div>
+                    <div class="form-group" id="container-detalle-especifico" style="display:none;"><label id="label-detalle">Diagnóstico / Apoyo</label><select id="detalle_asunto"></select></div>
                     <div class="form-group"><label>Folio Expediente</label><input type="text" id="folio_expediente" placeholder="Opcional"></div>
                     <div class="form-group" style="grid-column: span 2;"><label>Detalles Específicos</label><input type="text" id="detalles" placeholder="Breve descripción"></div>
+                </div>
+            </fieldset>
+
+            <!-- FLUJO SECUENCIAL: SEGUIMIENTO ESTATAL / CITAS CRISVER / APOYO ESTATAL (SOLO PARA PROGRAMA SOLICITUD) -->
+            <fieldset id="section-seguimiento-estatal" style="border: 2px solid var(--info); border-radius: 8px; padding: 16px; background-color: #f0f9ff; display: none;">
+                <legend style="padding: 0 8px; font-weight: 700; color: var(--info); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-list-check"></i> AGENDAR CITA CRISVER / ENTREGA APOYO - ESTATAL</legend>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 8px;">
+                    
+                    <!-- PASO 1 & 2: RESPUESTA DE CORREO -->
+                    <div style="background: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+                        <label style="color: var(--info); font-weight: 700;"><i class="fa-solid fa-envelope"></i> Paso 1 y 2: Respuesta Correo Estatal</label>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Estado Correo DIF Estatal</label>
+                            <select id="respuesta_correo" onchange="evaluarFlujoPasos()">
+                                <option value="ESPERANDO_RESPUESTA">📩 Correo Enviado (En Espera)</option>
+                                <option value="APROBADO">✅ Respuesta Positiva (Aprobado)</option>
+                                <option value="RECHAZADO">❌ Respuesta Negativa (Rechazado)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Fecha Respuesta Correo</label>
+                            <input type="date" id="fecha_respuesta_correo">
+                        </div>
+                    </div>
+
+                    <!-- PASO 3: ESTUDIO SOCIOECONÓMICO (SE ACTIVA SOLO SI FUE APROBADO) -->
+                    <div style="background: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+                        <label style="color: var(--primary); font-weight: 700;"><i class="fa-solid fa-file-signature"></i> Paso 3: Estudio Socioeconómico</label>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Validación de Estudio</label>
+                            <select id="estudio_socioeconomico_estado" disabled onchange="evaluarFlujoPasos()">
+                                <option value="PENDIENTE">⏳ Pendiente de Realizar</option>
+                                <option value="VALIDADO">📝 Estudio Realizado y Validado</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Fecha de Validación Estudio</label>
+                            <input type="date" id="fecha_estudio_validado" disabled>
+                        </div>
+                    </div>
+
+                    <!-- PASO 4: AGENDAR CITA CRISVER / ENTREGA APOYO - ESTATAL -->
+                    <div style="background: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+                        <label style="color: var(--success); font-weight: 700;"><i class="fa-solid fa-calendar-check"></i> Paso 4: AGENDAR CITA CRISVER / ENTREGA APOYO - ESTATAL</label>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Fecha Cita CRISVER / Entrega Apoyo</label>
+                            <input type="date" id="fecha_cita_crisver" disabled onchange="evaluarFlujoPasos()">
+                        </div>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Estatus Final del Proceso</label>
+                            <input type="text" id="resumen_fase" readonly value="PASO 1: EN ESPERA DE CORREO ESTATAL" style="background:#f8fafc; font-weight:600; color:var(--info);">
+                        </div>
+                    </div>
+
                 </div>
             </fieldset>
 
@@ -112,19 +163,19 @@
                 </div>
             </fieldset>
 
-            <!-- 3. ESTATUS Y SEGUIMIENTO -->
+            <!-- 3. ESTATUS Y SEGUIMIENTO GENERAL -->
             <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff;">
-                <legend style="padding: 0 8px; font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-clipboard-check"></i> Estatus y Seguimiento</legend>
+                <legend style="padding: 0 8px; font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-clipboard-check"></i> Estatus General</legend>
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
                     <div class="form-group">
-                        <label>Estatus</label>
+                        <label>Estatus General</label>
                         <select id="estatus" style="background: #fffbeb; font-weight: 500;">
                             <option value="PENDIENTE">PENDIENTE</option>
+                            <option value="EN PROCESO">EN PROCESO</option>
                             <option value="ATENDIDO">ATENDIDO</option>
                             <option value="ENTREGADO">ENTREGADO</option>
                             <option value="REALIZADO">REALIZADO</option>
                             <option value="CANCELADO">CANCELADO</option>
-                            <option value="EN PROCESO">EN PROCESO</option>
                             <option value="VALIDADO">VALIDADO</option>
                         </select>
                     </div>
@@ -138,7 +189,7 @@
                             <option value="J.C.C.Q. / M.P.F.">J.C.C.Q. / M.P.F.</option>
                         </select>
                     </div>
-                    <div class="form-group" style="grid-column: span 3;"><label>Observaciones</label><input type="text" id="observaciones"></div>
+                    <div class="form-group" style="grid-column: span 3;"><label>Observaciones Adicionales</label><input type="text" id="observaciones" placeholder="Detalles de la cita u observaciones generales"></div>
                 </div>
             </fieldset>
 
@@ -162,8 +213,8 @@
         </div>
 
         <div class="btn-box">
-            <button class="btn" id="btn-save" style="background: var(--success);" onclick="subirYGuardar()"><i class="fa-solid fa-floppy-disk"></i> Guardar</button>   
-            <button class="btn" id="btn-update" style="background: var(--warning); display:none;" onclick="actualizar()"><i class="fa-solid fa-arrows-rotate"></i> Actualizar</button>
+            <button class="btn" id="btn-save" style="background: var(--success);" onclick="subirYGuardar()"><i class="fa-solid fa-floppy-disk"></i> Guardar Registro</button>   
+            <button class="btn" id="btn-update" style="background: var(--warning); display:none;" onclick="actualizar()"><i class="fa-solid fa-arrows-rotate"></i> Actualizar Registro / Avanzar Paso</button>
             <button class="btn" style="background: #107c41;" onclick="exportarExcel()"><i class="fa-solid fa-file-excel"></i> Exportar</button>
             <button class="btn btn-secondary" onclick="limpiarForm()"><i class="fa-solid fa-eraser"></i> Limpiar</button>
         </div>
@@ -171,7 +222,7 @@
 
     <!-- Buscador -->
     <div class="search-box no-print">
-        <div class="form-group" style="flex:2;"><label><i class="fa-solid fa-magnifying-glass"></i> Buscador Global</label><input type="text" id="buscador" placeholder="Buscar..." onkeyup="filtrar(true)"></div>
+        <div class="form-group" style="flex:2;"><label><i class="fa-solid fa-magnifying-glass"></i> Buscador Global</label><input type="text" id="buscador" placeholder="Buscar por nombre, TDAH, estado del correo..." onkeyup="filtrar(true)"></div>
         <div class="form-group" style="flex:1;">
             <label>Filas por página</label>
             <select id="rows-per-page" onchange="actualizarFilasPorPagina()">
@@ -201,10 +252,10 @@
                     <th>Evidencia(s)</th>
                     <th>Fecha</th>
                     <th>Beneficiario / Evento / Recibe / Teléfono</th>
-                    <th>Edad / Fecha Entrega / Detalle</th>
+                    <th>Edad / Cita CRISVER / Entrega</th>
                     <th>Solicitante / Lugar / Tipo Exp</th>
                     <th>Col / Loc / Tema / Cantidad</th>
-                    <th>Trámite / Programa y Asunto</th>
+                    <th>Programa, Asunto y Etapa</th>
                     <th>Estatus</th>
                     <th>Encargado</th>
                     <th class="no-print">Acciones</th>
@@ -232,7 +283,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E",
@@ -257,24 +308,45 @@
     const listaCampos = [
         'numero_consecutivo', 'fecha_registro', 'nombre', 'fecha_nacimiento', 'edad', 'genero',
         'telefono', 'colonia', 'localidad', 'direccion', 'nombre_solicitante', 'programa', 'asunto', 'detalle_asunto',
+        'respuesta_correo', 'fecha_respuesta_correo', 'estudio_socioeconomico_estado', 'fecha_estudio_validado',
+        'fecha_cita_crisver', 'resumen_fase',
         'horarios_mixtos', 'folio_expediente', 'estatus', 'detalles', 'usuario', 'observaciones',
         'cap_nombre', 'cap_lugar', 'cap_fecha', 'cap_hora', 'cap_tema',
         'exp_recibe', 'exp_tipo', 'exp_cantidad', 'exp_fecha_entrega', 'exp_detalle'
     ];
 
+    const camposEstatal = [
+        'respuesta_correo', 'fecha_respuesta_correo', 'estudio_socioeconomico_estado', 
+        'fecha_estudio_validado', 'fecha_cita_crisver', 'resumen_fase'
+    ];
+
     window.evaluarVistaAsunto = () => {
+        const programa = document.getElementById('programa').value;
         const asunto = document.getElementById('asunto').value;
+        
         const secBeneficiario = document.getElementById('section-beneficiario');
         const secCapacitacion = document.getElementById('section-capacitacion');
         const secExpedientes = document.getElementById('section-expedientes');
         const labelEncargado = document.getElementById('label-encargado');
+        const secSeguimientoEstatal = document.getElementById('section-seguimiento-estatal');
 
-        if (asunto === "CAPACITACION") {
+        const programaNorm = programa ? programa.toUpperCase().trim() : "";
+        const asuntoNorm = asunto ? asunto.toUpperCase().trim() : "";
+
+        // Solo mostrar flujo estatal cuando es programa SOLICITUD (para gestión estatal).
+        // En ESTUDIO SOCIOECONOMICO (incluyendo APOYO FUNCIONAL MUNICIPAL) es 100% municipal y NO espera correo estatal.
+        if (programaNorm === "SOLICITUD" && !asuntoNorm.includes("MUNICIPAL") && (asuntoNorm.includes("CITAS") || asuntoNorm.includes("APOYO") || asuntoNorm.includes("GESTION"))) {
+            secSeguimientoEstatal.style.display = 'block';
+        } else {
+            secSeguimientoEstatal.style.display = 'none';
+        }
+
+        if (asuntoNorm === "CAPACITACION") {
             secBeneficiario.style.display = 'none';
             secCapacitacion.style.display = 'block';
             secExpedientes.style.display = 'none';
             labelEncargado.innerText = "Datos del Encargado";
-        } else if (asunto === "ENTREGA DE EXPEDIENTES DIF ESTATAL") {
+        } else if (asuntoNorm === "ENTREGA DE EXPEDIENTES DIF ESTATAL") {
             secBeneficiario.style.display = 'none';
             secCapacitacion.style.display = 'none';
             secExpedientes.style.display = 'block';
@@ -286,6 +358,60 @@
             labelEncargado.innerText = "Encargado que Atiende";
         }
         window.actualizarEspecificaciones();
+        window.evaluarFlujoPasos();
+    };
+
+    window.evaluarFlujoPasos = () => {
+        const secSeguimientoEstatal = document.getElementById('section-seguimiento-estatal');
+        if (secSeguimientoEstatal.style.display === 'none') {
+            return;
+        }
+
+        const respCorreo = document.getElementById('respuesta_correo').value;
+        const selectEstudio = document.getElementById('estudio_socioeconomico_estado');
+        const inputFechaEstudio = document.getElementById('fecha_estudio_validado');
+        const inputCitaCrisver = document.getElementById('fecha_cita_crisver');
+        const resumenInput = document.getElementById('resumen_fase');
+
+        if (respCorreo === "APROBADO") {
+            selectEstudio.disabled = false;
+            inputFechaEstudio.disabled = false;
+
+            if (selectEstudio.value === "VALIDADO") {
+                inputCitaCrisver.disabled = false;
+                
+                if (inputCitaCrisver.value) {
+                    resumenInput.value = "PASO 4: CITA / ENTREGA AGENDADA";
+                    resumenInput.style.color = "var(--success)";
+                } else {
+                    resumenInput.value = "PASO 3: ESTUDIO VALIDADO (PENDIENTE CITA)";
+                    resumenInput.style.color = "#6b21a8";
+                }
+            } else {
+                inputCitaCrisver.disabled = true;
+                inputCitaCrisver.value = "";
+                resumenInput.value = "PASO 2: CORREO APROBADO (HACER ESTUDIO)";
+                resumenInput.style.color = "var(--warning)";
+            }
+        } else if (respCorreo === "RECHAZADO") {
+            selectEstudio.disabled = true;
+            selectEstudio.value = "PENDIENTE";
+            inputFechaEstudio.disabled = true;
+            inputFechaEstudio.value = "";
+            inputCitaCrisver.disabled = true;
+            inputCitaCrisver.value = "";
+            resumenInput.value = "SOLICITUD RECHAZADA POR ESTATAL";
+            resumenInput.style.color = "var(--danger)";
+        } else {
+            selectEstudio.disabled = true;
+            selectEstudio.value = "PENDIENTE";
+            inputFechaEstudio.disabled = true;
+            inputFechaEstudio.value = "";
+            inputCitaCrisver.disabled = true;
+            inputCitaCrisver.value = "";
+            resumenInput.value = "PASO 1: ESPERANDO CORREO ESTATAL";
+            resumenInput.style.color = "var(--info)";
+        }
     };
 
     window.calcularEdad = () => {
@@ -373,12 +499,16 @@
         }
     };
 
-    onSnapshot(apoyosRef, (snapshot) => {
+    // ORDENADO DE FECHA MÁS RECIENTE (HOY) A ANTERIOR Y LÍMITE DE RENDIMIENTO
+    const qCarga = query(apoyosRef, orderBy("fecha_registro", "desc"), limit(150));
+    onSnapshot(qCarga, (snapshot) => {
         todosLosDatos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const numeros = todosLosDatos.map(d => parseInt(d.numero_consecutivo) || 0);
         proximoNo = (numeros.length > 0) ? Math.max(...numeros) + 1 : 1;
         
-        if(!document.getElementById('edit-id').value) document.getElementById('numero_consecutivo').value = proximoNo;
+        if(!document.getElementById('edit-id').value && !document.getElementById('numero_consecutivo').value) {
+            document.getElementById('numero_consecutivo').value = proximoNo;
+        }
         window.filtrar(false);
     });
 
@@ -462,7 +592,7 @@
                 title: '⚠️ Alerta de Coincidencia en Base de Datos',
                 html: `
                     <div style="margin-bottom: 12px; font-size: 12px; color: #475569; text-align: left;">
-                        Se detectaron registros previos asociados a los nombres ingresados (como <b>Beneficiario</b> o <b>Solicitante</b>):
+                        Se detectaron registros previos asociados a los nombres ingresados:
                     </div>
                     <div style="max-height: 260px; overflow-y: auto; padding-right: 4px;">
                         ${filasHtml}
@@ -480,6 +610,11 @@
         const data = obtenerValoresForm();
         const esCapacitacion = data.asunto === "CAPACITACION";
         const esExpedientes = data.asunto === "ENTREGA DE EXPEDIENTES DIF ESTATAL";
+
+        if (!data.numero_consecutivo) {
+            Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'Por favor, ingrese el No. Consecutivo.', confirmButtonColor: 'var(--primary)' });
+            return;
+        }
 
         if (!esCapacitacion && !esExpedientes && !data.nombre) {
             Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'Por favor, ingrese el nombre del beneficiario.', confirmButtonColor: 'var(--primary)' });
@@ -581,8 +716,8 @@
             
             Swal.fire({
                 icon: 'success',
-                title: '¡Actualizado!',
-                text: 'Registro actualizado correctamente.',
+                title: '¡Paso Actualizado!',
+                text: 'Se ha guardado el avance en el procedimiento.',
                 timer: 2000,
                 showConfirmButton: false
             });
@@ -637,10 +772,15 @@
 
     function obtenerValoresForm() {
         const res = {};
+        const esSeguimientoEstatalVisible = document.getElementById('section-seguimiento-estatal').style.display !== 'none';
+
         listaCampos.forEach(id => {
             const el = document.getElementById(id);
             if(el) {
-                if(['numero_consecutivo', 'fecha_registro', 'fecha_nacimiento', 'edad', 'usuario', 'detalle_asunto', 'genero', 'cap_fecha', 'cap_hora', 'exp_cantidad', 'exp_fecha_entrega', 'telefono'].includes(id)) {
+                // Si el trámite es municipal (sección estatal oculta), no guardar pasos de seguimiento estatal
+                if (!esSeguimientoEstatalVisible && camposEstatal.includes(id)) {
+                    res[id] = "";
+                } else if(['numero_consecutivo', 'fecha_registro', 'fecha_nacimiento', 'edad', 'usuario', 'detalle_asunto', 'genero', 'cap_fecha', 'cap_hora', 'exp_cantidad', 'exp_fecha_entrega', 'telefono', 'fecha_respuesta_correo', 'fecha_estudio_validado', 'fecha_cita_crisver'].includes(id)) {
                     res[id] = el.value;
                 } else {
                     res[id] = el.value.toUpperCase();
@@ -673,7 +813,7 @@
         establecerUsuarioPorDefecto();
     };
 
-   window.actualizarAsuntos = () => {
+    window.actualizarAsuntos = () => {
         const prog = document.getElementById('programa').value;
         const asuSelect = document.getElementById('asunto');
         const contDet = document.getElementById('container-detalle-especifico');
@@ -719,11 +859,7 @@
             "ANDADERA"
         ];
 
-        // Si es Apoyo Ataúd o Apoyo para Testamento, NO se muestra ningún desplegable de especificaciones
-        if (asu === "APOYO ATAUD" || asu === "APOYO PARA TESTAMENTO") {
-            contDet.style.display = 'none';
-            detSelect.innerHTML = '';
-        } else if (asu && (asu.includes("APOYO") || asu.includes("APOYOS"))) {
+        if (asu && (asu.includes("APOYO") || asu.includes("APOYOS"))) {
             detSelect.innerHTML = '<option value="">-- SELECCIONAR TIPO DE APOYO --</option>';
             tiposApoyoFuncional.forEach(s => {
                 const o = document.createElement('option');
@@ -785,7 +921,7 @@
     function actualizarModalCarrusel() {
         const img = document.getElementById('img-modal');
         const thumbs = document.getElementById('modal-galeria-thumbs');
-        const prevBtn = document.querySelector('.modal-carrusel-prev');
+        const prevBtn = document.querySelector('.modal-carrusel-nav');
         const nextBtn = document.querySelector('.modal-carrusel-next');
 
         img.src = carruselLista[carruselIndexActual];
@@ -819,7 +955,11 @@
         const term = document.getElementById('buscador').value.toLowerCase();
         datosFiltrados = todosLosDatos.filter(r => 
             Object.values(r).some(v => String(v).toLowerCase().includes(term))
-        ).sort((a,b) => (parseInt(b.numero_consecutivo)||0) - (parseInt(a.numero_consecutivo)||0));
+        ).sort((a,b) => {
+            const fechaA = a.fecha_registro || "";
+            const fechaB = b.fecha_registro || "";
+            return fechaB.localeCompare(fechaA);
+        });
         renderTabla();
     };
 
@@ -859,13 +999,23 @@
             } else if (esExp) {
                 campoDetalle1 = reg.exp_fecha_entrega ? `Entrega: ${reg.exp_fecha_entrega}` : (reg.exp_detalle || 'N/A');
             } else {
-                campoDetalle1 = `${reg.edad || ''} ${reg.genero ? `<br><small style="color:#64748b">${reg.genero}</small>` : ''}`;
+                let extraCita = reg.fecha_cita_crisver ? `<br><small style="color:var(--success); font-weight:700;"><i class="fa-regular fa-calendar-check"></i> CRISVER/Entrega: ${reg.fecha_cita_crisver}</small>` : '';
+                campoDetalle1 = `${reg.edad || ''} ${reg.genero ? `<br><small style="color:#64748b">${reg.genero}</small>` : ''}${extraCita}`;
             }
 
             let campoDetalle2 = '';
             if (esCap) campoDetalle2 = reg.cap_lugar || 'N/A';
             else if (esExp) campoDetalle2 = reg.exp_tipo ? `Tipo: ${reg.exp_tipo}` : 'N/A';
             else campoDetalle2 = reg.nombre_solicitante || '<i style="color:#cbd5e1">MISMO</i>';
+
+            let badgeFaseHtml = '';
+            if (reg.resumen_fase && reg.programa === "SOLICITUD") {
+                let clasePaso = "step-1";
+                if (reg.resumen_fase.includes("PASO 2")) clasePaso = "step-2";
+                if (reg.resumen_fase.includes("PASO 3")) clasePaso = "step-3";
+                if (reg.resumen_fase.includes("PASO 4")) clasePaso = "step-4";
+                badgeFaseHtml = `<br><span class="step-badge ${clasePaso}">${reg.resumen_fase}</span>`;
+            }
 
             return `
             <tr>
@@ -887,18 +1037,19 @@
                 <b>${campoNombre}</b>
                 ${reg.telefono ? `<br><span style="color:#475569;">Tel: ${reg.telefono}</span>` : ''}
                 </td>
-                <td data-label="Edad / Fecha Entrega / Detalle">${campoDetalle1}</td>
+                <td data-label="Edad / Cita CRISVER / Entrega">${campoDetalle1}</td>
                 <td data-label="Solicitante / Lugar / Tipo Exp">${campoDetalle2}</td>
                 <td data-label="Col / Loc / Tema / Cantidad">${colLocText}</td>
-                <td data-label="Trámite / Programa y Asunto">
+                <td data-label="Programa, Asunto y Etapa">
                     <b>${reg.programa || 'N/A'}</b>
                     ${reg.asunto ? `<br><span style="color:#475569;">${reg.asunto}</span>` : ''}
                     ${reg.detalle_asunto ? `<br><small style="color:var(--primary); font-weight:600;">${reg.detalle_asunto}</small>` : ''}
+                    ${badgeFaseHtml}
                 </td>
                 <td data-label="Estatus"><span class="status-badge bg-${reg.estatus?.toLowerCase().replace(" ","-") || 'pendiente'}"><i class="fa-solid fa-circle" style="font-size: 6px;"></i> ${reg.estatus || 'PENDIENTE'}</span></td>
                 <td data-label="Encargado">${reg.usuario || ''}</td>
                 <td data-label="Acciones" class="no-print" style="text-align: right;">
-                    <button onclick="editarLocal('${reg.id}')" title="Editar" style="border:1px solid var(--border); background:#ffffff; cursor:pointer; padding:6px 8px; border-radius:4px; color: var(--primary); margin-right: 4px;"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="editarLocal('${reg.id}')" title="Editar / Avanzar Paso" style="border:1px solid var(--border); background:#ffffff; cursor:pointer; padding:6px 8px; border-radius:4px; color: var(--primary); margin-right: 4px;"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button onclick="eliminarDoc('${reg.id}')" title="Eliminar" style="border:1px solid var(--border); background:#ffffff; cursor:pointer; padding:6px 8px; border-radius:4px; color: var(--danger);"><i class="fa-solid fa-trash-can"></i></button>
                 </td>
             </tr>
@@ -958,22 +1109,14 @@
     };
 
     function establecerUsuarioPorDefecto() {
-        let nombreSocial = sessionStorage.getItem('social_nombre') || sessionStorage.getItem('usuario_nombre') || sessionStorage.getItem('nombre_usuario') || localStorage.getItem('social_nombre');
-        let tituloSocial = sessionStorage.getItem('social_titulo') || sessionStorage.getItem('usuario_titulo') || '';
-        
-        if (nombreSocial === 'juanita.campechano' || nombreSocial === 'social') {
-            nombreSocial = 'LIC. JUANITA C. CAMPECHANO QUEZADA';
-        } else if (nombreSocial === 'monse.plata') {
-            nombreSocial = 'LTS. MONSERRAT PLATA FLORES';
-        }
-
-        const spanTextoNombre = document.getElementById('texto-nombre-usuario');
-        const saludoContenedor = document.getElementById('bienvenida-usuario');
+        const nombreSocial = sessionStorage.getItem('social_nombre') || sessionStorage.getItem('usuario_nombre');
+        const tituloSocial = sessionStorage.getItem('social_titulo') || sessionStorage.getItem('usuario_titulo') || '';
         const selectUsuario = document.getElementById('usuario');
+        const saludoContenedor = document.getElementById('bienvenida-usuario');
 
-        if (nombreSocial && saludoContenedor && spanTextoNombre) {
-            spanTextoNombre.innerText = `${tituloSocial} ${nombreSocial}`.trim();
-            saludoContenedor.style.display = 'inline-flex';
+        if (nombreSocial && saludoContenedor) {
+            saludoContenedor.innerText = `${tituloSocial} ${nombreSocial}`.trim();
+            saludoContenedor.style.display = 'inline-block';
         }
 
         if (nombreSocial && selectUsuario) {
