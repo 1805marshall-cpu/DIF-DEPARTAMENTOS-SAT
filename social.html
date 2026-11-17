@@ -237,9 +237,9 @@
         <div class="form-group">
             <label>Filas por página</label>
             <select id="rows-per-page" onchange="actualizarFilasPorPagina()">
-                <option value="10" selected>10 filas</option>
+                <option value="10">10 filas</option>
                 <option value="50">50 filas</option>
-                <option value="100">100 filas</option>
+                <option value="100" selected>100 filas</option>
             </select>
         </div>
     </div>
@@ -308,7 +308,7 @@
     let todosLosDatos = [];
     let datosFiltrados = [];
     let paginaActual = 1;
-    let filasPorPagina = 10;
+    let filasPorPagina = 100; // Ajustado por defecto a 100 filas
     let proximoNo = 1;
 
     let evidenciasBase64 = [];
@@ -508,7 +508,8 @@
         }
     };
 
-    const qCarga = query(apoyosRef, orderBy("fecha_registro", "desc"), limit(150));
+    // AMPLIADO EL LÍMITE A 1000 REGISTROS Y ORDENAMIENTO ESTABLE
+    const qCarga = query(apoyosRef, orderBy("fecha_registro", "desc"), limit(1000));
     onSnapshot(qCarga, (snapshot) => {
         todosLosDatos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const numeros = todosLosDatos.map(d => parseInt(d.numero_consecutivo) || 0);
@@ -966,7 +967,12 @@
             const cumpleTexto = Object.values(r).some(v => String(v).toLowerCase().includes(term));
             const cumpleUsuario = !usuarioFiltro || (r.usuario && r.usuario === usuarioFiltro);
             return cumpleTexto && cumpleUsuario;
-        }).sort((a,b) => {
+        }).sort((a, b) => {
+            // Ordenar de manera estable: primero por número consecutivo descendente (más alto / reciente primero)
+            const numA = parseInt(a.numero_consecutivo) || 0;
+            const numB = parseInt(b.numero_consecutivo) || 0;
+            if (numA !== numB) return numB - numA;
+            
             const fechaA = a.fecha_registro || "";
             const fechaB = b.fecha_registro || "";
             return fechaB.localeCompare(fechaA);
@@ -978,6 +984,7 @@
     function renderTabla() {
         const totalPaginas = Math.ceil(datosFiltrados.length / filasPorPagina) || 1;
         if(paginaActual > totalPaginas) paginaActual = totalPaginas;
+        if(paginaActual < 1) paginaActual = 1;
 
         const inicio = (paginaActual - 1) * filasPorPagina;
         const segmento = datosFiltrados.slice(inicio, inicio + filasPorPagina);
@@ -1069,8 +1076,8 @@
         }).join('');
 
         document.getElementById('page-info').innerText = `Página ${paginaActual} de ${totalPaginas}`;
-        document.getElementById('btn-prev').disabled = paginaActual === 1;
-        document.getElementById('btn-get-next').disabled = paginaActual === totalPaginas;
+        document.getElementById('btn-prev').disabled = paginaActual <= 1;
+        document.getElementById('btn-get-next').disabled = paginaActual >= totalPaginas;
     }
 
     window.eliminarDoc = async (id) => {
