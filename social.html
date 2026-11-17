@@ -6,6 +6,8 @@
     <title>DIF 2026 | Trabajo Social</title>
     <!-- Dependencias Únicas -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <!-- Librería para exportar a Word (.docx) -->
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -14,14 +16,21 @@
 <body>
 
 <header class="no-print">
-    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 12px;">
         <div style="display: flex; align-items: center; gap: 16px;">
             <h2 style="margin:0; color: var(--text); font-size: 15px; font-weight: 600;"><i class="fa-solid fa-users-gear" style="color: var(--primary);"></i> TRABAJO SOCIAL DIF</h2>
             <span id="bienvenida-usuario" style="font-size: 11px; font-weight: 500; color: #475569; background: #f1f5f9; padding: 4px 10px; border-radius: 4px; display: none;"></span>
         </div>
-        <div style="display: flex; align-items: center; gap: 8px;">
+        
+        <!-- CONTROLES DE REPORTE MENSUAL EN EL ENCABEZADO -->
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);">
+                <label for="mes-reporte" style="font-size: 10px; font-weight: 700; color: #475569; margin: 0;"><i class="fa-solid fa-calendar-days"></i> Mes Reporte:</label>
+                <input type="month" id="mes-reporte" value="2026-10" style="padding: 4px 8px; font-size: 11px; border: 1px solid var(--border); border-radius: 4px; background: #fff;">
+            </div>
+            <button class="btn" style="background: #0078d4; padding: 6px 12px;" onclick="generarReporteWordMensual()"><i class="fa-solid fa-file-word"></i> Descargar Reporte Mensual (Word)</button>
             <button class="btn btn-secondary" onclick="location.href='admin_global.html'"><i class="fa-solid fa-chart-pie"></i> Dashboard</button>
-            <button class="btn" style="background: var(--danger);" onclick="cerrarSesion()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Salir</button>
+            <button class="btn" style="background: var(--danger); padding: 6px 12px;" onclick="cerrarSesion()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Salir</button>
         </div>
     </div>
 </header>
@@ -215,16 +224,20 @@
         <div class="btn-box">
             <button class="btn" id="btn-save" style="background: var(--success);" onclick="subirYGuardar()"><i class="fa-solid fa-floppy-disk"></i> Guardar Registro</button>   
             <button class="btn" id="btn-update" style="background: var(--warning); display:none;" onclick="actualizar()"><i class="fa-solid fa-arrows-rotate"></i> Actualizar Registro / Avanzar Paso</button>
-            <button class="btn" style="background: #107c41;" onclick="exportarExcel()"><i class="fa-solid fa-file-excel"></i> Exportar</button>
+            <button class="btn" style="background: #107c41;" onclick="exportarExcel()"><i class="fa-solid fa-file-excel"></i> Exportar Excel</button>
             <button class="btn btn-secondary" onclick="limpiarForm()"><i class="fa-solid fa-eraser"></i> Limpiar</button>
         </div>
     </div>
 
-    <!-- Buscador y Filtro por Usuario -->
-    <div class="search-box no-print" style="grid-template-columns: 2fr 1fr 1fr;">
+    <!-- Buscador, Filtro por Mes y Filtro por Usuario -->
+    <div class="search-box no-print" style="grid-template-columns: 2fr 1fr 1fr 1fr;">
         <div class="form-group">
             <label><i class="fa-solid fa-magnifying-glass"></i> Buscador Global</label>
-            <input type="text" id="buscador" placeholder="Buscar por nombre, TDAH, estado del correo..." onkeyup="filtrar(true)">
+            <input type="text" id="buscador" placeholder="Buscar por nombre, No., programa..." onkeyup="filtrar(true)">
+        </div>
+        <div class="form-group">
+            <label><i class="fa-solid fa-calendar"></i> Filtrar Tabla por Mes</label>
+            <input type="month" id="filtro-mes" onchange="filtrar(true)">
         </div>
         <div class="form-group">
             <label><i class="fa-solid fa-filter"></i> Filtrar por Usuario</label>
@@ -235,12 +248,21 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Filas por página</label>
-            <select id="rows-per-page" onchange="actualizarFilasPorPagina()">
-                <option value="10">10 filas</option>
-                <option value="50">50 filas</option>
-                <option value="100" selected>100 filas</option>
-            </select>
+            <label>Orden / Filas</label>
+            <div style="display: flex; gap: 6px;">
+                <select id="orden-tabla" onchange="filtrar(true)">
+                    <option value="desc">Del último al 1</option>
+                    <option value="asc">Del 1 al último</option>
+                </select>
+                <select id="rows-per-page" onchange="actualizarFilasPorPagina()">
+                <option value="10" selected>10</option>
+                <option value="20" >20</option>
+                <option value="30" >30</option>
+                <option value="50">50</option>
+                <option value="100" >100</option>
+                <option value="500" >500</option>
+                </select>
+            </div>
         </div>
     </div>
 
@@ -294,7 +316,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query, limit, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E",
@@ -308,11 +330,10 @@
     let todosLosDatos = [];
     let datosFiltrados = [];
     let paginaActual = 1;
-    let filasPorPagina = 100; // Ajustado por defecto a 100 filas
+    let filasPorPagina = 10;
     let proximoNo = 1;
 
     let evidenciasBase64 = [];
-    
     let carruselLista = [];
     let carruselIndexActual = 0;
 
@@ -372,9 +393,7 @@
 
     window.evaluarFlujoPasos = () => {
         const secSeguimientoEstatal = document.getElementById('section-seguimiento-estatal');
-        if (secSeguimientoEstatal.style.display === 'none') {
-            return;
-        }
+        if (secSeguimientoEstatal.style.display === 'none') return;
 
         const respCorreo = document.getElementById('respuesta_correo').value;
         const selectEstudio = document.getElementById('estudio_socioeconomico_estado');
@@ -385,10 +404,8 @@
         if (respCorreo === "APROBADO") {
             selectEstudio.disabled = false;
             inputFechaEstudio.disabled = false;
-
             if (selectEstudio.value === "VALIDADO") {
                 inputCitaCrisver.disabled = false;
-                
                 if (inputCitaCrisver.value) {
                     resumenInput.value = "PASO 4: CITA / ENTREGA AGENDADA";
                     resumenInput.style.color = "var(--success)";
@@ -426,18 +443,12 @@
     window.calcularEdad = () => {
         const fn = document.getElementById('fecha_nacimiento').value;
         const inputEdad = document.getElementById('edad');
-        if (!fn) {
-            inputEdad.value = "";
-            return;
-        }
+        if (!fn) { inputEdad.value = ""; return; }
         const hoy = new Date();
         const cumpleanos = new Date(fn);
         let edad = hoy.getFullYear() - cumpleanos.getFullYear();
         const m = hoy.getMonth() - cumpleanos.getMonth();
-
-        if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) {
-            edad--;
-        }
+        if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) edad--;
         inputEdad.value = edad >= 0 ? `${edad} AÑOS` : "";
     };
 
@@ -454,12 +465,7 @@
                     const MAX_WIDTH = 800;
                     let width = img.width;
                     let height = img.height;
-
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                    
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                     canvas.width = width;
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
@@ -472,19 +478,11 @@
     window.procesarNuevasFotos = async (e) => {
         const files = Array.from(e.target.files);
         if(!files.length) return;
-
-        Swal.fire({
-            title: 'Procesando imágenes...',
-            text: 'Optimizando calidad y tamaño.',
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading()
-        });
-
+        Swal.fire({ title: 'Procesando imágenes...', text: 'Optimizando calidad y tamaño.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
         for (const file of files) {
             const b64 = await comprimirImagen(file);
             evidenciasBase64.push(b64);
         }
-
         Swal.close();
         document.getElementById('txt-compresion').style.display = 'inline-block';
         renderPreviewEvidencias();
@@ -503,18 +501,14 @@
     window.eliminarFotoEvidencia = (index) => {
         evidenciasBase64.splice(index, 1);
         renderPreviewEvidencias();
-        if(evidenciasBase64.length === 0) {
-            document.getElementById('txt-compresion').style.display = 'none';
-        }
+        if(evidenciasBase64.length === 0) document.getElementById('txt-compresion').style.display = 'none';
     };
 
-    // AMPLIADO EL LÍMITE A 1000 REGISTROS Y ORDENAMIENTO ESTABLE
-    const qCarga = query(apoyosRef, orderBy("fecha_registro", "desc"), limit(1000));
+    const qCarga = query(apoyosRef);
     onSnapshot(qCarga, (snapshot) => {
         todosLosDatos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const numeros = todosLosDatos.map(d => parseInt(d.numero_consecutivo) || 0);
         proximoNo = (numeros.length > 0) ? Math.max(...numeros) + 1 : 1;
-        
         if(!document.getElementById('edit-id').value && !document.getElementById('numero_consecutivo').value) {
             document.getElementById('numero_consecutivo').value = proximoNo;
         }
@@ -524,35 +518,23 @@
     window.verificarApoyoActivo = (nombreABuscar, idActual = null) => {
         if (!nombreABuscar) return null;
         const nombreLimpio = nombreABuscar.trim().toUpperCase();
-        
-        const coincidencias = todosLosDatos.filter(reg => {
-            const esMismoRegistro = idActual && reg.id === idActual;
-            if (esMismoRegistro) return false;
-
+        return todosLosDatos.filter(reg => {
+            if (idActual && reg.id === idActual) return false;
             const beneficiarioReg = reg.nombre ? reg.nombre.trim().toUpperCase() : "";
             const solicitanteReg = reg.nombre_solicitante ? reg.nombre_solicitante.trim().toUpperCase() : "";
-
             return beneficiarioReg === nombreLimpio || solicitanteReg === nombreLimpio;
-        });
-
-        return coincidencias.length > 0 ? coincidencias : null;
+        }).length > 0 ? todosLosDatos.filter(reg => (idActual && reg.id === idActual ? false : (reg.nombre?.trim().toUpperCase() === nombreLimpio || reg.nombre_solicitante?.trim().toUpperCase() === nombreLimpio))) : null;
     };
 
     let ultimoNombreVerificado = "";
     let ultimoSolicitanteVerificado = "";
 
     window.revisarNombreDuplicado = async () => {
-        const nombreInput = document.getElementById('nombre');
-        const solicitanteInput = document.getElementById('nombre_solicitante');
-        
-        const nombreVal = nombreInput ? nombreInput.value.trim() : "";
-        const solicitanteVal = solicitanteInput ? solicitanteInput.value.trim() : "";
-
+        const nombreVal = document.getElementById('nombre')?.value.trim() || "";
+        const solicitanteVal = document.getElementById('nombre_solicitante')?.value.trim() || "";
         if (nombreVal === ultimoNombreVerificado && solicitanteVal === ultimoSolicitanteVerificado) return;
-        
         ultimoNombreVerificado = nombreVal;
         ultimoSolicitanteVerificado = solicitanteVal;
-
         const idActual = document.getElementById('edit-id').value || null;
 
         let nombresARevisar = [];
@@ -562,182 +544,64 @@
         }
 
         let historialTotal = [];
-
         nombresARevisar.forEach(item => {
             const hist = window.verificarApoyoActivo(item.valor, idActual);
             if (hist) {
                 hist.forEach(h => {
-                    if (!historialTotal.some(r => r.id === h.id)) {
-                        historialTotal.push({ ...h, rolCoincidencia: item.tipo, nombreBuscado: item.valor });
-                    }
+                    if (!historialTotal.some(r => r.id === h.id)) historialTotal.push({ ...h, rolCoincidencia: item.tipo });
                 });
             }
         });
 
         if (historialTotal.length > 0) {
-            let filasHtml = '';
-            historialTotal.forEach((reg) => {
-                let etiquetaRol = reg.rolCoincidencia === 'SOLICITANTE' ? '<span style="background:#e0e7ff; color:var(--primary); padding:2px 6px; border-radius:4px; font-size:9px; font-weight:600;">COINCIDE COMO SOLICITANTE</span>' : '<span style="background:#fee2e2; color:var(--danger); padding:2px 6px; border-radius:4px; font-size:9px; font-weight:600;">COINCIDE COMO BENEFICIARIO</span>';
-
-                filasHtml += `
-                    <div style="text-align: left; background: #f8fafc; border-left: 3px solid var(--warning); padding: 10px; margin-bottom: 8px; border-radius: 6px; font-size: 12px; border: 1px solid var(--border);">
-                        <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 4px; color: #334155; align-items: center;">
-                            <span><i class="fa-regular fa-calendar"></i> ${reg.fecha_registro || 'Sin fecha'}</span>
-                            <div>
-                                ${etiquetaRol}
-                                <span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 10px; color: #475569; margin-left: 4px;">${reg.estatus || 'PENDIENTE'}</span>
-                            </div>
-                        </div>
-                        <div style="color: #64748b; margin-top: 4px;">
-                            <div><b>Beneficiario:</b> ${reg.nombre || 'N/A'}</div>
-                            <div><b>Solicitante:</b> ${reg.nombre_solicitante || 'MISMO'}</div>
-                            <div><b>Programa / Asunto:</b> ${reg.programa || 'N/A'} - ${reg.asunto || 'N/A'}</div>
-                        </div>
+            let filasHtml = historialTotal.map(reg => `
+                <div style="text-align: left; background: #f8fafc; border-left: 3px solid var(--warning); padding: 10px; margin-bottom: 8px; border-radius: 6px; font-size: 12px; border: 1px solid var(--border);">
+                    <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 4px; color: #334155;">
+                        <span><i class="fa-regular fa-calendar"></i> ${reg.fecha_registro || 'Sin fecha'}</span>
+                        <span>${reg.estatus || 'PENDIENTE'}</span>
                     </div>
-                `;
-            });
+                    <div style="color: #64748b;"><b>Beneficiario:</b> ${reg.nombre || 'N/A'} | <b>Programa:</b> ${reg.programa || 'N/A'} - ${reg.asunto || 'N/A'}</div>
+                </div>
+            `).join('');
 
             Swal.fire({
-                title: '⚠️ Alerta de Coincidencia en Base de Datos',
-                html: `
-                    <div style="margin-bottom: 12px; font-size: 12px; color: #475569; text-align: left;">
-                        Se detectaron registros previos asociados a los nombres ingresados:
-                    </div>
-                    <div style="max-height: 260px; overflow-y: auto; padding-right: 4px;">
-                        ${filasHtml}
-                    </div>
-                `,
+                title: '⚠️ Alerta de Coincidencia',
+                html: `<div style="max-height: 260px; overflow-y: auto;">${filasHtml}</div>`,
                 icon: 'warning',
-                confirmButtonText: 'Entendido, continuar',
-                confirmButtonColor: 'var(--primary)',
-                width: '520px'
+                confirmButtonText: 'Continuar',
+                confirmButtonColor: 'var(--primary)'
             });
         }
     };
 
     window.subirYGuardar = async () => {
         const data = obtenerValoresForm();
-        const esCapacitacion = data.asunto === "CAPACITACION";
-        const esExpedientes = data.asunto === "ENTREGA DE EXPEDIENTES DIF ESTATAL";
-
-        if (!data.numero_consecutivo) {
-            Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'Por favor, ingrese el No. Consecutivo.', confirmButtonColor: 'var(--primary)' });
-            return;
-        }
-
-        if (!esCapacitacion && !esExpedientes && !data.nombre) {
-            Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'Por favor, ingrese el nombre del beneficiario.', confirmButtonColor: 'var(--primary)' });
-            return;
-        }
-
-        if (esCapacitacion && !data.cap_nombre) {
-            Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'Por favor, ingrese el nombre para la capacitación.', confirmButtonColor: 'var(--primary)' });
-            return;
-        }
-
-        if (esExpedientes && !data.exp_recibe) {
-            Swal.fire({ icon: 'warning', title: 'Campo requerido', text: 'Por favor, ingrese el nombre de quien recibe los documentos.', confirmButtonColor: 'var(--primary)' });
-            return;
-        }
-
-        if (!esCapacitacion && !esExpedientes) {
-            const historial = window.verificarApoyoActivo(data.nombre);
-            if (historial) {
-                const result = await Swal.fire({
-                    title: '¿Continuar guardando?',
-                    text: `El beneficiario "${data.nombre}" ya tiene ${historial.length} registro(s) previo(s).`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: 'var(--danger)',
-                    cancelButtonColor: '#64748b',
-                    confirmButtonText: 'Sí, guardar',
-                    cancelButtonText: 'Cancelar'
-                });
-
-                if (!result.isConfirmed) return;
-            }
-        }
-
-        Swal.fire({
-            title: 'Guardando registro...',
-            text: 'Guardando información y evidencias...',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-        });
-
+        if (!data.numero_consecutivo) { Swal.fire({ icon: 'warning', title: 'Falta No. Consecutivo' }); return; }
+        
+        Swal.fire({ title: 'Guardando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
         try {
             data.evidencias = evidenciasBase64;
             data.url_evidencia = evidenciasBase64.length > 0 ? evidenciasBase64[0] : "";
             await addDoc(apoyosRef, data);
-
-            Swal.fire({
-                icon: 'success',
-                title: '¡Guardado exitoso!',
-                text: 'El nuevo registro ha sido guardado correctamente.',
-                timer: 2000,
-                showConfirmButton: false
-            });
-            
+            Swal.fire({ icon: 'success', title: '¡Guardado con éxito!', timer: 1500, showConfirmButton: false });
             window.limpiarForm();
         } catch (e) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error al guardar',
-                text: e.message,
-                confirmButtonColor: 'var(--primary)'
-            });
+            Swal.fire({ icon: 'error', title: 'Error', text: e.message });
         }
     };
 
     window.actualizar = async () => {
         const id = document.getElementById('edit-id').value;
         const data = obtenerValoresForm();
-
-        if (data.asunto !== "CAPACITACION" && data.asunto !== "ENTREGA DE EXPEDIENTES DIF ESTATAL") {
-            const historial = window.verificarApoyoActivo(data.nombre, id);
-
-            if (historial && historial.length > 0) {
-                const result = await Swal.fire({
-                    title: '¿Continuar con la actualización?',
-                    text: `El nombre "${data.nombre}" ya cuenta con ${historial.length} registro(s) previo(s).`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí, actualizar',
-                    cancelButtonText: 'Cancelar',
-                    confirmButtonColor: 'var(--primary)'
-                });
-                if (!result.isConfirmed) return;
-            }
-        }
-
-        Swal.fire({
-            title: 'Actualizando...',
-            text: 'Por favor, espere un momento.',
-            allowOutsideClick: false,
-            didOpen: () => { Swal.showLoading(); }
-        });
-
+        Swal.fire({ title: 'Actualizando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
         try {
             data.evidencias = evidenciasBase64;
             data.url_evidencia = evidenciasBase64.length > 0 ? evidenciasBase64[0] : "";
-            
             await updateDoc(doc(db, "trabajo_social", id), data);
-            
-            Swal.fire({
-                icon: 'success',
-                title: '¡Paso Actualizado!',
-                text: 'Se ha guardado el avance en el procedimiento.',
-                timer: 2000,
-                showConfirmButton: false
-            });
+            Swal.fire({ icon: 'success', title: '¡Actualizado!', timer: 1500, showConfirmButton: false });
             window.limpiarForm();
-        } catch (e) { 
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'No se pudo actualizar: ' + e.message,
-                confirmButtonColor: 'var(--primary)'
-            });
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'Error', text: e.message });
         }
     };
     
@@ -745,35 +609,13 @@
         const reg = todosLosDatos.find(r => r.id === id);
         if(!reg) return;
         document.getElementById('edit-id').value = id;
-        
-        listaCampos.forEach(c => {
-            const el = document.getElementById(c);
-            if(el) el.value = reg[c] || "";
-        });
-
-        if(!reg.colonia && !reg.localidad && reg.col_loc) {
-            document.getElementById('colonia').value = reg.col_loc;
-        }
-
+        listaCampos.forEach(c => { const el = document.getElementById(c); if(el) el.value = reg[c] || ""; });
         window.actualizarAsuntos();
         document.getElementById('asunto').value = reg.asunto || "";
-        
         window.evaluarVistaAsunto();
-        
-        if(reg.detalle_asunto) {
-            const detalleSelect = document.getElementById('detalle_asunto');
-            if (detalleSelect) detalleSelect.value = reg.detalle_asunto;
-        }
-
-        if (Array.isArray(reg.evidencias)) {
-            evidenciasBase64 = [...reg.evidencias];
-        } else if (reg.url_evidencia) {
-            evidenciasBase64 = [reg.url_evidencia];
-        } else {
-            evidenciasBase64 = [];
-        }
+        if(reg.detalle_asunto) document.getElementById('detalle_asunto').value = reg.detalle_asunto;
+        evidenciasBase64 = Array.isArray(reg.evidencias) ? [...reg.evidencias] : (reg.url_evidencia ? [reg.url_evidencia] : []);
         renderPreviewEvidencias();
-
         document.getElementById('btn-save').style.display = 'none';
         document.getElementById('btn-update').style.display = 'inline-flex';
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -782,41 +624,29 @@
     function obtenerValoresForm() {
         const res = {};
         const esSeguimientoEstatalVisible = document.getElementById('section-seguimiento-estatal').style.display !== 'none';
-
         listaCampos.forEach(id => {
             const el = document.getElementById(id);
             if(el) {
-                if (!esSeguimientoEstatalVisible && camposEstatal.includes(id)) {
-                    res[id] = "";
-                } else if(['numero_consecutivo', 'fecha_registro', 'fecha_nacimiento', 'edad', 'usuario', 'detalle_asunto', 'genero', 'cap_fecha', 'cap_hora', 'exp_cantidad', 'exp_fecha_entrega', 'telefono', 'fecha_respuesta_correo', 'fecha_estudio_validado', 'fecha_cita_crisver'].includes(id)) {
-                    res[id] = el.value;
-                } else {
-                    res[id] = el.value.toUpperCase();
-                }
+                if (!esSeguimientoEstatalVisible && camposEstatal.includes(id)) res[id] = "";
+                else if(id === 'numero_consecutivo') res[id] = parseInt(el.value) || 0;
+                else if(['fecha_registro', 'fecha_nacimiento', 'edad', 'usuario', 'detalle_asunto', 'genero', 'cap_fecha', 'cap_hora', 'exp_cantidad', 'exp_fecha_entrega', 'telefono', 'fecha_respuesta_correo', 'fecha_estudio_validado', 'fecha_cita_crisver'].includes(id)) res[id] = el.value;
+                else res[id] = el.value.toUpperCase();
             }
         });
         return res;
     }
 
     window.limpiarForm = () => {
-        listaCampos.forEach(id => {
-            const el = document.getElementById(id);
-            if(el && id !== "numero_consecutivo") el.value = "";
-        });
+        listaCampos.forEach(id => { const el = document.getElementById(id); if(el && id !== "numero_consecutivo") el.value = ""; });
         if(document.getElementById('input_file')) document.getElementById('input_file').value = "";
-        
         evidenciasBase64 = [];
         renderPreviewEvidencias();
-        
-        const txtComp = document.getElementById('txt-compresion');
-        txtComp.style.display = 'none';
-        
+        document.getElementById('txt-compresion').style.display = 'none';
         document.getElementById('numero_consecutivo').value = proximoNo;
         document.getElementById('edit-id').value = "";
         document.getElementById('btn-save').style.display = 'inline-flex';
         document.getElementById('btn-update').style.display = 'none';
         document.getElementById('container-detalle-especifico').style.display = 'none';
-        
         window.evaluarVistaAsunto();
         establecerUsuarioPorDefecto();
     };
@@ -824,11 +654,7 @@
     window.actualizarAsuntos = () => {
         const prog = document.getElementById('programa').value;
         const asuSelect = document.getElementById('asunto');
-        const contDet = document.getElementById('container-detalle-especifico');
-        
         asuSelect.innerHTML = '<option value="">-- SELECCIONAR --</option>';
-        contDet.style.display = 'none';
-
         const dataAsuntos = {
             "CAPACITACION AL PERSONAL SMDIF": ["CAPACITACION", "ENTREGA DE EXPEDIENTES"],
             "SOLICITUD": ["APOYO FUNCIONAL", "GESTION DE CITAS"],
@@ -837,13 +663,8 @@
             "ATENCION CIUDADANA": ["CAPACITACION", "ENTREGA DE EXPEDIENTES DIF ESTATAL", "ENTREGA DE APOYOS FUNCIONALES ESTATALES", "ENTREGA DE APOYOS FUNCIONALES MUNICIPALES", "TRASLADO Y ACOMPAÑAMIENTO A CRISVER", "PLATICAS PREVENTIVAS", "PACIENTES RECURRENTES", "DESPENSA MENSUAL"],
             "ESTUDIO SOCIOECONOMICO": ["ASILO", "DESCUENTO TRANSPORTE", "DESCUENTO CMAPS", "APOYO ATAUD", "APOYO FUNCIONAL MUNICIPAL", "APOYO FUNCIONAL ESTATAL", "ESTUDIOS CLINICOS", "TRASLADO DE CUERPO", "REGISTRO CIVIL", "TERAPIAS CRISAT", "APOYO AL INMIGRANTE", "CONDONACIÓN DE LENTES", "DESPENSA MENSUAL", "DESCUENTO SERVICIO DE AMBULANCIA", "APOYO A LA CIUDADANIA", "APOYO PARA TESTAMENTO"]
         };
-
         if(dataAsuntos[prog]) {
-            dataAsuntos[prog].forEach(a => {
-                const opt = document.createElement('option');
-                opt.value = a; opt.textContent = a;
-                asuSelect.appendChild(opt);
-            });
+            dataAsuntos[prog].forEach(a => { const opt = document.createElement('option'); opt.value = a; opt.textContent = a; asuSelect.appendChild(opt); });
         }
         window.evaluarVistaAsunto();
     };
@@ -853,129 +674,57 @@
         const detSelect = document.getElementById('detalle_asunto');
         const contDet = document.getElementById('container-detalle-especifico');
         const asu = asuSelect.value;
-
-        const tiposApoyoFuncional = [
-            "SILLA DE RUEDAS ESTANDAR ADULTO", 
-            "SILLA DE RUEDAS SOBREPESO", 
-            "SILLA DE RUEDAS PCI", 
-            "SILLA DE RUEDAS PCA", 
-            "SILLA DE RUEDAS JUVENIL", 
-            "SILLA DE RUEDAS INFANTIL", 
-            "BASTÓN PUÑO ALEMÁN", 
-            "BASTÓN 4 PUNTOS", 
-            "MULETAS", 
-            "ANDADERA"
-        ];
-
-        if (asu && (asu.includes("APOYO") || asu.includes("APOYOS"))) {
-            detSelect.innerHTML = '<option value="">-- SELECCIONAR TIPO DE APOYO --</option>';
-            tiposApoyoFuncional.forEach(s => {
-                const o = document.createElement('option');
-                o.value = s; o.textContent = s;
-                detSelect.appendChild(o);
-            });
+        if (asu && asu.includes("APOYO")) {
+            detSelect.innerHTML = '<option value="">-- SELECCIONAR --</option>';
+            ["SILLA DE RUEDAS ESTANDAR", "BASTÓN", "MULETAS", "ANDADERA"].forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; detSelect.appendChild(o); });
             contDet.style.display = 'block';
-            document.getElementById('label-detalle').innerText = "Tipo de Apoyo";
-        } else if (asu === "DESCUENTO TRANSPORTE") {
-            detSelect.innerHTML = '<option value="">-- SELECCIONAR ESPECIFICACIÓN --</option>';
-            ["TRANSPORTE LOS TUXTLA", "AUTOBUSES DE ORIENTE (ADO)"].forEach(s => {
-                const o = document.createElement('option');
-                o.value = s; o.textContent = s;
-                detSelect.appendChild(o);
-            });
-            contDet.style.display = 'block';
-            document.getElementById('label-detalle').innerText = "Diagnóstico / Especificación";
-        } else if (asu === "GESTION DE CITAS") {
-            detSelect.innerHTML = '<option value="">-- SELECCIONAR ESPECIFICACIÓN --</option>';
-            ["TDAH", "TDH", "AUTISMO", "AUX. AUDITIVO", "PROTESIS", "CRISVER (DIVERSOS)", "SINDROME DE DOWN"].forEach(s => {
-                const o = document.createElement('option');
-                o.value = s; o.textContent = s;
-                detSelect.appendChild(o);
-            });
-            contDet.style.display = 'block';
-            document.getElementById('label-detalle').innerText = "Diagnóstico";
-        } else {
-            contDet.style.display = 'none';
-        }
+        } else { contDet.style.display = 'none'; }
     };
 
-    /* LÓGICA DEL CARRUSEL / MODAL */
     window.abrirCarrusel = (index, origen = 'FORMULARIO', idDoc = null) => {
-        if (origen === 'FORMULARIO') {
-            carruselLista = [...evidenciasBase64];
-        } else if (origen === 'TABLA') {
+        carruselLista = origen === 'FORMULARIO' ? [...evidenciasBase64] : (() => {
             const reg = todosLosDatos.find(r => r.id === idDoc);
-            if (reg) {
-                carruselLista = Array.isArray(reg.evidencias) && reg.evidencias.length ? reg.evidencias : (reg.url_evidencia ? [reg.url_evidencia] : []);
-            }
-        }
-
-        if(!carruselLista || !carruselLista.length) return;
+            return reg ? (reg.evidencias || [reg.url_evidencia]) : [];
+        })();
+        if(!carruselLista.length) return;
         carruselIndexActual = index;
-        actualizarModalCarrusel();
+        document.getElementById('img-modal').src = carruselLista[carruselIndexActual];
         document.getElementById('modal-foto').style.display = 'flex';
     };
 
-    window.cambiarImagenCarrusel = (direccion) => {
-        carruselIndexActual += direccion;
-        if (carruselIndexActual < 0) {
-            carruselIndexActual = carruselLista.length - 1;
-        } else if (carruselIndexActual >= carruselLista.length) {
-            carruselIndexActual = 0;
-        }
-        actualizarModalCarrusel();
+    window.cambiarImagenCarrusel = (d) => {
+        carruselIndexActual = (carruselIndexActual + d + carruselLista.length) % carruselLista.length;
+        document.getElementById('img-modal').src = carruselLista[carruselIndexActual];
     };
 
-    function actualizarModalCarrusel() {
-        const img = document.getElementById('img-modal');
-        const thumbs = document.getElementById('modal-galeria-thumbs');
-        const prevBtn = document.querySelector('.modal-carrusel-nav');
-        const nextBtn = document.querySelector('.modal-carrusel-next');
+    window.cerrarCarrusel = () => { document.getElementById('modal-foto').style.display = 'none'; };
 
-        img.src = carruselLista[carruselIndexActual];
-
-        if (carruselLista.length <= 1) {
-            prevBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-        } else {
-            prevBtn.style.display = 'block';
-            nextBtn.style.display = 'block';
-        }
-
-        thumbs.innerHTML = carruselLista.map((src, i) => `
-            <div class="thumb-box" style="border: ${i === carruselIndexActual ? '2px solid var(--primary)' : '1px solid var(--border)'}; opacity: ${i === carruselIndexActual ? '1' : '0.6'}">
-                <img src="${src}" onclick="seleccionarImagenCarrusel(${i})">
-            </div>
-        `).join('');
+    function coincideMes(fechaRegistro, mesAnio) {
+        if (!mesAnio) return true;
+        if (!fechaRegistro) return false;
+        const f = String(fechaRegistro).trim();
+        const [anio, mesNum] = mesAnio.split('-');
+        if (f.startsWith(`${anio}-${mesNum}`) || f.startsWith(`${anio}/${mesNum}`)) return true;
+        if (f.includes(`/${mesNum}/${anio}`) || f.includes(`-${mesNum}-${anio}`)) return true;
+        return false;
     }
-
-    window.seleccionarImagenCarrusel = (i) => {
-        carruselIndexActual = i;
-        actualizarModalCarrusel();
-    };
-
-    window.cerrarCarrusel = () => {
-        document.getElementById('modal-foto').style.display = 'none';
-    };
 
     window.filtrar = (resetearPagina = false) => {
         if(resetearPagina) paginaActual = 1;
         const term = document.getElementById('buscador').value.toLowerCase();
         const usuarioFiltro = document.getElementById('filtro-usuario').value;
+        const mesFiltro = document.getElementById('filtro-mes').value;
+        const orden = document.getElementById('orden-tabla').value;
 
         datosFiltrados = todosLosDatos.filter(r => {
-            const cumpleTexto = Object.values(r).some(v => String(v).toLowerCase().includes(term));
+            const cumpleTexto = !term || Object.values(r).some(v => String(v).toLowerCase().includes(term));
             const cumpleUsuario = !usuarioFiltro || (r.usuario && r.usuario === usuarioFiltro);
-            return cumpleTexto && cumpleUsuario;
+            const cumpleMes = coincideMes(r.fecha_registro, mesFiltro);
+            return cumpleTexto && cumpleUsuario && cumpleMes;
         }).sort((a, b) => {
-            // Ordenar de manera estable: primero por número consecutivo descendente (más alto / reciente primero)
             const numA = parseInt(a.numero_consecutivo) || 0;
             const numB = parseInt(b.numero_consecutivo) || 0;
-            if (numA !== numB) return numB - numA;
-            
-            const fechaA = a.fecha_registro || "";
-            const fechaB = b.fecha_registro || "";
-            return fechaB.localeCompare(fechaA);
+            return orden === 'asc' ? numA - numB : numB - numA;
         });
 
         renderTabla();
@@ -988,92 +737,26 @@
 
         const inicio = (paginaActual - 1) * filasPorPagina;
         const segmento = datosFiltrados.slice(inicio, inicio + filasPorPagina);
-        const tbody = document.getElementById('cuerpoTabla');
-        document.getElementById('info-total').innerText = `TOTAL: ${datosFiltrados.length} REGISTROS`;
+        document.getElementById('info-total').innerText = `TOTAL MOSTRADO: ${datosFiltrados.length} DE ${todosLosDatos.length} REGISTROS`;
         
-        tbody.innerHTML = segmento.map(reg => {
-            const fotos = Array.isArray(reg.evidencias) && reg.evidencias.length ? reg.evidencias : (reg.url_evidencia ? [reg.url_evidencia] : []);
-            const esCap = reg.asunto === "CAPACITACION";
-            const esExp = reg.asunto === "ENTREGA DE EXPEDIENTES DIF ESTATAL";
-            
-            let colLocText = "";
-            if (esCap) {
-                colLocText = reg.cap_tema ? `<b>Tema:</b> ${reg.cap_tema}` : '';
-            } else if (esExp) {
-                colLocText = reg.exp_cantidad ? `<b>Cant:</b> ${reg.exp_cantidad}` : '';
-            } else if (reg.colonia || reg.localidad) {
-                colLocText = [reg.colonia, reg.localidad].filter(Boolean).join(' / ');
-            } else {
-                colLocText = reg.col_loc || '';
-            }
-
-            let campoNombre = 'N/A';
-            if (esCap) campoNombre = reg.cap_nombre || 'N/A';
-            else if (esExp) campoNombre = reg.exp_recibe ? `RECIBE: ${reg.exp_recibe}` : 'N/A';
-            else campoNombre = reg.nombre || 'N/A';
-
-            let campoDetalle1 = '';
-            if (esCap) {
-                campoDetalle1 = reg.cap_fecha ? `${reg.cap_fecha} ${reg.cap_hora || ''}` : 'N/A';
-            } else if (esExp) {
-                campoDetalle1 = reg.exp_fecha_entrega ? `Entrega: ${reg.exp_fecha_entrega}` : (reg.exp_detalle || 'N/A');
-            } else {
-                let extraCita = reg.fecha_cita_crisver ? `<br><small style="color:var(--success); font-weight:700;"><i class="fa-regular fa-calendar-check"></i> CRISVER/Entrega: ${reg.fecha_cita_crisver}</small>` : '';
-                campoDetalle1 = `${reg.edad || ''} ${reg.genero ? `<br><small style="color:#64748b">${reg.genero}</small>` : ''}${extraCita}`;
-            }
-
-            let campoDetalle2 = '';
-            if (esCap) campoDetalle2 = reg.cap_lugar || 'N/A';
-            else if (esExp) campoDetalle2 = reg.exp_tipo ? `Tipo: ${reg.exp_tipo}` : 'N/A';
-            else campoDetalle2 = reg.nombre_solicitante || '<i style="color:#cbd5e1">MISMO</i>';
-
-            let badgeFaseHtml = '';
-            if (reg.resumen_fase && reg.programa === "SOLICITUD") {
-                let clasePaso = "step-1";
-                if (reg.resumen_fase.includes("PASO 2")) clasePaso = "step-2";
-                if (reg.resumen_fase.includes("PASO 3")) clasePaso = "step-3";
-                if (reg.resumen_fase.includes("PASO 4")) clasePaso = "step-4";
-                badgeFaseHtml = `<br><span class="step-badge ${clasePaso}">${reg.resumen_fase}</span>`;
-            }
-
-            return `
+        document.getElementById('cuerpoTabla').innerHTML = segmento.map(reg => `
             <tr>
-                <td data-label="No."><b>${reg.numero_consecutivo}</b></td>
-                <td data-label="Evidencia(s)">
-                    ${fotos.length > 0 ? `
-                        <div style="display:flex; gap:4px; align-items:center;">
-                            <img src="${fotos[0]}" 
-                                 onclick="abrirCarrusel(0, 'TABLA', '${reg.id}')" 
-                                 alt="Evidencia" 
-                                 style="width: 40px; height: 35px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid var(--border);"
-                                 title="Ver carrusel de imágenes" />
-                            ${fotos.length > 1 ? `<span style="font-size:10px; font-weight:600; color:var(--primary); background:#e0e7ff; padding:2px 5px; border-radius:10px; cursor:pointer;" onclick="abrirCarrusel(0, 'TABLA', '${reg.id}')">+${fotos.length - 1}</span>` : ''}
-                        </div>
-                    ` : '<span style="color:#cbd5e1; font-size:10px;">Sin fotos</span>'}
-                </td>
-                <td data-label="Fecha">${reg.fecha_registro || ''}</td>
-                <td data-label="Beneficiario / Evento / Recibe / Teléfono">
-                <b>${campoNombre}</b>
-                ${reg.telefono ? `<br><span style="color:#475569;">Tel: ${reg.telefono}</span>` : ''}
-                </td>
-                <td data-label="Edad / Cita CRISVER / Entrega">${campoDetalle1}</td>
-                <td data-label="Solicitante / Lugar / Tipo Exp">${campoDetalle2}</td>
-                <td data-label="Col / Loc / Tema / Cantidad">${colLocText}</td>
-                <td data-label="Programa, Asunto y Etapa">
-                    <b>${reg.programa || 'N/A'}</b>
-                    ${reg.asunto ? `<br><span style="color:#475569;">${reg.asunto}</span>` : ''}
-                    ${reg.detalle_asunto ? `<br><small style="color:var(--primary); font-weight:600;">${reg.detalle_asunto}</small>` : ''}
-                    ${badgeFaseHtml}
-                </td>
-                <td data-label="Estatus"><span class="status-badge bg-${reg.estatus?.toLowerCase().replace(" ","-") || 'pendiente'}"><i class="fa-solid fa-circle" style="font-size: 6px;"></i> ${reg.estatus || 'PENDIENTE'}</span></td>
-                <td data-label="Encargado">${reg.usuario || ''}</td>
-                <td data-label="Acciones" class="no-print" style="text-align: right;">
-                    <button onclick="editarLocal('${reg.id}')" title="Editar / Avanzar Paso" style="border:1px solid var(--border); background:#ffffff; cursor:pointer; padding:6px 8px; border-radius:4px; color: var(--primary); margin-right: 4px;"><i class="fa-solid fa-pen-to-square"></i></button>
-                    <button onclick="eliminarDoc('${reg.id}')" title="Eliminar" style="border:1px solid var(--border); background:#ffffff; cursor:pointer; padding:6px 8px; border-radius:4px; color: var(--danger);"><i class="fa-solid fa-trash-can"></i></button>
+                <td><b>${reg.numero_consecutivo ?? ''}</b></td>
+                <td>${reg.url_evidencia || (reg.evidencias && reg.evidencias.length) ? `<img src="${reg.evidencias?.[0] || reg.url_evidencia}" style="width:35px;height:30px;object-fit:cover;cursor:pointer;border-radius:4px;" onclick="abrirCarrusel(0, 'TABLA', '${reg.id}')">` : 'Sin foto'}</td>
+                <td>${reg.fecha_registro || ''}</td>
+                <td><b>${reg.nombre || reg.cap_nombre || reg.exp_recibe || 'N/A'}</b></td>
+                <td>${reg.edad || reg.fecha_cita_crisver || ''}</td>
+                <td>${reg.nombre_solicitante || reg.cap_lugar || reg.exp_tipo || 'MISMO'}</td>
+                <td>${reg.colonia || reg.cap_tema || ''}</td>
+                <td><b>${reg.programa || ''}</b><br>${reg.asunto || ''}</td>
+                <td><span class="status-badge bg-${reg.estatus?.toLowerCase().replace(" ","-") || 'pendiente'}">${reg.estatus || 'PENDIENTE'}</span></td>
+                <td>${reg.usuario || ''}</td>
+                <td class="no-print" style="text-align: right;">
+                    <button onclick="editarLocal('${reg.id}')" style="border:1px solid var(--border); background:#fff; cursor:pointer; padding:6px 8px; border-radius:4px; color:var(--primary);"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="eliminarDoc('${reg.id}')" style="border:1px solid var(--border); background:#fff; cursor:pointer; padding:6px 8px; border-radius:4px; color:var(--danger);"><i class="fa-solid fa-trash-can"></i></button>
                 </td>
             </tr>
-            `;
-        }).join('');
+        `).join('');
 
         document.getElementById('page-info').innerText = `Página ${paginaActual} de ${totalPaginas}`;
         document.getElementById('btn-prev').disabled = paginaActual <= 1;
@@ -1081,51 +764,268 @@
     }
 
     window.eliminarDoc = async (id) => {
-        const result = await Swal.fire({
-            title: '¿Eliminar registro?',
-            text: "Esta acción no se puede deshacer.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: 'var(--danger)',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'Sí, eliminar',
-            cancelButtonText: 'Cancelar'
-        });
-
-        if (result.isConfirmed) {
-            try {
-                await deleteDoc(doc(db, "trabajo_social", id));
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Eliminado',
-                    text: 'El registro ha sido eliminado correctamente.',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-            } catch (e) {
-                Swal.fire({ icon: 'error', title: 'Error', text: e.message, confirmButtonColor: 'var(--primary)' });
-            }
+        if((await Swal.fire({ title: '¿Eliminar?', icon: 'warning', showCancelButton: true })).isConfirmed) {
+            await deleteDoc(doc(db, "trabajo_social", id));
+            Swal.fire({ icon: 'success', title: 'Eliminado', timer: 1000, showConfirmButton: false });
         }
     };
     
     window.exportarExcel = () => {
-        const datosLimpios = datosFiltrados.map(({ evidencias, url_evidencia, id, ...rest }) => rest);
-        const ws = XLSX.utils.json_to_sheet(datosLimpios);
+        const ws = XLSX.utils.json_to_sheet(datosFiltrados.map(({ evidencias, url_evidencia, id, ...rest }) => rest));
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Trabajo_Social");
         XLSX.writeFile(wb, "Reporte_Trabajo_Social.xlsx");
     };
     
-    window.cambiarPagina = (d) => { 
-        paginaActual += d; 
-        renderTabla(); 
+    // --- FUNCIÓN PARA GENERAR REPORTE MENSUAL EN WORD CON LOGOS Y NUMÉRICA CENTRADA ---
+    window.generarReporteWordMensual = () => {
+        const mesAnio = document.getElementById('mes-reporte').value; // Formato "YYYY-MM"
+        if(!mesAnio) {
+            Swal.fire({ icon: 'warning', title: 'Seleccione un mes' });
+            return;
+        }
+
+        const [anio, mesNum] = mesAnio.split('-');
+        const nombresMeses = ["", "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+        const nombresMesesCap = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const nombreMesStr = nombresMeses[parseInt(mesNum)];
+        const nombreMesCap = nombresMesesCap[parseInt(mesNum)];
+
+        const ultimoDia = new Date(parseInt(anio), parseInt(mesNum), 0).getDate();
+        const registrosMes = todosLosDatos.filter(r => coincideMes(r.fecha_registro, mesAnio));
+
+        let cSolEstatalTram = 0, cSolEstatalRec = 0, cSolEstatalEnt = 0, cSolEstatalBen = 0;
+        let cFuncPropioTram = 0, cFuncPropioRec = 0, cFuncPropioEnt = 0, cFuncPropioBen = 0;
+        let cTransporte = 0;
+        let cAtaud = 0;
+        let cRegCivil = 0;
+        let cAtencionCiudadana = 0;
+        let cCrisverAutismo = 0;
+        let cCrisverHipoacusia = 0;
+        let cCrisverProtesis = 0;
+        let cVisitasDom = 0;
+        let cCrisverVisitas = 0;
+
+        registrosMes.forEach(r => {
+            const prog = (r.programa || "").toUpperCase();
+            const asu = (r.asunto || "").toUpperCase();
+            const det = (r.detalle_asunto || "").toUpperCase();
+            const obs = (r.observaciones || "").toUpperCase();
+            const dts = (r.detalles || "").toUpperCase();
+            const est = (r.estatus || "").toUpperCase();
+
+            if ((prog === "SOLICITUD" && (asu.includes("APOYO") || asu.includes("FUNCIONAL"))) || asu.includes("ESTATAL")) {
+                cSolEstatalTram++;
+                if (r.respuesta_correo === "APROBADO" || est === "ENTREGADO" || est === "ATENDIDO") cSolEstatalRec++;
+                if (est === "ENTREGADO" || est === "ATENDIDO") cSolEstatalEnt++;
+                cSolEstatalBen++;
+            }
+            if (asu.includes("MUNICIPAL") || asu.includes("PROPIO")) {
+                cFuncPropioTram++;
+                cFuncPropioRec++;
+                if (est === "ENTREGADO" || est === "ATENDIDO") cFuncPropioEnt++;
+                cFuncPropioBen++;
+            }
+            if (asu.includes("TRANSPORTE")) cTransporte++;
+            if (asu.includes("ATAUD")) cAtaud++;
+            if (asu.includes("REGISTRO CIVIL")) cRegCivil++;
+            if (prog === "ATENCION CIUDADANA" || asu.includes("CIUDADANIA")) cAtencionCiudadana++;
+            if (det.includes("AUTISMO") || asu.includes("AUTISMO") || dts.includes("AUTISMO") || obs.includes("AUTISMO")) cCrisverAutismo++;
+            if (det.includes("HIPOACUSIA") || asu.includes("HIPOACUSIA") || dts.includes("HIPOACUSIA") || obs.includes("HIPOACUSIA")) cCrisverHipoacusia++;
+            if (det.includes("PROTESIS") || asu.includes("PROTESIS") || dts.includes("PROTESIS") || obs.includes("PROTESIS")) cCrisverProtesis++;
+            if (prog.includes("VISITA DOMICILIARIA")) cVisitasDom++;
+            if (asu.includes("CRISVER") || det.includes("CRISVER") || dts.includes("CRISVER")) cCrisverVisitas++;
+        });
+
+        const totalPersonas = registrosMes.length;
+        const valOrEmpty = (v) => v > 0 ? v : "";
+
+        // URL base64 o enlaces directos de los logos institucionales provistos
+        const logoAyuntamiento = "https://i.imgur.com/2Y0qQo2.png"; // Logo Ayuntamiento (Izquierda)
+        const logoDif = "https://i.imgur.com/4l5O4nB.png"; // Logo DIF (Derecha)
+        const logoPie = "https://i.imgur.com/8xLqP1z.png"; // Logotipo pie de página ("Amor que protege")
+
+        const contenidoHtml = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head><meta charset='utf-8'><title>Reporte Mensual</title></head>
+            <body style="font-family: Arial, sans-serif; font-size: 10.5pt; line-height: 1.25; color: #000;">
+                
+                <!-- ENCABEZADO CON LOGOS INSTITUCIONALES -->
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <tr>
+                        <td style="width: 35%; text-align: left; vertical-align: middle;">
+                            <img src="${logoAyuntamiento}" style="max-height: 70px; width: auto;" alt="Ayuntamiento">
+                        </td>
+                        <td style="width: 30%;"></td>
+                        <td style="width: 35%; text-align: right; vertical-align: middle;">
+                            <img src="${logoDif}" style="max-height: 60px; width: auto;" alt="DIF Municipal">
+                        </td>
+                    </tr>
+                </table>
+
+                <div style="text-align: right; font-weight: bold; margin-bottom: 22px;">
+                    San Andrés Tuxtla Ver. A ${ultimoDia} de ${nombreMesCap} ${anio}
+                </div>
+                <div style="font-weight: bold; margin-bottom: 16px;">
+                    LIC. LORENA GONZALEZ KEGEL<br>
+                    DIRECTORA DEL SISTEMA MUNICIPAL DIF<br>
+                    DE SAN ANDRES TUXTLA, VERACRUZ.
+                </div>
+                <div style="font-weight: bold; letter-spacing: 3px; margin-bottom: 16px;">
+                    PRESENTE
+                </div>
+                <p style="text-align: justify; margin-bottom: 16px;">
+                    Sean estas líneas portadoras de un cordial saludo, por este medio le informo las funciones y actividades del área de Trabajo Social realizadas durante el mes de <b>${nombreMesStr}</b> del ${anio}, las cuales se describen a continuación:
+                </p>
+                <div style="font-weight: bold; margin-bottom: 10px;">ACTIVIDADES:</div>
+                
+                <table border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 9.5pt;">
+                    <thead>
+                        <tr style="background-color: #e6b8b7; font-weight: bold; text-align: center;">
+                            <th style="width: 6%; border: 1px solid #000; vertical-align: middle;">N°</th>
+                            <th style="width: 34%; border: 1px solid #000; text-align: left; vertical-align: middle;">APOYO MES DE ${nombreMesStr}</th>
+                            <th style="width: 15%; border: 1px solid #000; vertical-align: middle; text-align: center;">TRAMITADO</th>
+                            <th style="width: 15%; border: 1px solid #000; vertical-align: middle; text-align: center;">RECIBIDO</th>
+                            <th style="width: 15%; border: 1px solid #000; vertical-align: middle; text-align: center;">ENTREGADO</th>
+                            <th style="width: 15%; border: 1px solid #000; vertical-align: middle; text-align: center;">BENEFICIARIOS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">1</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">SOLICITUD DE APOYOS FUNCIONALES ESTATAL</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"><b>${cSolEstatalTram}</b></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${valOrEmpty(cSolEstatalRec)}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"><b>${cSolEstatalEnt}</b></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"><b>${cSolEstatalBen}</b></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">2</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">FUNCIONALES RECURSO PROPIO ENTREGADOS</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cFuncPropioTram}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${valOrEmpty(cFuncPropioRec)}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cFuncPropioEnt}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cFuncPropioBen}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">3</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">EST. SOC. TRANSPORTE</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cTransporte}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cTransporte}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">4</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">ESTUDIOS SOC. ATAUD</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cAtaud}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cAtaud}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">5</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">EST. SOC. REGISTRO CIVIL</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cRegCivil}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cRegCivil}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">6</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">EST. SOC. ATENCION CIUDADANIA</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cAtencionCiudadana}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cAtencionCiudadana}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">7</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">MENORES AUTISMO CRISVER</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverAutismo}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverAutismo}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">8</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">MENORES CON HIPOACUSIA CRISVER</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverHipoacusia}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverHipoacusia}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">9</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">ADULTO PROTESIS CRISVER</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverProtesis}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverProtesis}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">10</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">VISITAS DOMICILIARIAS</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cVisitasDom}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cVisitasDom}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">11</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">VISITAS A CRISVER</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverVisitas}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverVisitas}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000;"></td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">TOTAL DE PERSONAS ATENDIDAS</td>
+                            <td style="border: 1px solid #000;"></td>
+                            <td style="border: 1px solid #000;"></td>
+                            <td style="border: 1px solid #000;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle; font-weight: bold;">${totalPersonas}<br>PERSONAS</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <br><br><br>
+                <div style="text-align: center; margin-top: 30px; font-weight: bold;">
+                    ATENTAMENTE<br><br><br>
+                    ____________________________________<br>
+                    LIC. JUANITA CONCEPCION CAMPECHANO QUEZADA<br>
+                    ENCARGADA DEL DEPARTAMENTO<br>
+                    DE TRABAJO SOCIAL DEL SMDIF
+                </div>
+
+                <!-- PIE DE PÁGINA CON LOGOTIPO "AMOR QUE PROTEGE" -->
+                <div style="text-align: center; margin-top: 50px;">
+                    <img src="${logoPie}" style="max-height: 45px; width: auto;" alt="Amor que protege">
+                </div>
+            </body>
+            </html>
+        `;
+
+        const converted = htmlDocx.asBlob(contenidoHtml);
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(converted);
+        link.download = `Reporte_Mensual_${nombreMesStr}_${anio}.docx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        Swal.fire({
+            icon: 'success',
+            title: '¡Reporte Word Generado!',
+            text: `Se descargó el reporte de ${nombreMesStr} ${anio} con formato oficial y logos.`,
+            timer: 2500,
+            showConfirmButton: false
+        });
     };
-    
-    window.actualizarFilasPorPagina = () => { 
-        filasPorPagina = parseInt(document.getElementById('rows-per-page').value); 
-        paginaActual = 1; 
-        renderTabla(); 
-    };
+
+    window.cambiarPagina = (d) => { paginaActual += d; renderTabla(); };
+    window.actualizarFilasPorPagina = () => { filasPorPagina = parseInt(document.getElementById('rows-per-page').value); paginaActual = 1; renderTabla(); };
 
     function establecerUsuarioPorDefecto() {
         const nombreSocial = sessionStorage.getItem('social_nombre') || sessionStorage.getItem('usuario_nombre');
@@ -1137,60 +1037,22 @@
             saludoContenedor.innerText = `${tituloSocial} ${nombreSocial}`.trim();
             saludoContenedor.style.display = 'inline-block';
         }
-
         if (nombreSocial && selectUsuario) {
             for (let i = 0; i < selectUsuario.options.length; i++) {
-                if (selectUsuario.options[i].value === nombreSocial) {
-                    selectUsuario.selectedIndex = i;
-                    break;
-                }
+                if (selectUsuario.options[i].value === nombreSocial) { selectUsuario.selectedIndex = i; break; }
             }
         }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        const asuntoSelect = document.getElementById('asunto');
-        if (asuntoSelect) {
-            asuntoSelect.addEventListener('change', window.evaluarVistaAsunto);
-        }
-
-        const nombreInput = document.getElementById('nombre');
-        const solicitanteInput = document.getElementById('nombre_solicitante');
-
-        if (nombreInput) {
-            nombreInput.addEventListener('blur', window.revisarNombreDuplicado);
-        }
-        if (solicitanteInput) {
-            solicitanteInput.addEventListener('blur', window.revisarNombreDuplicado);
-        }
-
+        document.getElementById('asunto')?.addEventListener('change', window.evaluarVistaAsunto);
+        document.getElementById('nombre')?.addEventListener('blur', window.revisarNombreDuplicado);
+        document.getElementById('nombre_solicitante')?.addEventListener('blur', window.revisarNombreDuplicado);
         establecerUsuarioPorDefecto();
-
-        document.addEventListener('keydown', (e) => {
-            const modal = document.getElementById('modal-foto');
-            if (modal.style.display === 'flex') {
-                if (e.key === 'ArrowLeft') window.cambiarImagenCarrusel(-1);
-                if (e.key === 'ArrowRight') window.cambiarImagenCarrusel(1);
-                if (e.key === 'Escape') window.cerrarCarrusel();
-            }
-        });
     });
 
-    establecerUsuarioPorDefecto();
-
     window.cerrarSesion = async () => {
-        const result = await Swal.fire({
-            title: '¿Cerrar sesión?',
-            text: '¿Está seguro de que desea salir del sistema?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: 'var(--primary)',
-            cancelButtonColor: '#64748b',
-            confirmButtonText: 'Sí, salir',
-            cancelButtonText: 'Cancelar'
-        });
-
-        if (result.isConfirmed) {
+        if((await Swal.fire({ title: '¿Cerrar sesión?', icon: 'question', showCancelButton: true })).isConfirmed) {
             sessionStorage.clear();
             window.location.href = 'index.html';
         }
