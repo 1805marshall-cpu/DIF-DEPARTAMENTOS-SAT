@@ -61,7 +61,7 @@
                     </div>
                     <div class="form-group"><label>Asunto</label><select id="asunto" onchange="evaluarVistaAsunto()"><option value="">-- SELECCIONE PROGRAMA --</option></select></div>
                     
-                    <div class="form-group" id="container-detalle-especifico" style="display:none;"><label id="label-detalle">Diagnóstico / Apoyo</label><select id="detalle_asunto"></select></div>
+                    <div class="form-group" id="container-detalle-especifico" style="display:none;"><label id="label-detalle">Tipo de Apoyo Específico</label><select id="detalle_asunto"></select></div>
                     <div class="form-group"><label>Folio Expediente</label><input type="text" id="folio_expediente" placeholder="Opcional"></div>
                     <div class="form-group" style="grid-column: span 2;"><label>Detalles Específicos</label><input type="text" id="detalles" placeholder="Breve descripción"></div>
                 </div>
@@ -255,12 +255,13 @@
                     <option value="asc">Del 1 al último</option>
                 </select>
                 <select id="rows-per-page" onchange="actualizarFilasPorPagina()">
-                <option value="10" selected>10</option>
-                <option value="20" >20</option>
-                <option value="30" >30</option>
-                <option value="50">50</option>
-                <option value="100" >100</option>
-                <option value="500" >500</option>
+                    <option value="10"selected>10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                    <option value="100" >100</option>
+                    <option value="500">500</option>
                 </select>
             </div>
         </div>
@@ -288,7 +289,7 @@
                     <th>Edad / Cita CRISVER / Entrega</th>
                     <th>Solicitante / Lugar / Tipo Exp</th>
                     <th>Col / Loc / Tema / Cantidad</th>
-                    <th>Programa, Asunto y Etapa</th>
+                    <th>Programa, Asunto y Tipo de Apoyo</th>
                     <th>Estatus</th>
                     <th>Encargado</th>
                     <th class="no-print">Acciones</th>
@@ -674,11 +675,33 @@
         const detSelect = document.getElementById('detalle_asunto');
         const contDet = document.getElementById('container-detalle-especifico');
         const asu = asuSelect.value;
-        if (asu && asu.includes("APOYO")) {
-            detSelect.innerHTML = '<option value="">-- SELECCIONAR --</option>';
-            ["SILLA DE RUEDAS ESTANDAR", "BASTÓN", "MULETAS", "ANDADERA"].forEach(s => { const o = document.createElement('option'); o.value = s; o.textContent = s; detSelect.appendChild(o); });
+
+        const tiposApoyoFuncional = [
+            "SILLA DE RUEDAS ESTANDAR ADULTO", 
+            "SILLA DE RUEDAS SOBREPESO", 
+            "SILLA DE RUEDAS PCI", 
+            "SILLA DE RUEDAS PCA", 
+            "SILLA DE RUEDAS JUVENIL", 
+            "SILLA DE RUEDAS INFANTIL", 
+            "BASTÓN PUÑO ALEMÁN", 
+            "BASTÓN 4 PUNTOS", 
+            "MULETAS", 
+            "ANDADERA"
+        ];
+
+        if (asu && (asu.includes("APOYO FUNCIONAL") || asu.includes("APOYOS FUNCIONALES"))) {
+            detSelect.innerHTML = '<option value="">-- SELECCIONAR TIPO DE APOYO --</option>';
+            tiposApoyoFuncional.forEach(s => { 
+                const o = document.createElement('option'); 
+                o.value = s; 
+                o.textContent = s; 
+                detSelect.appendChild(o); 
+            });
             contDet.style.display = 'block';
-        } else { contDet.style.display = 'none'; }
+        } else { 
+            contDet.style.display = 'none'; 
+            detSelect.innerHTML = '';
+        }
     };
 
     window.abrirCarrusel = (index, origen = 'FORMULARIO', idDoc = null) => {
@@ -748,7 +771,7 @@
                 <td>${reg.edad || reg.fecha_cita_crisver || ''}</td>
                 <td>${reg.nombre_solicitante || reg.cap_lugar || reg.exp_tipo || 'MISMO'}</td>
                 <td>${reg.colonia || reg.cap_tema || ''}</td>
-                <td><b>${reg.programa || ''}</b><br>${reg.asunto || ''}</td>
+                <td><b>${reg.programa || ''}</b><br>${reg.asunto || ''}${reg.detalle_asunto ? `<br><span style="color:var(--primary); font-size:10px; font-weight:600;"><i class="fa-solid fa-check"></i> ${reg.detalle_asunto}</span>` : ''}</td>
                 <td><span class="status-badge bg-${reg.estatus?.toLowerCase().replace(" ","-") || 'pendiente'}">${reg.estatus || 'PENDIENTE'}</span></td>
                 <td>${reg.usuario || ''}</td>
                 <td class="no-print" style="text-align: right;">
@@ -840,7 +863,7 @@
         const totalPersonas = registrosMes.length;
         const valOrEmpty = (v) => v > 0 ? v : "";
 
-        // URL base64 o enlaces directos de los logos institucionales provistos
+        // Enlaces directos a las imágenes institucionales provistas
         const logoAyuntamiento = "https://i.imgur.com/2Y0qQo2.png"; // Logo Ayuntamiento (Izquierda)
         const logoDif = "https://i.imgur.com/4l5O4nB.png"; // Logo DIF (Derecha)
         const logoPie = "https://i.imgur.com/8xLqP1z.png"; // Logotipo pie de página ("Amor que protege")
