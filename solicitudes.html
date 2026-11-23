@@ -3,355 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DIF 2026 | Trabajo Social </title>
+    <title>DIF 2026 | Trabajo Social</title>
+    <!-- Dependencias Únicas -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Librería para exportar a Word (.docx) -->
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <style>
-    :root { 
-        --primary: #1e40af; --success: #059669; --warning: #f59e0b; 
-        --danger: #dc2626; --bg: #f8fafc; --social: #1e40af; --excel: #1d6f42;
-    }
-    
-    body { 
-        font-family: 'Segoe UI', system-ui, sans-serif; 
-        background: var(--bg); 
-        margin: 0; 
-        color: #1e293b; 
-        font-size: 13px; 
-    }
-    
-    /* HEADER RESPONSIVO */
-    header { 
-        background: #fff; 
-        padding: 15px 20px; 
-        border-bottom: 3px solid var(--social); 
-        display: flex; 
-        flex-direction: row;
-        justify-content: space-between; 
-        align-items: center; 
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
-    }
-    
-    .container { 
-        max-width: 1850px; 
-        margin: 10px auto; 
-        padding: 0 15px; 
-    }
-    
-    .card { 
-        background: #fff; 
-        padding: 20px; 
-        border-radius: 12px; 
-        box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
-        border: 1px solid #e2e8f0; 
-        margin-bottom: 20px; 
-    }
-    
-    h3 { 
-        margin: 0 0 15px 0; 
-        font-size: 11px; 
-        color: var(--social); 
-        text-transform: uppercase; 
-        border-bottom: 1px solid #f1f5f9; 
-        padding-bottom: 8px; 
-        letter-spacing: 1px; 
-    }
-    
-    /* REJILLA FORMULARIO AUTOMÁTICA */
-    .form-grid { 
-        display: grid; 
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
-        gap: 12px; 
-    }
-    
-    .form-group { 
-        display: flex; 
-        flex-direction: column; 
-    }
-    
-    label { 
-        font-size: 9px; 
-        font-weight: bold; 
-        color: #64748b; 
-        text-transform: uppercase; 
-        margin-bottom: 3px; 
-    }
-    
-    input, select, textarea { 
-        padding: 9px; 
-        border: 1px solid #cbd5e1; 
-        border-radius: 6px; 
-        font-size: 12px; 
-        outline: none; 
-        transition: 0.2s; 
-        width: 100%;
-        box-sizing: border-box;
-    }
-    
-    input:focus { 
-        border-color: var(--social); 
-        box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.1); 
-    }
-    
-    /* BOTONES RESPONSIVOS */
-    .btn-box { 
-        display: flex; 
-        gap: 8px; 
-        margin-top: 20px; 
-        flex-wrap: wrap; 
-    }
-    
-    .btn { 
-        padding: 10px 16px; 
-        border: none; 
-        border-radius: 6px; 
-        font-weight: bold; 
-        cursor: pointer; 
-        font-size: 10px; 
-        color: white; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center;
-        gap: 6px; 
-        text-transform: uppercase; 
-        transition: 0.3s; 
-        flex: 1 1 auto; /* Permite que los botones se acomoden al ancho en pantallas chicas */
-        min-width: 120px;
-    }
-    
-    .btn:hover { 
-        opacity: 0.9; 
-        transform: translateY(-1px); 
-    }
-    
-    /* CAJA DE BÚSQUEDA RESPONSIVA */
-    .search-box { 
-        background: #f1f5f9; 
-        padding: 15px; 
-        border-radius: 10px; 
-        border: 1px solid #e2e8f0; 
-        margin-bottom: 15px; 
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 15px; 
-        align-items: flex-end; 
-    }
-    
-    /* CONTENEDOR DE TABLAS */
-    .table-wrap { 
-        background: #fff; 
-        border-radius: 12px; 
-        border: 1px solid #e2e8f0; 
-        overflow-x: auto; 
-        width: 100%;
-    }
-    
-    table { 
-        width: 100%; 
-        border-collapse: collapse; 
-    }
-    
-    th { 
-        background: #f8fafc; 
-        padding: 12px; 
-        text-align: left; 
-        font-size: 10px; 
-        color: #475569; 
-        border-bottom: 2px solid #e2e8f0; 
-        text-transform: uppercase; 
-    }
-    
-    td { 
-        padding: 12px; 
-        border-bottom: 1px solid #f1f5f9; 
-        vertical-align: middle; 
-    }
-    
-    tr:hover { 
-        background-color: #fcfcfc; 
-    }
-    
-    /* BADGES */
-    .status-badge { 
-        padding: 4px 10px; 
-        border-radius: 20px; 
-        font-size: 10px; 
-        font-weight: 800; 
-        text-transform: uppercase; 
-        display: inline-block;
-    }
-    
-    .bg-atendido, .bg-realizado, .bg-validado { background: #dcfce7; color: #15803d; }
-    .bg-entregado, .bg-en-proceso { background: #e0f2fe; color: #0369a1; }
-    .bg-pendiente { background: #ff9849; color: #b45309; }
-    .bg-cancelado { background: #f77979; color: #b40909; }
-    
-    /* PAGINACIÓN RESPONSIVA */
-    .paginacion-bar { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        background: #fff; 
-        padding: 12px 20px; 
-        border-radius: 10px; 
-        margin-bottom: 10px; 
-        border: 1px solid #e2e8f0; 
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-    
-    .btn-pag { 
-        padding: 6px 12px; 
-        border: 1px solid #cbd5e1; 
-        background: white; 
-        border-radius: 4px; 
-        cursor: pointer; 
-        font-size: 11px; 
-    }
-    
-    .btn-pag:disabled { 
-        background: #e2e8f0; 
-        cursor: not-allowed; 
-        color: #94a3b8; 
-    }
-    
-    /* =========================================================================
-       MEDIA QUERIES PARA RESPONSIVIDAD EXTREMA (MÓVILES Y TABLETS)
-       ========================================================================= */
-    @media (max-width: 768px) {
-        header {
-            flex-direction: column;
-            gap: 10px;
-            text-align: center;
-            padding: 15px;
-        }
-
-        .container {
-            padding: 0 8px;
-        }
-
-        .card {
-            padding: 15px;
-        }
-
-        /* TRANSFORMACIÓN DE TABLA A MODO TARJETA (CELULARES) */
-        .table-wrap {
-            border: none;
-            background: transparent;
-        }
-
-        table, thead, tbody, th, td, tr { 
-            display: block; 
-        }
-
-        thead tr { 
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
-        }
-
-        tr { 
-            background: #ffffff;
-            border: 1px solid #e2e8f0; 
-            border-radius: 10px;
-            margin-bottom: 15px;
-            padding: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        tr:hover {
-            background-color: #ffffff;
-        }
-
-        td { 
-            border: none;
-            border-bottom: 1px solid #f1f5f9; 
-            position: relative;
-            padding-left: 45% !important; 
-            text-align: right;
-            font-size: 12px;
-            min-height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-
-        td:last-child {
-            border-bottom: 0;
-        }
-
-        /* INYECTA LOS NOMBRE DE LAS COLUMNAS EN DISPOSITIVOS MÓVILES */
-        td:before { 
-            position: absolute;
-            top: 50%;
-            left: 12px;
-            transform: translateY(-50%);
-            width: 40%; 
-            padding-right: 10px; 
-            white-space: nowrap;
-            text-align: left;
-            font-weight: bold;
-            color: #64748b;
-            font-size: 9px;
-            text-transform: uppercase;
-            content: attr(data-label); /* Utiliza el atributo data-label de tus celdas */
-        }
+        :root{--primary:#4f46e5;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--info:#0284c7;--bg:#f8fafc;--text:#334155;--border:#e2e8f0}
+        body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);margin:0;color:var(--text);font-size:13px;letter-spacing:-.01em}
+        header{background:#fff;padding:12px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+        .container{max-width:1400px;margin:20px auto;padding:0 20px}
+        .card,.search-box,.paginacion-bar,.table-wrap{background:#fff;border-radius:8px;border:1px solid var(--border)}
+        .card{padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.02),0 1px 2px rgba(0,0,0,.04);margin-bottom:20px}
+        h3{margin:0 0 16px;font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.05em}
+        .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+        .form-group{display:flex;flex-direction:column}
+        label{font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;margin-bottom:6px;letter-spacing:.03em}
+        input,select,textarea{padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:12px;outline:0;background:#fff;color:var(--text);transition:all .2s;width:100%;box-sizing:border-box}
+        input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.08)}
+        input:disabled,select:disabled{background:#f1f5f9!important;cursor:not-allowed!important;color:#94a3b8!important;border-color:#e2e8f0!important}
+        .file-upload-wrapper{position:relative;display:inline-block;width:100%}
+        .file-upload-label{display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;background:#f1f5f9;border:2px dashed var(--border);border-radius:6px;color:#475569;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+        .file-upload-label:hover{background:#e2e8f0;border-color:var(--primary);color:var(--primary)}
+        .file-upload-input{display:none}
+        .btn-box{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+        .btn{padding:8px 16px;border:1px solid transparent;border-radius:6px;font-weight:500;cursor:pointer;font-size:11px;color:#fff;background:var(--primary);display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background .2s,transform .1s}
+        .btn:hover{opacity:.92}
+        .btn-secondary{background:#fff;color:#475569;border-color:var(--border)}
+        .btn-secondary:hover{background:#f8fafc;color:#0f172a}
+        .search-box{padding:16px;margin-bottom:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;align-items:flex-end}
+        .table-wrap{overflow-x:auto;width:100%}
+        table{width:100%;border-collapse:collapse}
+        th{background:#f8fafc;padding:10px 16px;text-align:left;font-size:10px;font-weight:600;color:#64748b;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.03em}
+        td{padding:12px 16px;border-bottom:1px solid #f1f5f9;vertical-align:middle;color:#334155}
+        tr:hover{background-color:#fafafa}
+        .status-badge{padding:3px 8px;border-radius:4px;font-size:10px;font-weight:500;text-transform:uppercase;display:inline-flex;align-items:center;gap:4px}
+        .preview-container{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+        .thumb-box{position:relative;width:55px;height:55px;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+        .thumb-box img{width:100%;height:100%;object-fit:cover;cursor:pointer}
+        .thumb-box .btn-remove-img{position:absolute;top:2px;right:2px;background:rgba(239,68,68,.9);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+        .thumb-box .btn-remove-img:hover{background:#dc2626}
+        .bg-atendido,.bg-realizado,.bg-validado{background:#ecfdf5;color:#047857}
+        .bg-entregado,.bg-en-proceso{background:#f0f9ff;color:#0369a1}
+        .bg-pendiente{background:#fffbeb;color:#b45309}
+        .bg-cancelado,.bg-negativo{background:#fef2f2;color:#b91c1c}
+        .paginacion-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;margin-top:15px;flex-wrap:wrap;gap:10px}
+        .btn-pag{padding:6px 12px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;font-size:11px;color:#475569}
+        .btn-pag:hover:not(:disabled){background:#f8fafc}
+        .btn-pag:disabled{background:#f1f5f9;cursor:not-allowed;color:#cbd5e1}
+        .modal-carrusel-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.2);color:#fff;border:none;font-size:24px;padding:12px 16px;cursor:pointer;border-radius:50%;transition:background .2s;user-select:none}
+        .modal-carrusel-nav:hover{background:rgba(255,255,255,.4)}
+        .modal-carrusel-prev{left:20px}
+        .modal-carrusel-next{right:20px}
         
-        /* Ajustador para los formularios interactivos en línea */
-        td .btn-admin, td button, td input, td select {
-            width: auto;
-            max-width: 100%;
-        }
-        
-        .paginacion-bar {
-            flex-direction: column;
-            text-align: center;
-        }
-    }
+        /* Estilos para el módulo de turnos en espera */
+        .card-turno-recepcion { background: #f0fdf4; border-left: 5px solid var(--success); padding: 14px 18px; margin-bottom: 12px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; border: 1px solid #bbf7d0; }
+        .card-turno-recepcion .info h4 { margin: 0 0 4px 0; color: #166534; font-size: 13px; font-weight: 700; }
+        .card-turno-recepcion .info p { margin: 0; color: #475569; font-size: 11px; }
+        .badge-espera { background: #fef3c7; color: #b45309; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; text-transform: uppercase; }
 
-    @media print { 
-        .no-print { display: none !important; } 
-    }
-</style>
+        @media (max-width:768px){
+            header{flex-direction:column;gap:8px;text-align:center;padding:12px}
+            .container{padding:0 10px}
+            .table-wrap{border:none;background:0 0}
+            table,thead,tbody,th,td,tr{display:block}
+            thead tr{position:absolute;top:-9999px;left:-9999px}
+            tr{background:#fff;border:1px solid var(--border);border-radius:8px;margin-bottom:12px;padding:12px;box-shadow:0 1px 2px rgba(0,0,0,.02)}
+            td{border:none;border-bottom:1px solid #f8fafc;position:relative;padding-left:45%!important;text-align:right;font-size:12px;min-height:32px;display:flex;align-items:center;justify-content:flex-end}
+            td:last-child{border-bottom:0}
+            td:before{position:absolute;top:50%;left:12px;transform:translateY(-50%);width:40%;padding-right:10px;white-space:nowrap;text-align:left;font-weight:600;color:#64748b;font-size:10px;text-transform:uppercase;content:attr(data-label)}
+            .paginacion-bar{flex-direction:column;text-align:center}
+        }
+        @media print{.no-print{display:none!important}}
+    </style>
 </head>
 <body>
 
 <header class="no-print">
-    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-        <div style="display: flex; align-items: center; gap: 20px;">
-            <h2 style="margin:0; color: var(--social); font-size: 18px;"><i class="fas fa-users-cog"></i> TRABAJO SOCIAL DIF</h2>
-            <span id="bienvenida-usuario" style="font-size: 13px; font-weight: bold; color: #475569; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; display: none;"></span>
+    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <h2 style="margin:0; color: var(--text); font-size: 15px; font-weight: 600;"><i class="fa-solid fa-users-gear" style="color: var(--primary);"></i> TRABAJO SOCIAL DIF</h2>
+            <span id="bienvenida-usuario" style="font-size: 11px; font-weight: 500; color: #475569; background: #f1f5f9; padding: 4px 10px; border-radius: 4px; display: none;"></span>
         </div>
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <button class="btn" style="background: #6366f1;" onclick="location.href='admin_global.html'"><i class="fa-solid fa-chart-pie"></i> DASHBOARD</button>
-            <button class="btn" style="background: var(--danger);" onclick="cerrarSesion()"><i class="fa-solid fa-sign-out-alt"></i> CERRAR SESIÓN</button>
+        
+        <!-- CONTROLES DE REPORTE MENSUAL EN EL ENCABEZADO -->
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 6px; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border);">
+                <label for="mes-reporte" style="font-size: 10px; font-weight: 700; color: #475569; margin: 0;"><i class="fa-solid fa-calendar-days"></i> Mes Reporte:</label>
+                <input type="month" id="mes-reporte" value="2026-10" style="padding: 4px 8px; font-size: 11px; border: 1px solid var(--border); border-radius: 4px; background: #fff;">
+            </div>
+            <button class="btn" style="background: #0078d4; padding: 6px 12px;" onclick="generarReporteWordMensual()"><i class="fa-solid fa-file-word"></i> Descargar Reporte Mensual (Word)</button>
+            <button class="btn btn-secondary" onclick="location.href='admin_global.html'"><i class="fa-solid fa-chart-pie"></i> Dashboard</button>
+            <button class="btn" style="background: var(--danger); padding: 6px 12px;" onclick="cerrarSesion()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Salir</button>
         </div>
     </div>
 </header>
 
+<!-- SECCIÓN DE RECEPCIÓN Y TURNOS EN ESPERA -->
+<div id="panel-recepcion-espera" class="container" style="margin-bottom: 0px; display: none; margin-top: 20px;">
+    <div class="card" style="background: #fdfbf7; border: 2px dashed #f59e0b; padding: 16px;">
+        <h3 style="color: #b45309; margin-bottom: 12px;"><i class="fa-solid fa-bell" style="color: var(--warning);"></i> Ciudadanos en Espera desde Recepción</h3>
+        <div id="lista-espera-recepcion"></div>
+    </div>
+</div>
+
 <div class="container">
     <div class="card no-print">
-        <h3 style="margin-bottom: 25px; color: var(--primary); border-bottom: 2px solid #f1f5f9; padding-bottom: 10px;"><i class="fas fa-folder-plus"></i> Registro de Casos y Apoyos</h3>
+        <h3><i class="fa-solid fa-folder-plus"></i> Registro de Casos y Apoyos</h3>
         <input type="hidden" id="edit-id">
-        <input type="hidden" id="eliminar-foto-flag" value="false">
         
-        <div class="form-grid" style="display: flex; flex-direction: column; gap: 20px;">
-            <fieldset style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #ffffff;">
-                <legend style="padding: 0 15px; font-weight: 800; color: var(--primary); font-size: 13px; text-transform: uppercase;"><i class="fas fa-user-circle"></i> Datos del Beneficiario</legend>
-                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
-                    <div class="form-group"><label>No. Consecutivo</label><input type="text" id="numero_consecutivo" readonly style="background:#f8fafc; font-weight:bold;"></div>
+        <div class="form-grid" style="display: flex; flex-direction: column; gap: 16px;">
+            
+            <!-- 1. DETALLES DEL TRÁMITE O APOYO -->
+            <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #fafafa;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-hand-holding-heart"></i> Detalles del Trámite o Apoyo</legend>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group"><label>No. Consecutivo</label><input type="number" id="numero_consecutivo" style="background:#fff; font-weight:500;" placeholder="Ej. 1"></div>
                     <div class="form-group"><label>Fecha de Registro</label><input type="date" id="fecha_registro"></div>
-                    <div class="form-group" style="grid-column: span 2;"><label>Nombre del Beneficiario</label><input type="text" id="nombre" placeholder="Nombre completo"></div>
-                    <div class="form-group"><label>Teléfono</label><input type="tel" id="telefono" placeholder="294..."></div>
-                    <div class="form-group"><label>Colonia/Localidad</label><input type="text" id="col_loc"></div>
-                    <div class="form-group" style="grid-column: span 2;"><label>Dirección Exacta</label><input type="text" id="direccion"></div>
-                </div>
-            </fieldset>
-
-            <fieldset style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; background-color: #f8fafc;">
-                <legend style="padding: 0 15px; font-weight: 800; color: var(--primary); font-size: 13px; text-transform: uppercase;"><i class="fas fa-hand-holding-heart"></i> Detalles del Trámite o Apoyo</legend>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
                     <div class="form-group">
                         <label>Programa</label>
                         <select id="programa" onchange="actualizarAsuntos()">
@@ -360,95 +131,298 @@
                             <option value="VISITA DOMICILIARIA">VISITA DOMICILIARIA</option>
                             <option value="ATENCION CIUDADANA">ATENCION CIUDADANA</option>
                             <option value="ESTUDIO SOCIOECONOMICO">ESTUDIO SOCIOECONOMICO</option>
+                            <option value="V.D./E. SOCIOECONOMICO">VISITA DOMICILIARIA / ESTUDIO SOCIOECONOMICO</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>Asunto</label><select id="asunto"><option value="">-- SELECCIONE PROGRAMA --</option></select></div>
-                    <div class="form-group" id="container-detalle-especifico" style="display:none;"><label id="label-detalle">ESPECIFICACIÓN</label><select id="detalle_asunto"></select></div>
-                    <div class="form-group"><label>Folio Expediente</label><input type="text" id="folio_expediente" placeholder="Opcional"></div>
-                    <div class="form-group" style="grid-column: span 3;"><label>Detalles Específicos</label><input type="text" id="detalles" placeholder="Breve descripción"></div>
+                    <div class="form-group"><label>Asunto</label><select id="asunto" onchange="evaluarVistaAsunto()"><option value="">-- SELECCIONE PROGRAMA --</option></select></div>
+                    
+                    <div class="form-group" id="container-detalle-especifico" style="display:none;"><label id="label-detalle">Tipo de Apoyo / Cita</label><select id="detalle_asunto"></select></div>
+                    <div class="form-group" id="container-fecha-entrega-apoyo" style="display:none;">
+                        <label id="label-fecha-entrega-apoyo">Fecha de Entrega</label>
+                        <input type="date" id="fecha_entrega_apoyo" onchange="validarEstatusFechaEntrega()">
+                    </div>
+                    <div class="form-group" id="container-folio-expediente"><label>Folio Expediente</label><input type="text" id="folio_expediente" placeholder="Opcional"></div>
+                    <div class="form-group" id="container-detalles-especificos" style="grid-column: span 2;"><label>Detalles Específicos</label><input type="text" id="detalles" placeholder="Breve descripción"></div>
+
+                    <!-- GESTIONADO SÍ / NO Y QUIÉN LO GESTIONÓ -->
+                    <div class="form-group">
+                        <label>Gestionado</label>
+                        <select id="gestionado" onchange="evaluarCampoGestionado()">
+                            <option value="NO">NO</option>
+                            <option value="SI">SI</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="container-gestionado-por" style="display: none; grid-column: span 3;">
+                        <label>¿Quién lo gestionó?</label>
+                        <input type="text" id="gestionado_por" list="sugerencias-gestores" placeholder="Ej. Presidente, Regidora, Síndico o nombre...">
+                        <datalist id="sugerencias-gestores">
+                            <option value="PRESIDENTE MUNICIPAL">
+                            <option value="SÍNDICO ÚNICO">
+                            <option value="REGIDORA">
+                            <option value="REGIDOR">
+                            <option value="DIRECTORA SMDIF">
+                        </datalist>
+                    </div>
                 </div>
             </fieldset>
 
-            <fieldset style="border: 1px solid #cbd5e1; border-radius: 12px; padding: 20px; background-color: #ffffff;">
-                <legend style="padding: 0 15px; font-weight: 800; color: #64748b; font-size: 13px; text-transform: uppercase;"><i class="fas fa-clipboard-check"></i> Estatus y Seguimiento</legend>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+            <!-- FLUJO SECUENCIAL: SEGUIMIENTO ESTATAL / CITAS CRISVER / APOYO ESTATAL (SOLO PARA PROGRAMA SOLICITUD) -->
+            <fieldset id="section-seguimiento-estatal" style="border: 2px solid var(--info); border-radius: 8px; padding: 16px; background-color: #f0f9ff; display: none;">
+                <legend style="padding: 0 8px; font-weight: 700; color: var(--info); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-list-check"></i> AGENDAR CITA CRISVER / ENTREGA APOYO - ESTATAL</legend>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 8px;">
+                    
+                    <!-- PASO 1 & 2: RESPUESTA DE CORREO -->
+                    <div style="background: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+                        <label style="color: var(--info); font-weight: 700;"><i class="fa-solid fa-envelope"></i> Paso 1 y 2: Respuesta Correo Estatal</label>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Estado Correo DIF Estatal</label>
+                            <select id="respuesta_correo" onchange="evaluarFlujoPasos()">
+                                <option value="ESPERANDO_RESPUESTA">📩 Correo Enviado (En Espera)</option>
+                                <option value="APROBADO">✅ Respuesta Positiva (Aprobado)</option>
+                                <option value="RECHAZADO">❌ Respuesta Negativa (Rechazado)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Fecha Respuesta Correo</label>
+                            <input type="date" id="fecha_respuesta_correo">
+                        </div>
+                    </div>
+
+                    <!-- PASO 3: ESTUDIO SOCIOECONÓMICO (SE ACTIVA SOLO SI FUE APROBADO) -->
+                    <div style="background: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+                        <label style="color: var(--primary); font-weight: 700;"><i class="fa-solid fa-file-signature"></i> Paso 3: Estudio Socioeconómico</label>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Validación de Estudio</label>
+                            <select id="estudio_socioeconomico_estado" disabled onchange="evaluarFlujoPasos()">
+                                <option value="PENDIENTE">⏳ Pendiente de Realizar</option>
+                                <option value="VALIDADO">📝 Estudio Realizado y Validado</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Fecha de Validación Estudio</label>
+                            <input type="date" id="fecha_estudio_validado" disabled>
+                        </div>
+                    </div>
+
+                    <!-- PASO 4: AGENDAR CITA CRISVER / ENTREGA APOYO - ESTATAL -->
+                    <div style="background: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid var(--border);">
+                        <label style="color: var(--success); font-weight: 700;"><i class="fa-solid fa-calendar-check"></i> Paso 4: AGENDAR CITA CRISVER / ENTREGA APOYO - ESTATAL</label>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Fecha Cita CRISVER / Entrega Apoyo</label>
+                            <input type="date" id="fecha_cita_crisver" disabled onchange="evaluarFlujoPasos()">
+                        </div>
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>Estatus Final del Proceso</label>
+                            <input type="text" id="resumen_fase" readonly value="PASO 1: EN ESPERA DE CORREO ESTATAL" style="background:#f8fafc; font-weight:600; color:var(--info);">
+                        </div>
+                    </div>
+
+                </div>
+            </fieldset>
+
+            <!-- 2A. DATOS DEL BENEFICIARIO (MODO ESTÁNDAR) -->
+            <fieldset id="section-beneficiario" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-user"></i> Datos del Beneficiario</legend>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group" style="grid-column: span 2;"><label>Nombre Completo del Beneficiario</label><input type="text" id="nombre" placeholder="Nombre completo"></div>
+                    <div class="form-group"><label>Fecha Nacimiento</label><input type="date" id="fecha_nacimiento" onchange="calcularEdad()"></div>
+                    <div class="form-group"><label>Edad Automática</label><input type="text" id="edad" readonly placeholder="Auto" style="background:#f8fafc; font-weight:500;"></div>
+                    
                     <div class="form-group">
-                        <label>Estatus</label>
-                        <select id="estatus" style="background: #fffbeb; font-weight: bold;">
+                        <label>Género</label>
+                        <select id="genero">
+                            <option value="">-- SELECCIONAR --</option>
+                            <option value="MASCULINO">MASCULINO</option>
+                            <option value="FEMENINO">FEMENINO</option>
+                            <option value="OTRO">OTRO</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Teléfono</label><input type="tel" id="telefono" placeholder="294..."></div>
+                    <div class="form-group"><label>Colonia</label><input type="text" id="colonia"></div>
+                    <div class="form-group"><label>Localidad</label><input type="text" id="localidad"></div>
+
+                    <div class="form-group" style="grid-column: span 2;"><label>Dirección Exacta</label><input type="text" id="direccion"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Nombre Completo del Solicitante</label><input type="text" id="nombre_solicitante" placeholder="En caso de acudir un tercero / tutor"></div>
+                </div>
+            </fieldset>
+
+            <!-- 2F. PLÁTICAS PREVENTIVAS (ATENCIÓN CIUDADANA -> PLÁTICAS PREVENTIVAS) -->
+            <fieldset id="section-platicas-preventivas" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff; display: none;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-comments"></i> Pláticas Preventivas</legend>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group"><label>Lugar de la plática</label><input type="text" id="platica_lugar" placeholder="Lugar donde se realiza la plática"></div>
+                    <div class="form-group"><label>Tipo de plática</label><input type="text" id="platica_tipo" placeholder="Tema o tipo de plática preventiva"></div>
+                    <div class="form-group"><label>Cantidad de personas</label><input type="number" id="platica_cantidad_personas" placeholder="0" min="0"></div>
+                    <div class="form-group" style="grid-column: span 3;"><label>Observaciones</label><input type="text" id="platica_observaciones" placeholder="Observaciones de la plática"></div>
+                </div>
+            </fieldset>
+
+            <!-- 2E. TRASLADO Y ACOMPAÑAMIENTO A CRISVER -->
+            <fieldset id="section-traslado-crisver" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff; display: none;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-van-shuttle"></i> Traslado y Acompañamiento a CRISVER</legend>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group"><label>Lugar de salida</label><input type="text" id="crisver_lugar_salida" value="SMDIF" placeholder="SMDIF"></div>
+                    <div class="form-group"><label>Destino</label><input type="text" id="crisver_destino" value="XALAPA CRISVER" placeholder="XALAPA CRISVER"></div>
+                    <div class="form-group"><label>Cantidad de personas</label><input type="number" id="crisver_cantidad_personas" placeholder="0" min="0"></div>
+                </div>
+            </fieldset>
+
+            <!-- 2D. ENTREGA DE APOYOS (ATENCIÓN CIUDADANA -> APOYOS FUNCIONALES ESTATALES Y MUNICIPALES) -->
+            <fieldset id="section-entrega-apoyos" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff; display: none;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-wheelchair"></i> Entrega de Apoyos</legend>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group"><label>Lugar del evento</label><input type="text" id="apoyo_lugar_evento" placeholder="Lugar donde se realiza la entrega"></div>
+                    <div class="form-group"><label>Fecha del evento</label><input type="date" id="apoyo_fecha_evento"></div>
+                    <div class="form-group"><label>Numero total de apoyos entregados</label><input type="number" id="apoyo_total_entregados" placeholder="0" min="0"></div>
+                </div>
+            </fieldset>
+
+            <!-- 2B. DATOS DEL EVENTO / CAPACITACIÓN (MODO CAPACITACIÓN) -->
+            <fieldset id="section-capacitacion" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff; display: none;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-chalkboard-user"></i> Datos del Evento / Capacitación</legend>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group" style="grid-column: span 2;"><label>Nombre Completo</label><input type="text" id="cap_nombre" placeholder="Nombre completo del capacitador o evento"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Lugar</label><input type="text" id="cap_lugar" placeholder="Ubicación / Sede"></div>
+                    <div class="form-group"><label>Fecha</label><input type="date" id="cap_fecha"></div>
+                    <div class="form-group"><label>Hora</label><input type="time" id="cap_hora"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Tema</label><input type="text" id="cap_tema" placeholder="Tema impartido"></div>
+                </div>
+            </fieldset>
+
+            <!-- 2C. DATOS DE ENTREGA DE EXPEDIENTES DIF ESTATAL -->
+            <fieldset id="section-expedientes" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff; display: none;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-folder-closed"></i> Datos de Entrega de Expedientes DIF Estatal</legend>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group" style="grid-column: span 2;"><label>Nombre de quien recibe</label><input type="text" id="exp_recibe" placeholder="Nombre completo del funcionario/persona que recibe"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Tipo de Expediente</label><input type="text" id="exp_tipo" placeholder="Ej. Apoyos Funcionales, Proyectos, etc."></div>
+                    <div class="form-group"><label>Cantidad de Expedientes</label><input type="number" id="exp_cantidad" placeholder="0" min="1"></div>
+                    <div class="form-group"><label>Fecha de Entrega</label><input type="date" id="exp_fecha_entrega"></div>
+                    <div class="form-group" style="grid-column: span 2;"><label>Detalle de Entrega</label><input type="text" id="exp_detalle" placeholder="Observaciones o notas adicionales de la entrega"></div>
+                </div>
+            </fieldset>
+
+            <!-- 3. ESTATUS Y SEGUIMIENTO GENERAL -->
+            <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff;">
+                <legend style="padding: 0 8px; font-weight: 600; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-clipboard-check"></i> Estatus General</legend>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group">
+                        <label>Estatus General</label>
+                        <select id="estatus" style="background: #fffbeb; font-weight: 500;" onchange="verificarCambioEstadoOcupado(); validarEstatusFechaEntrega();">
                             <option value="PENDIENTE">PENDIENTE</option>
+                            <option value="EN PROCESO">EN PROCESO</option>
                             <option value="ATENDIDO">ATENDIDO</option>
                             <option value="ENTREGADO">ENTREGADO</option>
                             <option value="REALIZADO">REALIZADO</option>
                             <option value="CANCELADO">CANCELADO</option>
-                            <option value="EN PROCESO">EN PROCESO</option>
+                            <option value="NEGATIVO">NEGATIVO</option>
                             <option value="VALIDADO">VALIDADO</option>
                         </select>
                     </div>
                     <div class="form-group"><label>H. Mixtos</label><select id="horarios_mixtos"><option value="NO">NO</option><option value="SI">SI</option></select></div>
                     <div class="form-group">
-                        <label>Usuario que Atiende</label>
-                        <select id="usuario">
+                        <label id="label-encargado">Encargado que Atiende</label>
+                        <select id="usuario" onchange="actualizarEstadoTrabajadoraSocial()">
                             <option value="">-- SELECCIONAR --</option>
                             <option value="JUANITA C. CAMPECHANO QUEZADA">JUANITA C. CAMPECHANO QUEZADA</option>
                             <option value="MONSERRAT PLATA FLORES">MONSERRAT PLATA FLORES</option>
                             <option value="J.C.C.Q. / M.P.F.">J.C.C.Q. / M.P.F.</option>
                         </select>
                     </div>
-                    <div class="form-group" style="grid-column: span 3;"><label>Observaciones</label><input type="text" id="observaciones"></div>
+                    <div class="form-group" style="grid-column: span 3;"><label>Observaciones Adicionales</label><input type="text" id="observaciones" placeholder="Detalles de la cita u observaciones generales"></div>
+                </div>
+            </fieldset>
+
+            <!-- 4. EVIDENCIA FOTOGRÁFICA MÚLTIPLE -->
+            <fieldset style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #fafafa;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-images"></i> Evidencia Fotográfica Múltiple</legend>
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
                     <div class="form-group">
-                        <label>Seleccionar Evidencia (Imagen)</label>
-                        <input type="file" id="input_file" accept="image/*">
-                        <small id="txt-compresion" style="color:var(--success); font-weight:bold; margin-top:4px; display:none;">⚡ Foto optimizada con éxito.</small>
-                        <button type="button" id="btn-delete-photo" style="display:none; background:var(--danger); color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:10px; font-weight:bold; margin-top:8px; align-items:center; gap:5px; width:fit-content;" onclick="quitarFotoForm()">
-                            <i class="fas fa-trash"></i> QUITAR FOTO ACTUAL
-                        </button>
-                    </div>                
+                        <label>Seleccionar fotos</label>
+                        <div class="file-upload-wrapper">
+                            <label for="input_file" class="file-upload-label">
+                                <i class="fa-solid fa-cloud-arrow-up" style="font-size: 16px;"></i> Subir Imágenes / Tomar Foto
+                            </label>
+                            <input type="file" id="input_file" class="file-upload-input" accept="image/*" multiple onchange="procesarNuevasFotos(event)">
+                        </div>
+                        <small id="txt-compresion" style="color:var(--success); font-weight:500; margin-top:6px; display:none;"><i class="fa-solid fa-bolt"></i> Fotos optimizadas correctamente.</small>
+                    </div>
+                    <div id="galeria-preview" class="preview-container"></div>
                 </div>
             </fieldset>
         </div>
 
         <div class="btn-box">
-            <button class="btn" id="btn-save" style="background:var(--success)" onclick="subirYGuardar()"><i class="fas fa-save"></i> GUARDAR</button>   
-            <button class="btn" id="btn-update" style="background:var(--warning); display:none;" onclick="actualizar()"><i class="fas fa-sync"></i> ACTUALIZAR</button>
-            <button class="btn" style="background:var(--excel)" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> EXPORTAR</button>
-            <button class="btn" style="background:#94a3b8" onclick="limpiarForm()"><i class="fas fa-eraser"></i> LIMPIAR</button>
+            <button class="btn" id="btn-save" style="background: var(--success);" onclick="subirYGuardar()"><i class="fa-solid fa-floppy-disk"></i> Guardar Registro</button>   
+            <button class="btn" id="btn-update" style="background: var(--warning); display:none;" onclick="actualizar()"><i class="fa-solid fa-arrows-rotate"></i> Actualizar Registro / Avanzar Paso</button>
+            <button class="btn" style="background: #107c41;" onclick="exportarExcel()"><i class="fa-solid fa-file-excel"></i> Exportar Excel</button>
+            <button class="btn btn-secondary" onclick="limpiarForm()"><i class="fa-solid fa-eraser"></i> Limpiar / Marcar Disponible</button>
         </div>
     </div>
 
-    <div class="search-box no-print">
-        <div class="form-group" style="flex:2;"><label>🔍 Buscador Global</label><input type="text" id="buscador" placeholder="Buscar..." onkeyup="filtrar(true)"></div>
-        <div class="form-group" style="flex:1;">
-            <label>Filas</label>
-            <select id="rows-per-page" onchange="actualizarFilasPorPagina()">
-                <option value="10" selected>10 filas</option>
-                <option value="50">50 filas</option>
-                <option value="100">100 filas</option>
+    <!-- Buscador, Filtro por Mes y Filtro por Usuario -->
+    <div class="search-box no-print" style="grid-template-columns: 2fr 1fr 1fr 1fr;">
+        <div class="form-group">
+            <label><i class="fa-solid fa-magnifying-glass"></i> Buscador Global</label>
+            <input type="text" id="buscador" placeholder="Buscar por nombre, No., programa..." onkeyup="filtrar(true)">
+        </div>
+        <div class="form-group">
+            <label><i class="fa-solid fa-calendar"></i> Filtrar Tabla por Mes</label>
+            <input type="month" id="filtro-mes" onchange="filtrar(true)">
+        </div>
+        <div class="form-group">
+            <label><i class="fa-solid fa-filter"></i> Filtrar por Usuario</label>
+            <select id="filtro-usuario" onchange="filtrar(true)">
+                <option value="">-- TODOS LOS USUARIOS --</option>
+                <option value="MONSERRAT PLATA FLORES">MONSERRAT PLATA FLORES (MONSE)</option>
+                <option value="JUANITA C. CAMPECHANO QUEZADA">JUANITA C. CAMPECHANO QUEZADA (JUANITA)</option>
             </select>
         </div>
-    </div>
-
-    <div class="paginacion-bar no-print">
-        <div id="info-total" style="font-size: 11px; font-weight: bold; color: var(--social);"></div>
-        <div>
-            <button class="btn-pag" id="btn-prev" onclick="cambiarPagina(-1)">Anterior</button>
-            <span id="page-info" style="margin: 0 10px; font-size: 11px;">Página 1</span>
-            <button class="btn-pag" id="btn-get-next" onclick="cambiarPagina(1)">Siguiente</button>
+        <div class="form-group">
+            <label>Orden / Filas</label>
+            <div style="display: flex; gap: 6px;">
+                <select id="orden-tabla" onchange="filtrar(true)">
+                    <option value="desc">Del último al 1</option>
+                    <option value="asc">Del 1 al último</option>
+                </select>
+                <select id="rows-per-page" onchange="actualizarFilasPorPagina()">
+                    <option value="10" selected>10</option>
+                    <option value="20">20</option>
+                    <option value="30">30</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                    <option value="500">500</option>
+                </select>
+            </div>
         </div>
     </div>
 
+    <!-- Paginación -->
+    <div class="paginacion-bar no-print">
+        <div id="info-total" style="font-size: 11px; font-weight: 500; color: #64748b;"></div>
+        <div style="display: flex; gap: 6px; align-items: center;">
+            <button class="btn-pag" id="btn-prev" onclick="cambiarPagina(-1)"><i class="fa-solid fa-chevron-left"></i> Anterior</button>
+            <span id="page-info" style="margin: 0 6px; font-size: 11px; color: #475569;">Página 1</span>
+            <button class="btn-pag" id="btn-get-next" onclick="cambiarPagina(1)">Siguiente <i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+    </div>
+
+    <!-- Tabla -->
     <div class="table-wrap">
         <table>
             <thead>
                 <tr>
                     <th>No.</th>
-                    <th>Evidencia</th>
+                    <th>Evidencia(s)</th>
                     <th>Fecha</th>
-                    <th>Nombre del Beneficiario</th>
-                    <th>Col_Loc</th>
-                    <th>Programa</th>
-                    <th>Asunto</th>
+                    <th>Beneficiario / Evento / Recibe / Teléfono</th>
+                    <th>Edad / Cita CRISVER / Entrega</th>
+                    <th>Solicitante / Lugar / Tipo Exp</th>
+                    <th>Col / Loc / Dirección / Tema / Cantidad</th>
+                    <th>Programa, Asunto y Tipo de Apoyo</th>
                     <th>Estatus</th>
-                    <th>Usuario</th>
+                    <th>Encargado</th>
                     <th class="no-print">Acciones</th>
                 </tr>
             </thead>
@@ -457,14 +431,24 @@
     </div>
 </div>
 
-<div id="modal-foto" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.8); align-items:center; justify-content:center;">
-    <span onclick="document.getElementById('modal-foto').style.display='none'" style="position:absolute; top:20px; right:30px; color:white; font-size:40px; cursor:pointer; user-select:none;">&times;</span>
-    <img id="img-modal" style="max-width:90%; max-height:85%; border-radius:8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);">
+<!-- Modal Carrusel / Visualizador de Fotos -->
+<div id="modal-foto" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.9); align-items:center; justify-content:center; flex-direction:column;">
+    <span onclick="cerrarCarrusel()" style="position:absolute; top:20px; right:30px; color:white; font-size:32px; cursor:pointer; user-select:none; z-index: 1010;"><i class="fa-solid fa-xmark"></i></span>
+    
+    <button class="modal-carrusel-nav modal-carrusel-prev" onclick="cambiarImagenCarrusel(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+    
+    <div style="position: relative; max-width: 85%; max-height: 75%; display: flex; align-items: center; justify-content: center;">
+        <img id="img-modal" style="max-width:100%; max-height:75vh; border-radius:6px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); object-fit: contain;">
+    </div>
+    
+    <button class="modal-carrusel-nav modal-carrusel-next" onclick="cambiarImagenCarrusel(1)"><i class="fa-solid fa-chevron-right"></i></button>
+
+    <div id="modal-galeria-thumbs" class="preview-container" style="margin-top:20px; max-width: 90%; overflow-x: auto;"></div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCk6vNVA6mkYzcqdgSBE2akIMVkXYOwq0E",
@@ -481,12 +465,359 @@
     let filasPorPagina = 10;
     let proximoNo = 1;
 
+    let evidenciasBase64 = [];
+    let carruselLista = [];
+    let carruselIndexActual = 0;
+
     const listaCampos = [
-        'numero_consecutivo', 'fecha_registro', 'nombre', 'telefono', 
-        'col_loc', 'direccion', 'programa', 'asunto', 'detalle_asunto',
-        'horarios_mixtos', 'folio_expediente', 'estatus', 
-        'detalles', 'usuario', 'observaciones', 'url_evidencia'
+        'numero_consecutivo', 'fecha_registro', 'nombre', 'fecha_nacimiento', 'edad', 'genero',
+        'telefono', 'colonia', 'localidad', 'direccion', 'nombre_solicitante', 'programa', 'asunto', 'detalle_asunto',
+        'fecha_entrega_apoyo', 'gestionado', 'gestionado_por',
+        'apoyo_lugar_evento', 'apoyo_fecha_evento', 'apoyo_total_entregados',
+        'crisver_lugar_salida', 'crisver_destino', 'crisver_cantidad_personas',
+        'platica_lugar', 'platica_tipo', 'platica_cantidad_personas', 'platica_observaciones',
+        'respuesta_correo', 'fecha_respuesta_correo', 'estudio_socioeconomico_estado', 'fecha_estudio_validado',
+        'fecha_cita_crisver', 'resumen_fase',
+        'horarios_mixtos', 'folio_expediente', 'estatus', 'detalles', 'usuario', 'observaciones',
+        'cap_nombre', 'cap_lugar', 'cap_fecha', 'cap_hora', 'cap_tema',
+        'exp_recibe', 'exp_tipo', 'exp_cantidad', 'exp_fecha_entrega', 'exp_detalle'
     ];
+
+    const camposEstatal = [
+        'respuesta_correo', 'fecha_respuesta_correo', 'estudio_socioeconomico_estado', 
+        'fecha_estudio_validado', 'fecha_cita_crisver', 'resumen_fase'
+    ];
+
+    window.evaluarCampoGestionado = () => {
+        const gestionado = (document.getElementById('gestionado')?.value || "NO").toUpperCase().trim();
+        const contGestionadoPor = document.getElementById('container-gestionado-por');
+        const inputGestionadoPor = document.getElementById('gestionado_por');
+        if (!contGestionadoPor || !inputGestionadoPor) return;
+
+        if (gestionado === "SI") {
+            contGestionadoPor.style.display = 'block';
+        } else {
+            contGestionadoPor.style.display = 'none';
+            inputGestionadoPor.value = "";
+        }
+    };
+
+    function esApoyoEstudioSocioeconomicoMunicipalEstatal() {
+        const prog = (document.getElementById('programa')?.value || "").toUpperCase().trim();
+        const asu = (document.getElementById('asunto')?.value || "").toUpperCase().trim();
+        return prog === "ESTUDIO SOCIOECONOMICO" && (asu === "APOYO FUNCIONAL MUNICIPAL" || asu === "APOYO FUNCIONAL ESTATAL");
+    }
+
+    function esEntregaApoyosAtencionCiudadana() {
+        const prog = (document.getElementById('programa')?.value || "").toUpperCase().trim();
+        const asu = (document.getElementById('asunto')?.value || "").toUpperCase().trim();
+        return prog === "ATENCION CIUDADANA" && (asu === "ENTREGA DE APOYOS FUNCIONALES ESTATALES" || asu === "ENTREGA DE APOYOS FUNCIONALES MUNICIPALES");
+    }
+
+    function esTrasladoCrisverAtencionCiudadana() {
+        const prog = (document.getElementById('programa')?.value || "").toUpperCase().trim();
+        const asu = (document.getElementById('asunto')?.value || "").toUpperCase().trim();
+        return prog === "ATENCION CIUDADANA" && asu === "TRASLADO Y ACOMPAÑAMIENTO A CRISVER";
+    }
+
+    function esPlaticasPreventivasAtencionCiudadana() {
+        const prog = (document.getElementById('programa')?.value || "").toUpperCase().trim();
+        const asu = (document.getElementById('asunto')?.value || "").toUpperCase().trim();
+        return prog === "ATENCION CIUDADANA" && asu === "PLATICAS PREVENTIVAS";
+    }
+
+    window.validarEstatusFechaEntrega = () => {
+        if (!esApoyoEstudioSocioeconomicoMunicipalEstatal()) return true;
+        const estatus = (document.getElementById('estatus')?.value || "").toUpperCase().trim();
+        const fechaEntrega = document.getElementById('fecha_entrega_apoyo')?.value || "";
+        const estatusValidos = ["ENTREGADO", "CANCELADO", "NEGATIVO"];
+
+        if (fechaEntrega && !estatusValidos.includes(estatus)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Validación de Estatus',
+                text: 'Al capturar una Fecha de Entrega en Apoyos Municipales/Estatales, el Estatus General debe ser ENTREGADO, CANCELADO o NEGATIVO.'
+            });
+            return false;
+        }
+        return true;
+    };
+
+    // --- SISTEMA DE RECEPCIÓN Y ESTADO OCUPADO / LIBRE EN TIEMPO REAL ---
+    const AREA_RECEPCION = 'social';
+    const trabajadorasMonitoreadas = [
+        "JUANITA C. CAMPECHANO QUEZADA",
+        "MONSERRAT PLATA FLORES"
+    ];
+
+    function cargarTurnosRecepcion() {
+        const contenedorPanel = document.getElementById('panel-recepcion-espera');
+        const contenedorLista = document.getElementById('lista-espera-recepcion');
+        const listaEspera = JSON.parse(localStorage.getItem('dif_' + AREA_RECEPCION)) || [];
+
+        if (listaEspera.length === 0) {
+            contenedorPanel.style.display = 'none';
+            return;
+        }
+
+        contenedorPanel.style.display = 'block';
+        contenedorLista.innerHTML = listaEspera.map((persona) => `
+            <div class="card-turno-recepcion">
+                <div class="info">
+                    <span class="badge-espera"><i class="fa-solid fa-clock"></i> Llegada: ${persona.hora}</span>
+                    <h4><i class="fa-solid fa-user"></i> Beneficiario: ${persona.beneficiario}</h4>
+                    <p><strong>Solicitante / Tutor:</strong> ${persona.solicitante || 'Mismo beneficiario'} | <strong>Motivo:</strong> ${persona.asunto}</p>
+                </div>
+                <button class="btn" style="background: var(--success); padding: 6px 12px;" onclick="atenderYPasarAlFormulario('${persona.id}', '${persona.beneficiario.replace(/'/g, "")}', '${persona.solicitante ? persona.solicitante.replace(/'/g, "") : ""}', '${persona.asunto.replace(/'/g, "")}')">
+                    <i class="fa-solid fa-check"></i> Atender y Registrar
+                </button>
+            </div>
+        `).join('');
+    }
+
+    window.atenderYPasarAlFormulario = (id, beneficiario, solicitante, asunto) => {
+        let lista = JSON.parse(localStorage.getItem('dif_' + AREA_RECEPCION)) || [];
+        lista = lista.filter(p => p.id != id);
+        localStorage.setItem('dif_' + AREA_RECEPCION, JSON.stringify(lista));
+        cargarTurnosRecepcion();
+
+        document.getElementById('nombre').value = beneficiario;
+        if (solicitante && solicitante !== "MISMO") {
+            document.getElementById('nombre_solicitante').value = solicitante;
+        }
+        document.getElementById('detalles').value = asunto;
+        document.getElementById('programa').value = "ATENCION CIUDADANA";
+        document.getElementById('estatus').value = "EN PROCESO";
+        window.actualizarAsuntos();
+
+        const usuarioActual = document.getElementById('usuario').value;
+        if (usuarioActual && trabajadorasMonitoreadas.includes(usuarioActual)) {
+            actualizarEstadoOcupacionTrabajadora(usuarioActual, true, beneficiario);
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        Swal.fire({
+            icon: 'info',
+            title: 'Ciudadano Asignado',
+            text: `Se han cargado los datos de ${beneficiario} en el formulario y se ha marcado estatus ocupado.`,
+            timer: 2000,
+            showConfirmButton: false
+        });
+    };
+
+    window.actualizarEstadoTrabajadoraSocial = () => {
+        const usuarioSeleccionado = document.getElementById('usuario').value;
+        const nombreBeneficiario = document.getElementById('nombre').value || "Ciudadano";
+        const estatusActual = document.getElementById('estatus').value;
+
+        if (!trabajadorasMonitoreadas.includes(usuarioSeleccionado)) return;
+
+        if (["ATENDIDO", "ENTREGADO", "REALIZADO", "CANCELADO", "NEGATIVO"].includes(estatusActual)) {
+            actualizarEstadoOcupacionTrabajadora(usuarioSeleccionado, false, "");
+        } else {
+            actualizarEstadoOcupacionTrabajadora(usuarioSeleccionado, true, nombreBeneficiario);
+        }
+    };
+
+    window.verificarCambioEstadoOcupado = () => {
+        const usuarioSeleccionado = document.getElementById('usuario').value;
+        const nombreBeneficiario = document.getElementById('nombre').value || "Ciudadano";
+        const estatusActual = document.getElementById('estatus').value;
+
+        if (!trabajadorasMonitoreadas.includes(usuarioSeleccionado)) return;
+
+        if (["ATENDIDO", "ENTREGADO", "REALIZADO", "CANCELADO", "NEGATIVO"].includes(estatusActual)) {
+            actualizarEstadoOcupacionTrabajadora(usuarioSeleccionado, false, "");
+        } else {
+            actualizarEstadoOcupacionTrabajadora(usuarioSeleccionado, true, nombreBeneficiario);
+        }
+    };
+
+    function actualizarEstadoOcupacionTrabajadora(nombreTrabajadora, ocupada, nombreCiudadano) {
+        let estadoAtencion = JSON.parse(localStorage.getItem('dif_estado_atencion')) || {};
+        const ahora = new Date();
+        const horaFormateada = ahora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        if (ocupada) {
+            estadoAtencion[nombreTrabajadora] = {
+                ocupada: true,
+                ciudadano: nombreCiudadano,
+                hora: horaFormateada
+            };
+        } else {
+            estadoAtencion[nombreTrabajadora] = {
+                ocupada: false,
+                ciudadano: "",
+                hora: ""
+            };
+        }
+        localStorage.setItem('dif_estado_atencion', JSON.stringify(estadoAtencion));
+    }
+
+    window.evaluarVistaAsunto = () => {
+        const programa = document.getElementById('programa').value;
+        const asunto = document.getElementById('asunto').value;
+        
+        const secBeneficiario = document.getElementById('section-beneficiario');
+        const secPlaticasPreventivas = document.getElementById('section-platicas-preventivas');
+        const secTrasladoCrisver = document.getElementById('section-traslado-crisver');
+        const secEntregaApoyos = document.getElementById('section-entrega-apoyos');
+        const secCapacitacion = document.getElementById('section-capacitacion');
+        const secExpedientes = document.getElementById('section-expedientes');
+        const labelEncargado = document.getElementById('label-encargado');
+        const secSeguimientoEstatal = document.getElementById('section-seguimiento-estatal');
+        const contFechaEntrega = document.getElementById('container-fecha-entrega-apoyo');
+        const contFolioExpediente = document.getElementById('container-folio-expediente');
+        const contDetallesEspecificos = document.getElementById('container-detalles-especificos');
+
+        const programaNorm = programa ? programa.toUpperCase().trim() : "";
+        const asuntoNorm = asunto ? asunto.toUpperCase().trim() : "";
+        const esEntregaApoyos = esEntregaApoyosAtencionCiudadana();
+        const esTrasladoCrisver = esTrasladoCrisverAtencionCiudadana();
+        const esPlaticasPreventivas = esPlaticasPreventivasAtencionCiudadana();
+
+        if (esApoyoEstudioSocioeconomicoMunicipalEstatal()) {
+            contFechaEntrega.style.display = 'block';
+        } else {
+            contFechaEntrega.style.display = 'none';
+            document.getElementById('fecha_entrega_apoyo').value = "";
+        }
+
+        if (esEntregaApoyos || esTrasladoCrisver) {
+            contFolioExpediente.style.display = 'none';
+            document.getElementById('folio_expediente').value = "";
+            contDetallesEspecificos.style.display = 'none';
+            document.getElementById('detalles').value = "";
+        } else {
+            contFolioExpediente.style.display = 'block';
+            contDetallesEspecificos.style.display = 'block';
+        }
+
+        if (programaNorm === "SOLICITUD" && !asuntoNorm.includes("MUNICIPAL") && (asuntoNorm.includes("CITAS") || asuntoNorm.includes("APOYO") || asuntoNorm.includes("GESTION"))) {
+            secSeguimientoEstatal.style.display = 'block';
+        } else {
+            secSeguimientoEstatal.style.display = 'none';
+        }
+
+        if (asuntoNorm === "CAPACITACION") {
+            secBeneficiario.style.display = 'none';
+            secPlaticasPreventivas.style.display = 'none';
+            secTrasladoCrisver.style.display = 'none';
+            secEntregaApoyos.style.display = 'none';
+            secCapacitacion.style.display = 'block';
+            secExpedientes.style.display = 'none';
+            labelEncargado.innerText = "Datos del Encargado";
+        } else if (asuntoNorm === "ENTREGA DE EXPEDIENTES DIF ESTATAL") {
+            secBeneficiario.style.display = 'none';
+            secPlaticasPreventivas.style.display = 'none';
+            secTrasladoCrisver.style.display = 'none';
+            secEntregaApoyos.style.display = 'none';
+            secCapacitacion.style.display = 'none';
+            secExpedientes.style.display = 'block';
+            labelEncargado.innerText = "Encargado que Entrega";
+        } else if (esEntregaApoyos) {
+            secBeneficiario.style.display = 'none';
+            secPlaticasPreventivas.style.display = 'none';
+            secTrasladoCrisver.style.display = 'none';
+            secEntregaApoyos.style.display = 'block';
+            secCapacitacion.style.display = 'none';
+            secExpedientes.style.display = 'none';
+            labelEncargado.innerText = "Encargado que Atiende";
+        } else if (esTrasladoCrisver) {
+            secBeneficiario.style.display = 'none';
+            secPlaticasPreventivas.style.display = 'none';
+            secTrasladoCrisver.style.display = 'block';
+            secEntregaApoyos.style.display = 'none';
+            secCapacitacion.style.display = 'none';
+            secExpedientes.style.display = 'none';
+            const inputSalida = document.getElementById('crisver_lugar_salida');
+            const inputDestino = document.getElementById('crisver_destino');
+            if (!inputSalida.value) inputSalida.value = "SMDIF";
+            if (!inputDestino.value) inputDestino.value = "XALAPA CRISVER";
+            labelEncargado.innerText = "Encargado que Atiende";
+        } else if (esPlaticasPreventivas) {
+            secBeneficiario.style.display = 'none';
+            secPlaticasPreventivas.style.display = 'block';
+            secTrasladoCrisver.style.display = 'none';
+            secEntregaApoyos.style.display = 'none';
+            secCapacitacion.style.display = 'none';
+            secExpedientes.style.display = 'none';
+            labelEncargado.innerText = "Encargado que Atiende";
+        } else {
+            secBeneficiario.style.display = 'block';
+            secPlaticasPreventivas.style.display = 'none';
+            secTrasladoCrisver.style.display = 'none';
+            secEntregaApoyos.style.display = 'none';
+            secCapacitacion.style.display = 'none';
+            secExpedientes.style.display = 'none';
+            labelEncargado.innerText = "Encargado que Atiende";
+        }
+        window.actualizarEspecificaciones();
+        window.evaluarFlujoPasos();
+        window.evaluarCampoGestionado();
+    };
+
+    window.evaluarFlujoPasos = () => {
+        const secSeguimientoEstatal = document.getElementById('section-seguimiento-estatal');
+        if (secSeguimientoEstatal.style.display === 'none') return;
+
+        const respCorreo = document.getElementById('respuesta_correo').value;
+        const selectEstudio = document.getElementById('estudio_socioeconomico_estado');
+        const inputFechaEstudio = document.getElementById('fecha_estudio_validado');
+        const inputCitaCrisver = document.getElementById('fecha_cita_crisver');
+        const resumenInput = document.getElementById('resumen_fase');
+
+        if (respCorreo === "APROBADO") {
+            selectEstudio.disabled = false;
+            inputFechaEstudio.disabled = false;
+            if (selectEstudio.value === "VALIDADO") {
+                inputCitaCrisver.disabled = false;
+                if (inputCitaCrisver.value) {
+                    resumenInput.value = "PASO 4: CITA / ENTREGA AGENDADA";
+                    resumenInput.style.color = "var(--success)";
+                } else {
+                    resumenInput.value = "PASO 3: ESTUDIO VALIDADO (PENDIENTE CITA)";
+                    resumenInput.style.color = "#6b21a8";
+                }
+            } else {
+                inputCitaCrisver.disabled = true;
+                inputCitaCrisver.value = "";
+                resumenInput.value = "PASO 2: CORREO APROBADO (HACER ESTUDIO)";
+                resumenInput.style.color = "var(--warning)";
+            }
+        } else if (respCorreo === "RECHAZADO") {
+            selectEstudio.disabled = true;
+            selectEstudio.value = "PENDIENTE";
+            inputFechaEstudio.disabled = true;
+            inputFechaEstudio.value = "";
+            inputCitaCrisver.disabled = true;
+            inputCitaCrisver.value = "";
+            resumenInput.value = "SOLICITUD RECHAZADA POR ESTATAL";
+            resumenInput.style.color = "var(--danger)";
+        } else {
+            selectEstudio.disabled = true;
+            selectEstudio.value = "PENDIENTE";
+            inputFechaEstudio.disabled = true;
+            inputFechaEstudio.value = "";
+            inputCitaCrisver.disabled = true;
+            inputCitaCrisver.value = "";
+            resumenInput.value = "PASO 1: ESPERANDO CORREO ESTATAL";
+            resumenInput.style.color = "var(--info)";
+        }
+    };
+
+    window.calcularEdad = () => {
+        const fn = document.getElementById('fecha_nacimiento').value;
+        const inputEdad = document.getElementById('edad');
+        if (!fn) { inputEdad.value = ""; return; }
+        const hoy = new Date();
+        const cumpleanos = new Date(fn);
+        let edad = hoy.getFullYear() - cumpleanos.getFullYear();
+        const m = hoy.getMonth() - cumpleanos.getMonth();
+        if (m < 0 || (m === 0 && hoy.getDate() < cumpleanos.getDate())) edad--;
+        inputEdad.value = edad >= 0 ? `${edad} AÑOS` : "";
+    };
 
     function comprimirImagen(file) {
         return new Promise((resolve) => {
@@ -501,12 +832,7 @@
                     const MAX_WIDTH = 800;
                     let width = img.width;
                     let height = img.height;
-
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                    
+                    if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
                     canvas.width = width;
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
@@ -516,420 +842,765 @@
         });
     }
 
-    onSnapshot(apoyosRef, (snapshot) => {
+    window.procesarNuevasFotos = async (e) => {
+        const files = Array.from(e.target.files);
+        if(!files.length) return;
+        Swal.fire({ title: 'Procesando imágenes...', text: 'Optimizando calidad y tamaño.', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        for (const file of files) {
+            const b64 = await comprimirImagen(file);
+            evidenciasBase64.push(b64);
+        }
+        Swal.close();
+        document.getElementById('txt-compresion').style.display = 'inline-block';
+        renderPreviewEvidencias();
+    };
+
+    function renderPreviewEvidencias() {
+        const galeria = document.getElementById('galeria-preview');
+        galeria.innerHTML = evidenciasBase64.map((b64, index) => `
+            <div class="thumb-box">
+                <img src="${b64}" onclick="abrirCarrusel(${index}, 'FORMULARIO')" alt="Evidencia ${index+1}">
+                <button type="button" class="btn-remove-img" onclick="eliminarFotoEvidencia(${index})" title="Eliminar esta foto"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        `).join('');
+    }
+
+    window.eliminarFotoEvidencia = (index) => {
+        evidenciasBase64.splice(index, 1);
+        renderPreviewEvidencias();
+        if(evidenciasBase64.length === 0) document.getElementById('txt-compresion').style.display = 'none';
+    };
+
+    const qCarga = query(apoyosRef);
+    onSnapshot(qCarga, (snapshot) => {
         todosLosDatos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         const numeros = todosLosDatos.map(d => parseInt(d.numero_consecutivo) || 0);
         proximoNo = (numeros.length > 0) ? Math.max(...numeros) + 1 : 1;
-        
-        if(!document.getElementById('edit-id').value) document.getElementById('numero_consecutivo').value = proximoNo;
+        if(!document.getElementById('edit-id').value && !document.getElementById('numero_consecutivo').value) {
+            document.getElementById('numero_consecutivo').value = proximoNo;
+        }
         window.filtrar(false);
     });
 
-// 1. COMPROBACIÓN TOTAL CONTRA TODAS LAS FECHAS REGISTRADAS
-window.verificarApoyoActivo = (nombreActual, idActual = null) => {
-    if (!nombreActual) return null;
-    const nombreLimpio = nombreActual.trim().toUpperCase();
-    
-    const coincidencias = todosLosDatos.filter(reg => {
-        // Excluimos el registro que estamos editando
-        const esMismoRegistro = idActual && reg.id === idActual;
-        const nombreCoincide = reg.nombre && reg.nombre.trim().toUpperCase() === nombreLimpio;
-        
-        return !esMismoRegistro && nombreCoincide;
-    });
+    window.verificarApoyoActivo = (nombreABuscar, idActual = null) => {
+        if (!nombreABuscar) return null;
+        const nombreLimpio = nombreABuscar.trim().toUpperCase();
+        return todosLosDatos.filter(reg => {
+            if (idActual && reg.id === idActual) return false;
+            const beneficiarioReg = reg.nombre ? reg.nombre.trim().toUpperCase() : "";
+            const solicitanteReg = reg.nombre_solicitante ? reg.nombre_solicitante.trim().toUpperCase() : "";
+            return beneficiarioReg === nombreLimpio || solicitanteReg === nombreLimpio;
+        }).length > 0 ? todosLosDatos.filter(reg => (idActual && reg.id === idActual ? false : (reg.nombre?.trim().toUpperCase() === nombreLimpio || reg.nombre_solicitante?.trim().toUpperCase() === nombreLimpio))) : null;
+    };
 
-    return coincidencias.length > 0 ? coincidencias : null;
-};
+    let ultimoNombreVerificado = "";
+    let ultimoSolicitanteVerificado = "";
 
-    // 2. LANZAR ALERTA EN TIEMPO REAL CON EL HISTORIAL COMPLETO DE FECHAS
     window.revisarNombreDuplicado = async () => {
-    const nombreInput = document.getElementById('nombre');
-    if (!nombreInput) return;
+        const nombreVal = document.getElementById('nombre')?.value.trim() || "";
+        const solicitanteVal = document.getElementById('nombre_solicitante')?.value.trim() || "";
+        if (nombreVal === ultimoNombreVerificado && solicitanteVal === ultimoSolicitanteVerificado) return;
+        ultimoNombreVerificado = nombreVal;
+        ultimoSolicitanteVerificado = solicitanteVal;
+        const idActual = document.getElementById('edit-id').value || null;
 
-    const nombreActual = nombreInput.value;
-    const idActual = document.getElementById('edit-id').value || null;
-
-    const historial = window.verificarApoyoActivo(nombreActual, idActual);
-
-    if (historial) {
-        // Construimos las filas de los antecedentes de forma dinámica
-        let filasHtml = '';
-        historial.forEach((reg, index) => {
-            filasHtml += `
-                <div style="text-align: left; background: #f8f9fa; border-left: 4px solid #dc3545; padding: 10px; margin-bottom: 10px; border-radius: 4px; font-size: 0.9rem;">
-                    <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 5px; color: #333;">
-                        <span>📅 ${reg.fecha_registro || 'Sin fecha'}</span>
-                        <span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; color: #4a5568;">${reg.estatus || 'PENDIENTE'}</span>
-                    </div>
-                    <div style="color: #555; margin-left: 5px;">
-                        <div><b>Programa:</b> ${reg.programa || 'NO ASIGNADO'}</div>
-                        <div><b>Asunto:</b> ${reg.asunto || 'NO ASIGNADO'}</div>
-                    </div>
-                </div>
-            `;
-        });
-
-        // Lanzamos la alerta estilizada
-        Swal.fire({
-            title: '⚠️ Antecedentes Detectados',
-            html: `
-                <div style="margin-bottom: 15px; font-size: 1rem; color: #333;">
-                    El ciudadano <b style="color: #dc3545;">${nombreActual.toUpperCase()}</b> ya cuenta con <b>${historial.length}</b> registro(s) previo(s):
-                </div>
-                <div style="max-height: 280px; overflow-y: auto; padding-right: 5px;">
-                    ${filasHtml}
-                </div>
-                <p style="margin-top: 15px; font-size: 0.85rem; color: #666; font-style: italic;">
-                    Por favor, revisa si procede otorgar un nuevo apoyo basándote en la regla de temporalidad.
-                </p>
-            `,
-            icon: 'warning',
-            confirmButtonText: 'Entendido',
-            confirmButtonColor: '#3085d6',
-            width: '500px'
-        });
-    }
-};
-
-    // 3. ADAPTACIÓN DE BOTÓN GUARDAR CON REVISIÓN GLOBAL
-    window.subirYGuardar = async () => {
-        const data = obtenerValoresForm(); 
-        
-        const historial = window.verificarApoyoActivo(data.nombre);
-        if (historial) {
-            const mensaje = `⚠️ ATENCIÓN: El beneficiario "${data.nombre}" ya tiene ${historial.length} antecedente(s) en diferentes fechas.\n\n¿Estás seguro de que deseas saltarte la advertencia y GUARDAR este NUEVO registro de todos modos?`;
-            if (!confirm(mensaje)) return;
+        let nombresARevisar = [];
+        if (nombreVal) nombresARevisar.push({ tipo: 'BENEFICIARIO', valor: nombreVal });
+        if (solicitanteVal && solicitanteVal.toUpperCase() !== "MISMO" && solicitanteVal.toUpperCase() !== nombreVal.toUpperCase()) {
+            nombresARevisar.push({ tipo: 'SOLICITANTE', valor: solicitanteVal });
         }
 
-        const fileInput = document.getElementById('input_file');
-        const file = fileInput.files[0];
-        let base64Data = ""; 
+        let historialTotal = [];
+        nombresARevisar.forEach(item => {
+            const hist = window.verificarApoyoActivo(item.valor, idActual);
+            if (hist) {
+                hist.forEach(h => {
+                    if (!historialTotal.some(r => r.id === h.id)) historialTotal.push({ ...h, rolCoincidencia: item.tipo });
+                });
+            }
+        });
 
-        if (file) {
-            document.getElementById('txt-compresion').style.display = 'inline-block';
-            document.getElementById('txt-compresion').innerText = "⏳ Optimizando imagen...";
-            base64Data = await comprimirImagen(file);
-        }
+        if (historialTotal.length > 0) {
+            let filasHtml = historialTotal.map(reg => `
+                <div style="text-align: left; background: #f8fafc; border-left: 3px solid var(--warning); padding: 10px; margin-bottom: 8px; border-radius: 6px; font-size: 12px; border: 1px solid var(--border);">
+                    <div style="display: flex; justify-content: space-between; font-weight: 600; margin-bottom: 4px; color: #334155;">
+                        <span><i class="fa-regular fa-calendar"></i> ${reg.fecha_registro || 'Sin fecha'}</span>
+                        <span>${reg.estatus || 'PENDIENTE'}</span>
+                    </div>
+                    <div style="color: #64748b;"><b>Beneficiario:</b> ${reg.nombre || 'N/A'} | <b>Programa:</b> ${reg.programa || 'N/A'} - ${reg.asunto || 'N/A'}</div>
+                </div>
+            `).join('');
 
-        try {
-            data.url_evidencia = base64Data;
-            await addDoc(apoyosRef, data);
-            alert("✅ Registro guardado con éxito.");
-            limpiarForm();
-        } catch (e) {
-            alert("Error al guardar: " + e.message);
+            Swal.fire({
+                title: '⚠️ Alerta de Coincidencia',
+                html: `<div style="max-height: 260px; overflow-y: auto;">${filasHtml}</div>`,
+                icon: 'warning',
+                confirmButtonText: 'Continuar',
+                confirmButtonColor: 'var(--primary)'
+            });
         }
     };
 
-window.actualizar = async () => {
-    const id = document.getElementById('edit-id').value;
-    const data = obtenerValoresForm();
-
-    const historial = window.verificarApoyoActivo(data.nombre, id);
-
-    // Alerta de advertencia estilizada antes de continuar
-    if (historial && historial.length > 0) {
-        const result = await Swal.fire({
-            title: '⚠️ ¿Continuar con la actualización?',
-            text: `El nombre "${data.nombre}" ya tiene ${historial.length} registro(s) previo(s).`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Sí, actualizar',
-            cancelButtonText: 'Cancelar',
-            confirmButtonColor: '#3085d6'
-        });
-        if (!result.isConfirmed) return;
-    }
-
-    // Alerta de "Cargando" mientras se procesa
-    Swal.fire({
-        title: 'Procesando...',
-        text: 'Por favor, espera un momento.',
-        allowOutsideClick: false,
-        didOpen: () => { Swal.showLoading(); }
-    });
-
-    const fileInput = document.getElementById('input_file');
-    const file = fileInput.files[0];
-    const borrarFotoFlag = document.getElementById('eliminar-foto-flag').value === "true";
-
-    try {
-        if (file) {
-            data.url_evidencia = await comprimirImagen(file);
-        } else if (borrarFotoFlag) {
-            data.url_evidencia = "";
-        } else {
-            const regOriginal = todosLosDatos.find(r => r.id === id);
-            data.url_evidencia = (regOriginal && regOriginal.url_evidencia) ? regOriginal.url_evidencia : "";
+    function validarAntesDeGuardar(data, { esEdicion = false, registroAnterior = null } = {}) {
+        if (!data.numero_consecutivo) {
+            Swal.fire({ icon: 'warning', title: 'Falta No. Consecutivo' });
+            return false;
         }
-        
-        await updateDoc(doc(db, "trabajo_social", id), data);
-        
-        // Alerta de éxito
-        Swal.fire({
-            icon: 'success',
-            title: '¡Éxito!',
-            text: 'Registro actualizado correctamente.',
-            timer: 2000,
-            showConfirmButton: false
-        });
-        limpiarForm();
-    } catch (e) { 
-        // Alerta de error
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'No se pudo actualizar: ' + e.message
-        });
+        if (esApoyoEstudioSocioeconomicoMunicipalEstatal()) {
+            const estatusValidos = ["ENTREGADO", "CANCELADO", "NEGATIVO"];
+            const fechaAnterior = registroAnterior?.fecha_entrega_apoyo || "";
+            const cambioFechaEntrega = data.fecha_entrega_apoyo !== fechaAnterior;
+
+            if (!esEdicion) {
+                if (!estatusValidos.includes(data.estatus)) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Estatus Requerido',
+                        text: 'En Estudio Socioeconómico -> Apoyos Municipales y Estatales, el estatus debe ser ENTREGADO, CANCELADO o NEGATIVO.'
+                    });
+                    return false;
+                }
+                if (!data.fecha_entrega_apoyo) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Falta Fecha de Entrega',
+                        text: 'Debe ingresar la Fecha de Entrega para el tipo de apoyo.'
+                    });
+                    return false;
+                }
+            } else if (cambioFechaEntrega && data.fecha_entrega_apoyo && !estatusValidos.includes(data.estatus)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Estatus Requerido',
+                    text: 'Al capturar una Fecha de Entrega, el Estatus General debe ser ENTREGADO, CANCELADO o NEGATIVO.'
+                });
+                return false;
+            }
+        }
+        return true;
     }
-};
+
+    window.subirYGuardar = async () => {
+        const data = obtenerValoresForm();
+        if (!validarAntesDeGuardar(data, { esEdicion: false })) return;
+        
+        Swal.fire({ title: 'Guardando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        try {
+            data.evidencias = evidenciasBase64;
+            data.url_evidencia = evidenciasBase64.length > 0 ? evidenciasBase64[0] : "";
+            await addDoc(apoyosRef, data);
+
+            const usuarioActual = document.getElementById('usuario').value;
+            if (trabajadorasMonitoreadas.includes(usuarioActual)) {
+                actualizarEstadoOcupacionTrabajadora(usuarioActual, false, "");
+            }
+
+            Swal.fire({ icon: 'success', title: '¡Guardado con éxito!', timer: 1500, showConfirmButton: false });
+            window.limpiarForm();
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'Error', text: e.message });
+        }
+    };
+
+    window.actualizar = async () => {
+        const id = document.getElementById('edit-id').value;
+        const registroAnterior = todosLosDatos.find(r => r.id === id) || null;
+        const data = obtenerValoresForm();
+        if (!validarAntesDeGuardar(data, { esEdicion: true, registroAnterior })) return;
+
+        Swal.fire({ title: 'Actualizando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+        try {
+            data.evidencias = evidenciasBase64;
+            data.url_evidencia = evidenciasBase64.length > 0 ? evidenciasBase64[0] : "";
+            await updateDoc(doc(db, "trabajo_social", id), data);
+
+            const usuarioActual = document.getElementById('usuario').value;
+            const estatusActual = document.getElementById('estatus').value;
+            if (trabajadorasMonitoreadas.includes(usuarioActual) && ["ATENDIDO", "ENTREGADO", "REALIZADO", "CANCELADO", "NEGATIVO"].includes(estatusActual)) {
+                actualizarEstadoOcupacionTrabajadora(usuarioActual, false, "");
+            }
+
+            Swal.fire({ icon: 'success', title: '¡Actualizado!', timer: 1500, showConfirmButton: false });
+            window.limpiarForm();
+        } catch (e) {
+            Swal.fire({ icon: 'error', title: 'Error', text: e.message });
+        }
+    };
     
     window.editarLocal = (id) => {
         const reg = todosLosDatos.find(r => r.id === id);
         if(!reg) return;
         document.getElementById('edit-id').value = id;
-        document.getElementById('eliminar-foto-flag').value = "false";
-        
-        listaCampos.forEach(c => {
-            const el = document.getElementById(c);
-            if(el) el.value = reg[c] || "";
-        });
-
+        listaCampos.forEach(c => { const el = document.getElementById(c); if(el) el.value = reg[c] || ""; });
+        if (!reg.gestionado) {
+            document.getElementById('gestionado').value = reg.gestionado_por ? "SI" : "NO";
+        }
         window.actualizarAsuntos();
         document.getElementById('asunto').value = reg.asunto || "";
-        
-        window.actualizarEspecificaciones();
-        
-        if(reg.detalle_asunto) {
-            const detalleSelect = document.getElementById('detalle_asunto');
-            if (detalleSelect) detalleSelect.value = reg.detalle_asunto;
-        }
-
-        const btnDeletePhoto = document.getElementById('btn-delete-photo');
-        if(reg.url_evidencia && reg.url_evidencia !== "") {
-            btnDeletePhoto.style.display = 'flex';
-        } else {
-            btnDeletePhoto.style.display = 'none';
-        }
-
+        window.evaluarVistaAsunto();
+        if(reg.gestionado_por) document.getElementById('gestionado_por').value = reg.gestionado_por;
+        if(reg.detalle_asunto && !esEntregaApoyosAtencionCiudadana()) document.getElementById('detalle_asunto').value = reg.detalle_asunto;
+        if(reg.fecha_entrega_apoyo) document.getElementById('fecha_entrega_apoyo').value = reg.fecha_entrega_apoyo;
+        if(reg.apoyo_lugar_evento) document.getElementById('apoyo_lugar_evento').value = reg.apoyo_lugar_evento;
+        if(reg.apoyo_fecha_evento) document.getElementById('apoyo_fecha_evento').value = reg.apoyo_fecha_evento;
+        if(reg.apoyo_total_entregados) document.getElementById('apoyo_total_entregados').value = reg.apoyo_total_entregados;
+        if(reg.crisver_lugar_salida) document.getElementById('crisver_lugar_salida').value = reg.crisver_lugar_salida;
+        if(reg.crisver_destino) document.getElementById('crisver_destino').value = reg.crisver_destino;
+        if(reg.crisver_cantidad_personas) document.getElementById('crisver_cantidad_personas').value = reg.crisver_cantidad_personas;
+        if(reg.platica_lugar) document.getElementById('platica_lugar').value = reg.platica_lugar;
+        if(reg.platica_tipo) document.getElementById('platica_tipo').value = reg.platica_tipo;
+        if(reg.platica_cantidad_personas) document.getElementById('platica_cantidad_personas').value = reg.platica_cantidad_personas;
+        if(reg.platica_observaciones) document.getElementById('platica_observaciones').value = reg.platica_observaciones;
+        evidenciasBase64 = Array.isArray(reg.evidencias) ? [...reg.evidencias] : (reg.url_evidencia ? [reg.url_evidencia] : []);
+        renderPreviewEvidencias();
         document.getElementById('btn-save').style.display = 'none';
-        document.getElementById('btn-update').style.display = 'inline-block';
+        document.getElementById('btn-update').style.display = 'inline-flex';
         window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    window.quitarFotoForm = () => {
-        if(confirm("¿Seguro que deseas quitar la foto de este registro? Para confirmar el cambio deberás dar clic en ACTUALIZAR.")) {
-            document.getElementById('eliminar-foto-flag').value = "true";
-            document.getElementById('btn-delete-photo').style.display = 'none';
-            document.getElementById('input_file').value = "";
-            
-            const txtComp = document.getElementById('txt-compresion');
-            txtComp.style.display = 'inline-block';
-            txtComp.innerText = "🗑️ Foto marcada para eliminación.";
-            txtComp.style.color = "var(--danger)";
-        }
     };
 
     function obtenerValoresForm() {
         const res = {};
+        const esSeguimientoEstatalVisible = document.getElementById('section-seguimiento-estatal').style.display !== 'none';
+        const esFechaEntregaVisible = document.getElementById('container-fecha-entrega-apoyo').style.display !== 'none';
+        const esEntregaApoyosVisible = document.getElementById('section-entrega-apoyos').style.display !== 'none';
+        const esTrasladoCrisverVisible = document.getElementById('section-traslado-crisver').style.display !== 'none';
+        const esPlaticasPreventivasVisible = document.getElementById('section-platicas-preventivas').style.display !== 'none';
+        const gestionadoVal = (document.getElementById('gestionado')?.value || "NO").toUpperCase().trim();
+
         listaCampos.forEach(id => {
             const el = document.getElementById(id);
             if(el) {
-                if(['numero_consecutivo', 'fecha_registro', 'usuario', 'detalle_asunto'].includes(id)) {
-                    res[id] = el.value;
-                } else {
-                    res[id] = el.value.toUpperCase();
-                }
+                if (id === 'gestionado') res[id] = gestionadoVal;
+                else if (id === 'gestionado_por') res[id] = gestionadoVal === "SI" ? el.value.trim().toUpperCase() : "";
+                else if (!esSeguimientoEstatalVisible && camposEstatal.includes(id)) res[id] = "";
+                else if (id === 'fecha_entrega_apoyo' && !esFechaEntregaVisible) res[id] = "";
+                else if (['apoyo_lugar_evento', 'apoyo_fecha_evento', 'apoyo_total_entregados'].includes(id) && !esEntregaApoyosVisible) res[id] = "";
+                else if (['crisver_lugar_salida', 'crisver_destino', 'crisver_cantidad_personas'].includes(id) && !esTrasladoCrisverVisible) res[id] = "";
+                else if (['platica_lugar', 'platica_tipo', 'platica_cantidad_personas', 'platica_observaciones'].includes(id) && !esPlaticasPreventivasVisible) res[id] = "";
+                else if (['detalle_asunto', 'folio_expediente', 'detalles'].includes(id) && (esEntregaApoyosVisible || esTrasladoCrisverVisible)) res[id] = "";
+                else if(['numero_consecutivo', 'apoyo_total_entregados', 'crisver_cantidad_personas', 'platica_cantidad_personas'].includes(id)) res[id] = parseInt(el.value) || 0;
+                else if(['fecha_registro', 'fecha_nacimiento', 'edad', 'usuario', 'detalle_asunto', 'fecha_entrega_apoyo', 'apoyo_fecha_evento', 'genero', 'cap_fecha', 'cap_hora', 'exp_cantidad', 'exp_fecha_entrega', 'telefono', 'fecha_respuesta_correo', 'fecha_estudio_validado', 'fecha_cita_crisver'].includes(id)) res[id] = el.value;
+                else res[id] = el.value.toUpperCase();
             }
         });
         return res;
     }
 
     window.limpiarForm = () => {
-        listaCampos.forEach(id => {
-            const el = document.getElementById(id);
-            if(el && id !== "numero_consecutivo") el.value = "";
-        });
+        const usuarioActual = document.getElementById('usuario').value;
+        if (usuarioActual && trabajadorasMonitoreadas.includes(usuarioActual)) {
+            actualizarEstadoOcupacionTrabajadora(usuarioActual, false, "");
+        }
+
+        listaCampos.forEach(id => { const el = document.getElementById(id); if(el && id !== "numero_consecutivo") el.value = ""; });
+        document.getElementById('gestionado').value = "NO";
+        document.getElementById('crisver_lugar_salida').value = "SMDIF";
+        document.getElementById('crisver_destino').value = "XALAPA CRISVER";
         if(document.getElementById('input_file')) document.getElementById('input_file').value = "";
-        
-        const txtComp = document.getElementById('txt-compresion');
-        txtComp.style.display = 'none';
-        txtComp.style.color = "var(--success)";
-        
-        document.getElementById('eliminar-foto-flag').value = "false";
-        document.getElementById('btn-delete-photo').style.display = 'none';
+        evidenciasBase64 = [];
+        renderPreviewEvidencias();
+        document.getElementById('txt-compresion').style.display = 'none';
         document.getElementById('numero_consecutivo').value = proximoNo;
         document.getElementById('edit-id').value = "";
-        document.getElementById('btn-save').style.display = 'inline-block';
+        document.getElementById('btn-save').style.display = 'inline-flex';
         document.getElementById('btn-update').style.display = 'none';
         document.getElementById('container-detalle-especifico').style.display = 'none';
-        
+        document.getElementById('container-fecha-entrega-apoyo').style.display = 'none';
+        window.evaluarVistaAsunto();
         establecerUsuarioPorDefecto();
     };
 
     window.actualizarAsuntos = () => {
         const prog = document.getElementById('programa').value;
         const asuSelect = document.getElementById('asunto');
-        const contDet = document.getElementById('container-detalle-especifico');
-        
         asuSelect.innerHTML = '<option value="">-- SELECCIONAR --</option>';
-        contDet.style.display = 'none';
-
         const dataAsuntos = {
-            "SOLICITUD": ["APOYOS FUNCIONALES", "GESTION DE CITAS"],
-            "VISITA DOMICILIARIA": ["INVESTIGACION", "CERCIORAMIENTO DE TUTOR", "ASILO"],
-            "ATENCION CIUDADANA": ["ENTREGA DE APOYOS FUNCIONALES ESTATALES", "ENTREGA DE APOYOS FUNCIONALES MUNICIPALES", "TRASLADO Y ACOMPAÑAMIENTO A CRISVER", "PLATICAS PREVENTIVAS"],
-            "ESTUDIO SOCIOECONOMICO": ["ASILO", "DESCUENTO TRANSPORTE", "DESCUENTO CMAPS", "APOYO ATAUD", "APOYO FUNCIONAL", "ESTUDIOS CLINICOS", "TRASLADO DE CUERPO", "REGISTRO CIVIL", "TERAPIAS CRISAT", "APOYO AL INMIGRANTE"]
+            "CAPACITACION AL PERSONAL SMDIF": ["CAPACITACION", "ENTREGA DE EXPEDIENTES"],
+            "SOLICITUD": ["GESTION DE CITAS"],
+            "V.D./E. SOCIOECONOMICO": ["ASILO", "ADOPCIÓN", "DESCUENTO CMAPS"],
+            "VISITA DOMICILIARIA": ["INVESTIGACION/PROCURADURIA", "CERCIORAMIENTO DE TUTOR/PROCURADURIA"],
+            "ATENCION CIUDADANA": ["CAPACITACION", "ENTREGA DE EXPEDIENTES DIF ESTATAL", "ENTREGA DE APOYOS FUNCIONALES ESTATALES", "ENTREGA DE APOYOS FUNCIONALES MUNICIPALES", "TRASLADO Y ACOMPAÑAMIENTO A CRISVER", "PLATICAS PREVENTIVAS", "PACIENTES RECURRENTES", "DESPENSA MENSUAL"],
+            "ESTUDIO SOCIOECONOMICO": ["DESCUENTO TRANSPORTE", "APOYO ATAUD", "APOYO FUNCIONAL MUNICIPAL", "APOYO FUNCIONAL ESTATAL", "ESTUDIOS CLINICOS", "TRASLADO DE CUERPO", "REGISTRO CIVIL", "TERAPIAS CRISAT", "APOYO AL INMIGRANTE", "CONDONACIÓN DE LENTES", "DESPENSA MENSUAL", "DESCUENTO SERVICIO DE AMBULANCIA", "APOYO A LA CIUDADANIA", "APOYO PARA TESTAMENTO"]
         };
-
         if(dataAsuntos[prog]) {
-            dataAsuntos[prog].forEach(a => {
-                const opt = document.createElement('option');
-                opt.value = a; opt.textContent = a;
-                asuSelect.appendChild(opt);
-            });
+            dataAsuntos[prog].forEach(a => { const opt = document.createElement('option'); opt.value = a; opt.textContent = a; asuSelect.appendChild(opt); });
         }
+        window.evaluarVistaAsunto();
     };
 
     window.actualizarEspecificaciones = () => {
         const asuSelect = document.getElementById('asunto');
         const detSelect = document.getElementById('detalle_asunto');
         const contDet = document.getElementById('container-detalle-especifico');
-        const asu = asuSelect.value;
+        const asu = asuSelect.value ? asuSelect.value.toUpperCase().trim() : "";
 
-        const subData = {
-            "APOYOS FUNCIONALES": ["SILLA DE RUEDAS ESTANDAR ADULTO", "SILLA DE RUEDAS SOBREPESO", "SILLA DE RUEDAS PCI", "SILLA DE RUEDAS PCA", "SILLA DE RUEDAS JUVENIL", "SILLA DE RUEDAS INFANTIL", "BASTÓN PUÑO ALEMÁN", "BASTÓN 4 PUNTOS", "MULETAS", "ANDADERA"],
-            "APOYO FUNCIONAL": ["SILLA DE RUEDAS ESTANDAR ADULTO", "SILLA DE RUEDAS SOBREPESO", "SILLA DE RUEDAS PCI", "SILLA DE RUEDAS PCA", "SILLA DE RUEDAS JUVENIL", "SILLA DE RUEDAS INFANTIL", "BASTÓN PUÑO ALEMÁN", "BASTÓN 4 PUNTOS", "MULETAS", "ANDADERA"],
-            "GESTION DE CITAS": ["TDH", "AUTISMO", "AUX. AUDITIVO", "PROTESIS", "CRISVER (DIVERSOS)", "SINDROME DE DOWN"]
-        };
+        if (esEntregaApoyosAtencionCiudadana() || esTrasladoCrisverAtencionCiudadana()) {
+            contDet.style.display = 'none';
+            detSelect.innerHTML = '';
+            return;
+        }
 
-        if(subData[asu]) {
-            detSelect.innerHTML = '<option value="">-- SELECCIONAR ESPECIFICACIÓN --</option>';
-            subData[asu].forEach(s => {
+        const tiposApoyoFuncional = [
+            "SILLA DE RUEDAS ESTANDAR ADULTO", 
+            "SILLA DE RUEDAS SOBREPESO", 
+            "SILLA DE RUEDAS PCI", 
+            "SILLA DE RUEDAS PCA", 
+            "SILLA DE RUEDAS JUVENIL", 
+            "SILLA DE RUEDAS INFANTIL", 
+            "BASTÓN PUÑO ALEMÁN", 
+            "BASTÓN 4 PUNTOS", 
+            "MULETAS", 
+            "ANDADERA"
+        ];
+
+        const opcionesGestionCitas = [
+            "AUTISMO",
+            "TDAH",
+            "SÍNDROME DE DOWN",
+            "PRÓTESIS",
+            "HIPOACUSIA",
+            "VALORACIÓN MÉDICA",
+            "TERAPIAS FÍSICAS",
+            "OTRO"
+        ];
+
+        const opcionesRegistroCivil = [
+            "ACTAS EXTEMPORÁNEAS"
+        ];
+
+        const opcionesDescuentoTransporte = [
+            "AUTOBUSES DEL ORIENTE (ADO)",
+            "TRANSPORTE LOS TUXTLAS (TLT)"
+        ];
+
+        if (asu === "DESCUENTO TRANSPORTE") {
+            document.getElementById('label-detalle').innerText = "Tipo de Transporte";
+            detSelect.innerHTML = '<option value="">-- SELECCIONAR TRANSPORTE --</option>';
+            opcionesDescuentoTransporte.forEach(s => {
                 const o = document.createElement('option');
-                o.value = s; o.textContent = s;
+                o.value = s;
+                o.textContent = s;
                 detSelect.appendChild(o);
             });
             contDet.style.display = 'block';
-            document.getElementById('label-detalle').innerText = (asu.includes("APOYO")) ? "Tipo de Apoyo" : "Diagnóstico";
-        } else {
-            contDet.style.display = 'none';
+        } else if (asu.includes("APOYO FUNCIONAL") || asu.includes("APOYOS FUNCIONALES")) {
+            document.getElementById('label-detalle').innerText = "Tipo de Apoyo Específico";
+            detSelect.innerHTML = '<option value="">-- SELECCIONAR TIPO DE APOYO --</option>';
+            tiposApoyoFuncional.forEach(s => { 
+                const o = document.createElement('option'); 
+                o.value = s; 
+                o.textContent = s; 
+                detSelect.appendChild(o); 
+            });
+            contDet.style.display = 'block';
+        } else if (asu.includes("GESTION DE CITAS") || asu.includes("GESTIÓN DE CITAS") || asu.includes("CITAS")) {
+            document.getElementById('label-detalle').innerText = "Tipo de Cita / Especialidad";
+            detSelect.innerHTML = '<option value="">-- SELECCIONAR TIPO DE CITA --</option>';
+            opcionesGestionCitas.forEach(s => { 
+                const o = document.createElement('option'); 
+                o.value = s; 
+                o.textContent = s; 
+                detSelect.appendChild(o); 
+            });
+            contDet.style.display = 'block';
+        } else if (asu === "REGISTRO CIVIL") {
+            document.getElementById('label-detalle').innerText = "Tipo de Trámite / Apoyo";
+            detSelect.innerHTML = '<option value="">-- SELECCIONAR --</option>';
+            opcionesRegistroCivil.forEach(s => { 
+                const o = document.createElement('option'); 
+                o.value = s; 
+                o.textContent = s; 
+                detSelect.appendChild(o); 
+            });
+            contDet.style.display = 'block';
+        } else { 
+            contDet.style.display = 'none'; 
+            detSelect.innerHTML = '';
         }
     };
 
-    window.abrirFoto = (url) => {
-        const modal = document.getElementById('modal-foto');
-        const img = document.getElementById('img-modal');
-        img.src = url;
-        modal.style.display = 'flex';
+    window.abrirCarrusel = (index, origen = 'FORMULARIO', idDoc = null) => {
+        carruselLista = origen === 'FORMULARIO' ? [...evidenciasBase64] : (() => {
+            const reg = todosLosDatos.find(r => r.id === idDoc);
+            return reg ? (reg.evidencias || [reg.url_evidencia]) : [];
+        })();
+        if(!carruselLista.length) return;
+        carruselIndexActual = index;
+        document.getElementById('img-modal').src = carruselLista[carruselIndexActual];
+        document.getElementById('modal-foto').style.display = 'flex';
     };
+
+    window.cambiarImagenCarrusel = (d) => {
+        carruselIndexActual = (carruselIndexActual + d + carruselLista.length) % carruselLista.length;
+        document.getElementById('img-modal').src = carruselLista[carruselIndexActual];
+    };
+
+    window.cerrarCarrusel = () => { document.getElementById('modal-foto').style.display = 'none'; };
+
+    function coincideMes(fechaRegistro, mesAnio) {
+        if (!mesAnio) return true;
+        if (!fechaRegistro) return false;
+        const f = String(fechaRegistro).trim();
+        const [anio, mesNum] = mesAnio.split('-');
+        if (f.startsWith(`${anio}-${mesNum}`) || f.startsWith(`${anio}/${mesNum}`)) return true;
+        if (f.includes(`/${mesNum}/${anio}`) || f.includes(`-${mesNum}-${anio}`)) return true;
+        return false;
+    }
 
     window.filtrar = (resetearPagina = false) => {
         if(resetearPagina) paginaActual = 1;
         const term = document.getElementById('buscador').value.toLowerCase();
-        datosFiltrados = todosLosDatos.filter(r => 
-            Object.values(r).some(v => String(v).toLowerCase().includes(term))
-        ).sort((a,b) => (parseInt(b.numero_consecutivo)||0) - (parseInt(a.numero_consecutivo)||0));
+        const usuarioFiltro = document.getElementById('filtro-usuario').value;
+        const mesFiltro = document.getElementById('filtro-mes').value;
+        const orden = document.getElementById('orden-tabla').value;
+
+        datosFiltrados = todosLosDatos.filter(r => {
+            const cumpleTexto = !term || Object.values(r).some(v => String(v).toLowerCase().includes(term));
+            const cumpleUsuario = !usuarioFiltro || (r.usuario && r.usuario === usuarioFiltro);
+            const cumpleMes = coincideMes(r.fecha_registro, mesFiltro);
+            return cumpleTexto && cumpleUsuario && cumpleMes;
+        }).sort((a, b) => {
+            const numA = parseInt(a.numero_consecutivo) || 0;
+            const numB = parseInt(b.numero_consecutivo) || 0;
+            return orden === 'asc' ? numA - numB : numB - numA;
+        });
+
         renderTabla();
     };
 
     function renderTabla() {
-    const totalPaginas = Math.ceil(datosFiltrados.length / filasPorPagina) || 1;
-    if(paginaActual > totalPaginas) paginaActual = totalPaginas;
+        const totalPaginas = Math.ceil(datosFiltrados.length / filasPorPagina) || 1;
+        if(paginaActual > totalPaginas) paginaActual = totalPaginas;
+        if(paginaActual < 1) paginaActual = 1;
 
-    const inicio = (paginaActual - 1) * filasPorPagina;
-    const segmento = datosFiltrados.slice(inicio, inicio + filasPorPagina);
-    const tbody = document.getElementById('cuerpoTabla');
-    document.getElementById('info-total').innerText = `TOTAL: ${datosFiltrados.length} REGISTROS`;
-    
-    tbody.innerHTML = segmento.map(reg => `
-        <tr>
-            <td><b>${reg.numero_consecutivo}</b></td>
-            <td>
-                ${reg.url_evidencia ? `
-                    <img src="${reg.url_evidencia}" 
-                         onclick="abrirFoto('${reg.url_evidencia}')" 
-                         alt="Evidencia" 
-                         style="max-width: 60px; max-height: 45px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid #cbd5e1;"
-                         title="Clic para ampliar" />
-                ` : '<span style="color:#cbd5e1; font-size:9px;">Sin foto</span>'}
-            </td>
-            <td>${reg.fecha_registro || ''}</td>
-            <td><b>${reg.nombre}</b></td>
-            <td>${reg.col_loc || ''}</td>
-            <td style="font-size:9px;">${reg.programa || ''}</td>
-            <td>${reg.asunto || ''} ${reg.detalle_asunto ? `<br><small style="color:blue">${reg.detalle_asunto}</small>` : ''}</td>
-            <td><span class="status-badge bg-${reg.estatus?.toLowerCase().replace(" ","-") || 'pendiente'}">${reg.estatus || 'PENDIENTE'}</span></td>
-            <td>${reg.usuario || ''}</td>
-            <td class="no-print">
-                <button onclick="editarLocal('${reg.id}')" style="border:none; background:none; cursor:pointer;">✏️</button>
-                <button onclick="eliminarDoc('${reg.id}')" style="border:none; background:none; cursor:pointer;">🗑️</button>
-            </td>
-        </tr>
-    `).join('');
+        const inicio = (paginaActual - 1) * filasPorPagina;
+        const segmento = datosFiltrados.slice(inicio, inicio + filasPorPagina);
+        document.getElementById('info-total').innerText = `TOTAL MOSTRADO: ${datosFiltrados.length} DE ${todosLosDatos.length} REGISTROS`;
+        
+        document.getElementById('cuerpoTabla').innerHTML = segmento.map(reg => {
+            const ubicacionCompleta = [reg.colonia, reg.localidad, reg.direccion].filter(Boolean).join(' / ');
+            const infoExtraColLoc = ubicacionCompleta || (reg.platica_cantidad_personas ? `${reg.platica_cantidad_personas} personas` : '') || (reg.crisver_cantidad_personas ? `${reg.crisver_cantidad_personas} personas` : '') || (reg.apoyo_total_entregados ? `Total: ${reg.apoyo_total_entregados}` : '') || reg.cap_tema || '';
+            const nombrePrincipal = reg.nombre || reg.platica_lugar || reg.crisver_lugar_salida || reg.apoyo_lugar_evento || reg.cap_nombre || reg.exp_recibe || 'N/A';
+            const infoGestionBeneficiario = reg.gestionado === "SI" ? `<br><span style="color:var(--info); font-size:10px; font-weight:600;"><i class="fa-solid fa-handshake"></i> Gestionado: SÍ${reg.gestionado_por ? ` (${reg.gestionado_por})` : ''}</span>` : '';
+
+            return `
+            <tr>
+                <td><b>${reg.numero_consecutivo ?? ''}</b></td>
+                <td>${reg.url_evidencia || (reg.evidencias && reg.evidencias.length) ? `<img src="${reg.evidencias?.[0] || reg.url_evidencia}" style="width:35px;height:30px;object-fit:cover;cursor:pointer;border-radius:4px;" onclick="abrirCarrusel(0, 'TABLA', '${reg.id}')">` : 'Sin foto'}</td>
+                <td>${reg.fecha_registro || ''}</td>
+                <td><b>${nombrePrincipal}</b>${infoGestionBeneficiario}</td>
+                <td>${reg.edad || reg.apoyo_fecha_evento || reg.fecha_cita_crisver || reg.fecha_entrega_apoyo || ''}</td>
+                <td>${reg.nombre_solicitante || reg.platica_tipo || reg.crisver_destino || reg.cap_lugar || reg.exp_tipo || 'MISMO'}</td>
+                <td>${infoExtraColLoc}</td>
+                <td><b>${reg.programa || ''}</b><br>${reg.asunto || ''}${reg.detalle_asunto ? `<br><span style="color:var(--primary); font-size:10px; font-weight:600;"><i class="fa-solid fa-check"></i> ${reg.detalle_asunto}</span>` : ''}${reg.fecha_entrega_apoyo ? `<br><span style="color:var(--success); font-size:10px; font-weight:600;"><i class="fa-solid fa-calendar-check"></i> Entrega: ${reg.fecha_entrega_apoyo}</span>` : ''}${reg.platica_observaciones ? `<br><span style="color:#64748b; font-size:10px;">Obs: ${reg.platica_observaciones}</span>` : ''}</td>
+                <td><span class="status-badge bg-${reg.estatus?.toLowerCase().replace(" ","-") || 'pendiente'}">${reg.estatus || 'PENDIENTE'}</span></td>
+                <td>${reg.usuario || ''}</td>
+                <td class="no-print" style="text-align: right;">
+                    <button onclick="editarLocal('${reg.id}')" style="border:1px solid var(--border); background:#fff; cursor:pointer; padding:6px 8px; border-radius:4px; color:var(--primary);"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="eliminarDoc('${reg.id}')" style="border:1px solid var(--border); background:#fff; cursor:pointer; padding:6px 8px; border-radius:4px; color:var(--danger);"><i class="fa-solid fa-trash-can"></i></button>
+                </td>
+            </tr>
+        `;
+        }).join('');
 
         document.getElementById('page-info').innerText = `Página ${paginaActual} de ${totalPaginas}`;
-        document.getElementById('btn-prev').disabled = paginaActual === 1;
-        document.getElementById('btn-get-next').disabled = paginaActual === totalPaginas;
+        document.getElementById('btn-prev').disabled = paginaActual <= 1;
+        document.getElementById('btn-get-next').disabled = paginaActual >= totalPaginas;
     }
 
-    window.eliminarDoc = async (id) => { if(confirm("¿Eliminar?")) await deleteDoc(doc(db, "trabajo_social", id)); };
+    window.eliminarDoc = async (id) => {
+        if((await Swal.fire({ title: '¿Eliminar?', icon: 'warning', showCancelButton: true })).isConfirmed) {
+            await deleteDoc(doc(db, "trabajo_social", id));
+            Swal.fire({ icon: 'success', title: 'Eliminado', timer: 1000, showConfirmButton: false });
+        }
+    };
     
     window.exportarExcel = () => {
-        const ws = XLSX.utils.json_to_sheet(datosFiltrados);
+        const ws = XLSX.utils.json_to_sheet(datosFiltrados.map(({ evidencias, url_evidencia, id, ...rest }) => rest));
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Data");
+        XLSX.utils.book_append_sheet(wb, ws, "Trabajo_Social");
         XLSX.writeFile(wb, "Reporte_Trabajo_Social.xlsx");
     };
     
-    window.cambiarPagina = (d) => { 
-        paginaActual += d; 
-        renderTabla(); 
-    };
-    
-    window.actualizarFilasPorPagina = () => { 
-        filasPorPagina = parseInt(document.getElementById('rows-per-page').value); 
-        paginaActual = 1; 
-        renderTabla(); 
+    window.generarReporteWordMensual = () => {
+        const mesAnio = document.getElementById('mes-reporte').value;
+        if(!mesAnio) {
+            Swal.fire({ icon: 'warning', title: 'Seleccione un mes' });
+            return;
+        }
+
+        const [anio, mesNum] = mesAnio.split('-');
+        const nombresMeses = ["", "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+        const nombresMesesCap = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const nombreMesStr = nombresMeses[parseInt(mesNum)];
+        const nombreMesCap = nombresMesesCap[parseInt(mesNum)];
+
+        const ultimoDia = new Date(parseInt(anio), parseInt(mesNum), 0).getDate();
+        const registrosMes = todosLosDatos.filter(r => coincideMes(r.fecha_registro, mesAnio));
+
+        let cSolEstatalTram = 0, cSolEstatalRec = 0, cSolEstatalEnt = 0, cSolEstatalBen = 0;
+        let cFuncPropioTram = 0, cFuncPropioRec = 0, cFuncPropioEnt = 0, cFuncPropioBen = 0;
+        let cTransporte = 0;
+        let cAtaud = 0;
+        let cRegCivil = 0;
+        let cAtencionCiudadana = 0;
+        let cCrisverAutismo = 0;
+        let cCrisverHipoacusia = 0;
+        let cCrisverProtesis = 0;
+        let cVisitasDom = 0;
+        let cCrisverVisitas = 0;
+
+        registrosMes.forEach(r => {
+            const prog = (r.programa || "").toUpperCase();
+            const asu = (r.asunto || "").toUpperCase();
+            const det = (r.detalle_asunto || "").toUpperCase();
+            const obs = (r.observaciones || "").toUpperCase();
+            const dts = (r.detalles || "").toUpperCase();
+            const est = (r.estatus || "").toUpperCase();
+
+            if ((prog === "SOLICITUD" && (asu.includes("APOYO") || asu.includes("FUNCIONAL"))) || asu.includes("ESTATAL")) {
+                cSolEstatalTram++;
+                if (r.respuesta_correo === "APROBADO" || est === "ENTREGADO" || est === "ATENDIDO") cSolEstatalRec++;
+                if (est === "ENTREGADO" || est === "ATENDIDO") cSolEstatalEnt++;
+                cSolEstatalBen++;
+            }
+            if (asu.includes("MUNICIPAL") || asu.includes("PROPIO")) {
+                cFuncPropioTram++;
+                cFuncPropioRec++;
+                if (est === "ENTREGADO" || est === "ATENDIDO") cFuncPropioEnt++;
+                cFuncPropioBen++;
+            }
+            if (asu.includes("TRANSPORTE")) cTransporte++;
+            if (asu.includes("ATAUD")) cAtaud++;
+            if (asu.includes("REGISTRO CIVIL")) cRegCivil++;
+            if (prog === "ATENCION CIUDADANA" || asu.includes("CIUDADANIA")) cAtencionCiudadana++;
+            if (det.includes("AUTISMO") || asu.includes("AUTISMO") || dts.includes("AUTISMO") || obs.includes("AUTISMO")) cCrisverAutismo++;
+            if (det.includes("HIPOACUSIA") || asu.includes("HIPOACUSIA") || dts.includes("HIPOACUSIA") || obs.includes("HIPOACUSIA")) cCrisverHipoacusia++;
+            if (det.includes("PROTESIS") || asu.includes("PROTESIS") || dts.includes("PROTESIS") || obs.includes("PROTESIS")) cCrisverProtesis++;
+            if (prog.includes("VISITA DOMICILIARIA")) cVisitasDom++;
+            if (asu.includes("CRISVER") || det.includes("CRISVER") || dts.includes("CRISVER")) cCrisverVisitas++;
+        });
+
+        const totalPersonas = registrosMes.length;
+        const valOrEmpty = (v) => v > 0 ? v : "";
+
+        const logoAyuntamiento = "https://i.imgur.com/2Y0qQo2.png";
+        const logoDif = "https://i.imgur.com/4l5O4nB.png";
+        const logoPie = "https://i.imgur.com/8xLqP1z.png";
+
+        const contenidoHtml = `
+            <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+            <head><meta charset='utf-8'><title>Reporte Mensual</title></head>
+            <body style="font-family: Arial, sans-serif; font-size: 10.5pt; line-height: 1.25; color: #000;">
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <tr>
+                        <td style="width: 35%; text-align: left; vertical-align: middle;">
+                            <img src="${logoAyuntamiento}" style="max-height: 70px; width: auto;" alt="Ayuntamiento">
+                        </td>
+                        <td style="width: 30%;"></td>
+                        <td style="width: 35%; text-align: right; vertical-align: middle;">
+                            <img src="${logoDif}" style="max-height: 60px; width: auto;" alt="DIF Municipal">
+                        </td>
+                    </tr>
+                </table>
+
+                <div style="text-align: right; font-weight: bold; margin-bottom: 22px;">
+                    San Andrés Tuxtla Ver. A ${ultimoDia} de ${nombreMesCap} ${anio}
+                </div>
+                <div style="font-weight: bold; margin-bottom: 16px;">
+                    LIC. LORENA GONZALEZ KEGEL<br>
+                    DIRECTORA DEL SISTEMA MUNICIPAL DIF<br>
+                    DE SAN ANDRES TUXTLA, VERACRUZ.
+                </div>
+                <div style="font-weight: bold; letter-spacing: 3px; margin-bottom: 16px;">
+                    PRESENTE
+                </div>
+                <p style="text-align: justify; margin-bottom: 16px;">
+                    Sean estas líneas portadoras de un cordial saludo, por este medio le informo las funciones y actividades del área de Trabajo Social realizadas durante el mes de <b>${nombreMesStr}</b> del ${anio}, las cuales se describen a continuación:
+                </p>
+                <div style="font-weight: bold; margin-bottom: 10px;">ACTIVIDADES:</div>
+                
+                <table border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 9.5pt;">
+                    <thead>
+                        <tr style="background-color: #e6b8b7; font-weight: bold; text-align: center;">
+                            <th style="width: 6%; border: 1px solid #000; vertical-align: middle;">N°</th>
+                            <th style="width: 34%; border: 1px solid #000; text-align: left; vertical-align: middle;">APOYO MES DE ${nombreMesStr}</th>
+                            <th style="width: 15%; border: 1px solid #000; vertical-align: middle; text-align: center;">TRAMITADO</th>
+                            <th style="width: 15%; border: 1px solid #000; vertical-align: middle; text-align: center;">RECIBIDO</th>
+                            <th style="width: 15%; border: 1px solid #000; vertical-align: middle; text-align: center;">ENTREGADO</th>
+                            <th style="width: 15%; border: 1px solid #000; vertical-align: middle; text-align: center;">BENEFICIARIOS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">1</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">SOLICITUD DE APOYOS FUNCIONALES ESTATAL</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"><b>${cSolEstatalTram}</b></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${valOrEmpty(cSolEstatalRec)}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"><b>${cSolEstatalEnt}</b></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"><b>${cSolEstatalBen}</b></td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">2</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">FUNCIONALES RECURSO PROPIO ENTREGADOS</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cFuncPropioTram}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${valOrEmpty(cFuncPropioRec)}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cFuncPropioEnt}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cFuncPropioBen}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">3</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">EST. SOC. TRANSPORTE</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cTransporte}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cTransporte}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">4</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">ESTUDIOS SOC. ATAUD</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cAtaud}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cAtaud}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">5</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">EST. SOC. REGISTRO CIVIL</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cRegCivil}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cRegCivil}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">6</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">EST. SOC. ATENCION CIUDADANIA</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cAtencionCiudadana}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cAtencionCiudadana}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">7</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">MENORES AUTISMO CRISVER</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverAutismo}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverAutismo}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">8</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">MENORES CON HIPOACUSIA CRISVER</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverHipoacusia}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverHipoacusia}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">9</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">ADULTO PROTESIS CRISVER</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverProtesis}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverProtesis}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">10</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">VISITAS DOMICILIARIAS</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cVisitasDom}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cVisitasDom}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">11</td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">VISITAS A CRISVER</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverVisitas}</td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle;">${cCrisverVisitas}</td>
+                        </tr>
+                        <tr>
+                            <td style="border: 1px solid #000;"></td>
+                            <td style="border: 1px solid #000; text-align: left; vertical-align: middle;">TOTAL DE PERSONAS ATENDIDAS</td>
+                            <td style="border: 1px solid #000;"></td>
+                            <td style="border: 1px solid #000;"></td>
+                            <td style="border: 1px solid #000;"></td>
+                            <td style="border: 1px solid #000; text-align: center; vertical-align: middle; font-weight: bold;">${totalPersonas}<br>PERSONAS</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <br><br><br>
+                <div style="text-align: center; margin-top: 30px; font-weight: bold;">
+                    ATENTAMENTE<br><br><br>
+                    ____________________________________<br>
+                    LIC. JUANITA CONCEPCION CAMPECHANO QUEZADA<br>
+                    ENCARGADA DEL DEPARTAMENTO<br>
+                    DE TRABAJO SOCIAL DEL SMDIF
+                </div>
+
+                <div style="text-align: center; margin-top: 50px;">
+                    <img src="${logoPie}" style="max-height: 45px; width: auto;" alt="Amor que protege">
+                </div>
+            </body>
+            </html>
+        `;
+
+        const converted = htmlDocx.asBlob(contenidoHtml);
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(converted);
+        link.download = `Reporte_Mensual_${nombreMesStr}_${anio}.docx`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        Swal.fire({
+            icon: 'success',
+            title: '¡Reporte Word Generado!',
+            text: `Se descargó el reporte de ${nombreMesStr} ${anio} con formato oficial y logos.`,
+            timer: 2500,
+            showConfirmButton: false
+        });
     };
 
+    window.cambiarPagina = (d) => { paginaActual += d; renderTabla(); };
+    window.actualizarFilasPorPagina = () => { filasPorPagina = parseInt(document.getElementById('rows-per-page').value); paginaActual = 1; renderTabla(); };
+
     function establecerUsuarioPorDefecto() {
-        const nombreSocial = sessionStorage.getItem('social_nombre');
+        const nombreSocial = sessionStorage.getItem('social_nombre') || sessionStorage.getItem('usuario_nombre');
+        const tituloSocial = sessionStorage.getItem('social_titulo') || sessionStorage.getItem('usuario_titulo') || '';
         const selectUsuario = document.getElementById('usuario');
+        const saludoContenedor = document.getElementById('bienvenida-usuario');
+
+        if (nombreSocial && saludoContenedor) {
+            saludoContenedor.innerText = `${tituloSocial} ${nombreSocial}`.trim();
+            saludoContenedor.style.display = 'inline-block';
+        }
         if (nombreSocial && selectUsuario) {
             for (let i = 0; i < selectUsuario.options.length; i++) {
-                if (selectUsuario.options[i].value === nombreSocial) {
-                    selectUsuario.selectedIndex = i;
-                    break;
-                }
+                if (selectUsuario.options[i].value === nombreSocial) { selectUsuario.selectedIndex = i; break; }
             }
         }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        const nombreSocial = sessionStorage.getItem('social_nombre');
-        const tituloSocial = sessionStorage.getItem('social_titulo');
-        const saludoContenedor = document.getElementById('bienvenida-usuario');
-
-        const asuntoSelect = document.getElementById('asunto');
-        if (asuntoSelect) {
-            asuntoSelect.addEventListener('change', window.actualizarEspecificaciones);
-        }
-
-        const nombreInput = document.getElementById('nombre');
-        if (nombreInput) {
-            nombreInput.addEventListener('blur', window.revisarNombreDuplicado);
-        }
-
-        if (nombreSocial && tituloSocial) {
-            saludoContenedor.innerText = `¡BIENVENIDA, ${tituloSocial} ${nombreSocial}!`;
-            saludoContenedor.style.display = 'inline-block';
-        }
+        document.getElementById('asunto')?.addEventListener('change', window.evaluarVistaAsunto);
+        document.getElementById('nombre')?.addEventListener('blur', window.revisarNombreDuplicado);
+        document.getElementById('nombre_solicitante')?.addEventListener('blur', window.revisarNombreDuplicado);
+        window.evaluarCampoGestionado();
         establecerUsuarioPorDefecto();
+        cargarTurnosRecepcion();
+        
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'dif_' + AREA_RECEPCION) {
+                cargarTurnosRecepcion();
+            }
+        });
     });
 
-    window.cerrarSesion = () => {
-        if (confirm("¿Está seguro de que desea cerrar sesión?")) {
+    window.cerrarSesion = async () => {
+        if((await Swal.fire({ title: '¿Cerrar sesión?', icon: 'question', showCancelButton: true })).isConfirmed) {
             sessionStorage.clear();
             window.location.href = 'index.html';
         }
