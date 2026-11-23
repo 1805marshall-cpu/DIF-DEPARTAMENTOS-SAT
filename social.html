@@ -49,7 +49,7 @@
         .bg-atendido,.bg-realizado,.bg-validado{background:#ecfdf5;color:#047857}
         .bg-entregado,.bg-en-proceso{background:#f0f9ff;color:#0369a1}
         .bg-pendiente{background:#fffbeb;color:#b45309}
-        .bg-cancelado{background:#fef2f2;color:#b91c1c}
+        .bg-cancelado,.bg-negativo{background:#fef2f2;color:#b91c1c}
         .paginacion-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;margin-top:15px;flex-wrap:wrap;gap:10px}
         .btn-pag{padding:6px 12px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;font-size:11px;color:#475569}
         .btn-pag:hover:not(:disabled){background:#f8fafc}
@@ -137,8 +137,32 @@
                     <div class="form-group"><label>Asunto</label><select id="asunto" onchange="evaluarVistaAsunto()"><option value="">-- SELECCIONE PROGRAMA --</option></select></div>
                     
                     <div class="form-group" id="container-detalle-especifico" style="display:none;"><label id="label-detalle">Tipo de Apoyo / Cita</label><select id="detalle_asunto"></select></div>
-                    <div class="form-group"><label>Folio Expediente</label><input type="text" id="folio_expediente" placeholder="Opcional"></div>
-                    <div class="form-group" style="grid-column: span 2;"><label>Detalles Específicos</label><input type="text" id="detalles" placeholder="Breve descripción"></div>
+                    <div class="form-group" id="container-fecha-entrega-apoyo" style="display:none;">
+                        <label id="label-fecha-entrega-apoyo">Fecha de Entrega</label>
+                        <input type="date" id="fecha_entrega_apoyo" onchange="validarEstatusFechaEntrega()">
+                    </div>
+                    <div class="form-group" id="container-folio-expediente"><label>Folio Expediente</label><input type="text" id="folio_expediente" placeholder="Opcional"></div>
+                    <div class="form-group" id="container-detalles-especificos" style="grid-column: span 2;"><label>Detalles Específicos</label><input type="text" id="detalles" placeholder="Breve descripción"></div>
+
+                    <!-- GESTIONADO SÍ / NO Y QUIÉN LO GESTIONÓ -->
+                    <div class="form-group">
+                        <label>Gestionado</label>
+                        <select id="gestionado" onchange="evaluarCampoGestionado()">
+                            <option value="NO">NO</option>
+                            <option value="SI">SI</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="container-gestionado-por" style="display: none; grid-column: span 3;">
+                        <label>¿Quién lo gestionó?</label>
+                        <input type="text" id="gestionado_por" list="sugerencias-gestores" placeholder="Ej. Presidente, Regidora, Síndico o nombre...">
+                        <datalist id="sugerencias-gestores">
+                            <option value="PRESIDENTE MUNICIPAL">
+                            <option value="SÍNDICO ÚNICO">
+                            <option value="REGIDORA">
+                            <option value="REGIDOR">
+                            <option value="DIRECTORA SMDIF">
+                        </datalist>
+                    </div>
                 </div>
             </fieldset>
 
@@ -223,6 +247,37 @@
                 </div>
             </fieldset>
 
+            <!-- 2F. PLÁTICAS PREVENTIVAS (ATENCIÓN CIUDADANA -> PLÁTICAS PREVENTIVAS) -->
+            <fieldset id="section-platicas-preventivas" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff; display: none;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-comments"></i> Pláticas Preventivas</legend>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group"><label>Lugar de la plática</label><input type="text" id="platica_lugar" placeholder="Lugar donde se realiza la plática"></div>
+                    <div class="form-group"><label>Tipo de plática</label><input type="text" id="platica_tipo" placeholder="Tema o tipo de plática preventiva"></div>
+                    <div class="form-group"><label>Cantidad de personas</label><input type="number" id="platica_cantidad_personas" placeholder="0" min="0"></div>
+                    <div class="form-group" style="grid-column: span 3;"><label>Observaciones</label><input type="text" id="platica_observaciones" placeholder="Observaciones de la plática"></div>
+                </div>
+            </fieldset>
+
+            <!-- 2E. TRASLADO Y ACOMPAÑAMIENTO A CRISVER -->
+            <fieldset id="section-traslado-crisver" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff; display: none;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-van-shuttle"></i> Traslado y Acompañamiento a CRISVER</legend>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group"><label>Lugar de salida</label><input type="text" id="crisver_lugar_salida" value="SMDIF" placeholder="SMDIF"></div>
+                    <div class="form-group"><label>Destino</label><input type="text" id="crisver_destino" value="XALAPA CRISVER" placeholder="XALAPA CRISVER"></div>
+                    <div class="form-group"><label>Cantidad de personas</label><input type="number" id="crisver_cantidad_personas" placeholder="0" min="0"></div>
+                </div>
+            </fieldset>
+
+            <!-- 2D. ENTREGA DE APOYOS (ATENCIÓN CIUDADANA -> APOYOS FUNCIONALES ESTATALES Y MUNICIPALES) -->
+            <fieldset id="section-entrega-apoyos" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff; display: none;">
+                <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-wheelchair"></i> Entrega de Apoyos</legend>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
+                    <div class="form-group"><label>Lugar del evento</label><input type="text" id="apoyo_lugar_evento" placeholder="Lugar donde se realiza la entrega"></div>
+                    <div class="form-group"><label>Fecha del evento</label><input type="date" id="apoyo_fecha_evento"></div>
+                    <div class="form-group"><label>Numero total de apoyos entregados</label><input type="number" id="apoyo_total_entregados" placeholder="0" min="0"></div>
+                </div>
+            </fieldset>
+
             <!-- 2B. DATOS DEL EVENTO / CAPACITACIÓN (MODO CAPACITACIÓN) -->
             <fieldset id="section-capacitacion" style="border: 1px solid var(--border); border-radius: 8px; padding: 16px; background-color: #ffffff; display: none;">
                 <legend style="padding: 0 8px; font-weight: 600; color: var(--primary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em;"><i class="fa-solid fa-chalkboard-user"></i> Datos del Evento / Capacitación</legend>
@@ -253,13 +308,14 @@
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 8px;">
                     <div class="form-group">
                         <label>Estatus General</label>
-                        <select id="estatus" style="background: #fffbeb; font-weight: 500;" onchange="verificarCambioEstadoOcupado()">
+                        <select id="estatus" style="background: #fffbeb; font-weight: 500;" onchange="verificarCambioEstadoOcupado(); validarEstatusFechaEntrega();">
                             <option value="PENDIENTE">PENDIENTE</option>
                             <option value="EN PROCESO">EN PROCESO</option>
                             <option value="ATENDIDO">ATENDIDO</option>
                             <option value="ENTREGADO">ENTREGADO</option>
                             <option value="REALIZADO">REALIZADO</option>
                             <option value="CANCELADO">CANCELADO</option>
+                            <option value="NEGATIVO">NEGATIVO</option>
                             <option value="VALIDADO">VALIDADO</option>
                         </select>
                     </div>
@@ -363,7 +419,7 @@
                     <th>Beneficiario / Evento / Recibe / Teléfono</th>
                     <th>Edad / Cita CRISVER / Entrega</th>
                     <th>Solicitante / Lugar / Tipo Exp</th>
-                    <th>Col / Loc / Tema / Cantidad</th>
+                    <th>Col / Loc / Dirección / Tema / Cantidad</th>
                     <th>Programa, Asunto y Tipo de Apoyo</th>
                     <th>Estatus</th>
                     <th>Encargado</th>
@@ -416,6 +472,10 @@
     const listaCampos = [
         'numero_consecutivo', 'fecha_registro', 'nombre', 'fecha_nacimiento', 'edad', 'genero',
         'telefono', 'colonia', 'localidad', 'direccion', 'nombre_solicitante', 'programa', 'asunto', 'detalle_asunto',
+        'fecha_entrega_apoyo', 'gestionado', 'gestionado_por',
+        'apoyo_lugar_evento', 'apoyo_fecha_evento', 'apoyo_total_entregados',
+        'crisver_lugar_salida', 'crisver_destino', 'crisver_cantidad_personas',
+        'platica_lugar', 'platica_tipo', 'platica_cantidad_personas', 'platica_observaciones',
         'respuesta_correo', 'fecha_respuesta_correo', 'estudio_socioeconomico_estado', 'fecha_estudio_validado',
         'fecha_cita_crisver', 'resumen_fase',
         'horarios_mixtos', 'folio_expediente', 'estatus', 'detalles', 'usuario', 'observaciones',
@@ -427,6 +487,61 @@
         'respuesta_correo', 'fecha_respuesta_correo', 'estudio_socioeconomico_estado', 
         'fecha_estudio_validado', 'fecha_cita_crisver', 'resumen_fase'
     ];
+
+    window.evaluarCampoGestionado = () => {
+        const gestionado = (document.getElementById('gestionado')?.value || "NO").toUpperCase().trim();
+        const contGestionadoPor = document.getElementById('container-gestionado-por');
+        const inputGestionadoPor = document.getElementById('gestionado_por');
+        if (!contGestionadoPor || !inputGestionadoPor) return;
+
+        if (gestionado === "SI") {
+            contGestionadoPor.style.display = 'block';
+        } else {
+            contGestionadoPor.style.display = 'none';
+            inputGestionadoPor.value = "";
+        }
+    };
+
+    function esApoyoEstudioSocioeconomicoMunicipalEstatal() {
+        const prog = (document.getElementById('programa')?.value || "").toUpperCase().trim();
+        const asu = (document.getElementById('asunto')?.value || "").toUpperCase().trim();
+        return prog === "ESTUDIO SOCIOECONOMICO" && (asu === "APOYO FUNCIONAL MUNICIPAL" || asu === "APOYO FUNCIONAL ESTATAL");
+    }
+
+    function esEntregaApoyosAtencionCiudadana() {
+        const prog = (document.getElementById('programa')?.value || "").toUpperCase().trim();
+        const asu = (document.getElementById('asunto')?.value || "").toUpperCase().trim();
+        return prog === "ATENCION CIUDADANA" && (asu === "ENTREGA DE APOYOS FUNCIONALES ESTATALES" || asu === "ENTREGA DE APOYOS FUNCIONALES MUNICIPALES");
+    }
+
+    function esTrasladoCrisverAtencionCiudadana() {
+        const prog = (document.getElementById('programa')?.value || "").toUpperCase().trim();
+        const asu = (document.getElementById('asunto')?.value || "").toUpperCase().trim();
+        return prog === "ATENCION CIUDADANA" && asu === "TRASLADO Y ACOMPAÑAMIENTO A CRISVER";
+    }
+
+    function esPlaticasPreventivasAtencionCiudadana() {
+        const prog = (document.getElementById('programa')?.value || "").toUpperCase().trim();
+        const asu = (document.getElementById('asunto')?.value || "").toUpperCase().trim();
+        return prog === "ATENCION CIUDADANA" && asu === "PLATICAS PREVENTIVAS";
+    }
+
+    window.validarEstatusFechaEntrega = () => {
+        if (!esApoyoEstudioSocioeconomicoMunicipalEstatal()) return true;
+        const estatus = (document.getElementById('estatus')?.value || "").toUpperCase().trim();
+        const fechaEntrega = document.getElementById('fecha_entrega_apoyo')?.value || "";
+        const estatusValidos = ["ENTREGADO", "CANCELADO", "NEGATIVO"];
+
+        if (fechaEntrega && !estatusValidos.includes(estatus)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Validación de Estatus',
+                text: 'Al capturar una Fecha de Entrega en Apoyos Municipales/Estatales, el Estatus General debe ser ENTREGADO, CANCELADO o NEGATIVO.'
+            });
+            return false;
+        }
+        return true;
+    };
 
     // --- SISTEMA DE RECEPCIÓN Y ESTADO OCUPADO / LIBRE EN TIEMPO REAL ---
     const AREA_RECEPCION = 'social';
@@ -498,7 +613,7 @@
 
         if (!trabajadorasMonitoreadas.includes(usuarioSeleccionado)) return;
 
-        if (["ATENDIDO", "ENTREGADO", "REALIZADO", "CANCELADO"].includes(estatusActual)) {
+        if (["ATENDIDO", "ENTREGADO", "REALIZADO", "CANCELADO", "NEGATIVO"].includes(estatusActual)) {
             actualizarEstadoOcupacionTrabajadora(usuarioSeleccionado, false, "");
         } else {
             actualizarEstadoOcupacionTrabajadora(usuarioSeleccionado, true, nombreBeneficiario);
@@ -512,7 +627,7 @@
 
         if (!trabajadorasMonitoreadas.includes(usuarioSeleccionado)) return;
 
-        if (["ATENDIDO", "ENTREGADO", "REALIZADO", "CANCELADO"].includes(estatusActual)) {
+        if (["ATENDIDO", "ENTREGADO", "REALIZADO", "CANCELADO", "NEGATIVO"].includes(estatusActual)) {
             actualizarEstadoOcupacionTrabajadora(usuarioSeleccionado, false, "");
         } else {
             actualizarEstadoOcupacionTrabajadora(usuarioSeleccionado, true, nombreBeneficiario);
@@ -545,13 +660,39 @@
         const asunto = document.getElementById('asunto').value;
         
         const secBeneficiario = document.getElementById('section-beneficiario');
+        const secPlaticasPreventivas = document.getElementById('section-platicas-preventivas');
+        const secTrasladoCrisver = document.getElementById('section-traslado-crisver');
+        const secEntregaApoyos = document.getElementById('section-entrega-apoyos');
         const secCapacitacion = document.getElementById('section-capacitacion');
         const secExpedientes = document.getElementById('section-expedientes');
         const labelEncargado = document.getElementById('label-encargado');
         const secSeguimientoEstatal = document.getElementById('section-seguimiento-estatal');
+        const contFechaEntrega = document.getElementById('container-fecha-entrega-apoyo');
+        const contFolioExpediente = document.getElementById('container-folio-expediente');
+        const contDetallesEspecificos = document.getElementById('container-detalles-especificos');
 
         const programaNorm = programa ? programa.toUpperCase().trim() : "";
         const asuntoNorm = asunto ? asunto.toUpperCase().trim() : "";
+        const esEntregaApoyos = esEntregaApoyosAtencionCiudadana();
+        const esTrasladoCrisver = esTrasladoCrisverAtencionCiudadana();
+        const esPlaticasPreventivas = esPlaticasPreventivasAtencionCiudadana();
+
+        if (esApoyoEstudioSocioeconomicoMunicipalEstatal()) {
+            contFechaEntrega.style.display = 'block';
+        } else {
+            contFechaEntrega.style.display = 'none';
+            document.getElementById('fecha_entrega_apoyo').value = "";
+        }
+
+        if (esEntregaApoyos || esTrasladoCrisver) {
+            contFolioExpediente.style.display = 'none';
+            document.getElementById('folio_expediente').value = "";
+            contDetallesEspecificos.style.display = 'none';
+            document.getElementById('detalles').value = "";
+        } else {
+            contFolioExpediente.style.display = 'block';
+            contDetallesEspecificos.style.display = 'block';
+        }
 
         if (programaNorm === "SOLICITUD" && !asuntoNorm.includes("MUNICIPAL") && (asuntoNorm.includes("CITAS") || asuntoNorm.includes("APOYO") || asuntoNorm.includes("GESTION"))) {
             secSeguimientoEstatal.style.display = 'block';
@@ -561,22 +702,60 @@
 
         if (asuntoNorm === "CAPACITACION") {
             secBeneficiario.style.display = 'none';
+            secPlaticasPreventivas.style.display = 'none';
+            secTrasladoCrisver.style.display = 'none';
+            secEntregaApoyos.style.display = 'none';
             secCapacitacion.style.display = 'block';
             secExpedientes.style.display = 'none';
             labelEncargado.innerText = "Datos del Encargado";
         } else if (asuntoNorm === "ENTREGA DE EXPEDIENTES DIF ESTATAL") {
             secBeneficiario.style.display = 'none';
+            secPlaticasPreventivas.style.display = 'none';
+            secTrasladoCrisver.style.display = 'none';
+            secEntregaApoyos.style.display = 'none';
             secCapacitacion.style.display = 'none';
             secExpedientes.style.display = 'block';
             labelEncargado.innerText = "Encargado que Entrega";
+        } else if (esEntregaApoyos) {
+            secBeneficiario.style.display = 'none';
+            secPlaticasPreventivas.style.display = 'none';
+            secTrasladoCrisver.style.display = 'none';
+            secEntregaApoyos.style.display = 'block';
+            secCapacitacion.style.display = 'none';
+            secExpedientes.style.display = 'none';
+            labelEncargado.innerText = "Encargado que Atiende";
+        } else if (esTrasladoCrisver) {
+            secBeneficiario.style.display = 'none';
+            secPlaticasPreventivas.style.display = 'none';
+            secTrasladoCrisver.style.display = 'block';
+            secEntregaApoyos.style.display = 'none';
+            secCapacitacion.style.display = 'none';
+            secExpedientes.style.display = 'none';
+            const inputSalida = document.getElementById('crisver_lugar_salida');
+            const inputDestino = document.getElementById('crisver_destino');
+            if (!inputSalida.value) inputSalida.value = "SMDIF";
+            if (!inputDestino.value) inputDestino.value = "XALAPA CRISVER";
+            labelEncargado.innerText = "Encargado que Atiende";
+        } else if (esPlaticasPreventivas) {
+            secBeneficiario.style.display = 'none';
+            secPlaticasPreventivas.style.display = 'block';
+            secTrasladoCrisver.style.display = 'none';
+            secEntregaApoyos.style.display = 'none';
+            secCapacitacion.style.display = 'none';
+            secExpedientes.style.display = 'none';
+            labelEncargado.innerText = "Encargado que Atiende";
         } else {
             secBeneficiario.style.display = 'block';
+            secPlaticasPreventivas.style.display = 'none';
+            secTrasladoCrisver.style.display = 'none';
+            secEntregaApoyos.style.display = 'none';
             secCapacitacion.style.display = 'none';
             secExpedientes.style.display = 'none';
             labelEncargado.innerText = "Encargado que Atiende";
         }
         window.actualizarEspecificaciones();
         window.evaluarFlujoPasos();
+        window.evaluarCampoGestionado();
     };
 
     window.evaluarFlujoPasos = () => {
@@ -762,9 +941,48 @@
         }
     };
 
+    function validarAntesDeGuardar(data, { esEdicion = false, registroAnterior = null } = {}) {
+        if (!data.numero_consecutivo) {
+            Swal.fire({ icon: 'warning', title: 'Falta No. Consecutivo' });
+            return false;
+        }
+        if (esApoyoEstudioSocioeconomicoMunicipalEstatal()) {
+            const estatusValidos = ["ENTREGADO", "CANCELADO", "NEGATIVO"];
+            const fechaAnterior = registroAnterior?.fecha_entrega_apoyo || "";
+            const cambioFechaEntrega = data.fecha_entrega_apoyo !== fechaAnterior;
+
+            if (!esEdicion) {
+                if (!estatusValidos.includes(data.estatus)) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Estatus Requerido',
+                        text: 'En Estudio Socioeconómico -> Apoyos Municipales y Estatales, el estatus debe ser ENTREGADO, CANCELADO o NEGATIVO.'
+                    });
+                    return false;
+                }
+                if (!data.fecha_entrega_apoyo) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Falta Fecha de Entrega',
+                        text: 'Debe ingresar la Fecha de Entrega para el tipo de apoyo.'
+                    });
+                    return false;
+                }
+            } else if (cambioFechaEntrega && data.fecha_entrega_apoyo && !estatusValidos.includes(data.estatus)) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Estatus Requerido',
+                    text: 'Al capturar una Fecha de Entrega, el Estatus General debe ser ENTREGADO, CANCELADO o NEGATIVO.'
+                });
+                return false;
+            }
+        }
+        return true;
+    }
+
     window.subirYGuardar = async () => {
         const data = obtenerValoresForm();
-        if (!data.numero_consecutivo) { Swal.fire({ icon: 'warning', title: 'Falta No. Consecutivo' }); return; }
+        if (!validarAntesDeGuardar(data, { esEdicion: false })) return;
         
         Swal.fire({ title: 'Guardando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
         try {
@@ -786,7 +1004,10 @@
 
     window.actualizar = async () => {
         const id = document.getElementById('edit-id').value;
+        const registroAnterior = todosLosDatos.find(r => r.id === id) || null;
         const data = obtenerValoresForm();
+        if (!validarAntesDeGuardar(data, { esEdicion: true, registroAnterior })) return;
+
         Swal.fire({ title: 'Actualizando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
         try {
             data.evidencias = evidenciasBase64;
@@ -795,7 +1016,7 @@
 
             const usuarioActual = document.getElementById('usuario').value;
             const estatusActual = document.getElementById('estatus').value;
-            if (trabajadorasMonitoreadas.includes(usuarioActual) && ["ATENDIDO", "ENTREGADO", "REALIZADO", "CANCELADO"].includes(estatusActual)) {
+            if (trabajadorasMonitoreadas.includes(usuarioActual) && ["ATENDIDO", "ENTREGADO", "REALIZADO", "CANCELADO", "NEGATIVO"].includes(estatusActual)) {
                 actualizarEstadoOcupacionTrabajadora(usuarioActual, false, "");
             }
 
@@ -811,10 +1032,25 @@
         if(!reg) return;
         document.getElementById('edit-id').value = id;
         listaCampos.forEach(c => { const el = document.getElementById(c); if(el) el.value = reg[c] || ""; });
+        if (!reg.gestionado) {
+            document.getElementById('gestionado').value = reg.gestionado_por ? "SI" : "NO";
+        }
         window.actualizarAsuntos();
         document.getElementById('asunto').value = reg.asunto || "";
         window.evaluarVistaAsunto();
-        if(reg.detalle_asunto) document.getElementById('detalle_asunto').value = reg.detalle_asunto;
+        if(reg.gestionado_por) document.getElementById('gestionado_por').value = reg.gestionado_por;
+        if(reg.detalle_asunto && !esEntregaApoyosAtencionCiudadana()) document.getElementById('detalle_asunto').value = reg.detalle_asunto;
+        if(reg.fecha_entrega_apoyo) document.getElementById('fecha_entrega_apoyo').value = reg.fecha_entrega_apoyo;
+        if(reg.apoyo_lugar_evento) document.getElementById('apoyo_lugar_evento').value = reg.apoyo_lugar_evento;
+        if(reg.apoyo_fecha_evento) document.getElementById('apoyo_fecha_evento').value = reg.apoyo_fecha_evento;
+        if(reg.apoyo_total_entregados) document.getElementById('apoyo_total_entregados').value = reg.apoyo_total_entregados;
+        if(reg.crisver_lugar_salida) document.getElementById('crisver_lugar_salida').value = reg.crisver_lugar_salida;
+        if(reg.crisver_destino) document.getElementById('crisver_destino').value = reg.crisver_destino;
+        if(reg.crisver_cantidad_personas) document.getElementById('crisver_cantidad_personas').value = reg.crisver_cantidad_personas;
+        if(reg.platica_lugar) document.getElementById('platica_lugar').value = reg.platica_lugar;
+        if(reg.platica_tipo) document.getElementById('platica_tipo').value = reg.platica_tipo;
+        if(reg.platica_cantidad_personas) document.getElementById('platica_cantidad_personas').value = reg.platica_cantidad_personas;
+        if(reg.platica_observaciones) document.getElementById('platica_observaciones').value = reg.platica_observaciones;
         evidenciasBase64 = Array.isArray(reg.evidencias) ? [...reg.evidencias] : (reg.url_evidencia ? [reg.url_evidencia] : []);
         renderPreviewEvidencias();
         document.getElementById('btn-save').style.display = 'none';
@@ -825,12 +1061,25 @@
     function obtenerValoresForm() {
         const res = {};
         const esSeguimientoEstatalVisible = document.getElementById('section-seguimiento-estatal').style.display !== 'none';
+        const esFechaEntregaVisible = document.getElementById('container-fecha-entrega-apoyo').style.display !== 'none';
+        const esEntregaApoyosVisible = document.getElementById('section-entrega-apoyos').style.display !== 'none';
+        const esTrasladoCrisverVisible = document.getElementById('section-traslado-crisver').style.display !== 'none';
+        const esPlaticasPreventivasVisible = document.getElementById('section-platicas-preventivas').style.display !== 'none';
+        const gestionadoVal = (document.getElementById('gestionado')?.value || "NO").toUpperCase().trim();
+
         listaCampos.forEach(id => {
             const el = document.getElementById(id);
             if(el) {
-                if (!esSeguimientoEstatalVisible && camposEstatal.includes(id)) res[id] = "";
-                else if(id === 'numero_consecutivo') res[id] = parseInt(el.value) || 0;
-                else if(['fecha_registro', 'fecha_nacimiento', 'edad', 'usuario', 'detalle_asunto', 'genero', 'cap_fecha', 'cap_hora', 'exp_cantidad', 'exp_fecha_entrega', 'telefono', 'fecha_respuesta_correo', 'fecha_estudio_validado', 'fecha_cita_crisver'].includes(id)) res[id] = el.value;
+                if (id === 'gestionado') res[id] = gestionadoVal;
+                else if (id === 'gestionado_por') res[id] = gestionadoVal === "SI" ? el.value.trim().toUpperCase() : "";
+                else if (!esSeguimientoEstatalVisible && camposEstatal.includes(id)) res[id] = "";
+                else if (id === 'fecha_entrega_apoyo' && !esFechaEntregaVisible) res[id] = "";
+                else if (['apoyo_lugar_evento', 'apoyo_fecha_evento', 'apoyo_total_entregados'].includes(id) && !esEntregaApoyosVisible) res[id] = "";
+                else if (['crisver_lugar_salida', 'crisver_destino', 'crisver_cantidad_personas'].includes(id) && !esTrasladoCrisverVisible) res[id] = "";
+                else if (['platica_lugar', 'platica_tipo', 'platica_cantidad_personas', 'platica_observaciones'].includes(id) && !esPlaticasPreventivasVisible) res[id] = "";
+                else if (['detalle_asunto', 'folio_expediente', 'detalles'].includes(id) && (esEntregaApoyosVisible || esTrasladoCrisverVisible)) res[id] = "";
+                else if(['numero_consecutivo', 'apoyo_total_entregados', 'crisver_cantidad_personas', 'platica_cantidad_personas'].includes(id)) res[id] = parseInt(el.value) || 0;
+                else if(['fecha_registro', 'fecha_nacimiento', 'edad', 'usuario', 'detalle_asunto', 'fecha_entrega_apoyo', 'apoyo_fecha_evento', 'genero', 'cap_fecha', 'cap_hora', 'exp_cantidad', 'exp_fecha_entrega', 'telefono', 'fecha_respuesta_correo', 'fecha_estudio_validado', 'fecha_cita_crisver'].includes(id)) res[id] = el.value;
                 else res[id] = el.value.toUpperCase();
             }
         });
@@ -844,6 +1093,9 @@
         }
 
         listaCampos.forEach(id => { const el = document.getElementById(id); if(el && id !== "numero_consecutivo") el.value = ""; });
+        document.getElementById('gestionado').value = "NO";
+        document.getElementById('crisver_lugar_salida').value = "SMDIF";
+        document.getElementById('crisver_destino').value = "XALAPA CRISVER";
         if(document.getElementById('input_file')) document.getElementById('input_file').value = "";
         evidenciasBase64 = [];
         renderPreviewEvidencias();
@@ -853,6 +1105,7 @@
         document.getElementById('btn-save').style.display = 'inline-flex';
         document.getElementById('btn-update').style.display = 'none';
         document.getElementById('container-detalle-especifico').style.display = 'none';
+        document.getElementById('container-fecha-entrega-apoyo').style.display = 'none';
         window.evaluarVistaAsunto();
         establecerUsuarioPorDefecto();
     };
@@ -863,11 +1116,11 @@
         asuSelect.innerHTML = '<option value="">-- SELECCIONAR --</option>';
         const dataAsuntos = {
             "CAPACITACION AL PERSONAL SMDIF": ["CAPACITACION", "ENTREGA DE EXPEDIENTES"],
-            "SOLICITUD": ["APOYO FUNCIONAL", "GESTION DE CITAS"],
-            "V.D./E. SOCIOECONOMICO": ["ASILO", "ADOPCIÓN"],
-            "VISITA DOMICILIARIA": ["INVESTIGACION", "CERCIORAMIENTO DE TUTOR", "ASILO"],
+            "SOLICITUD": ["GESTION DE CITAS"],
+            "V.D./E. SOCIOECONOMICO": ["ASILO", "ADOPCIÓN", "DESCUENTO CMAPS"],
+            "VISITA DOMICILIARIA": ["INVESTIGACION/PROCURADURIA", "CERCIORAMIENTO DE TUTOR/PROCURADURIA"],
             "ATENCION CIUDADANA": ["CAPACITACION", "ENTREGA DE EXPEDIENTES DIF ESTATAL", "ENTREGA DE APOYOS FUNCIONALES ESTATALES", "ENTREGA DE APOYOS FUNCIONALES MUNICIPALES", "TRASLADO Y ACOMPAÑAMIENTO A CRISVER", "PLATICAS PREVENTIVAS", "PACIENTES RECURRENTES", "DESPENSA MENSUAL"],
-            "ESTUDIO SOCIOECONOMICO": ["ASILO", "DESCUENTO TRANSPORTE", "DESCUENTO CMAPS", "APOYO ATAUD", "APOYO FUNCIONAL MUNICIPAL", "APOYO FUNCIONAL ESTATAL", "ESTUDIOS CLINICOS", "TRASLADO DE CUERPO", "REGISTRO CIVIL", "TERAPIAS CRISAT", "APOYO AL INMIGRANTE", "CONDONACIÓN DE LENTES", "DESPENSA MENSUAL", "DESCUENTO SERVICIO DE AMBULANCIA", "APOYO A LA CIUDADANIA", "APOYO PARA TESTAMENTO"]
+            "ESTUDIO SOCIOECONOMICO": ["DESCUENTO TRANSPORTE", "APOYO ATAUD", "APOYO FUNCIONAL MUNICIPAL", "APOYO FUNCIONAL ESTATAL", "ESTUDIOS CLINICOS", "TRASLADO DE CUERPO", "REGISTRO CIVIL", "TERAPIAS CRISAT", "APOYO AL INMIGRANTE", "CONDONACIÓN DE LENTES", "DESPENSA MENSUAL", "DESCUENTO SERVICIO DE AMBULANCIA", "APOYO A LA CIUDADANIA", "APOYO PARA TESTAMENTO"]
         };
         if(dataAsuntos[prog]) {
             dataAsuntos[prog].forEach(a => { const opt = document.createElement('option'); opt.value = a; opt.textContent = a; asuSelect.appendChild(opt); });
@@ -880,6 +1133,12 @@
         const detSelect = document.getElementById('detalle_asunto');
         const contDet = document.getElementById('container-detalle-especifico');
         const asu = asuSelect.value ? asuSelect.value.toUpperCase().trim() : "";
+
+        if (esEntregaApoyosAtencionCiudadana() || esTrasladoCrisverAtencionCiudadana()) {
+            contDet.style.display = 'none';
+            detSelect.innerHTML = '';
+            return;
+        }
 
         const tiposApoyoFuncional = [
             "SILLA DE RUEDAS ESTANDAR ADULTO", 
@@ -905,7 +1164,26 @@
             "OTRO"
         ];
 
-        if (asu.includes("APOYO FUNCIONAL") || asu.includes("APOYOS FUNCIONALES")) {
+        const opcionesRegistroCivil = [
+            "ACTAS EXTEMPORÁNEAS"
+        ];
+
+        const opcionesDescuentoTransporte = [
+            "AUTOBUSES DEL ORIENTE (ADO)",
+            "TRANSPORTE LOS TUXTLAS (TLT)"
+        ];
+
+        if (asu === "DESCUENTO TRANSPORTE") {
+            document.getElementById('label-detalle').innerText = "Tipo de Transporte";
+            detSelect.innerHTML = '<option value="">-- SELECCIONAR TRANSPORTE --</option>';
+            opcionesDescuentoTransporte.forEach(s => {
+                const o = document.createElement('option');
+                o.value = s;
+                o.textContent = s;
+                detSelect.appendChild(o);
+            });
+            contDet.style.display = 'block';
+        } else if (asu.includes("APOYO FUNCIONAL") || asu.includes("APOYOS FUNCIONALES")) {
             document.getElementById('label-detalle').innerText = "Tipo de Apoyo Específico";
             detSelect.innerHTML = '<option value="">-- SELECCIONAR TIPO DE APOYO --</option>';
             tiposApoyoFuncional.forEach(s => { 
@@ -919,6 +1197,16 @@
             document.getElementById('label-detalle').innerText = "Tipo de Cita / Especialidad";
             detSelect.innerHTML = '<option value="">-- SELECCIONAR TIPO DE CITA --</option>';
             opcionesGestionCitas.forEach(s => { 
+                const o = document.createElement('option'); 
+                o.value = s; 
+                o.textContent = s; 
+                detSelect.appendChild(o); 
+            });
+            contDet.style.display = 'block';
+        } else if (asu === "REGISTRO CIVIL") {
+            document.getElementById('label-detalle').innerText = "Tipo de Trámite / Apoyo";
+            detSelect.innerHTML = '<option value="">-- SELECCIONAR --</option>';
+            opcionesRegistroCivil.forEach(s => { 
                 const o = document.createElement('option'); 
                 o.value = s; 
                 o.textContent = s; 
@@ -989,16 +1277,22 @@
         const segmento = datosFiltrados.slice(inicio, inicio + filasPorPagina);
         document.getElementById('info-total').innerText = `TOTAL MOSTRADO: ${datosFiltrados.length} DE ${todosLosDatos.length} REGISTROS`;
         
-        document.getElementById('cuerpoTabla').innerHTML = segmento.map(reg => `
+        document.getElementById('cuerpoTabla').innerHTML = segmento.map(reg => {
+            const ubicacionCompleta = [reg.colonia, reg.localidad, reg.direccion].filter(Boolean).join(' / ');
+            const infoExtraColLoc = ubicacionCompleta || (reg.platica_cantidad_personas ? `${reg.platica_cantidad_personas} personas` : '') || (reg.crisver_cantidad_personas ? `${reg.crisver_cantidad_personas} personas` : '') || (reg.apoyo_total_entregados ? `Total: ${reg.apoyo_total_entregados}` : '') || reg.cap_tema || '';
+            const nombrePrincipal = reg.nombre || reg.platica_lugar || reg.crisver_lugar_salida || reg.apoyo_lugar_evento || reg.cap_nombre || reg.exp_recibe || 'N/A';
+            const infoGestionBeneficiario = reg.gestionado === "SI" ? `<br><span style="color:var(--info); font-size:10px; font-weight:600;"><i class="fa-solid fa-handshake"></i> Gestionado: SÍ${reg.gestionado_por ? ` (${reg.gestionado_por})` : ''}</span>` : '';
+
+            return `
             <tr>
                 <td><b>${reg.numero_consecutivo ?? ''}</b></td>
                 <td>${reg.url_evidencia || (reg.evidencias && reg.evidencias.length) ? `<img src="${reg.evidencias?.[0] || reg.url_evidencia}" style="width:35px;height:30px;object-fit:cover;cursor:pointer;border-radius:4px;" onclick="abrirCarrusel(0, 'TABLA', '${reg.id}')">` : 'Sin foto'}</td>
                 <td>${reg.fecha_registro || ''}</td>
-                <td><b>${reg.nombre || reg.cap_nombre || reg.exp_recibe || 'N/A'}</b></td>
-                <td>${reg.edad || reg.fecha_cita_crisver || ''}</td>
-                <td>${reg.nombre_solicitante || reg.cap_lugar || reg.exp_tipo || 'MISMO'}</td>
-                <td>${reg.colonia || reg.cap_tema || ''}</td>
-                <td><b>${reg.programa || ''}</b><br>${reg.asunto || ''}${reg.detalle_asunto ? `<br><span style="color:var(--primary); font-size:10px; font-weight:600;"><i class="fa-solid fa-check"></i> ${reg.detalle_asunto}</span>` : ''}</td>
+                <td><b>${nombrePrincipal}</b>${infoGestionBeneficiario}</td>
+                <td>${reg.edad || reg.apoyo_fecha_evento || reg.fecha_cita_crisver || reg.fecha_entrega_apoyo || ''}</td>
+                <td>${reg.nombre_solicitante || reg.platica_tipo || reg.crisver_destino || reg.cap_lugar || reg.exp_tipo || 'MISMO'}</td>
+                <td>${infoExtraColLoc}</td>
+                <td><b>${reg.programa || ''}</b><br>${reg.asunto || ''}${reg.detalle_asunto ? `<br><span style="color:var(--primary); font-size:10px; font-weight:600;"><i class="fa-solid fa-check"></i> ${reg.detalle_asunto}</span>` : ''}${reg.fecha_entrega_apoyo ? `<br><span style="color:var(--success); font-size:10px; font-weight:600;"><i class="fa-solid fa-calendar-check"></i> Entrega: ${reg.fecha_entrega_apoyo}</span>` : ''}${reg.platica_observaciones ? `<br><span style="color:#64748b; font-size:10px;">Obs: ${reg.platica_observaciones}</span>` : ''}</td>
                 <td><span class="status-badge bg-${reg.estatus?.toLowerCase().replace(" ","-") || 'pendiente'}">${reg.estatus || 'PENDIENTE'}</span></td>
                 <td>${reg.usuario || ''}</td>
                 <td class="no-print" style="text-align: right;">
@@ -1006,7 +1300,8 @@
                     <button onclick="eliminarDoc('${reg.id}')" style="border:1px solid var(--border); background:#fff; cursor:pointer; padding:6px 8px; border-radius:4px; color:var(--danger);"><i class="fa-solid fa-trash-can"></i></button>
                 </td>
             </tr>
-        `).join('');
+        `;
+        }).join('');
 
         document.getElementById('page-info').innerText = `Página ${paginaActual} de ${totalPaginas}`;
         document.getElementById('btn-prev').disabled = paginaActual <= 1;
@@ -1293,6 +1588,7 @@
         document.getElementById('asunto')?.addEventListener('change', window.evaluarVistaAsunto);
         document.getElementById('nombre')?.addEventListener('blur', window.revisarNombreDuplicado);
         document.getElementById('nombre_solicitante')?.addEventListener('blur', window.revisarNombreDuplicado);
+        window.evaluarCampoGestionado();
         establecerUsuarioPorDefecto();
         cargarTurnosRecepcion();
         
