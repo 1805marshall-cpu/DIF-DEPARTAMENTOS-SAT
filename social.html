@@ -949,30 +949,14 @@
         if (esApoyoEstudioSocioeconomicoMunicipalEstatal()) {
             const estatusValidos = ["ENTREGADO", "CANCELADO", "NEGATIVO"];
             const fechaAnterior = registroAnterior?.fecha_entrega_apoyo || "";
-            const cambioFechaEntrega = data.fecha_entrega_apoyo !== fechaAnterior;
+            const tieneFechaEntrega = Boolean(data.fecha_entrega_apoyo);
+            const seCapturoOModificoFechaEntrega = tieneFechaEntrega && (!esEdicion || data.fecha_entrega_apoyo !== fechaAnterior);
 
-            if (!esEdicion) {
-                if (!estatusValidos.includes(data.estatus)) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Estatus Requerido',
-                        text: 'En Estudio Socioeconómico -> Apoyos Municipales y Estatales, el estatus debe ser ENTREGADO, CANCELADO o NEGATIVO.'
-                    });
-                    return false;
-                }
-                if (!data.fecha_entrega_apoyo) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Falta Fecha de Entrega',
-                        text: 'Debe ingresar la Fecha de Entrega para el tipo de apoyo.'
-                    });
-                    return false;
-                }
-            } else if (cambioFechaEntrega && data.fecha_entrega_apoyo && !estatusValidos.includes(data.estatus)) {
+            if (seCapturoOModificoFechaEntrega && !estatusValidos.includes(data.estatus)) {
                 Swal.fire({
                     icon: 'warning',
                     title: 'Estatus Requerido',
-                    text: 'Al capturar una Fecha de Entrega, el Estatus General debe ser ENTREGADO, CANCELADO o NEGATIVO.'
+                    text: 'Al registrar o modificar la Fecha de Entrega en Estudio Socioeconómico -> Apoyos Municipales y Estatales, el estatus debe ser ENTREGADO, CANCELADO o NEGATIVO.'
                 });
                 return false;
             }
